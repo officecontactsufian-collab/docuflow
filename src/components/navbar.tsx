@@ -1,3 +1,5 @@
+"use client"
+
 import Link from 'next/link';
 import { 
   FileText, 
@@ -5,7 +7,6 @@ import {
   Merge, 
   Scissors, 
   Search, 
-  ShieldCheck, 
   Lock,
   Menu,
   RotateCw,
@@ -14,7 +15,9 @@ import {
   Hash,
   Eraser,
   Signature,
-  Wrench
+  Wrench,
+  User,
+  LogOut
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -25,8 +28,17 @@ import {
   DropdownMenuSeparator,
   DropdownMenuLabel,
 } from '@/components/ui/dropdown-menu';
+import { useUser, useAuth } from '@/firebase';
+import { signOut } from 'firebase/auth';
 
 export function Navbar() {
+  const { user, isUserLoading } = useUser();
+  const auth = useAuth();
+
+  const handleLogout = () => {
+    signOut(auth);
+  };
+
   return (
     <nav className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
@@ -100,12 +112,37 @@ export function Navbar() {
         </div>
 
         <div className="flex items-center gap-3">
-          <div className="hidden md:flex items-center gap-4 mr-4">
-             <Link href="#" className="text-sm font-medium text-muted-foreground hover:text-foreground">Login</Link>
-          </div>
-          <Button asChild className="bg-primary hover:bg-primary/90 shadow-md">
-            <Link href="/#tools">Get Started</Link>
-          </Button>
+          {!isUserLoading && user ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="flex items-center gap-2">
+                  <User className="h-4 w-4" />
+                  <span className="hidden sm:inline-block max-w-[150px] truncate">{user.isAnonymous ? "Guest User" : user.email}</span>
+                  <ChevronDown className="h-3 w-3 opacity-50" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem className="cursor-pointer">Settings</DropdownMenuItem>
+                <DropdownMenuItem className="cursor-pointer">Usage Dashboard</DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={handleLogout} className="text-destructive cursor-pointer">
+                  <LogOut className="mr-2 h-4 w-4" />
+                  Sign Out
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : (
+            <>
+              <div className="hidden md:flex items-center gap-4 mr-4">
+                 <Link href="/login" className="text-sm font-medium text-muted-foreground hover:text-foreground">Login</Link>
+              </div>
+              <Button asChild className="bg-primary hover:bg-primary/90 shadow-md">
+                <Link href="/login">Get Started</Link>
+              </Button>
+            </>
+          )}
           
           <div className="lg:hidden">
             <DropdownMenu>
@@ -123,6 +160,9 @@ export function Navbar() {
                 <DropdownMenuSeparator />
                 <DropdownMenuItem asChild><Link href="/sanitize">Sanitize</Link></DropdownMenuItem>
                 <DropdownMenuItem asChild><Link href="/repair">Repair</Link></DropdownMenuItem>
+                <DropdownMenuSeparator />
+                {!user && <DropdownMenuItem asChild><Link href="/login">Login</Link></DropdownMenuItem>}
+                {user && <DropdownMenuItem onClick={handleLogout} className="text-destructive">Sign Out</DropdownMenuItem>}
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
