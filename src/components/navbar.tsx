@@ -103,7 +103,9 @@ export function Navbar() {
           <div className="hidden md:flex items-center gap-4 mr-4">
              <Link href="#" className="text-sm font-medium text-muted-foreground hover:text-foreground">Login</Link>
           </div>
-          <Button className="bg-primary hover:bg-primary/90 shadow-md">Get Started</Button>
+          <Button asChild className="bg-primary hover:bg-primary/90 shadow-md">
+            <Link href="/#tools">Get Started</Link>
+          </Button>
           
           <div className="lg:hidden">
             <DropdownMenu>

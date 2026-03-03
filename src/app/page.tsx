@@ -166,11 +166,15 @@ export default function Home() {
               </div>
 
               <div className="flex flex-col sm:flex-row items-center gap-4">
-                <Button size="lg" className="h-14 px-8 text-base shadow-xl shadow-primary/20 group">
-                  Get Started <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
+                <Button asChild size="lg" className="h-14 px-8 text-base shadow-xl shadow-primary/20 group cursor-pointer">
+                  <Link href="#tools">
+                    Get Started <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
+                  </Link>
                 </Button>
-                <Button size="lg" variant="outline" className="h-14 px-8 text-base bg-white/50 backdrop-blur-sm">
-                  View Features
+                <Button asChild size="lg" variant="outline" className="h-14 px-8 text-base bg-white/50 backdrop-blur-sm cursor-pointer">
+                  <Link href="#tools">
+                    View Features
+                  </Link>
                 </Button>
               </div>
             </div>
@@ -178,7 +182,7 @@ export default function Home() {
         </section>
 
         {/* Tools Dashboard */}
-        <section className="py-24 bg-muted/30">
+        <section id="tools" className="py-24 bg-muted/30 scroll-mt-16">
           <div className="container mx-auto px-4 space-y-24">
             
             {/* Manipulation Suite */}
