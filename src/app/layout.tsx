@@ -1,5 +1,6 @@
 import type {Metadata} from 'next';
 import './globals.css';
+import { Toaster } from "@/components/ui/toaster";
 
 export const metadata: Metadata = {
   title: 'DocuFlow Professional - Advanced PDF Solutions',
@@ -20,6 +21,7 @@ export default function RootLayout({
       </head>
       <body className="font-body antialiased min-h-screen bg-background selection:bg-primary/20">
         {children}
+        <Toaster />
       </body>
     </html>
   );

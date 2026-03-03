@@ -8,12 +8,13 @@ import {
   ShieldCheck, 
   Lock,
   Menu,
-  Maximize,
   RotateCw,
   Unlock,
   Type,
   Hash,
-  Eraser
+  Eraser,
+  Signature,
+  Wrench
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -75,15 +76,18 @@ export function Navbar() {
                   <DropdownMenuItem asChild className="cursor-pointer">
                     <Link href="/sanitize" className="flex items-center gap-2"><Eraser className="h-4 w-4 text-primary" /> Sanitize PDF</Link>
                   </DropdownMenuItem>
+                  <DropdownMenuItem asChild className="cursor-pointer">
+                    <Link href="/repair" className="flex items-center gap-2"><Wrench className="h-4 w-4 text-primary" /> Repair PDF</Link>
+                  </DropdownMenuItem>
                   <DropdownMenuSeparator />
+                  <DropdownMenuItem asChild className="cursor-pointer">
+                    <Link href="/sign" className="flex items-center gap-2"><Signature className="h-4 w-4 text-primary" /> Sign PDF</Link>
+                  </DropdownMenuItem>
                   <DropdownMenuItem asChild className="cursor-pointer">
                     <Link href="/protect" className="flex items-center gap-2"><Lock className="h-4 w-4 text-primary" /> Protect PDF</Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild className="cursor-pointer">
                     <Link href="/protect?mode=unlock" className="flex items-center gap-2"><Unlock className="h-4 w-4 text-primary" /> Unlock PDF</Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild className="cursor-pointer">
-                    <Link href="/convert?type=pdf-to-pdfa" className="flex items-center gap-2"><ShieldCheck className="h-4 w-4 text-green-600" /> Compliance PDF/A</Link>
                   </DropdownMenuItem>
                 </div>
               </div>
@@ -112,11 +116,11 @@ export function Navbar() {
                 <DropdownMenuLabel>Tools</DropdownMenuLabel>
                 <DropdownMenuItem asChild><Link href="/merge">Merge PDF</Link></DropdownMenuItem>
                 <DropdownMenuItem asChild><Link href="/split">Split PDF</Link></DropdownMenuItem>
-                <DropdownMenuItem asChild><Link href="/watermark">Watermark</Link></DropdownMenuItem>
+                <DropdownMenuItem asChild><Link href="/sign">Sign PDF</Link></DropdownMenuItem>
                 <DropdownMenuItem asChild><Link href="/numbers">Numbers</Link></DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem asChild><Link href="/sanitize">Sanitize</Link></DropdownMenuItem>
-                <DropdownMenuItem asChild><Link href="/protect">Security Hub</Link></DropdownMenuItem>
+                <DropdownMenuItem asChild><Link href="/repair">Repair</Link></DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>

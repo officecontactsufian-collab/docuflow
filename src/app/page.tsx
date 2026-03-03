@@ -19,7 +19,8 @@ import {
   Search,
   Type,
   Hash,
-  Eraser
+  Eraser,
+  Wrench
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
@@ -37,6 +38,12 @@ export default function Home() {
       description: "Remove hidden metadata and author info for privacy.",
       icon: Eraser,
       href: "/sanitize",
+    },
+    {
+      title: "Repair & Rebuild",
+      description: "Fix broken file structures and object indexes.",
+      icon: Wrench,
+      href: "/repair",
     }
   ];
 
@@ -108,6 +115,12 @@ export default function Home() {
 
   const securityTools = [
     {
+      title: "Digital Sign",
+      description: "Secure electronic signature placement.",
+      icon: Signature,
+      href: "/sign",
+    },
+    {
       title: "Protect PDF",
       description: "Military-grade 256-bit AES encryption.",
       icon: Lock,
@@ -120,16 +133,10 @@ export default function Home() {
       href: "/protect?mode=unlock",
     },
     {
-      title: "PDF to PDF/A",
+      title: "Compliance PDF/A",
       description: "ISO-compliant long-term electronic archiving.",
       icon: ShieldCheck,
       href: "/convert?type=pdf-to-pdfa",
-    },
-    {
-      title: "Digital Sign",
-      description: "Legally binding electronic signatures.",
-      icon: Signature,
-      href: "#",
     }
   ];
 
@@ -197,7 +204,7 @@ export default function Home() {
                   <p className="text-muted-foreground text-sm">In-depth structural analysis and data sanitization.</p>
                 </div>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {analysisTools.map((tool) => (
                   <ToolCard key={tool.title} {...tool} />
                 ))}
@@ -294,7 +301,7 @@ export default function Home() {
               <ul className="space-y-2 text-sm text-muted-foreground">
                 <li><Link href="/protect">Protect PDF</Link></li>
                 <li><Link href="/protect?mode=unlock">Unlock PDF</Link></li>
-                <li><Link href="#">Compliance</Link></li>
+                <li><Link href="/sign">Sign PDF</Link></li>
               </ul>
             </div>
             <div className="space-y-4">

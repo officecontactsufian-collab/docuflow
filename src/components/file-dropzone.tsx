@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from 'react';
-import { Upload, FileText, X, CheckCircle2, Loader2 } from 'lucide-react';
+import { Upload, FileText, X, CheckCircle2, ImageIcon, FileCode, FileSpreadsheet, FileArchive } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
@@ -30,9 +30,16 @@ export function FileDropzone({ onFilesSelected, accept = ".pdf", maxFiles = 10, 
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     setIsDragging(false);
-    const files = Array.from(e.dataTransfer.files).filter(f => f.type === 'application/pdf' || f.name.endsWith('.pdf'));
-    if (files.length > 0) {
-      const newFiles = [...selectedFiles, ...files].slice(0, maxFiles);
+    const files = Array.from(e.dataTransfer.files);
+    // Simple filter based on accept string extensions if provided
+    const acceptedFiles = files.filter(file => {
+      if (accept === "*") return true;
+      const exts = accept.split(',').map(s => s.trim().toLowerCase());
+      return exts.some(ext => file.name.toLowerCase().endsWith(ext) || file.type.includes(ext.replace('.', '')));
+    });
+
+    if (acceptedFiles.length > 0) {
+      const newFiles = [...selectedFiles, ...acceptedFiles].slice(0, maxFiles);
       setSelectedFiles(newFiles);
       onFilesSelected(newFiles);
     }
@@ -51,6 +58,15 @@ export function FileDropzone({ onFilesSelected, accept = ".pdf", maxFiles = 10, 
     const newFiles = selectedFiles.filter((_, i) => i !== index);
     setSelectedFiles(newFiles);
     onFilesSelected(newFiles);
+  };
+
+  const getFileIcon = (fileName: string) => {
+    const ext = fileName.split('.').pop()?.toLowerCase();
+    if (['jpg', 'jpeg', 'png', 'webp'].includes(ext || '')) return <ImageIcon className="h-5 w-5" />;
+    if (['xls', 'xlsx', 'csv'].includes(ext || '')) return <FileSpreadsheet className="h-5 w-5" />;
+    if (['doc', 'docx'].includes(ext || '')) return <FileText className="h-5 w-5" />;
+    if (['html', 'htm', 'js', 'ts'].includes(ext || '')) return <FileCode className="h-5 w-5" />;
+    return <FileText className="h-5 w-5" />;
   };
 
   return (
@@ -85,8 +101,8 @@ export function FileDropzone({ onFilesSelected, accept = ".pdf", maxFiles = 10, 
             <Upload className="h-8 w-8" />
           </div>
           <div className="space-y-2">
-            <h3 className="text-xl font-semibold font-headline">Select PDF files</h3>
-            <p className="text-sm text-muted-foreground">or drag and drop PDFs here</p>
+            <h3 className="text-xl font-semibold font-headline">Select files to upload</h3>
+            <p className="text-sm text-muted-foreground">Accepts: {accept.replace(/\./g, '').toUpperCase()}</p>
           </div>
           <Button type="button" size="lg" className="mt-2 shadow-md">
             Choose Files
@@ -107,7 +123,7 @@ export function FileDropzone({ onFilesSelected, accept = ".pdf", maxFiles = 10, 
               <div key={`${file.name}-${i}`} className="flex items-center justify-between p-4 bg-card border rounded-xl shadow-sm group">
                 <div className="flex items-center gap-3">
                   <div className="p-2 bg-primary/10 text-primary rounded-lg">
-                    <FileText className="h-5 w-5" />
+                    {getFileIcon(file.name)}
                   </div>
                   <div className="flex flex-col">
                     <span className="text-sm font-medium truncate max-w-[200px] sm:max-w-md">{file.name}</span>
