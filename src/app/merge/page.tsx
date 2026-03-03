@@ -4,18 +4,20 @@ import * as React from 'react';
 import { Navbar } from '@/components/navbar';
 import { FileDropzone } from '@/components/file-dropzone';
 import { Button } from '@/components/ui/button';
-import { Merge, Loader2, Download, ArrowRight } from 'lucide-react';
+import { Merge, Loader2, Download } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Progress } from '@/components/ui/progress';
+import { PDFDocument } from 'pdf-lib';
 
 export default function MergePage() {
   const [files, setFiles] = React.useState<File[]>([]);
   const [isProcessing, setIsProcessing] = React.useState(false);
   const [progress, setProgress] = React.useState(0);
   const [isDone, setIsDone] = React.useState(false);
+  const [downloadUrl, setDownloadUrl] = React.useState<string | null>(null);
   const { toast } = useToast();
 
-  const handleMerge = () => {
+  const handleMerge = async () => {
     if (files.length < 2) {
       toast({
         variant: "destructive",
@@ -26,21 +28,66 @@ export default function MergePage() {
     }
 
     setIsProcessing(true);
-    // Simulate processing
-    let p = 0;
-    const interval = setInterval(() => {
-      p += 10;
-      setProgress(p);
-      if (p >= 100) {
-        clearInterval(interval);
-        setIsProcessing(false);
-        setIsDone(true);
-        toast({
-          title: "Files merged successfully!",
-          description: "Your new PDF is ready for download.",
-        });
+    setProgress(10);
+    
+    try {
+      const mergedPdf = await PDFDocument.create();
+      
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        const arrayBuffer = await file.arrayBuffer();
+        const pdf = await PDFDocument.load(arrayBuffer);
+        const copiedPages = await mergedPdf.copyPages(pdf, pdf.getPageIndices());
+        copiedPages.forEach((page) => mergedPdf.addPage(page));
+        
+        // Update progress incrementally
+        const currentProgress = Math.round(10 + ((i + 1) / files.length) * 80);
+        setProgress(currentProgress);
       }
-    }, 200);
+
+      const mergedPdfBytes = await mergedPdf.save();
+      const blob = new Blob([mergedPdfBytes], { type: 'application/pdf' });
+      const url = URL.createObjectURL(blob);
+      
+      setDownloadUrl(url);
+      setProgress(100);
+      setIsProcessing(false);
+      setIsDone(true);
+      
+      toast({
+        title: "Files merged successfully!",
+        description: "Your new PDF is ready for download.",
+      });
+    } catch (error) {
+      console.error(error);
+      setIsProcessing(false);
+      toast({
+        variant: "destructive",
+        title: "Merge failed",
+        description: "An error occurred while merging your PDF files.",
+      });
+    }
+  };
+
+  const handleDownload = () => {
+    if (downloadUrl) {
+      const link = document.createElement('a');
+      link.href = downloadUrl;
+      link.download = 'merged_document.pdf';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+  };
+
+  const reset = () => {
+    setIsDone(false);
+    setFiles([]);
+    setProgress(0);
+    if (downloadUrl) {
+      URL.revokeObjectURL(downloadUrl);
+      setDownloadUrl(null);
+    }
   };
 
   return (
@@ -55,7 +102,7 @@ export default function MergePage() {
             </div>
             <h1 className="text-3xl font-bold tracking-tight font-headline">Merge PDF Files</h1>
             <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-              Combine multiple PDF documents into a single, unified file. Drag files to reorder after uploading.
+              Combine multiple PDF documents into a single, unified file. All processing happens locally in your browser.
             </p>
           </div>
 
@@ -72,7 +119,7 @@ export default function MergePage() {
                   {isProcessing && (
                     <div className="w-full max-w-md space-y-2">
                       <Progress value={progress} className="h-2" />
-                      <p className="text-sm text-center text-muted-foreground">Merging {files.length} documents...</p>
+                      <p className="text-sm text-center text-muted-foreground">Processing {files.length} documents...</p>
                     </div>
                   )}
                   
@@ -100,13 +147,13 @@ export default function MergePage() {
                 </div>
                 <div>
                   <h2 className="text-2xl font-bold font-headline">Ready to download!</h2>
-                  <p className="text-muted-foreground mt-2">Combined document: {files.length} pages total</p>
+                  <p className="text-muted-foreground mt-2">Combined document is ready.</p>
                 </div>
-                <Button size="lg" className="w-full bg-accent hover:bg-accent/90 shadow-lg shadow-accent/20">
+                <Button size="lg" onClick={handleDownload} className="w-full bg-accent hover:bg-accent/90 shadow-lg shadow-accent/20">
                   Download Merged PDF
                 </Button>
               </div>
-              <Button variant="ghost" onClick={() => { setIsDone(false); setFiles([]); setProgress(0); }}>
+              <Button variant="ghost" onClick={reset}>
                 Merge more files
               </Button>
             </div>
