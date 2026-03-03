@@ -3,36 +3,31 @@ import { ToolCard } from '@/components/tool-card';
 import { 
   Merge, 
   Scissors, 
-  FileImage, 
-  RefreshCcw, 
-  Sparkles, 
-  Lock, 
   FileText, 
-  Presentation, 
-  Table as TableIcon, 
-  Code, 
+  Maximize, 
+  RotateCw, 
+  Lock, 
+  Unlock, 
   ShieldCheck, 
+  Signature, 
+  Info, 
+  Table as TableIcon, 
   Image as ImageIcon,
-  Zap,
+  ArrowRight,
   Shield,
   Clock,
-  ArrowRight,
-  Maximize,
-  RotateCw,
-  Unlock,
-  Signature
+  Search
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 
 export default function Home() {
-  const aiTools = [
+  const analysisTools = [
     {
-      title: "AI Analysis",
-      description: "Semantic extraction and executive summaries using DocuFlow LLM.",
-      icon: Sparkles,
+      title: "Document Inspector",
+      description: "Extract high-fidelity structural metadata and security profiles.",
+      icon: Search,
       href: "/analyze",
-      accent: true,
     }
   ];
 
@@ -57,7 +52,7 @@ export default function Home() {
     },
     {
       title: "PDF to Word",
-      description: "Advanced OCR and layout reconstruction to DOCX.",
+      description: "Advanced layout reconstruction to DOCX format.",
       icon: FileText,
       href: "/convert?type=pdf-to-word",
     }
@@ -134,20 +129,20 @@ export default function Home() {
               
               <div className="max-w-4xl space-y-6">
                 <h1 className="text-5xl md:text-7xl font-bold tracking-tight text-foreground font-headline leading-[1.1]">
-                  Automate your Document <br />
-                  <span className="text-primary italic">Intelligence</span> Workflow
+                  Professional Document <br />
+                  <span className="text-primary italic">Workflow</span> Simplified
                 </h1>
                 <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-                  DocuFlow Pro provides high-fidelity manipulation, semantic AI analysis, and secure conversion tools for the modern enterprise.
+                  DocuFlow Pro provides high-fidelity manipulation, deterministic structural analysis, and secure conversion tools for the modern enterprise.
                 </p>
               </div>
 
               <div className="flex flex-col sm:flex-row items-center gap-4">
                 <Button size="lg" className="h-14 px-8 text-base shadow-xl shadow-primary/20 group">
-                  Start Free Trial <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
+                  Get Started <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
                 </Button>
                 <Button size="lg" variant="outline" className="h-14 px-8 text-base bg-white/50 backdrop-blur-sm">
-                  View API Documentation
+                  View Features
                 </Button>
               </div>
             </div>
@@ -158,22 +153,22 @@ export default function Home() {
         <section className="py-24 bg-muted/30">
           <div className="container mx-auto px-4 space-y-24">
             
-            {/* AI Highlight */}
+            {/* Analysis */}
             <div className="space-y-8">
               <div className="flex items-end justify-between border-b pb-4">
                 <div className="space-y-1">
-                  <h2 className="text-2xl font-bold font-headline">AI Document Intelligence</h2>
-                  <p className="text-muted-foreground text-sm">Next-gen semantic processing and analysis.</p>
+                  <h2 className="text-2xl font-bold font-headline">Document Intelligence</h2>
+                  <p className="text-muted-foreground text-sm">In-depth structural and metadata processing.</p>
                 </div>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {aiTools.map((tool) => (
+                {analysisTools.map((tool) => (
                   <ToolCard key={tool.title} {...tool} />
                 ))}
-                <div className="md:col-span-2 p-8 rounded-2xl bg-accent text-accent-foreground flex flex-col justify-center space-y-4 shadow-xl shadow-accent/20">
-                  <h3 className="text-2xl font-bold font-headline">Enterprise Feature: Batch AI</h3>
-                  <p className="opacity-90 max-w-md">Process thousands of documents simultaneously with custom extraction logic and database synchronization.</p>
-                  <Button variant="secondary" className="w-fit text-accent font-bold">Request Demo</Button>
+                <div className="md:col-span-2 p-8 rounded-2xl bg-primary text-primary-foreground flex flex-col justify-center space-y-4 shadow-xl shadow-primary/20">
+                  <h3 className="text-2xl font-bold font-headline">Enterprise Feature: Batch Processing</h3>
+                  <p className="opacity-90 max-w-md">Process thousands of documents simultaneously with custom scripting and high-throughput local engines.</p>
+                  <Button variant="secondary" className="w-fit text-primary font-bold">Request Demo</Button>
                 </div>
               </div>
             </div>
@@ -183,7 +178,7 @@ export default function Home() {
               <div className="flex items-end justify-between border-b pb-4">
                 <div className="space-y-1">
                   <h2 className="text-2xl font-bold font-headline">High-Fidelity Conversion</h2>
-                  <p className="text-muted-foreground text-sm">Industrial-grade high-fidelity conversion engines.</p>
+                  <p className="text-muted-foreground text-sm">Industrial-grade conversion engines for every format.</p>
                 </div>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -248,7 +243,7 @@ export default function Home() {
                     </div>
                     <div>
                       <h4 className="font-bold">Lightning Fast Processing</h4>
-                      <p className="text-muted-foreground text-sm">Proprietary engines optimized for high-volume document batching.</p>
+                      <p className="text-muted-foreground text-sm">Proprietary engines optimized for high-volume local document manipulation.</p>
                     </div>
                   </div>
                 </div>
@@ -275,7 +270,7 @@ export default function Home() {
               <ul className="space-y-2 text-sm text-muted-foreground">
                 <li><Link href="/merge">Merge PDF</Link></li>
                 <li><Link href="/compress">Compress PDF</Link></li>
-                <li><Link href="/analyze">AI Analysis</Link></li>
+                <li><Link href="/analyze">Document Inspector</Link></li>
               </ul>
             </div>
             <div className="space-y-4">

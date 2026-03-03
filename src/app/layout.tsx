@@ -3,7 +3,7 @@ import './globals.css';
 
 export const metadata: Metadata = {
   title: 'DocuFlow Professional - Advanced PDF Solutions',
-  description: 'The ultimate professional document management platform with AI-powered analysis and high-fidelity conversion tools.',
+  description: 'The ultimate professional document management platform with high-fidelity conversion, manipulation, and security tools.',
 };
 
 export default function RootLayout({
@@ -18,7 +18,7 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
       </head>
-      <body className="font-body antialiased min-h-screen bg-background selection:bg-accent/20">
+      <body className="font-body antialiased min-h-screen bg-background selection:bg-primary/20">
         {children}
       </body>
     </html>

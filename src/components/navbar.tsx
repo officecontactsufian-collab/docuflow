@@ -4,8 +4,7 @@ import {
   ChevronDown, 
   Merge, 
   Scissors, 
-  Sparkles, 
-  RefreshCcw, 
+  Search, 
   ShieldCheck, 
   Lock,
   Menu,
@@ -64,8 +63,8 @@ export function Navbar() {
               <div className="space-y-3 border-l pl-6">
                 <DropdownMenuLabel className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold">Intelligence & Security</DropdownMenuLabel>
                 <div className="grid gap-1">
-                  <DropdownMenuItem asChild className="cursor-pointer bg-accent/5">
-                    <Link href="/analyze" className="flex items-center gap-2 font-semibold text-accent"><Sparkles className="h-4 w-4" /> AI Analysis</Link>
+                  <DropdownMenuItem asChild className="cursor-pointer">
+                    <Link href="/analyze" className="flex items-center gap-2 text-primary font-semibold"><Search className="h-4 w-4" /> Doc Inspector</Link>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem asChild className="cursor-pointer">
@@ -107,8 +106,8 @@ export function Navbar() {
                 <DropdownMenuItem asChild><Link href="/compress">Compress PDF</Link></DropdownMenuItem>
                 <DropdownMenuItem asChild><Link href="/organize">Organize PDF</Link></DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem asChild><Link href="/analyze" className="text-accent font-bold">AI Analyze</Link></DropdownMenuItem>
-                <DropdownMenuItem asChild><Link href="/protect">Security</Link></DropdownMenuItem>
+                <DropdownMenuItem asChild><Link href="/analyze" className="text-primary font-bold">Inspect Doc</Link></DropdownMenuItem>
+                <DropdownMenuItem asChild><Link href="/protect">Security Hub</Link></DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>

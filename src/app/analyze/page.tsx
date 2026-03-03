@@ -5,19 +5,26 @@ import { Navbar } from '@/components/navbar';
 import { FileDropzone } from '@/components/file-dropzone';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Sparkles, Loader2, FileText, Download, Calendar, Users, Hash, Tag, Info } from 'lucide-react';
-import { summarizePdfContent, type SummarizePdfContentOutput } from '@/ai/flows/summarize-pdf-content-flow';
-import { extractKeyInformationFromPdf, type ExtractKeyInformationFromPdfOutput } from '@/ai/flows/extract-key-information-from-pdf';
+import { Search, Loader2, FileText, Download, Calendar, Users, Hash, Tag, Info, ShieldCheck } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { PDFDocument } from 'pdf-lib';
 
 export default function AnalyzePage() {
   const [selectedFile, setSelectedFile] = React.useState<File | null>(null);
   const [isLoading, setIsLoading] = React.useState(false);
   const [result, setResult] = React.useState<{
-    summary?: string;
-    keyInfo?: ExtractKeyInformationFromPdfOutput['keyInformation'];
+    title?: string;
+    author?: string;
+    subject?: string;
+    creator?: string;
+    producer?: string;
+    creationDate?: Date;
+    modificationDate?: Date;
+    pageCount: number;
+    keywords?: string[];
+    isEncrypted: boolean;
   } | null>(null);
   const { toast } = useToast();
 
@@ -26,40 +33,37 @@ export default function AnalyzePage() {
     setResult(null);
   };
 
-  const readFileAsDataUri = (file: File): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve(reader.result as string);
-      reader.onerror = reject;
-      reader.readAsDataURL(file);
-    });
-  };
-
-  const handleAnalyze = async (type: 'summary' | 'info') => {
+  const handleInspect = async () => {
     if (!selectedFile) return;
 
     setIsLoading(true);
     try {
-      const pdfDataUri = await readFileAsDataUri(selectedFile);
+      const arrayBuffer = await selectedFile.arrayBuffer();
+      const pdfDoc = await PDFDocument.load(arrayBuffer, { ignoreEncryption: true });
       
-      if (type === 'summary') {
-        const output = await summarizePdfContent({ pdfDataUri });
-        setResult({ summary: output.summary });
-      } else {
-        const output = await extractKeyInformationFromPdf({ pdfDataUri });
-        setResult({ summary: output.summary, keyInfo: output.keyInformation });
-      }
+      setResult({
+        title: pdfDoc.getTitle() || "Untitled",
+        author: pdfDoc.getAuthor() || "Unknown",
+        subject: pdfDoc.getSubject() || "None",
+        creator: pdfDoc.getCreator() || "Unknown",
+        producer: pdfDoc.getProducer() || "Unknown",
+        creationDate: pdfDoc.getCreationDate(),
+        modificationDate: pdfDoc.getModificationDate(),
+        pageCount: pdfDoc.getPageCount(),
+        keywords: pdfDoc.getKeywords()?.split(' ').filter(k => k) || [],
+        isEncrypted: pdfDoc.isEncrypted,
+      });
       
       toast({
-        title: "Analysis complete",
-        description: "Your document has been analyzed successfully by DocuFlow AI.",
+        title: "Inspection complete",
+        description: "Document structure and metadata extracted successfully.",
       });
     } catch (error) {
       console.error(error);
       toast({
         variant: "destructive",
-        title: "Analysis failed",
-        description: "There was an error processing your document.",
+        title: "Inspection failed",
+        description: "Could not read document metadata. The file might be corrupted or heavily protected.",
       });
     } finally {
       setIsLoading(false);
@@ -74,12 +78,12 @@ export default function AnalyzePage() {
         <div className="max-w-4xl mx-auto space-y-12">
           {/* Header */}
           <div className="text-center space-y-4">
-            <div className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-accent text-accent-foreground shadow-lg mb-2">
-              <Sparkles className="h-6 w-6" />
+            <div className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-lg mb-2">
+              <Search className="h-6 w-6" />
             </div>
-            <h1 className="text-3xl font-bold tracking-tight font-headline">AI Content Analysis</h1>
+            <h1 className="text-3xl font-bold tracking-tight font-headline">Document Inspector</h1>
             <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-              Extract semantic intelligence and high-level summaries using DocuFlow's proprietary AI engine.
+              Extract metadata, security properties, and structural information directly from your PDF files.
             </p>
           </div>
 
@@ -92,25 +96,15 @@ export default function AnalyzePage() {
               />
               
               {selectedFile && (
-                <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+                <div className="flex justify-center">
                   <Button 
                     size="lg" 
-                    onClick={() => handleAnalyze('summary')}
+                    onClick={handleInspect}
                     disabled={isLoading}
-                    className="w-full sm:w-auto min-w-[200px]"
-                  >
-                    {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
-                    Generate Summary
-                  </Button>
-                  <Button 
-                    size="lg" 
-                    variant="outline"
-                    onClick={() => handleAnalyze('info')}
-                    disabled={isLoading}
-                    className="w-full sm:w-auto min-w-[200px] border-accent text-accent hover:bg-accent/5"
+                    className="min-w-[240px]"
                   >
                     {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Info className="mr-2 h-4 w-4" />}
-                    Full Semantic Extraction
+                    Inspect Document
                   </Button>
                 </div>
               )}
@@ -124,105 +118,97 @@ export default function AnalyzePage() {
                   </div>
                   <div>
                     <h2 className="font-bold text-lg">{selectedFile?.name}</h2>
-                    <p className="text-sm text-muted-foreground">Processed with DocuFlow Professional AI</p>
+                    <p className="text-sm text-muted-foreground">Local Structural Analysis</p>
                   </div>
                 </div>
-                <Button variant="outline" onClick={() => setResult(null)}>Analyze New Document</Button>
+                <Button variant="outline" onClick={() => setResult(null)}>Inspect New Document</Button>
               </div>
 
-              <Tabs defaultValue="summary" className="w-full">
-                <TabsList className="grid w-full grid-cols-2 mb-8">
-                  <TabsTrigger value="summary">Summary</TabsTrigger>
-                  <TabsTrigger value="details" disabled={!result.keyInfo}>Extracted Intelligence</TabsTrigger>
-                </TabsList>
-                
-                <TabsContent value="summary">
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="font-headline">Executive Summary</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <p className="text-lg leading-relaxed text-muted-foreground whitespace-pre-wrap">
-                        {result.summary}
-                      </p>
-                    </CardContent>
-                  </Card>
-                </TabsContent>
-
-                {result.keyInfo && (
-                  <TabsContent value="details" className="space-y-6">
-                    <div className="grid md:grid-cols-2 gap-6">
-                      <Card>
-                        <CardHeader className="flex flex-row items-center gap-3 space-y-0">
-                          <Users className="h-5 w-5 text-accent" />
-                          <CardTitle className="text-lg">Stakeholders & Entities</CardTitle>
-                        </CardHeader>
-                        <CardContent className="flex flex-wrap gap-2">
-                          {result.keyInfo.names.map((name, i) => (
-                            <Badge key={i} variant="secondary" className="px-3 py-1">{name}</Badge>
-                          ))}
-                        </CardContent>
-                      </Card>
-
-                      <Card>
-                        <CardHeader className="flex flex-row items-center gap-3 space-y-0">
-                          <Calendar className="h-5 w-5 text-accent" />
-                          <CardTitle className="text-lg">Key Milestones</CardTitle>
-                        </CardHeader>
-                        <CardContent className="flex flex-wrap gap-2">
-                          {result.keyInfo.dates.map((date, i) => (
-                            <Badge key={i} variant="outline" className="px-3 py-1">{date}</Badge>
-                          ))}
-                        </CardContent>
-                      </Card>
-
-                      <Card>
-                        <CardHeader className="flex flex-row items-center gap-3 space-y-0">
-                          <Hash className="h-5 w-5 text-accent" />
-                          <CardTitle className="text-lg">Critical Financials</CardTitle>
-                        </CardHeader>
-                        <CardContent className="flex flex-wrap gap-2">
-                          {result.keyInfo.figures.map((figure, i) => (
-                            <Badge key={i} className="bg-primary/10 text-primary border-primary/20 hover:bg-primary/20 px-3 py-1">{figure}</Badge>
-                          ))}
-                        </CardContent>
-                      </Card>
-
-                      <Card>
-                        <CardHeader className="flex flex-row items-center gap-3 space-y-0">
-                          <Tag className="h-5 w-5 text-accent" />
-                          <CardTitle className="text-lg">Thematic Keywords</CardTitle>
-                        </CardHeader>
-                        <CardContent className="flex flex-wrap gap-2">
-                          {result.keyInfo.keywords.map((kw, i) => (
-                            <Badge key={i} variant="outline" className="px-3 py-1">{kw}</Badge>
-                          ))}
-                        </CardContent>
-                      </Card>
+              <div className="grid md:grid-cols-3 gap-6">
+                <Card className="md:col-span-2">
+                  <CardHeader>
+                    <CardTitle className="text-lg flex items-center gap-2">
+                      <Info className="h-5 w-5 text-primary" />
+                      General Information
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4 text-sm">
+                      <div>
+                        <p className="text-muted-foreground mb-1">Title</p>
+                        <p className="font-medium">{result.title}</p>
+                      </div>
+                      <div>
+                        <p className="text-muted-foreground mb-1">Author</p>
+                        <p className="font-medium">{result.author}</p>
+                      </div>
+                      <div>
+                        <p className="text-muted-foreground mb-1">Subject</p>
+                        <p className="font-medium">{result.subject}</p>
+                      </div>
+                      <div>
+                        <p className="text-muted-foreground mb-1">Page Count</p>
+                        <p className="font-medium">{result.pageCount} Pages</p>
+                      </div>
+                      <div>
+                        <p className="text-muted-foreground mb-1">Producer</p>
+                        <p className="font-medium">{result.producer}</p>
+                      </div>
+                      <div>
+                        <p className="text-muted-foreground mb-1">Creator</p>
+                        <p className="font-medium">{result.creator}</p>
+                      </div>
                     </div>
+                  </CardContent>
+                </Card>
 
-                    {result.keyInfo.other.length > 0 && (
-                      <Card>
-                        <CardHeader>
-                          <CardTitle className="text-lg">Additional Provisions</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                          <ul className="list-disc pl-5 space-y-2 text-muted-foreground">
-                            {result.keyInfo.other.map((item, i) => (
-                              <li key={i}>{item}</li>
-                            ))}
-                          </ul>
-                        </CardContent>
-                      </Card>
-                    )}
-                  </TabsContent>
-                )}
-              </Tabs>
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg flex items-center gap-2">
+                      <ShieldCheck className="h-5 w-5 text-primary" />
+                      Security
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm">Encryption</span>
+                      <Badge variant={result.isEncrypted ? "destructive" : "secondary"}>
+                        {result.isEncrypted ? "Protected" : "None"}
+                      </Badge>
+                    </div>
+                    <div className="pt-4 border-t space-y-2">
+                       <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest">Timestamps</p>
+                       <div className="text-xs space-y-1">
+                          <p><span className="text-muted-foreground">Created:</span> {result.creationDate?.toLocaleDateString() || "N/A"}</p>
+                          <p><span className="text-muted-foreground">Modified:</span> {result.modificationDate?.toLocaleDateString() || "N/A"}</p>
+                       </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <Tag className="h-5 w-5 text-primary" />
+                    Embedded Keywords
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="flex flex-wrap gap-2">
+                  {result.keywords && result.keywords.length > 0 ? (
+                    result.keywords.map((kw, i) => (
+                      <Badge key={i} variant="outline" className="px-3 py-1">{kw}</Badge>
+                    ))
+                  ) : (
+                    <p className="text-sm text-muted-foreground italic">No keywords found in document metadata.</p>
+                  )}
+                </CardContent>
+              </Card>
               
               <div className="flex justify-center">
-                <Button size="lg" className="bg-accent hover:bg-accent/90">
+                <Button size="lg" className="bg-primary hover:bg-primary/90 min-w-[200px]">
                   <Download className="mr-2 h-4 w-4" />
-                  Export Analysis Report
+                  Export Metadata JSON
                 </Button>
               </div>
             </div>
