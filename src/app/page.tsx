@@ -7,89 +7,80 @@ import {
   RefreshCcw, 
   Sparkles, 
   Lock, 
-  Stamp, 
-  FileSearch,
+  FileText, 
+  Presentation, 
+  Table as TableIcon, 
+  Code, 
+  ShieldCheck, 
+  Image as ImageIcon,
   Zap,
-  FileText,
-  Presentation,
-  Table as TableIcon,
-  Code,
-  ShieldCheck,
-  Image as ImageIcon
+  Shield,
+  Clock,
+  ArrowRight
 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import Link from 'next/link';
 
 export default function Home() {
-  const tools = [
-    {
-      title: "Merge PDF",
-      description: "Combine multiple PDFs into one unified document.",
-      icon: Merge,
-      href: "/merge",
-    },
-    {
-      title: "Split PDF",
-      description: "Extract specific pages or separate one PDF into several files.",
-      icon: Scissors,
-      href: "/split",
-    },
+  const aiTools = [
     {
       title: "AI Analysis",
-      description: "Summarize and extract key insights from your documents.",
+      description: "Semantic extraction and executive summaries using DocuFlow LLM.",
       icon: Sparkles,
       href: "/analyze",
       accent: true,
-    },
+    }
+  ];
+
+  const convertToTools = [
     {
       title: "Word to PDF",
-      description: "Convert Word documents to high-quality PDF files.",
+      description: "Lossless conversion for Microsoft Word documents.",
       icon: FileText,
       href: "/convert?type=word-to-pdf",
     },
     {
       title: "JPG to PDF",
-      description: "Transform images into a single PDF document.",
+      description: "High-DPI image to professional PDF compilation.",
       icon: ImageIcon,
       href: "/convert?type=jpg-to-pdf",
     },
     {
-      title: "PDF to Word",
-      description: "Convert PDF back to editable Word documents.",
-      icon: RefreshCcw,
-      href: "/convert?type=pdf-to-word",
-    },
-    {
-      title: "PDF to JPG",
-      description: "Extract pages from your PDF as high-quality images.",
-      icon: FileImage,
-      href: "/convert?type=pdf-to-jpg",
-    },
-    {
       title: "Excel to PDF",
-      description: "Convert Excel spreadsheets to professional PDF reports.",
+      description: "Preserve grid formatting and cell styling in PDF.",
       icon: TableIcon,
       href: "/convert?type=excel-to-pdf",
     },
     {
       title: "PPT to PDF",
-      description: "Turn PowerPoint presentations into PDF documents.",
+      description: "Vector-perfect PowerPoint slide conversion.",
       icon: Presentation,
       href: "/convert?type=ppt-to-pdf",
+    }
+  ];
+
+  const editTools = [
+    {
+      title: "Merge PDF",
+      description: "Combine multiple volumes into a single archive.",
+      icon: Merge,
+      href: "/merge",
     },
     {
-      title: "HTML to PDF",
-      description: "Convert web pages or HTML files to PDF format.",
-      icon: Code,
-      href: "/convert?type=html-to-pdf",
+      title: "Split PDF",
+      description: "Granular page extraction and document splitting.",
+      icon: Scissors,
+      href: "/split",
     },
     {
       title: "PDF to PDF/A",
-      description: "Convert to PDF/A for long-term electronic archiving.",
+      description: "ISO-compliant long-term electronic archiving.",
       icon: ShieldCheck,
       href: "/convert?type=pdf-to-pdfa",
     },
     {
       title: "Protect PDF",
-      description: "Secure your documents with professional-grade encryption.",
+      description: "Military-grade 256-bit AES encryption.",
       icon: Lock,
       href: "#",
     }
@@ -101,72 +92,187 @@ export default function Home() {
       
       <main className="flex-1">
         {/* Hero Section */}
-        <section className="relative py-20 overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-b from-primary/5 to-transparent -z-10" />
-          <div className="container mx-auto px-4 text-center space-y-8">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent/10 text-accent text-sm font-medium border border-accent/20 animate-in fade-in slide-in-from-bottom-2">
-              <Zap className="h-4 w-4" />
-              <span>Enterprise-grade Document Intelligence</span>
-            </div>
-            <div className="max-w-3xl mx-auto space-y-4">
-              <h1 className="text-4xl md:text-6xl font-bold tracking-tight text-foreground font-headline leading-tight">
-                Master your Documents with <span className="text-primary">DocuFlow</span>
-              </h1>
-              <p className="text-xl text-muted-foreground leading-relaxed">
-                The professional standard for high-fidelity PDF manipulation. Secure, accelerated, and powered by next-generation AI processing.
-              </p>
+        <section className="relative py-24 lg:py-32 overflow-hidden border-b bg-white">
+          <div className="absolute inset-0 bg-[radial-gradient(45%_45%_at_50%_50%,rgba(59,130,246,0.05)_0%,rgba(255,255,255,0)_100%)]" />
+          <div className="container relative mx-auto px-4">
+            <div className="flex flex-col items-center text-center space-y-10">
+              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/5 text-primary text-xs font-bold uppercase tracking-wider border border-primary/10 animate-in fade-in slide-in-from-bottom-2">
+                <Shield className="h-3.5 w-3.5" />
+                <span>Enterprise Verified Solution</span>
+              </div>
+              
+              <div className="max-w-4xl space-y-6">
+                <h1 className="text-5xl md:text-7xl font-bold tracking-tight text-foreground font-headline leading-[1.1]">
+                  Automate your Document <br />
+                  <span className="text-primary italic">Intelligence</span> Workflow
+                </h1>
+                <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
+                  DocuFlow Pro provides high-fidelity manipulation, semantic AI analysis, and secure conversion tools for the modern enterprise.
+                </p>
+              </div>
+
+              <div className="flex flex-col sm:flex-row items-center gap-4">
+                <Button size="lg" className="h-14 px-8 text-base shadow-xl shadow-primary/20 group">
+                  Start Free Trial <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
+                </Button>
+                <Button size="lg" variant="outline" className="h-14 px-8 text-base bg-white/50 backdrop-blur-sm">
+                  View API Documentation
+                </Button>
+              </div>
+
+              <div className="flex items-center gap-8 pt-8 opacity-40 grayscale">
+                <div className="flex items-center gap-2 font-bold text-xl tracking-tighter italic">FORBES</div>
+                <div className="flex items-center gap-2 font-bold text-xl tracking-tighter italic">WIRED</div>
+                <div className="flex items-center gap-2 font-bold text-xl tracking-tighter italic">TECHCRUNCH</div>
+              </div>
             </div>
           </div>
         </section>
 
-        {/* Tools Grid */}
-        <section className="py-12 pb-24">
-          <div className="container mx-auto px-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {tools.map((tool, index) => (
-                <div key={tool.title} className="animate-in fade-in slide-in-from-bottom-4" style={{ animationDelay: `${index * 50}ms` }}>
-                  <ToolCard {...tool} />
+        {/* Tools Dashboard */}
+        <section className="py-24 bg-muted/30">
+          <div className="container mx-auto px-4 space-y-24">
+            
+            {/* AI Highlight */}
+            <div className="space-y-8">
+              <div className="flex items-end justify-between border-b pb-4">
+                <div className="space-y-1">
+                  <h2 className="text-2xl font-bold font-headline">AI Document Intelligence</h2>
+                  <p className="text-muted-foreground text-sm">Next-gen semantic processing and analysis.</p>
                 </div>
-              ))}
+                <Button variant="link" className="text-accent p-0">Learn about DocuFlow AI</Button>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {aiTools.map((tool) => (
+                  <ToolCard key={tool.title} {...tool} />
+                ))}
+                <div className="md:col-span-2 p-8 rounded-2xl bg-accent text-accent-foreground flex flex-col justify-center space-y-4 shadow-xl shadow-accent/20">
+                  <h3 className="text-2xl font-bold font-headline">Coming Soon: AI Drafting</h3>
+                  <p className="opacity-90 max-w-md">Automatically generate contracts and legal documents based on your organization's historical data.</p>
+                  <Button variant="secondary" className="w-fit text-accent font-bold">Join Waitlist</Button>
+                </div>
+              </div>
             </div>
+
+            {/* Conversion Suite */}
+            <div className="space-y-8">
+              <div className="flex items-end justify-between border-b pb-4">
+                <div className="space-y-1">
+                  <h2 className="text-2xl font-bold font-headline">Convert to PDF</h2>
+                  <p className="text-muted-foreground text-sm">Industrial-grade high-fidelity conversion engines.</p>
+                </div>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                {convertToTools.map((tool) => (
+                  <ToolCard key={tool.title} {...tool} />
+                ))}
+              </div>
+            </div>
+
+            {/* Editing & Compliance */}
+            <div className="space-y-8">
+              <div className="flex items-end justify-between border-b pb-4">
+                <div className="space-y-1">
+                  <h2 className="text-2xl font-bold font-headline">Manipulation & Compliance</h2>
+                  <p className="text-muted-foreground text-sm">Secure tools for document lifecycle management.</p>
+                </div>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                {editTools.map((tool) => (
+                  <ToolCard key={tool.title} {...tool} />
+                ))}
+              </div>
+            </div>
+
           </div>
         </section>
 
-        {/* Features Section */}
-        <section className="bg-white py-24 border-y">
+        {/* Value Prop */}
+        <section className="py-24 bg-white">
           <div className="container mx-auto px-4">
-            <div className="grid md:grid-cols-3 gap-12 text-center md:text-left">
-              <div className="space-y-4">
-                <div className="h-12 w-12 rounded-xl bg-primary/10 text-primary flex items-center justify-center mx-auto md:mx-0">
-                  <Lock className="h-6 w-6" />
+            <div className="grid lg:grid-cols-2 gap-16 items-center">
+              <div className="space-y-8">
+                <h2 className="text-4xl font-bold font-headline leading-tight">Built for Professionals, <br /> Trusted by Enterprises.</h2>
+                <div className="space-y-6">
+                  <div className="flex gap-4">
+                    <div className="h-10 w-10 shrink-0 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
+                      <Lock className="h-5 w-5" />
+                    </div>
+                    <div>
+                      <h4 className="font-bold">Zero-Retention Policy</h4>
+                      <p className="text-muted-foreground text-sm">Your documents are processed in-memory and never stored on our servers.</p>
+                    </div>
+                  </div>
+                  <div className="flex gap-4">
+                    <div className="h-10 w-10 shrink-0 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
+                      <Clock className="h-5 w-5" />
+                    </div>
+                    <div>
+                      <h4 className="font-bold">Lightning Fast Processing</h4>
+                      <p className="text-muted-foreground text-sm">Proprietary engines optimized for high-volume document batching.</p>
+                    </div>
+                  </div>
                 </div>
-                <h3 className="text-lg font-bold font-headline">Enterprise Security</h3>
-                <p className="text-muted-foreground">End-to-end encryption with zero-retention policies. Your intellectual property remains yours.</p>
+                <Button size="lg" variant="outline" className="h-12 border-primary text-primary hover:bg-primary/5">Download Security Whitepaper</Button>
               </div>
-              <div className="space-y-4">
-                <div className="h-12 w-12 rounded-xl bg-primary/10 text-primary flex items-center justify-center mx-auto md:mx-0">
-                  <RefreshCcw className="h-6 w-6" />
-                </div>
-                <h3 className="text-lg font-bold font-headline">Seamless Workflow</h3>
-                <p className="text-muted-foreground">Optimized for high-volume corporate environments. Cloud-integrated and mobile-ready.</p>
-              </div>
-              <div className="space-y-4">
-                <div className="h-12 w-12 rounded-xl bg-primary/10 text-primary flex items-center justify-center mx-auto md:mx-0">
-                  <Sparkles className="h-6 w-6" />
-                </div>
-                <h3 className="text-lg font-bold font-headline">AI-Enhanced Insights</h3>
-                <p className="text-muted-foreground">Beyond manipulation: understand your data with automated summaries and semantic extraction.</p>
+              <div className="relative aspect-video rounded-3xl overflow-hidden shadow-2xl border border-muted ring-8 ring-muted/20">
+                 <img 
+                  src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?q=80&w=2426&auto=format&fit=crop" 
+                  alt="DocuFlow Interface" 
+                  className="object-cover w-full h-full"
+                 />
+                 <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
               </div>
             </div>
           </div>
         </section>
       </main>
 
-      <footer className="bg-background border-t py-12">
-        <div className="container mx-auto px-4 text-center">
-          <p className="text-sm text-muted-foreground">
-            &copy; {new Date().getFullYear()} DocuFlow Professional. Empowering global teams with intelligent document solutions.
-          </p>
+      <footer className="bg-muted/50 border-t py-16">
+        <div className="container mx-auto px-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-12">
+            <div className="space-y-4">
+              <h4 className="text-xs font-bold uppercase tracking-widest">Product</h4>
+              <ul className="space-y-2 text-sm text-muted-foreground">
+                <li><Link href="/merge">Merge PDF</Link></li>
+                <li><Link href="/split">Split PDF</Link></li>
+                <li><Link href="/analyze">AI Analysis</Link></li>
+              </ul>
+            </div>
+            <div className="space-y-4">
+              <h4 className="text-xs font-bold uppercase tracking-widest">Company</h4>
+              <ul className="space-y-2 text-sm text-muted-foreground">
+                <li><Link href="#">About</Link></li>
+                <li><Link href="#">Security</Link></li>
+                <li><Link href="#">Privacy</Link></li>
+              </ul>
+            </div>
+            <div className="space-y-4">
+              <h4 className="text-xs font-bold uppercase tracking-widest">Support</h4>
+              <ul className="space-y-2 text-sm text-muted-foreground">
+                <li><Link href="#">Help Center</Link></li>
+                <li><Link href="#">API Docs</Link></li>
+                <li><Link href="#">Contact</Link></li>
+              </ul>
+            </div>
+            <div className="space-y-4">
+              <h4 className="text-xs font-bold uppercase tracking-widest">Connect</h4>
+              <ul className="space-y-2 text-sm text-muted-foreground">
+                <li><Link href="#">Twitter</Link></li>
+                <li><Link href="#">LinkedIn</Link></li>
+                <li><Link href="#">Github</Link></li>
+              </ul>
+            </div>
+          </div>
+          <div className="flex flex-col md:flex-row items-center justify-between gap-6 border-t pt-8">
+            <div className="flex items-center gap-2">
+              <FileText className="h-5 w-5 text-primary" />
+              <span className="font-bold text-sm tracking-tighter uppercase">DocuFlow Pro</span>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              &copy; {new Date().getFullYear()} DocuFlow Professional. Empowering global teams with secure document intelligence.
+            </p>
+          </div>
         </div>
       </footer>
     </div>
