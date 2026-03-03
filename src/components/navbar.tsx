@@ -1,4 +1,3 @@
-
 "use client"
 
 import Link from 'next/link';
@@ -18,7 +17,10 @@ import {
   Signature,
   Wrench,
   User,
-  LogOut
+  LogOut,
+  Zap,
+  Globe,
+  ShieldCheck
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -41,105 +43,96 @@ export function Navbar() {
   };
 
   return (
-    <nav className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container mx-auto flex h-16 items-center justify-between px-4">
+    <nav className="sticky top-0 z-50 w-full border-b bg-white/80 backdrop-blur-xl transition-all">
+      <div className="container mx-auto flex h-20 items-center justify-between px-4">
         <div className="flex items-center gap-2">
-          <Link href="/" className="flex items-center gap-4">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-lg shadow-primary/20">
-              <FileText className="h-6 w-6" />
+          <Link href="/" className="flex items-center gap-3 group">
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-2xl shadow-primary/30 transition-transform group-hover:scale-110">
+              <FileText className="h-7 w-7" />
             </div>
-            <span className="text-xl font-bold tracking-tight text-primary font-headline hidden sm:block">
-              DocuFlow <span className="text-foreground/50 font-medium">Pro</span>
+            <span className="text-2xl font-black tracking-tighter text-slate-900 font-headline hidden sm:block italic uppercase">
+              DocuFlow <span className="text-primary not-italic">Pro</span>
             </span>
           </Link>
         </div>
 
-        <div className="hidden lg:flex items-center gap-8">
+        <div className="hidden lg:flex items-center gap-10">
           <DropdownMenu>
-            <DropdownMenuTrigger className="flex items-center gap-1 text-sm font-medium hover:text-primary transition-colors outline-none">
-              Products <ChevronDown className="h-4 w-4 opacity-50" />
+            <DropdownMenuTrigger className="flex items-center gap-1.5 text-[13px] font-bold uppercase tracking-widest text-slate-600 hover:text-primary transition-colors outline-none">
+              Capabilities <ChevronDown className="h-3 w-3 opacity-50" />
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="start" className="w-[600px] p-6 grid grid-cols-2 gap-6">
-              <div className="space-y-3">
-                <DropdownMenuLabel className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold">Manipulation</DropdownMenuLabel>
-                <div className="grid gap-1">
-                  <DropdownMenuItem asChild className="cursor-pointer">
-                    <Link href="/merge" className="flex items-center gap-2"><Merge className="h-4 w-4 text-primary" /> Merge PDF</Link>
+            <DropdownMenuContent align="start" className="w-[700px] p-8 grid grid-cols-2 gap-8 rounded-3xl shadow-2xl border-slate-100">
+              <div className="space-y-5">
+                <DropdownMenuLabel className="text-[10px] uppercase tracking-[0.2em] text-slate-400 font-black">Manipulation & Logic</DropdownMenuLabel>
+                <div className="grid gap-2">
+                  <DropdownMenuItem asChild className="p-3 rounded-xl cursor-pointer hover:bg-slate-50">
+                    <Link href="/merge" className="flex items-center gap-3"><Merge className="h-5 w-5 text-primary" /> <div className="flex flex-col"><span className="font-bold">Merge PDF</span><span className="text-[10px] text-slate-400">Combine volumes</span></div></Link>
                   </DropdownMenuItem>
-                  <DropdownMenuItem asChild className="cursor-pointer">
-                    <Link href="/split" className="flex items-center gap-2"><Scissors className="h-4 w-4 text-primary" /> Split PDF</Link>
+                  <DropdownMenuItem asChild className="p-3 rounded-xl cursor-pointer hover:bg-slate-50">
+                    <Link href="/split" className="flex items-center gap-3"><Scissors className="h-5 w-5 text-primary" /> <div className="flex flex-col"><span className="font-bold">Split PDF</span><span className="text-[10px] text-slate-400">Extract pages</span></div></Link>
                   </DropdownMenuItem>
-                  <DropdownMenuItem asChild className="cursor-pointer">
-                    <Link href="/organize" className="flex items-center gap-2"><RotateCw className="h-4 w-4 text-primary" /> Organize Pages</Link>
+                  <DropdownMenuItem asChild className="p-3 rounded-xl cursor-pointer hover:bg-slate-50">
+                    <Link href="/organize" className="flex items-center gap-3"><RotateCw className="h-5 w-5 text-primary" /> <div className="flex flex-col"><span className="font-bold">Organize Pages</span><span className="text-[10px] text-slate-400">Reorder & rotate</span></div></Link>
                   </DropdownMenuItem>
-                  <DropdownMenuItem asChild className="cursor-pointer">
-                    <Link href="/watermark" className="flex items-center gap-2"><Type className="h-4 w-4 text-primary" /> Watermark PDF</Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild className="cursor-pointer">
-                    <Link href="/numbers" className="flex items-center gap-2"><Hash className="h-4 w-4 text-primary" /> Add Page Numbers</Link>
+                  <DropdownMenuItem asChild className="p-3 rounded-xl cursor-pointer hover:bg-slate-50">
+                    <Link href="/watermark" className="flex items-center gap-3"><Type className="h-5 w-5 text-primary" /> <div className="flex flex-col"><span className="font-bold">Watermark</span><span className="text-[10px] text-slate-400">Branding & security</span></div></Link>
                   </DropdownMenuItem>
                 </div>
               </div>
-              <div className="space-y-3 border-l pl-6">
-                <DropdownMenuLabel className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold">Intelligence & Security</DropdownMenuLabel>
-                <div className="grid gap-1">
-                  <DropdownMenuItem asChild className="cursor-pointer">
-                    <Link href="/analyze" className="flex items-center gap-2"><Search className="h-4 w-4 text-primary" /> Doc Inspector</Link>
+              <div className="space-y-5 border-l border-slate-100 pl-8">
+                <DropdownMenuLabel className="text-[10px] uppercase tracking-[0.2em] text-slate-400 font-black">Analysis & Compliance</DropdownMenuLabel>
+                <div className="grid gap-2">
+                  <DropdownMenuItem asChild className="p-3 rounded-xl cursor-pointer hover:bg-slate-50">
+                    <Link href="/analyze" className="flex items-center gap-3"><Search className="h-5 w-5 text-accent" /> <div className="flex flex-col"><span className="font-bold">Inspector</span><span className="text-[10px] text-slate-400">Metadata analysis</span></div></Link>
                   </DropdownMenuItem>
-                  <DropdownMenuItem asChild className="cursor-pointer">
-                    <Link href="/sanitize" className="flex items-center gap-2"><Eraser className="h-4 w-4 text-primary" /> Sanitize PDF</Link>
+                  <DropdownMenuItem asChild className="p-3 rounded-xl cursor-pointer hover:bg-slate-50">
+                    <Link href="/sanitize" className="flex items-center gap-3"><Eraser className="h-5 w-5 text-accent" /> <div className="flex flex-col"><span className="font-bold">Sanitize</span><span className="text-[10px] text-slate-400">Strip tracking info</span></div></Link>
                   </DropdownMenuItem>
-                  <DropdownMenuItem asChild className="cursor-pointer">
-                    <Link href="/repair" className="flex items-center gap-2"><Wrench className="h-4 w-4 text-primary" /> Repair PDF</Link>
+                  <DropdownMenuItem asChild className="p-3 rounded-xl cursor-pointer hover:bg-slate-50">
+                    <Link href="/protect" className="flex items-center gap-3"><Lock className="h-5 w-5 text-accent" /> <div className="flex flex-col"><span className="font-bold">Encrypt</span><span className="text-[10px] text-slate-400">AES-256 protection</span></div></Link>
                   </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem asChild className="cursor-pointer">
-                    <Link href="/sign" className="flex items-center gap-2"><Signature className="h-4 w-4 text-primary" /> Sign PDF</Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild className="cursor-pointer">
-                    <Link href="/protect" className="flex items-center gap-2"><Lock className="h-4 w-4 text-primary" /> Protect PDF</Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild className="cursor-pointer">
-                    <Link href="/protect?mode=unlock" className="flex items-center gap-2"><Unlock className="h-4 w-4 text-primary" /> Unlock PDF</Link>
+                  <DropdownMenuItem asChild className="p-3 rounded-xl cursor-pointer hover:bg-slate-50">
+                    <Link href="/sign" className="flex items-center gap-3"><Signature className="h-5 w-5 text-accent" /> <div className="flex flex-col"><span className="font-bold">Digital Sign</span><span className="text-[10px] text-slate-400">E-signature flow</span></div></Link>
                   </DropdownMenuItem>
                 </div>
               </div>
             </DropdownMenuContent>
           </DropdownMenu>
 
-          <Link href="/pricing" className="text-sm font-medium hover:text-primary transition-colors">Pricing</Link>
-          <Link href="/enterprise" className="text-sm font-medium hover:text-primary transition-colors">Enterprise</Link>
-          <Link href="/security" className="text-sm font-medium hover:text-primary transition-colors">Security</Link>
+          <Link href="/pricing" className="text-[13px] font-bold uppercase tracking-widest text-slate-600 hover:text-primary transition-colors">Pricing</Link>
+          <Link href="/enterprise" className="text-[13px] font-bold uppercase tracking-widest text-slate-600 hover:text-primary transition-colors">Enterprise</Link>
+          <Link href="/security" className="text-[13px] font-bold uppercase tracking-widest text-slate-600 hover:text-primary transition-colors">Trust Hub</Link>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-5">
           {!isUserLoading && user ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="flex items-center gap-2">
-                  <User className="h-4 w-4" />
-                  <span className="hidden sm:inline-block max-w-[150px] truncate">{user.isAnonymous ? "Guest User" : user.email}</span>
+                <Button variant="ghost" className="h-11 px-5 rounded-xl bg-slate-50 hover:bg-slate-100 flex items-center gap-3 border border-slate-200/50">
+                  <div className="w-6 h-6 rounded-full bg-primary text-white flex items-center justify-center text-[10px] font-bold">
+                    {user.email?.[0].toUpperCase() || 'G'}
+                  </div>
+                  <span className="hidden sm:inline-block max-w-[120px] truncate font-bold text-xs">{user.isAnonymous ? "Guest Session" : user.email}</span>
                   <ChevronDown className="h-3 w-3 opacity-50" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56">
-                <DropdownMenuLabel>My Account</DropdownMenuLabel>
+              <DropdownMenuContent align="end" className="w-64 p-2 rounded-2xl shadow-2xl border-slate-100">
+                <DropdownMenuLabel className="px-3 py-2 text-[10px] font-black uppercase tracking-widest text-slate-400">Account Control</DropdownMenuLabel>
+                <DropdownMenuItem className="p-3 rounded-xl cursor-pointer gap-3"><User className="h-4 w-4" /> Account Settings</DropdownMenuItem>
+                <DropdownMenuItem className="p-3 rounded-xl cursor-pointer gap-3"><Zap className="h-4 w-4" /> Usage Dashboard</DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem className="cursor-pointer">Settings</DropdownMenuItem>
-                <DropdownMenuItem className="cursor-pointer">Usage Dashboard</DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={handleLogout} className="text-destructive cursor-pointer">
-                  <LogOut className="mr-2 h-4 w-4" />
-                  Sign Out
+                <DropdownMenuItem onClick={handleLogout} className="p-3 rounded-xl cursor-pointer gap-3 text-destructive focus:bg-destructive/5 focus:text-destructive">
+                  <LogOut className="h-4 w-4" />
+                  Terminate Session
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           ) : (
             <>
-              <div className="hidden md:flex items-center gap-4 mr-4">
-                 <Link href="/login" className="text-sm font-medium text-muted-foreground hover:text-foreground">Login</Link>
+              <div className="hidden md:flex items-center gap-6 mr-2">
+                 <Link href="/login" className="text-[13px] font-bold uppercase tracking-widest text-slate-500 hover:text-slate-900">Sign In</Link>
               </div>
-              <Button asChild className="bg-primary hover:bg-primary/90 shadow-md">
+              <Button asChild size="lg" className="h-12 px-8 rounded-xl shadow-xl shadow-primary/20 hover:shadow-primary/30 transition-all">
                 <Link href="/login">Get Started</Link>
               </Button>
             </>
@@ -148,26 +141,20 @@ export function Navbar() {
           <div className="lg:hidden">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon">
+                <Button variant="outline" size="icon" className="h-11 w-11 rounded-xl border-slate-200">
                   <Menu className="h-6 w-6" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56 p-2">
-                <DropdownMenuLabel>Tools</DropdownMenuLabel>
-                <DropdownMenuItem asChild><Link href="/merge">Merge PDF</Link></DropdownMenuItem>
-                <DropdownMenuItem asChild><Link href="/split">Split PDF</Link></DropdownMenuItem>
-                <DropdownMenuItem asChild><Link href="/sign">Sign PDF</Link></DropdownMenuItem>
-                <DropdownMenuItem asChild><Link href="/numbers">Numbers</Link></DropdownMenuItem>
+              <DropdownMenuContent align="end" className="w-64 p-4 rounded-2xl shadow-2xl border-slate-100 space-y-4">
+                <div className="space-y-1">
+                  <DropdownMenuLabel className="text-[10px] uppercase tracking-widest text-slate-400 font-black">Navigation</DropdownMenuLabel>
+                  <DropdownMenuItem asChild className="p-3 rounded-xl"><Link href="/pricing" className="flex items-center gap-3 font-bold"><Zap className="h-4 w-4" /> Pricing</Link></DropdownMenuItem>
+                  <DropdownMenuItem asChild className="p-3 rounded-xl"><Link href="/enterprise" className="flex items-center gap-3 font-bold"><Globe className="h-4 w-4" /> Enterprise</Link></DropdownMenuItem>
+                  <DropdownMenuItem asChild className="p-3 rounded-xl"><Link href="/security" className="flex items-center gap-3 font-bold"><ShieldCheck className="h-4 w-4" /> Security</Link></DropdownMenuItem>
+                </div>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem asChild><Link href="/sanitize">Sanitize</Link></DropdownMenuItem>
-                <DropdownMenuItem asChild><Link href="/repair">Repair</Link></DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem asChild><Link href="/pricing">Pricing</Link></DropdownMenuItem>
-                <DropdownMenuItem asChild><Link href="/enterprise">Enterprise</Link></DropdownMenuItem>
-                <DropdownMenuItem asChild><Link href="/security">Security</Link></DropdownMenuItem>
-                <DropdownMenuSeparator />
-                {!user && <DropdownMenuItem asChild><Link href="/login">Login</Link></DropdownMenuItem>}
-                {user && <DropdownMenuItem onClick={handleLogout} className="text-destructive">Sign Out</DropdownMenuItem>}
+                {!user && <DropdownMenuItem asChild className="p-3 rounded-xl bg-primary text-white hover:bg-primary/90 hover:text-white"><Link href="/login" className="flex items-center justify-center font-bold">Log In</Link></DropdownMenuItem>}
+                {user && <DropdownMenuItem onClick={handleLogout} className="p-3 rounded-xl bg-destructive/10 text-destructive font-bold justify-center">Sign Out</DropdownMenuItem>}
               </DropdownMenuContent>
             </DropdownMenu>
           </div>

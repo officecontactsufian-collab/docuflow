@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { LucideIcon } from 'lucide-react';
+import { LucideIcon, ArrowRight } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
 interface ToolCardProps {
@@ -12,25 +12,29 @@ interface ToolCardProps {
 export function ToolCard({ title, description, icon: Icon, href }: ToolCardProps) {
   return (
     <Link href={href} className="group h-full">
-      <Card className="h-full transition-all duration-300 hover:-translate-y-1.5 hover:shadow-2xl border-border/60 overflow-hidden relative bg-white hover:border-primary/50">
-        <CardHeader className="space-y-5 p-6 pb-2">
-          <div className="w-12 h-12 rounded-2xl flex items-center justify-center transition-all group-hover:scale-110 group-hover:shadow-lg duration-300 bg-primary/5 text-primary border border-primary/10">
-            <Icon className="h-6 w-6" />
+      <Card className="h-full transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl border-slate-200/60 overflow-hidden relative bg-white flex flex-col rounded-[1.5rem] group-hover:border-primary/40 group-hover:ring-1 group-hover:ring-primary/10">
+        <CardHeader className="space-y-6 p-8 pb-4">
+          <div className="w-14 h-14 rounded-2xl flex items-center justify-center transition-all duration-500 bg-slate-50 text-slate-400 group-hover:bg-primary group-hover:text-white group-hover:shadow-xl group-hover:shadow-primary/30 group-hover:-rotate-3">
+            <Icon className="h-7 w-7" />
           </div>
-          <div className="space-y-2">
-            <CardTitle className="text-lg transition-colors font-headline group-hover:text-primary">
+          <div className="space-y-3">
+            <CardTitle className="text-xl font-black tracking-tight text-slate-900 group-hover:text-primary transition-colors">
               {title}
             </CardTitle>
-            <CardDescription className="text-muted-foreground text-sm leading-relaxed line-clamp-2">
+            <CardDescription className="text-slate-500 text-sm leading-relaxed line-clamp-3 font-medium">
               {description}
             </CardDescription>
           </div>
         </CardHeader>
-        <CardContent className="px-6 pb-6 pt-4">
-           <div className="text-[10px] font-bold uppercase tracking-widest flex items-center gap-2 transition-opacity group-hover:opacity-100 opacity-0 text-primary">
-             Open Tool <Icon className="h-3 w-3" />
+        <CardContent className="px-8 pb-8 pt-6 mt-auto">
+           <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] transition-all duration-300 opacity-60 group-hover:opacity-100 group-hover:text-primary group-hover:translate-x-1">
+             Configure Tool <ArrowRight className="h-3 w-3" />
            </div>
         </CardContent>
+        {/* Subtle hover background decoration */}
+        <div className="absolute top-0 right-0 p-4 opacity-0 group-hover:opacity-100 transition-opacity duration-700">
+           <div className="w-24 h-24 bg-primary/5 rounded-full blur-3xl" />
+        </div>
       </Card>
     </Link>
   );
