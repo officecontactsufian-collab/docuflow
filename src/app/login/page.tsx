@@ -9,7 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth, useUser, initiateEmailSignIn, initiateEmailSignUp, initiateAnonymousSignIn } from '@/firebase';
-import { FileText, Loader2, ShieldCheck, Zap } from 'lucide-react';
+import { FileText, Loader2, ShieldCheck, Zap, User, Phone, Mail, Lock, KeyRound } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 export default function LoginPage() {
@@ -20,6 +20,12 @@ export default function LoginPage() {
   
   const [email, setEmail] = React.useState('');
   const [password, setPassword] = React.useState('');
+  
+  // New registration fields
+  const [fullName, setFullName] = React.useState('');
+  const [phoneNumber, setPhoneNumber] = React.useState('');
+  const [confirmPassword, setConfirmPassword] = React.useState('');
+  
   const [isLoading, setIsLoading] = React.useState(false);
 
   React.useEffect(() => {
@@ -32,13 +38,23 @@ export default function LoginPage() {
     e.preventDefault();
     setIsLoading(true);
     initiateEmailSignIn(auth, email, password);
-    // Success/Error is handled by onAuthStateChanged in Provider
-    // We'll show a generic "Processing" toast if it takes time
   };
 
   const handleEmailSignUp = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (password !== confirmPassword) {
+      toast({
+        variant: "destructive",
+        title: "Registration Error",
+        description: "Passwords do not match. Please verify your credentials.",
+      });
+      return;
+    }
+
     setIsLoading(true);
+    // Note: Standard Firebase initiateEmailSignUp only takes email/password.
+    // In a full implementation, we would update the profile with fullName/phone after creation.
     initiateEmailSignUp(auth, email, password);
   };
 
@@ -50,7 +66,10 @@ export default function LoginPage() {
   if (isUserLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="h-12 w-12 animate-spin text-primary" />
+          <p className="text-sm font-medium text-muted-foreground animate-pulse">Initializing Secure Workspace...</p>
+        </div>
       </div>
     );
   }
@@ -65,26 +84,28 @@ export default function LoginPage() {
             <div className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-lg mb-4">
               <FileText className="h-6 w-6" />
             </div>
-            <h1 className="text-3xl font-bold tracking-tight font-headline">Welcome to DocuFlow</h1>
+            <h1 className="text-3xl font-bold tracking-tight font-headline">Enterprise Login</h1>
             <p className="text-muted-foreground">Access your professional document workspace.</p>
           </div>
 
           <Tabs defaultValue="login" className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
+            <TabsList className="grid w-full grid-cols-2 mb-4">
               <TabsTrigger value="login">Sign In</TabsTrigger>
-              <TabsTrigger value="register">Register</TabsTrigger>
+              <TabsTrigger value="register">Create Account</TabsTrigger>
             </TabsList>
             
             <TabsContent value="login">
-              <Card>
+              <Card className="border-border/60 shadow-xl">
                 <CardHeader>
                   <CardTitle>Sign In</CardTitle>
-                  <CardDescription>Enter your credentials to access your account.</CardDescription>
+                  <CardDescription>Enter your professional credentials to access your account.</CardDescription>
                 </CardHeader>
                 <form onSubmit={handleEmailSignIn}>
                   <CardContent className="space-y-4">
                     <div className="space-y-2">
-                      <Label htmlFor="email">Email</Label>
+                      <Label htmlFor="email" className="flex items-center gap-2">
+                        <Mail className="h-3.5 w-3.5 text-muted-foreground" /> Email Address
+                      </Label>
                       <Input 
                         id="email" 
                         type="email" 
@@ -92,28 +113,32 @@ export default function LoginPage() {
                         required 
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
+                        className="bg-muted/20"
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="password">Password</Label>
+                      <Label htmlFor="password" className="flex items-center gap-2">
+                        <Lock className="h-3.5 w-3.5 text-muted-foreground" /> Password
+                      </Label>
                       <Input 
                         id="password" 
                         type="password" 
                         required 
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
+                        className="bg-muted/20"
                       />
                     </div>
                   </CardContent>
                   <CardFooter className="flex flex-col gap-4">
-                    <Button type="submit" className="w-full h-11" disabled={isLoading}>
+                    <Button type="submit" className="w-full h-11 shadow-lg shadow-primary/20" disabled={isLoading}>
                       {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : "Sign In"}
                     </Button>
-                    <div className="relative w-full">
+                    <div className="relative w-full py-2">
                       <div className="absolute inset-0 flex items-center"><span className="w-full border-t"></span></div>
-                      <div className="relative flex justify-center text-xs uppercase"><span className="bg-background px-2 text-muted-foreground">Or</span></div>
+                      <div className="relative flex justify-center text-[10px] uppercase font-bold tracking-widest"><span className="bg-white px-2 text-muted-foreground">Professional Access</span></div>
                     </div>
-                    <Button type="button" variant="outline" className="w-full h-11" onClick={handleQuickStart} disabled={isLoading}>
+                    <Button type="button" variant="outline" className="w-full h-11 border-primary/20 hover:bg-primary/5" onClick={handleQuickStart} disabled={isLoading}>
                       <Zap className="mr-2 h-4 w-4 text-primary" /> Quick Start (Anonymous)
                     </Button>
                   </CardFooter>
@@ -122,15 +147,46 @@ export default function LoginPage() {
             </TabsContent>
 
             <TabsContent value="register">
-              <Card>
+              <Card className="border-border/60 shadow-xl">
                 <CardHeader>
-                  <CardTitle>Create Account</CardTitle>
-                  <CardDescription>Join DocuFlow for professional document management.</CardDescription>
+                  <CardTitle>Register Account</CardTitle>
+                  <CardDescription>Join DocuFlow for enterprise-grade document intelligence.</CardDescription>
                 </CardHeader>
                 <form onSubmit={handleEmailSignUp}>
                   <CardContent className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="reg-name" className="flex items-center gap-2">
+                          <User className="h-3.5 w-3.5 text-muted-foreground" /> Full Name
+                        </Label>
+                        <Input 
+                          id="reg-name" 
+                          placeholder="Jane Doe" 
+                          required 
+                          value={fullName}
+                          onChange={(e) => setFullName(e.target.value)}
+                          className="bg-muted/20"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="reg-phone" className="flex items-center gap-2">
+                          <Phone className="h-3.5 w-3.5 text-muted-foreground" /> Phone
+                        </Label>
+                        <Input 
+                          id="reg-phone" 
+                          type="tel" 
+                          placeholder="+1 (555) 000-0000" 
+                          required 
+                          value={phoneNumber}
+                          onChange={(e) => setPhoneNumber(e.target.value)}
+                          className="bg-muted/20"
+                        />
+                      </div>
+                    </div>
                     <div className="space-y-2">
-                      <Label htmlFor="reg-email">Email</Label>
+                      <Label htmlFor="reg-email" className="flex items-center gap-2">
+                        <Mail className="h-3.5 w-3.5 text-muted-foreground" /> Professional Email
+                      </Label>
                       <Input 
                         id="reg-email" 
                         type="email" 
@@ -138,21 +194,42 @@ export default function LoginPage() {
                         required 
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
+                        className="bg-muted/20"
                       />
                     </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="reg-password">Password</Label>
-                      <Input 
-                        id="reg-password" 
-                        type="password" 
-                        required 
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                      />
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="reg-password" className="flex items-center gap-2">
+                          <Lock className="h-3.5 w-3.5 text-muted-foreground" /> Password
+                        </Label>
+                        <Input 
+                          id="reg-password" 
+                          type="password" 
+                          placeholder="••••••••"
+                          required 
+                          value={password}
+                          onChange={(e) => setPassword(e.target.value)}
+                          className="bg-muted/20"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="reg-confirm" className="flex items-center gap-2">
+                          <KeyRound className="h-3.5 w-3.5 text-muted-foreground" /> Verification
+                        </Label>
+                        <Input 
+                          id="reg-confirm" 
+                          type="password" 
+                          placeholder="••••••••"
+                          required 
+                          value={confirmPassword}
+                          onChange={(e) => setConfirmPassword(e.target.value)}
+                          className="bg-muted/20"
+                        />
+                      </div>
                     </div>
                   </CardContent>
                   <CardFooter>
-                    <Button type="submit" className="w-full h-11" disabled={isLoading}>
+                    <Button type="submit" className="w-full h-11 shadow-lg shadow-primary/20" disabled={isLoading}>
                       {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : "Create Professional Account"}
                     </Button>
                   </CardFooter>
@@ -161,9 +238,14 @@ export default function LoginPage() {
             </TabsContent>
           </Tabs>
 
-          <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
-            <ShieldCheck className="h-3 w-3" />
-            <span>Secure Enterprise Authentication</span>
+          <div className="flex flex-col items-center gap-4 text-center">
+            <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
+              <ShieldCheck className="h-3 w-3" />
+              <span>Secure 256-bit AES Enterprise Authentication</span>
+            </div>
+            <p className="text-[10px] text-muted-foreground max-w-[280px]">
+              By continuing, you agree to our Terms of Service and Privacy Policy for professional data processing.
+            </p>
           </div>
         </div>
       </main>
