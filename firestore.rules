@@ -1,0 +1,113 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    /**
+     * PDF Spark Security Rules
+     *
+     * CORE PHILOSOPHY:
+     * This ruleset implements a strict User-Ownership model. All application data is 
+     * partitioned by the User's Unique Identifier (UID). This ensures that a user can 
+     * only access, modify, or delete their own files, operations, and AI results.
+     *
+     * DATA STRUCTURE:
+     * Data is organized hierarchically under `/users/{userId}`.
+     * - Files: `/users/{userId}/files/{fileId}`
+     * - Operations: `/users/{userId}/operations/{operationId}`
+     * - AI Results: `/users/{userId}/operations/{operationId}/aiAnalysisResults/{resultId}`
+     *
+     * KEY SECURITY DECISIONS:
+     * 1. Authorization Independence: All documents (including deeply nested ones like AI results)
+     *    contain a denormalized `userId` field. This allows rules to verify ownership 
+     *    instantly without performing expensive `get()` calls to parent documents.
+     * 2. Path-to-Data Consistency: We strictly enforce that the `userId` in the document
+     *    path matches the `userId` field inside the document data.
+     * 3. Prototyping Flexibility: While ownership is strictly enforced, the specific 
+     *    internal fields of documents (beyond the `userId`) are not validated for type 
+     *    or presence, allowing for rapid front-end iteration.
+     * 4. Immutable Ownership: Once a document is created, its `userId` field cannot 
+     *    be changed, preventing data from being "transferred" to other users maliciously.
+     */
+
+    // --- HELPER FUNCTIONS ---
+
+    /** Checks if the request is from an authenticated user. */
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    /** Checks if the authenticated user's UID matches the provided userId. */
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    /** Checks ownership and ensures the document exists for state-changing operations. */
+    function isExistingOwner(userId) {
+      return isOwner(userId) && resource != null;
+    }
+
+    /** Enforces that the internal userId field matches the path and is immutable. */
+    function isValidOwnership(userId) {
+      return request.resource.data.userId == userId;
+    }
+
+    // --- COLLECTION RULES ---
+
+    /**
+     * @description Rules for the root User document, allowing users to manage their own profile.
+     * @path /users/{userId}
+     * @allow Authenticated user (create) where UID matches document ID.
+     * @deny Any user (update) attempting to change a different user's document.
+     * @principle Self-Creation and Ownership.
+     */
+    match /users/{userId} {
+      allow get: if isOwner(userId);
+      allow list: if false; // Users cannot be listed for privacy.
+      allow create: if isOwner(userId);
+      allow update: if isExistingOwner(userId);
+      allow delete: if isExistingOwner(userId);
+
+      /**
+       * @description Stores individual PDF or document files uploaded by or generated for a specific user.
+       * @path /users/{userId}/files/{fileId}
+       * @allow User (list) their own files.
+       * @deny User (create) a file with a 'userId' field that doesn't match their own.
+       * @principle Relational integrity and path-based ownership.
+       */
+      match /files/{fileId} {
+        allow get, list: if isOwner(userId);
+        allow create: if isOwner(userId) && isValidOwnership(userId);
+        allow update: if isExistingOwner(userId) && request.resource.data.userId == resource.data.userId;
+        allow delete: if isExistingOwner(userId);
+      }
+
+      /**
+       * @description Tracks PDF processing tasks (merge, split, AI) initiated by a specific user.
+       * @path /users/{userId}/operations/{operationId}
+       * @allow User (get) a specific operation status.
+       * @deny Unauthenticated access to operation history.
+       * @principle Denormalized ownership for performant authorization.
+       */
+      match /operations/{operationId} {
+        allow get, list: if isOwner(userId);
+        allow create: if isOwner(userId) && isValidOwnership(userId);
+        allow update: if isExistingOwner(userId) && request.resource.data.userId == resource.data.userId;
+        allow delete: if isExistingOwner(userId);
+
+        /**
+         * @description Results of AI content analysis. Requires a denormalized 'userId' for rule efficiency.
+         * @path /users/{userId}/operations/{operationId}/aiAnalysisResults/{aiAnalysisResultId}
+         * @allow User (create) an AI result for their own operation.
+         * @deny User (list) results belonging to a different user's operation path.
+         * @principle Authorization Independence (Mandate A).
+         */
+        match /aiAnalysisResults/{aiAnalysisResultId} {
+          allow get, list: if isOwner(userId);
+          allow create: if isOwner(userId) && isValidOwnership(userId);
+          allow update: if isExistingOwner(userId) && request.resource.data.userId == resource.data.userId;
+          allow delete: if isExistingOwner(userId);
+        }
+      }
+    }
+  }
+}
