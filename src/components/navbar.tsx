@@ -10,7 +10,10 @@ import {
   Menu,
   Maximize,
   RotateCw,
-  Unlock
+  Unlock,
+  Type,
+  Hash,
+  Eraser
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -42,21 +45,24 @@ export function Navbar() {
             <DropdownMenuTrigger className="flex items-center gap-1 text-sm font-medium hover:text-primary transition-colors outline-none">
               Products <ChevronDown className="h-4 w-4 opacity-50" />
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="start" className="w-[500px] p-6 grid grid-cols-2 gap-6">
+            <DropdownMenuContent align="start" className="w-[600px] p-6 grid grid-cols-2 gap-6">
               <div className="space-y-3">
                 <DropdownMenuLabel className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold">Manipulation</DropdownMenuLabel>
                 <div className="grid gap-1">
                   <DropdownMenuItem asChild className="cursor-pointer">
-                    <Link href="/merge" className="flex items-center gap-2"><Merge className="h-4 w-4 text-primary" /> Merge Files</Link>
+                    <Link href="/merge" className="flex items-center gap-2"><Merge className="h-4 w-4 text-primary" /> Merge PDF</Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild className="cursor-pointer">
-                    <Link href="/split" className="flex items-center gap-2"><Scissors className="h-4 w-4 text-primary" /> Split Pages</Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild className="cursor-pointer">
-                    <Link href="/compress" className="flex items-center gap-2"><Maximize className="h-4 w-4 text-primary" /> Compress PDF</Link>
+                    <Link href="/split" className="flex items-center gap-2"><Scissors className="h-4 w-4 text-primary" /> Split PDF</Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild className="cursor-pointer">
                     <Link href="/organize" className="flex items-center gap-2"><RotateCw className="h-4 w-4 text-primary" /> Organize Pages</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild className="cursor-pointer">
+                    <Link href="/watermark" className="flex items-center gap-2"><Type className="h-4 w-4 text-primary" /> Watermark PDF</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild className="cursor-pointer">
+                    <Link href="/numbers" className="flex items-center gap-2"><Hash className="h-4 w-4 text-primary" /> Add Page Numbers</Link>
                   </DropdownMenuItem>
                 </div>
               </div>
@@ -64,7 +70,10 @@ export function Navbar() {
                 <DropdownMenuLabel className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold">Intelligence & Security</DropdownMenuLabel>
                 <div className="grid gap-1">
                   <DropdownMenuItem asChild className="cursor-pointer">
-                    <Link href="/analyze" className="flex items-center gap-2 text-primary font-semibold"><Search className="h-4 w-4" /> Doc Inspector</Link>
+                    <Link href="/analyze" className="flex items-center gap-2"><Search className="h-4 w-4 text-primary" /> Doc Inspector</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild className="cursor-pointer">
+                    <Link href="/sanitize" className="flex items-center gap-2"><Eraser className="h-4 w-4 text-primary" /> Sanitize PDF</Link>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem asChild className="cursor-pointer">
@@ -103,10 +112,10 @@ export function Navbar() {
                 <DropdownMenuLabel>Tools</DropdownMenuLabel>
                 <DropdownMenuItem asChild><Link href="/merge">Merge PDF</Link></DropdownMenuItem>
                 <DropdownMenuItem asChild><Link href="/split">Split PDF</Link></DropdownMenuItem>
-                <DropdownMenuItem asChild><Link href="/compress">Compress PDF</Link></DropdownMenuItem>
-                <DropdownMenuItem asChild><Link href="/organize">Organize PDF</Link></DropdownMenuItem>
+                <DropdownMenuItem asChild><Link href="/watermark">Watermark</Link></DropdownMenuItem>
+                <DropdownMenuItem asChild><Link href="/numbers">Numbers</Link></DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem asChild><Link href="/analyze" className="text-primary font-bold">Inspect Doc</Link></DropdownMenuItem>
+                <DropdownMenuItem asChild><Link href="/sanitize">Sanitize</Link></DropdownMenuItem>
                 <DropdownMenuItem asChild><Link href="/protect">Security Hub</Link></DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>

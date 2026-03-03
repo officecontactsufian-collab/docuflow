@@ -16,7 +16,10 @@ import {
   ArrowRight,
   Shield,
   Clock,
-  Search
+  Search,
+  Type,
+  Hash,
+  Eraser
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
@@ -28,6 +31,12 @@ export default function Home() {
       description: "Extract high-fidelity structural metadata and security profiles.",
       icon: Search,
       href: "/analyze",
+    },
+    {
+      title: "Sanitize PDF",
+      description: "Remove hidden metadata and author info for privacy.",
+      icon: Eraser,
+      href: "/sanitize",
     }
   ];
 
@@ -82,6 +91,18 @@ export default function Home() {
       description: "Rotate, reorder, or delete pages with ease.",
       icon: RotateCw,
       href: "/organize",
+    },
+    {
+      title: "Watermark PDF",
+      description: "Add professional text overlays to pages.",
+      icon: Type,
+      href: "/watermark",
+    },
+    {
+      title: "Add Page Numbers",
+      description: "Insert page counters in the footer.",
+      icon: Hash,
+      href: "/numbers",
     }
   ];
 
@@ -153,23 +174,33 @@ export default function Home() {
         <section className="py-24 bg-muted/30">
           <div className="container mx-auto px-4 space-y-24">
             
-            {/* Analysis */}
+            {/* Manipulation Suite */}
             <div className="space-y-8">
               <div className="flex items-end justify-between border-b pb-4">
                 <div className="space-y-1">
-                  <h2 className="text-2xl font-bold font-headline">Document Intelligence</h2>
-                  <p className="text-muted-foreground text-sm">In-depth structural and metadata processing.</p>
+                  <h2 className="text-2xl font-bold font-headline">Document Manipulation</h2>
+                  <p className="text-muted-foreground text-sm">Comprehensive page and structural management.</p>
                 </div>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {manipulationTools.map((tool) => (
+                  <ToolCard key={tool.title} {...tool} />
+                ))}
+              </div>
+            </div>
+
+            {/* Analysis & Privacy */}
+            <div className="space-y-8">
+              <div className="flex items-end justify-between border-b pb-4">
+                <div className="space-y-1">
+                  <h2 className="text-2xl font-bold font-headline">Intelligence & Privacy</h2>
+                  <p className="text-muted-foreground text-sm">In-depth structural analysis and data sanitization.</p>
+                </div>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {analysisTools.map((tool) => (
                   <ToolCard key={tool.title} {...tool} />
                 ))}
-                <div className="md:col-span-2 p-8 rounded-2xl bg-primary text-primary-foreground flex flex-col justify-center space-y-4 shadow-xl shadow-primary/20">
-                  <h3 className="text-2xl font-bold font-headline">Enterprise Feature: Batch Processing</h3>
-                  <p className="opacity-90 max-w-md">Process thousands of documents simultaneously with custom scripting and high-throughput local engines.</p>
-                  <Button variant="secondary" className="w-fit text-primary font-bold">Request Demo</Button>
-                </div>
               </div>
             </div>
 
@@ -183,21 +214,6 @@ export default function Home() {
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 {convertTools.map((tool) => (
-                  <ToolCard key={tool.title} {...tool} />
-                ))}
-              </div>
-            </div>
-
-            {/* Manipulation Suite */}
-            <div className="space-y-8">
-              <div className="flex items-end justify-between border-b pb-4">
-                <div className="space-y-1">
-                  <h2 className="text-2xl font-bold font-headline">Document Manipulation</h2>
-                  <p className="text-muted-foreground text-sm">Fast and efficient page management tools.</p>
-                </div>
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                {manipulationTools.map((tool) => (
                   <ToolCard key={tool.title} {...tool} />
                 ))}
               </div>
