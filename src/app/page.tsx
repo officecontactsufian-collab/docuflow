@@ -9,14 +9,20 @@ import {
   Lock, 
   Stamp, 
   FileSearch,
-  Zap
+  Zap,
+  FileText,
+  Presentation,
+  Table as TableIcon,
+  Code,
+  ShieldCheck,
+  Image as ImageIcon
 } from 'lucide-react';
 
 export default function Home() {
   const tools = [
     {
       title: "Merge PDF",
-      description: "Combine multiple PDFs into one unified document with ease.",
+      description: "Combine multiple PDFs into one unified document.",
       icon: Merge,
       href: "/merge",
     },
@@ -27,40 +33,64 @@ export default function Home() {
       href: "/split",
     },
     {
-      title: "Convert PDF",
-      description: "Transform PDFs to Word, Image, or Excel formats instantly.",
-      icon: RefreshCcw,
-      href: "/convert",
-    },
-    {
       title: "AI Analysis",
-      description: "Summarize and extract key insights from your documents using AI.",
+      description: "Summarize and extract key insights from your documents.",
       icon: Sparkles,
       href: "/analyze",
       accent: true,
     },
     {
-      title: "PDF to Image",
-      description: "Extract images from your PDF or save pages as high-quality JPGs.",
+      title: "Word to PDF",
+      description: "Convert Word documents to high-quality PDF files.",
+      icon: FileText,
+      href: "/convert?type=word-to-pdf",
+    },
+    {
+      title: "JPG to PDF",
+      description: "Transform images into a single PDF document.",
+      icon: ImageIcon,
+      href: "/convert?type=jpg-to-pdf",
+    },
+    {
+      title: "PDF to Word",
+      description: "Convert PDF back to editable Word documents.",
+      icon: RefreshCcw,
+      href: "/convert?type=pdf-to-word",
+    },
+    {
+      title: "PDF to JPG",
+      description: "Extract pages from your PDF as high-quality images.",
       icon: FileImage,
-      href: "/convert",
+      href: "/convert?type=pdf-to-jpg",
+    },
+    {
+      title: "Excel to PDF",
+      description: "Convert Excel spreadsheets to professional PDF reports.",
+      icon: TableIcon,
+      href: "/convert?type=excel-to-pdf",
+    },
+    {
+      title: "PPT to PDF",
+      description: "Turn PowerPoint presentations into PDF documents.",
+      icon: Presentation,
+      href: "/convert?type=ppt-to-pdf",
+    },
+    {
+      title: "HTML to PDF",
+      description: "Convert web pages or HTML files to PDF format.",
+      icon: Code,
+      href: "/convert?type=html-to-pdf",
+    },
+    {
+      title: "PDF to PDF/A",
+      description: "Convert to PDF/A for long-term electronic archiving.",
+      icon: ShieldCheck,
+      href: "/convert?type=pdf-to-pdfa",
     },
     {
       title: "Protect PDF",
       description: "Secure your documents with professional-grade encryption.",
       icon: Lock,
-      href: "#",
-    },
-    {
-      title: "Add Watermark",
-      description: "Protect your intellectual property with custom watermarks.",
-      icon: Stamp,
-      href: "#",
-    },
-    {
-      title: "Searchable PDF",
-      description: "Use OCR to make scanned PDF documents searchable.",
-      icon: FileSearch,
       href: "#",
     }
   ];
@@ -105,16 +135,25 @@ export default function Home() {
         {/* Features Section */}
         <section className="bg-white py-24 border-y">
           <div className="container mx-auto px-4">
-            <div className="grid md:grid-cols-3 gap-12">
+            <div className="grid md:grid-cols-3 gap-12 text-center md:text-left">
               <div className="space-y-4">
+                <div className="h-12 w-12 rounded-xl bg-primary/10 text-primary flex items-center justify-center mx-auto md:mx-0">
+                  <Lock className="h-6 w-6" />
+                </div>
                 <h3 className="text-lg font-bold font-headline">Fast & Secure</h3>
                 <p className="text-muted-foreground">We use industry-standard encryption and delete your files automatically after processing.</p>
               </div>
               <div className="space-y-4">
+                <div className="h-12 w-12 rounded-xl bg-primary/10 text-primary flex items-center justify-center mx-auto md:mx-0">
+                  <RefreshCcw className="h-6 w-6" />
+                </div>
                 <h3 className="text-lg font-bold font-headline">Cross-Platform</h3>
                 <p className="text-muted-foreground">Works in any web browser, on any device. No software installation required.</p>
               </div>
               <div className="space-y-4">
+                <div className="h-12 w-12 rounded-xl bg-primary/10 text-primary flex items-center justify-center mx-auto md:mx-0">
+                  <Sparkles className="h-6 w-6" />
+                </div>
                 <h3 className="text-lg font-bold font-headline">AI-Powered</h3>
                 <p className="text-muted-foreground">Leverage the latest Gemini models to extract insights from complex documents.</p>
               </div>
