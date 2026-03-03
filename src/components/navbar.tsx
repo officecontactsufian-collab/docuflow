@@ -1,3 +1,4 @@
+
 "use client"
 
 import Link from 'next/link';
@@ -106,9 +107,9 @@ export function Navbar() {
             </DropdownMenuContent>
           </DropdownMenu>
 
-          <Link href="#" className="text-sm font-medium hover:text-primary transition-colors">Pricing</Link>
-          <Link href="#" className="text-sm font-medium hover:text-primary transition-colors">Enterprise</Link>
-          <Link href="#" className="text-sm font-medium hover:text-primary transition-colors">Security</Link>
+          <Link href="/pricing" className="text-sm font-medium hover:text-primary transition-colors">Pricing</Link>
+          <Link href="/enterprise" className="text-sm font-medium hover:text-primary transition-colors">Enterprise</Link>
+          <Link href="/security" className="text-sm font-medium hover:text-primary transition-colors">Security</Link>
         </div>
 
         <div className="flex items-center gap-3">
@@ -160,6 +161,10 @@ export function Navbar() {
                 <DropdownMenuSeparator />
                 <DropdownMenuItem asChild><Link href="/sanitize">Sanitize</Link></DropdownMenuItem>
                 <DropdownMenuItem asChild><Link href="/repair">Repair</Link></DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem asChild><Link href="/pricing">Pricing</Link></DropdownMenuItem>
+                <DropdownMenuItem asChild><Link href="/enterprise">Enterprise</Link></DropdownMenuItem>
+                <DropdownMenuItem asChild><Link href="/security">Security</Link></DropdownMenuItem>
                 <DropdownMenuSeparator />
                 {!user && <DropdownMenuItem asChild><Link href="/login">Login</Link></DropdownMenuItem>}
                 {user && <DropdownMenuItem onClick={handleLogout} className="text-destructive">Sign Out</DropdownMenuItem>}
