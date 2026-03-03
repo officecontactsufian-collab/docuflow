@@ -75,60 +75,33 @@ export default function SecurityPage() {
         {/* Technical Details */}
         <section className="py-24 bg-slate-900 text-white">
           <div className="container mx-auto px-4">
-            <div className="grid lg:grid-cols-2 gap-16 items-center">
-              <div className="space-y-8">
+            <div className="max-w-4xl mx-auto space-y-12">
+              <div className="text-center space-y-4">
                 <h2 className="text-3xl md:text-4xl font-bold font-headline">Technical Safeguards</h2>
-                <div className="space-y-6">
-                  <div className="flex gap-4">
-                    <div className="h-6 w-6 rounded-full bg-green-500/20 text-green-500 flex items-center justify-center shrink-0 mt-1">
-                      <FileCheck className="h-4 w-4" />
-                    </div>
-                    <div>
-                      <h4 className="font-bold text-lg">Encrypted Memory Buffers</h4>
-                      <p className="text-slate-400">All PDF byte arrays are processed within isolated memory buffers that are wiped immediately upon garbage collection.</p>
-                    </div>
-                  </div>
-                  <div className="flex gap-4">
-                    <div className="h-6 w-6 rounded-full bg-green-500/20 text-green-500 flex items-center justify-center shrink-0 mt-1">
-                      <RefreshCcw className="h-4 w-4" />
-                    </div>
-                    <div>
-                      <h4 className="font-bold text-lg">No Persistent Logs</h4>
-                      <p className="text-slate-400">We do not log document names, metadata, or content. Only anonymous usage telemetry is recorded to improve tool stability.</p>
-                    </div>
-                  </div>
-                  <div className="flex gap-4">
-                    <div className="h-6 w-6 rounded-full bg-green-500/20 text-green-500 flex items-center justify-center shrink-0 mt-1">
-                      <ShieldAlert className="h-4 w-4" />
-                    </div>
-                    <div>
-                      <h4 className="font-bold text-lg">Brute Force Protection</h4>
-                      <p className="text-slate-400">Our unlock tools implement progressive delays to prevent unauthorized access via automated password guessing.</p>
-                    </div>
-                  </div>
-                </div>
+                <p className="text-slate-400 text-lg max-w-2xl mx-auto">Our infrastructure implements deterministic privacy controls at every layer of document processing.</p>
               </div>
-              <div className="bg-slate-800 p-8 rounded-3xl border border-slate-700 shadow-2xl">
-                 <div className="flex items-center gap-3 mb-8">
-                   <div className="w-3 h-3 rounded-full bg-red-500" />
-                   <div className="w-3 h-3 rounded-full bg-yellow-500" />
-                   <div className="w-3 h-3 rounded-full bg-green-500" />
-                 </div>
-                 <pre className="text-xs md:text-sm font-code text-slate-300 overflow-x-auto">
-                   <code>{`// DocuFlow Security Protocol
-const processDoc = async (buffer) => {
-  const securedBuffer = await AES256.encrypt(buffer);
-  
-  // Deterministic local processing
-  const result = await transform(securedBuffer);
-  
-  // Immediate cache purge
-  secureWipe(buffer);
-  secureWipe(securedBuffer);
-  
-  return result;
-};`}</code>
-                 </pre>
+              <div className="grid md:grid-cols-3 gap-8">
+                <div className="p-8 bg-slate-800/50 rounded-2xl border border-slate-700 space-y-4">
+                  <div className="h-10 w-10 rounded-full bg-green-500/20 text-green-500 flex items-center justify-center">
+                    <FileCheck className="h-5 w-5" />
+                  </div>
+                  <h4 className="font-bold text-lg">Memory Buffers</h4>
+                  <p className="text-slate-400 text-sm">All PDF byte arrays are processed within isolated memory buffers that are wiped immediately upon garbage collection.</p>
+                </div>
+                <div className="p-8 bg-slate-800/50 rounded-2xl border border-slate-700 space-y-4">
+                  <div className="h-10 w-10 rounded-full bg-green-500/20 text-green-500 flex items-center justify-center">
+                    <RefreshCcw className="h-5 w-5" />
+                  </div>
+                  <h4 className="font-bold text-lg">Zero Persistence</h4>
+                  <p className="text-slate-400 text-sm">We do not log document names, metadata, or content. Only anonymous usage telemetry is recorded to improve stability.</p>
+                </div>
+                <div className="p-8 bg-slate-800/50 rounded-2xl border border-slate-700 space-y-4">
+                  <div className="h-10 w-10 rounded-full bg-green-500/20 text-green-500 flex items-center justify-center">
+                    <ShieldAlert className="h-5 w-5" />
+                  </div>
+                  <h4 className="font-bold text-lg">Brute Force Protection</h4>
+                  <p className="text-slate-400 text-sm">Our unlock tools implement progressive delays to prevent unauthorized access via automated password guessing.</p>
+                </div>
               </div>
             </div>
           </div>
