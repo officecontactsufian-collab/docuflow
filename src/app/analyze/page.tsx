@@ -52,14 +52,14 @@ export default function AnalyzePage() {
       
       toast({
         title: "Analysis complete",
-        description: "Your document has been analyzed successfully.",
+        description: "Your document has been analyzed successfully by DocuFlow AI.",
       });
     } catch (error) {
       console.error(error);
       toast({
         variant: "destructive",
         title: "Analysis failed",
-        description: "There was an error processing your PDF document.",
+        description: "There was an error processing your document.",
       });
     } finally {
       setIsLoading(false);
@@ -79,7 +79,7 @@ export default function AnalyzePage() {
             </div>
             <h1 className="text-3xl font-bold tracking-tight font-headline">AI Content Analysis</h1>
             <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-              Get instant summaries and extract vital information from any PDF document using advanced AI.
+              Extract semantic intelligence and high-level summaries using DocuFlow's proprietary AI engine.
             </p>
           </div>
 
@@ -100,7 +100,7 @@ export default function AnalyzePage() {
                     className="w-full sm:w-auto min-w-[200px]"
                   >
                     {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
-                    Summarize Only
+                    Generate Summary
                   </Button>
                   <Button 
                     size="lg" 
@@ -110,7 +110,7 @@ export default function AnalyzePage() {
                     className="w-full sm:w-auto min-w-[200px] border-accent text-accent hover:bg-accent/5"
                   >
                     {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Info className="mr-2 h-4 w-4" />}
-                    Extract Full Info
+                    Full Semantic Extraction
                   </Button>
                 </div>
               )}
@@ -124,22 +124,22 @@ export default function AnalyzePage() {
                   </div>
                   <div>
                     <h2 className="font-bold text-lg">{selectedFile?.name}</h2>
-                    <p className="text-sm text-muted-foreground">Processed with PDF Spark AI</p>
+                    <p className="text-sm text-muted-foreground">Processed with DocuFlow Professional AI</p>
                   </div>
                 </div>
-                <Button variant="outline" onClick={() => setResult(null)}>Analyze New File</Button>
+                <Button variant="outline" onClick={() => setResult(null)}>Analyze New Document</Button>
               </div>
 
               <Tabs defaultValue="summary" className="w-full">
                 <TabsList className="grid w-full grid-cols-2 mb-8">
                   <TabsTrigger value="summary">Summary</TabsTrigger>
-                  <TabsTrigger value="details" disabled={!result.keyInfo}>Detailed Insights</TabsTrigger>
+                  <TabsTrigger value="details" disabled={!result.keyInfo}>Extracted Intelligence</TabsTrigger>
                 </TabsList>
                 
                 <TabsContent value="summary">
                   <Card>
                     <CardHeader>
-                      <CardTitle className="font-headline">Document Summary</CardTitle>
+                      <CardTitle className="font-headline">Executive Summary</CardTitle>
                     </CardHeader>
                     <CardContent>
                       <p className="text-lg leading-relaxed text-muted-foreground whitespace-pre-wrap">
@@ -155,7 +155,7 @@ export default function AnalyzePage() {
                       <Card>
                         <CardHeader className="flex flex-row items-center gap-3 space-y-0">
                           <Users className="h-5 w-5 text-accent" />
-                          <CardTitle className="text-lg">Names & Organizations</CardTitle>
+                          <CardTitle className="text-lg">Stakeholders & Entities</CardTitle>
                         </CardHeader>
                         <CardContent className="flex flex-wrap gap-2">
                           {result.keyInfo.names.map((name, i) => (
@@ -167,7 +167,7 @@ export default function AnalyzePage() {
                       <Card>
                         <CardHeader className="flex flex-row items-center gap-3 space-y-0">
                           <Calendar className="h-5 w-5 text-accent" />
-                          <CardTitle className="text-lg">Important Dates</CardTitle>
+                          <CardTitle className="text-lg">Key Milestones</CardTitle>
                         </CardHeader>
                         <CardContent className="flex flex-wrap gap-2">
                           {result.keyInfo.dates.map((date, i) => (
@@ -179,7 +179,7 @@ export default function AnalyzePage() {
                       <Card>
                         <CardHeader className="flex flex-row items-center gap-3 space-y-0">
                           <Hash className="h-5 w-5 text-accent" />
-                          <CardTitle className="text-lg">Critical Figures</CardTitle>
+                          <CardTitle className="text-lg">Critical Financials</CardTitle>
                         </CardHeader>
                         <CardContent className="flex flex-wrap gap-2">
                           {result.keyInfo.figures.map((figure, i) => (
@@ -191,7 +191,7 @@ export default function AnalyzePage() {
                       <Card>
                         <CardHeader className="flex flex-row items-center gap-3 space-y-0">
                           <Tag className="h-5 w-5 text-accent" />
-                          <CardTitle className="text-lg">Keywords</CardTitle>
+                          <CardTitle className="text-lg">Thematic Keywords</CardTitle>
                         </CardHeader>
                         <CardContent className="flex flex-wrap gap-2">
                           {result.keyInfo.keywords.map((kw, i) => (
@@ -204,7 +204,7 @@ export default function AnalyzePage() {
                     {result.keyInfo.other.length > 0 && (
                       <Card>
                         <CardHeader>
-                          <CardTitle className="text-lg">Other Significant Info</CardTitle>
+                          <CardTitle className="text-lg">Additional Provisions</CardTitle>
                         </CardHeader>
                         <CardContent>
                           <ul className="list-disc pl-5 space-y-2 text-muted-foreground">
@@ -222,7 +222,7 @@ export default function AnalyzePage() {
               <div className="flex justify-center">
                 <Button size="lg" className="bg-accent hover:bg-accent/90">
                   <Download className="mr-2 h-4 w-4" />
-                  Download Analysis Report
+                  Export Analysis Report
                 </Button>
               </div>
             </div>

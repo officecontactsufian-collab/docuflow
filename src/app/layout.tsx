@@ -2,8 +2,8 @@ import type {Metadata} from 'next';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'PDF Spark - Professional PDF Tools',
-  description: 'The ultimate professional PDF editor and analyzer with AI capabilities.',
+  title: 'DocuFlow Professional - Advanced PDF Solutions',
+  description: 'The ultimate professional document management platform with AI-powered analysis and high-fidelity conversion tools.',
 };
 
 export default function RootLayout({

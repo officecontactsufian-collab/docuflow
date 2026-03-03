@@ -18,7 +18,7 @@ export function Navbar() {
               <FileText className="h-6 w-6" />
             </div>
             <span className="text-xl font-bold tracking-tight text-primary font-headline">
-              PDF Spark
+              DocuFlow
             </span>
           </Link>
         </div>
@@ -34,7 +34,7 @@ export function Navbar() {
           <Button variant="ghost" size="icon" className="hidden md:flex">
             <Github className="h-5 w-5" />
           </Button>
-          <Button className="bg-accent hover:bg-accent/90">Sign Up</Button>
+          <Button className="bg-accent hover:bg-accent/90">Enterprise Sign Up</Button>
           
           <div className="md:hidden">
             <DropdownMenu>

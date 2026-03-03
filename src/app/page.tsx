@@ -106,14 +106,14 @@ export default function Home() {
           <div className="container mx-auto px-4 text-center space-y-8">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent/10 text-accent text-sm font-medium border border-accent/20 animate-in fade-in slide-in-from-bottom-2">
               <Zap className="h-4 w-4" />
-              <span>Now with AI-powered summaries</span>
+              <span>Enterprise-grade Document Intelligence</span>
             </div>
             <div className="max-w-3xl mx-auto space-y-4">
               <h1 className="text-4xl md:text-6xl font-bold tracking-tight text-foreground font-headline leading-tight">
-                Handle PDFs with <span className="text-primary">Intelligence</span>
+                Master your Documents with <span className="text-primary">DocuFlow</span>
               </h1>
               <p className="text-xl text-muted-foreground leading-relaxed">
-                Everything you need to merge, split, convert, and analyze your documents in one professional platform. Secure, fast, and remarkably simple.
+                The professional standard for high-fidelity PDF manipulation. Secure, accelerated, and powered by next-generation AI processing.
               </p>
             </div>
           </div>
@@ -140,22 +140,22 @@ export default function Home() {
                 <div className="h-12 w-12 rounded-xl bg-primary/10 text-primary flex items-center justify-center mx-auto md:mx-0">
                   <Lock className="h-6 w-6" />
                 </div>
-                <h3 className="text-lg font-bold font-headline">Fast & Secure</h3>
-                <p className="text-muted-foreground">We use industry-standard encryption and delete your files automatically after processing.</p>
+                <h3 className="text-lg font-bold font-headline">Enterprise Security</h3>
+                <p className="text-muted-foreground">End-to-end encryption with zero-retention policies. Your intellectual property remains yours.</p>
               </div>
               <div className="space-y-4">
                 <div className="h-12 w-12 rounded-xl bg-primary/10 text-primary flex items-center justify-center mx-auto md:mx-0">
                   <RefreshCcw className="h-6 w-6" />
                 </div>
-                <h3 className="text-lg font-bold font-headline">Cross-Platform</h3>
-                <p className="text-muted-foreground">Works in any web browser, on any device. No software installation required.</p>
+                <h3 className="text-lg font-bold font-headline">Seamless Workflow</h3>
+                <p className="text-muted-foreground">Optimized for high-volume corporate environments. Cloud-integrated and mobile-ready.</p>
               </div>
               <div className="space-y-4">
                 <div className="h-12 w-12 rounded-xl bg-primary/10 text-primary flex items-center justify-center mx-auto md:mx-0">
                   <Sparkles className="h-6 w-6" />
                 </div>
-                <h3 className="text-lg font-bold font-headline">AI-Powered</h3>
-                <p className="text-muted-foreground">Leverage the latest Gemini models to extract insights from complex documents.</p>
+                <h3 className="text-lg font-bold font-headline">AI-Enhanced Insights</h3>
+                <p className="text-muted-foreground">Beyond manipulation: understand your data with automated summaries and semantic extraction.</p>
               </div>
             </div>
           </div>
@@ -165,7 +165,7 @@ export default function Home() {
       <footer className="bg-background border-t py-12">
         <div className="container mx-auto px-4 text-center">
           <p className="text-sm text-muted-foreground">
-            &copy; {new Date().getFullYear()} PDF Spark. All rights reserved. Professional document handling tools.
+            &copy; {new Date().getFullYear()} DocuFlow Professional. Empowering global teams with intelligent document solutions.
           </p>
         </div>
       </footer>
