@@ -10,7 +10,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useAuth, useUser, initiateEmailSignIn, initiateEmailSignUp, initiateAnonymousSignIn } from '@/firebase';
-import { FileText, Loader2, ShieldCheck, Zap, User, Phone, Mail, Lock, KeyRound } from 'lucide-react';
+import { FileText, Loader2, ShieldCheck, Zap, User, Phone, Mail, Lock, KeyRound, Check } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { countryCodes } from '@/lib/country-codes';
 
@@ -183,19 +183,17 @@ export default function LoginPage() {
                       </Label>
                       <div className="flex gap-2">
                         <Select value={selectedCountryISO} onValueChange={setSelectedCountryISO}>
-                          <SelectTrigger className="w-[120px] bg-muted/20 shrink-0">
-                            <SelectValue>
-                              <span className="flex items-center gap-2">
-                                <span>{selectedCountry.flag}</span>
-                                <span className="font-mono text-xs">{selectedCountry.dial_code}</span>
-                              </span>
-                            </SelectValue>
+                          <SelectTrigger className="w-[110px] bg-muted/20 shrink-0">
+                            <div className="flex items-center gap-2">
+                              <span className="text-base">{selectedCountry.flag}</span>
+                              <span className="font-mono text-xs font-bold">{selectedCountry.dial_code}</span>
+                            </div>
                           </SelectTrigger>
                           <SelectContent className="max-h-[300px]">
                             {countryCodes.map((country) => (
                               <SelectItem key={country.code} value={country.code}>
                                 <div className="flex items-center gap-3 w-full">
-                                  <span className="shrink-0">{country.flag}</span>
+                                  <span className="text-lg shrink-0">{country.flag}</span>
                                   <span className="text-xs font-medium truncate max-w-[140px]">{country.name}</span>
                                   <span className="text-[10px] font-mono text-muted-foreground ml-auto">{country.dial_code}</span>
                                 </div>
@@ -210,7 +208,7 @@ export default function LoginPage() {
                           required 
                           value={phoneNumber}
                           onChange={(e) => setPhoneNumber(e.target.value)}
-                          className="bg-muted/20 flex-1"
+                          className="bg-muted/20 flex-1 font-mono"
                         />
                       </div>
                     </div>
