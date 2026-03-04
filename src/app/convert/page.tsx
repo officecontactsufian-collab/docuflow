@@ -216,8 +216,48 @@ export default function ConvertPage() {
         const pdfBytes = await pdfDoc.save();
         setDownloadUrl(URL.createObjectURL(new Blob([pdfBytes], { type: 'application/pdf' })));
 
-      } else if (currentType === 'ppt-to-pdf' || currentType === 'html-to-pdf') {
-        // Professional Transformation Report for complex formats
+      } else if (currentType === 'html-to-pdf') {
+        const arrayBuffer = await selectedFile.arrayBuffer();
+        const decoder = new TextDecoder();
+        const htmlText = decoder.decode(arrayBuffer);
+        
+        // Strip structural tags for high-fidelity text reconstruction
+        const strippedText = htmlText.replace(/<[^>]*>?/gm, '');
+
+        const pdfDoc = await PDFDocument.create();
+        const regularFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
+        const margin = 50;
+        const fontSize = 10;
+        const lineHeight = 12;
+        const pageWidth = 595;
+        const pageHeight = 842;
+        const usableWidth = pageWidth - margin * 2;
+        const maxLinesPerPage = Math.floor((pageHeight - margin * 2) / lineHeight);
+
+        const wrappedLines = wrapText(strippedText, usableWidth, regularFont, fontSize);
+        
+        let currentPage = pdfDoc.addPage([pageWidth, pageHeight]);
+        let currentY = pageHeight - margin;
+        let lineCount = 0;
+
+        for (const line of wrappedLines) {
+          if (lineCount >= maxLinesPerPage) {
+            currentPage = pdfDoc.addPage([pageWidth, pageHeight]);
+            currentY = pageHeight - margin;
+            lineCount = 0;
+          }
+          const sanitizedLine = sanitizeText(line);
+          if (sanitizedLine.trim()) {
+            currentPage.drawText(sanitizedLine, { x: margin, y: currentY, size: fontSize, font: regularFont });
+          }
+          currentY -= lineHeight;
+          lineCount++;
+        }
+
+        const pdfBytes = await pdfDoc.save();
+        setDownloadUrl(URL.createObjectURL(new Blob([pdfBytes], { type: 'application/pdf' })));
+
+      } else if (currentType === 'ppt-to-pdf') {
         const pdfDoc = await PDFDocument.create();
         const boldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
         const regularFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
