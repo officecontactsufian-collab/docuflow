@@ -21,7 +21,11 @@ import {
   Edit3,
   Hash,
   Crop,
-  Search
+  Search,
+  FilePenLine,
+  FileOutput,
+  FileSearch,
+  Table
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -58,8 +62,8 @@ export function Navbar() {
     {
       label: "Convert & Export",
       items: [
-        { href: "/convert?type=word-to-pdf", icon: FileText, title: "To PDF", desc: "Word, Excel, JPG, HTML" },
-        { href: "/convert?type=pdf-to-word", icon: FileText, title: "From PDF", desc: "Word, Excel, PPT, JPG" },
+        { href: "/convert?type=word-to-pdf", icon: FilePenLine, title: "To PDF", desc: "Word, Excel, JPG, PPT" },
+        { href: "/convert?type=pdf-to-word", icon: FileText, title: "From PDF", desc: "Word, Excel, JPG, PDF/A" },
         { href: "/convert?type=pdf-to-pdfa", icon: ShieldCheck, title: "PDF/A", desc: "Archival conversion" },
       ]
     },

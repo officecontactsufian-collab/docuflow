@@ -22,7 +22,6 @@ import {
   Table,
   LayoutDashboard,
   Layers,
-  Sparkles,
   Presentation,
   FileCode,
   Unlock,
@@ -31,38 +30,56 @@ import {
   Edit3,
   Hash,
   Crop,
-  Trash2,
+  Search,
+  Building2,
+  FilePenLine,
   FileOutput,
   RefreshCw,
-  Eraser,
-  Wrench,
-  Search,
-  Building2
+  FileSearch
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
-import { FileDropzone } from '@/components/file-dropzone';
 
 export default function Home() {
   const toolCategories = [
     {
-      label: "Convert & Export",
-      description: "Lossless transformation between formats.",
+      label: "Organize PDF",
+      description: "Visual page management and structural manipulation.",
       items: [
-        { title: "PDF to Word", desc: "Editable DOCX documents.", icon: FileText, href: "/convert?type=pdf-to-word" },
-        { title: "Word to PDF", desc: "Clean universal standards.", icon: FileText, href: "/convert?type=word-to-pdf" },
-        { title: "PDF to Excel", desc: "Extract tables accurately.", icon: Table, href: "/convert?type=pdf-to-excel" },
+        { title: "Merge PDF", desc: "Combine multiple documents into one.", icon: Merge, href: "/merge" },
+        { title: "Split PDF", desc: "Extract or divide pages with range parser.", icon: Scissors, href: "/split" },
+        { title: "Organize", desc: "Reorder and rotate pages visually.", icon: RotateCw, href: "/organize" },
+        { title: "Remove Pages", desc: "Delete unwanted pages instantly.", icon: Scissors, href: "/organize" },
+      ]
+    },
+    {
+      label: "Convert To PDF",
+      description: "High-fidelity generation from source formats.",
+      items: [
+        { title: "Word to PDF", desc: "Clean universal standards.", icon: FilePenLine, href: "/convert?type=word-to-pdf" },
+        { title: "Excel to PDF", desc: "Extract tables accurately.", icon: Table, href: "/convert?type=excel-to-pdf" },
+        { title: "PPT to PDF", desc: "Preserve slides and animations.", icon: Presentation, href: "/convert?type=ppt-to-pdf" },
         { title: "JPG to PDF", desc: "High-res image stitching.", icon: ImageIcon, href: "/convert?type=jpg-to-pdf" },
       ]
     },
     {
-      label: "Structure & Flow",
-      description: "Advanced page manipulation tools.",
+      label: "Convert From PDF",
+      description: "Lossless extraction to editable assets.",
       items: [
-        { title: "Merge PDF", desc: "Unify multiple documents.", icon: Merge, href: "/merge" },
-        { title: "Split PDF", desc: "Extract specific page ranges.", icon: Scissors, href: "/split" },
-        { title: "Organize", desc: "Rotate and reorder pages.", icon: RotateCw, href: "/organize" },
+        { title: "PDF to Word", desc: "Editable DOCX documents.", icon: FileText, href: "/convert?type=pdf-to-word" },
+        { title: "PDF to Excel", desc: "Data extraction to spreadsheets.", icon: Table, href: "/convert?type=pdf-to-excel" },
+        { title: "PDF to JPG", desc: "Convert pages to high-res images.", icon: ImageIcon, href: "/convert?type=pdf-to-jpg" },
+        { title: "PDF to PDF/A", desc: "Archival long-term preservation.", icon: ShieldCheck, href: "/convert?type=pdf-to-pdfa" },
+      ]
+    },
+    {
+      label: "Optimize & Secure",
+      description: "Advanced protection and performance tools.",
+      items: [
         { title: "Compress", desc: "Optimize for size and speed.", icon: Maximize, href: "/compress" },
+        { title: "Protect", desc: "Apply AES-256 encryption.", icon: Lock, href: "/protect" },
+        { title: "Unlock", desc: "Remove security restrictions.", icon: Unlock, href: "/protect?mode=unlock" },
+        { title: "Digital Sign", desc: "Apply signatures securely.", icon: Signature, href: "/sign" },
       ]
     }
   ];
@@ -73,16 +90,16 @@ export default function Home() {
       
       <main className="flex-1">
         {/* PREMIUM ENTERPRISE HERO SECTION */}
-        <section className="premium-hero pt-24 pb-48 lg:pt-32 lg:pb-64 relative overflow-hidden">
+        <section className="premium-hero pt-32 pb-48 lg:pt-48 lg:pb-64 relative overflow-hidden">
           <div className="container relative mx-auto px-6">
             <div className="max-w-5xl mx-auto space-y-16">
-              <div className="text-center space-y-8 animate-in fade-in slide-in-from-top-12 duration-1000">
+              <div className="text-center space-y-10 animate-in fade-in slide-in-from-top-12 duration-1000">
                 <div className="section-label mx-auto brand-glow">
                   <ShieldCheck className="h-4 w-4 text-primary" />
                   <span>Encrypted 256-bit AES Workspace</span>
                 </div>
                 
-                <h1 className="text-6xl md:text-8xl font-black tracking-tighter text-accent leading-[0.9] italic uppercase text-gradient">
+                <h1 className="text-6xl md:text-9xl font-black tracking-tighter text-accent leading-[0.85] italic uppercase text-gradient">
                   Intelligent <br />
                   <span className="not-italic text-accent">Document</span> <br />
                   Flow.
@@ -92,10 +109,15 @@ export default function Home() {
                   High-performance document intelligence for modern professionals. 
                   Encrypted, private, and powered by advanced logic.
                 </p>
-              </div>
 
-              <div className="animate-in fade-in zoom-in-95 duration-1000 delay-300">
-                <FileDropzone isHero onFilesSelected={() => {}} className="max-w-4xl" />
+                <div className="flex flex-col sm:flex-row items-center justify-center gap-6 pt-8">
+                  <Button size="lg" className="h-16 px-12 rounded-2xl bg-accent text-white font-black uppercase tracking-[0.2em] text-[11px] shadow-2xl shadow-accent/30 hover:scale-105 transition-all" asChild>
+                    <Link href="#tools">Initialize Workspace</Link>
+                  </Button>
+                  <Button variant="outline" size="lg" className="h-16 px-12 rounded-2xl border-accent/20 text-accent font-black uppercase tracking-[0.2em] text-[11px] hover:bg-accent/5" asChild>
+                    <Link href="/enterprise">Enterprise Demo</Link>
+                  </Button>
+                </div>
               </div>
 
               <div className="flex items-center justify-center gap-12 pt-12 opacity-30 grayscale filter blur-[0.5px]">
@@ -180,7 +202,6 @@ export default function Home() {
                 </div>
               ))}
               
-              {/* CONNECTING LINES (Desktop Only) */}
               <div className="hidden md:block absolute top-12 left-[20%] right-[20%] h-px bg-accent/5 -z-10" />
             </div>
           </div>
