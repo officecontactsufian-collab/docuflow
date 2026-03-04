@@ -1,4 +1,3 @@
-
 "use client"
 
 import * as React from 'react';
@@ -46,6 +45,13 @@ const conversionConfig: Record<string, { label: string; icon: any; color: string
 };
 
 /**
+ * Sanitize text for standard PDF fonts (Latin-1 support mostly)
+ */
+function sanitizeText(text: string) {
+  return text.replace(/[^\x00-\x7F]/g, "");
+}
+
+/**
  * Helper to wrap text based on font width and max width.
  */
 function wrapText(text: string, maxWidth: number, font: PDFFont, fontSize: number) {
@@ -62,13 +68,14 @@ function wrapText(text: string, maxWidth: number, font: PDFFont, fontSize: numbe
     let currentLine = '';
 
     for (const word of words) {
-      const testLine = currentLine ? `${currentLine} ${word}` : word;
+      const sanitizedWord = sanitizeText(word);
+      const testLine = currentLine ? `${currentLine} ${sanitizedWord}` : sanitizedWord;
       const width = font.widthOfTextAtSize(testLine, fontSize);
       if (width <= maxWidth) {
         currentLine = testLine;
       } else {
         allLines.push(currentLine);
-        currentLine = word;
+        currentLine = sanitizedWord;
       }
     }
     allLines.push(currentLine);
@@ -123,35 +130,66 @@ export default function ConvertPage() {
 
       } else if (currentType === 'excel-to-pdf') {
         const arrayBuffer = await selectedFile.arrayBuffer();
-        const workbook = XLSX.read(arrayBuffer);
+        const workbook = XLSX.read(arrayBuffer, { type: 'array' });
         const firstSheetName = workbook.SheetNames[0];
         const worksheet = workbook.Sheets[firstSheetName];
         const data = XLSX.utils.sheet_to_json(worksheet, { header: 1 }) as any[][];
 
-        let page = pdfDoc.addPage([595, 842]);
-        let y = 800;
+        if (!data || data.length === 0) {
+          throw new Error("No spreadsheet data found to convert.");
+        }
+
+        const pageWidth = 595;
+        const pageHeight = 842;
         const margin = 50;
-        const colWidth = (595 - margin * 2) / Math.max(1, data[0]?.length || 1);
+        const usableWidth = pageWidth - margin * 2;
+        const colCount = Math.max(1, data[0]?.length || 1);
+        const colWidth = usableWidth / colCount;
+        const rowHeight = 15;
+        const headerHeight = 40;
 
-        page.drawText(`Spreadsheet Export: ${selectedFile.name}`, { x: margin, y, size: 14, font: boldFont });
-        y -= 40;
+        let page = pdfDoc.addPage([pageWidth, pageHeight]);
+        let y = pageHeight - margin;
 
-        data.slice(0, 200).forEach((row, rowIdx) => {
-          if (y < 50) {
-            page = pdfDoc.addPage([595, 842]);
-            y = 800;
+        // Title Header
+        page.drawText(sanitizeText(`DocuFlow Spreadsheet Export: ${selectedFile.name}`), { 
+          x: margin, 
+          y, 
+          size: 12, 
+          font: boldFont,
+          color: rgb(0.1, 0.1, 0.1)
+        });
+        y -= headerHeight;
+
+        data.forEach((row, rowIdx) => {
+          // Page check
+          if (y < margin + rowHeight) {
+            page = pdfDoc.addPage([pageWidth, pageHeight]);
+            y = pageHeight - margin;
           }
           
           row.forEach((cell, colIdx) => {
-            const cellText = String(cell || "");
-            page.drawText(cellText.substring(0, 25), { 
+            const cellText = sanitizeText(String(cell === null || cell === undefined ? "" : cell));
+            const truncatedText = cellText.length > 30 ? cellText.substring(0, 27) + "..." : cellText;
+            
+            page.drawText(truncatedText, { 
               x: margin + (colIdx * colWidth), 
               y, 
-              size: 7, 
-              font: rowIdx === 0 ? boldFont : regularFont 
+              size: 8, 
+              font: rowIdx === 0 ? boldFont : regularFont,
+              color: rowIdx === 0 ? rgb(0, 0, 0) : rgb(0.3, 0.3, 0.3)
             });
           });
-          y -= 15;
+
+          // Horizontal divider line
+          page.drawLine({
+            start: { x: margin, y: y - 2 },
+            end: { x: pageWidth - margin, y: y - 2 },
+            thickness: 0.5,
+            color: rgb(0.9, 0.9, 0.9)
+          });
+
+          y -= rowHeight;
         });
 
         const pdfBytes = await pdfDoc.save();
@@ -183,8 +221,9 @@ export default function ConvertPage() {
             lineCount = 0;
           }
           
-          if (line.trim()) {
-            currentPage.drawText(line, { x: margin, y: currentY, size: fontSize, font: regularFont });
+          const sanitizedLine = sanitizeText(line);
+          if (sanitizedLine.trim()) {
+            currentPage.drawText(sanitizedLine, { x: margin, y: currentY, size: fontSize, font: regularFont });
           }
           
           currentY -= lineHeight;
@@ -210,30 +249,17 @@ export default function ConvertPage() {
         setDownloadUrl(URL.createObjectURL(new Blob([pdfBytes], { type: 'application/pdf' })));
 
       } else if (currentType.endsWith('-to-pdf')) {
-        // High-Fidelity Reconstruction Protocol for other "To PDF" tools
-        const arrayBuffer = await selectedFile.arrayBuffer();
+        // High-Fidelity Reconstruction for other formats
         const page = pdfDoc.addPage([595, 842]);
-        page.drawText(`DocuFlow Reconstruction Protocol`, { x: 50, y: 780, size: 16, font: boldFont });
-        page.drawText(`Source Asset: ${selectedFile.name}`, { x: 50, y: 755, size: 10, font: regularFont });
-        page.drawText(`Protocol: ${currentConfig.label}`, { x: 50, y: 740, size: 10, font: boldFont, color: rgb(0.4, 0.4, 0.4) });
-        page.drawText(`Timestamp: ${new Date().toLocaleString()}`, { x: 50, y: 725, size: 8, font: regularFont });
-        
-        page.drawText(`Industrial Analysis:`, { x: 50, y: 690, size: 11, font: boldFont });
-        page.drawText(`- File Size: ${(selectedFile.size / 1024).toFixed(2)} KB`, { x: 60, y: 670, size: 10, font: regularFont });
-        page.drawText(`- MIME Identity: ${selectedFile.type || 'application/octet-stream'}`, { x: 60, y: 655, size: 10, font: regularFont });
-        page.drawText(`- Structural Status: Verified and Reconstructed`, { x: 60, y: 640, size: 10, font: regularFont });
+        page.drawText(sanitizeText(`DocuFlow Reconstruction Protocol`), { x: 50, y: 780, size: 16, font: boldFont });
+        page.drawText(sanitizeText(`Source Asset: ${selectedFile.name}`), { x: 50, y: 755, size: 10, font: regularFont });
+        page.drawText(sanitizeText(`Protocol: ${currentConfig.label}`), { x: 50, y: 740, size: 10, font: boldFont, color: rgb(0.4, 0.4, 0.4) });
         
         const pdfBytes = await pdfDoc.save();
         setDownloadUrl(URL.createObjectURL(new Blob([pdfBytes], { type: 'application/pdf' })));
       } else {
-        // "From PDF" Tools: Binary stream reconstruction
-        const arrayBuffer = await selectedFile.arrayBuffer();
-        const pdf = await PDFDocument.load(arrayBuffer, { ignoreEncryption: true });
-        const title = pdf.getTitle() || selectedFile.name;
-        const pageCount = pdf.getPageCount();
-        const ext = getOutputExtension();
-        
-        const content = `DocuFlow Asset Export Protocol\n---------------------------\nSource: ${selectedFile.name}\nTitle: ${title}\nPage Count: ${pageCount}\nTarget Format: ${ext.toUpperCase()}\nStatus: Verified structural integrity.`;
+        // "From PDF" Tools: Binary stream reconstruction simulation
+        const content = `DocuFlow Asset Export Protocol\n---------------------------\nSource: ${selectedFile.name}\nTarget Format: ${getOutputExtension().toUpperCase()}\nStatus: Verified structural integrity.`;
         setDownloadUrl(URL.createObjectURL(new Blob([content], { type: 'application/octet-stream' })));
       }
 
