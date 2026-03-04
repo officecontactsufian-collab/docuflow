@@ -15,7 +15,7 @@
     --popover: 0 0% 100%;
     --popover-foreground: 165 19% 5%;
     
-    /* Primary: #DE496C (Vibrant Pink/Red for Icons) - HSL: 346 71% 58% */
+    /* Primary (Icons): #DE496C - HSL: 346 71% 58% */
     --primary: 346 71% 58%;
     --primary-foreground: 0 0% 100%;
     
@@ -23,7 +23,7 @@
     --secondary: 190 15% 54%;
     --secondary-foreground: 0 0% 100%;
     
-    /* Header Color: #91C5C1 - HSL: 175 31% 67% */
+    /* Muted (Header Accent): #91C5C1 - HSL: 175 31% 67% */
     --muted: 175 31% 67%;
     --muted-foreground: 165 19% 25%;
     
