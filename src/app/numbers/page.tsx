@@ -4,13 +4,14 @@ import * as React from 'react';
 import { Navbar } from '@/components/navbar';
 import { FileDropzone } from '@/components/file-dropzone';
 import { Button } from '@/components/ui/button';
-import { Hash, Loader2, Download, CheckCircle2, LayoutGrid, Settings2, ShieldCheck } from 'lucide-react';
+import { Hash, Loader2, Download, CheckCircle2, LayoutGrid, Settings2, ShieldCheck, ListOrdered } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { PDFDocument, StandardFonts, rgb } from 'pdf-lib';
 import { PDFPreview } from '@/components/pdf-preview';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Input } from '@/components/ui/input';
 
 export default function NumbersPage() {
   const [selectedFile, setSelectedFile] = React.useState<File | null>(null);
@@ -18,6 +19,7 @@ export default function NumbersPage() {
   const [isDone, setIsDone] = React.useState(false);
   const [downloadUrl, setDownloadUrl] = React.useState<string | null>(null);
   const [position, setPosition] = React.useState("bottom-center");
+  const [startNumber, setStartNumber] = React.useState(1);
   const { toast } = useToast();
 
   const handleApply = async () => {
@@ -28,30 +30,33 @@ export default function NumbersPage() {
       const arrayBuffer = await selectedFile.arrayBuffer();
       const pdfDoc = await PDFDocument.load(arrayBuffer, { ignoreEncryption: true });
       const pages = pdfDoc.getPages();
-      const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
+      const font = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
       const pageCount = pages.length;
 
       pages.forEach((page, i) => {
         const { width, height } = page.getSize();
-        const text = `Page ${i + 1} of ${pageCount}`;
-        const fontSize = 10;
+        // Use MediaBox to handle non-zero origins
+        const mediaBox = page.getMediaBox();
+        
+        const text = `Page ${i + startNumber}`;
+        const fontSize = 12;
         const textWidth = font.widthOfTextAtSize(text, fontSize);
         
-        let x = width / 2 - textWidth / 2;
-        let y = 20;
+        let x = mediaBox.x + (width / 2 - textWidth / 2);
+        let y = mediaBox.y + 30; // 30 points from bottom
 
-        if (position === "bottom-left") x = 40;
-        if (position === "bottom-right") x = width - textWidth - 40;
-        if (position === "top-center") y = height - 40;
-        if (position === "top-left") { x = 40; y = height - 40; }
-        if (position === "top-right") { x = width - textWidth - 40; y = height - 40; }
+        if (position === "bottom-left") x = mediaBox.x + 50;
+        if (position === "bottom-right") x = mediaBox.x + width - textWidth - 50;
+        if (position === "top-center") y = mediaBox.y + height - 50;
+        if (position === "top-left") { x = mediaBox.x + 50; y = mediaBox.y + height - 50; }
+        if (position === "top-right") { x = mediaBox.x + width - textWidth - 50; y = mediaBox.y + height - 50; }
 
         page.drawText(text, {
           x,
           y,
           size: fontSize,
           font: font,
-          color: rgb(0.4, 0.4, 0.4),
+          color: rgb(0.2, 0.2, 0.2), // Darker for better visibility
         });
       });
 
@@ -78,6 +83,7 @@ export default function NumbersPage() {
   const reset = () => {
     setSelectedFile(null);
     setIsDone(false);
+    setStartNumber(1);
     if (downloadUrl) URL.revokeObjectURL(downloadUrl);
     setDownloadUrl(null);
   };
@@ -87,7 +93,7 @@ export default function NumbersPage() {
       <Navbar />
       
       <main className="flex-1 container mx-auto px-4 py-12">
-        <div className="max-w-6xl mx-auto space-y-12">
+        <div className="max-w-7xl mx-auto space-y-12">
           {/* Header */}
           <div className="text-center space-y-4">
             <div className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-lg mb-2">
@@ -113,7 +119,7 @@ export default function NumbersPage() {
                     <div className="flex items-center justify-between px-2">
                       <h3 className="text-[10px] font-black uppercase tracking-widest text-accent/60 flex items-center gap-2">
                         <LayoutGrid className="h-3.5 w-3.5" />
-                        Reference Viewer
+                        Live Preview
                       </h3>
                       <span className="text-[10px] font-bold text-primary uppercase truncate max-w-[200px]">{selectedFile.name}</span>
                     </div>
@@ -148,6 +154,19 @@ export default function NumbersPage() {
                           </Select>
                         </div>
 
+                        <div className="space-y-4">
+                          <Label className="text-[10px] font-black uppercase tracking-widest text-accent/60 flex items-center gap-2">
+                            <ListOrdered className="h-3 w-3" /> Start Number
+                          </Label>
+                          <Input 
+                            type="number" 
+                            min={0} 
+                            value={startNumber} 
+                            onChange={(e) => setStartNumber(parseInt(e.target.value) || 1)}
+                            className="h-12 rounded-xl bg-white border-accent/10 font-bold"
+                          />
+                        </div>
+
                         <div className="pt-4 flex flex-col gap-3">
                           <Button 
                             onClick={handleApply} 
@@ -168,7 +187,7 @@ export default function NumbersPage() {
                       <div className="space-y-1">
                         <p className="text-xs font-black uppercase tracking-wider text-accent">Automated indexing</p>
                         <p className="text-[10px] text-muted-foreground leading-relaxed">
-                          Standard Helvetica fonts are embedded for maximum cross-platform compatibility.
+                          Sequential counters are applied permanently to the document structure.
                         </p>
                       </div>
                     </div>
