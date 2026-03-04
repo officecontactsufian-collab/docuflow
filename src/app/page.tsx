@@ -1,5 +1,6 @@
 "use client"
 
+import * as React from 'react';
 import { Navbar } from '@/components/navbar';
 import { ToolCard } from '@/components/tool-card';
 import { FileDropzone } from '@/components/file-dropzone';
@@ -69,9 +70,9 @@ export default function Home() {
                   <span>Encrypted 256-bit AES Workspace</span>
                 </div>
                 
-                <h1 className="text-6xl md:text-8xl font-black tracking-tighter text-accent leading-[0.9] italic uppercase text-gradient">
+                <h1 className="text-6xl md:text-8xl font-black tracking-tighter leading-[0.9] italic uppercase text-gradient">
                   Intelligent <br />
-                  <span className="not-italic text-accent">Document</span> <br />
+                  <span className="not-italic">Document</span> <br />
                   Flow.
                 </h1>
                 
@@ -163,8 +164,8 @@ export default function Home() {
                 }
               ].map((step, idx) => (
                 <div key={step.title} className="space-y-8 text-center relative group">
-                  <div className="w-24 h-24 flex items-center justify-center mx-auto transition-transform duration-500 group-hover:scale-110 group-hover:-rotate-6">
-                    <step.icon className="h-16 w-16 text-primary" />
+                  <div className="w-24 h-24 bg-secondary rounded-[2.5rem] flex items-center justify-center shadow-2xl mx-auto transition-transform duration-500 group-hover:scale-110 group-hover:-rotate-6">
+                    <step.icon className="h-10 w-10 text-primary" />
                   </div>
                   <div className="space-y-4">
                     <h3 className="text-3xl font-black text-accent uppercase italic">{idx + 1}. {step.title}</h3>

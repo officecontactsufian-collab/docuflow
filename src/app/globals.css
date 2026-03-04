@@ -62,7 +62,7 @@
   }
 
   .icon-box {
-    @apply w-12 h-12 text-primary flex items-center justify-center transition-transform group-hover:scale-110 group-hover:rotate-3;
+    @apply w-12 h-12 text-primary flex items-center justify-center transition-transform group-hover:scale-110 group-hover:rotate-3 bg-transparent;
   }
 
   .section-label {
@@ -75,5 +75,5 @@
 }
 
 .text-gradient {
-  @apply bg-clip-text text-transparent bg-gradient-to-br from-accent to-secondary;
+  @apply bg-clip-text text-transparent bg-gradient-to-br from-accent via-primary to-secondary;
 }
