@@ -11,20 +11,17 @@ import {
   RotateCw,
   LogOut,
   Maximize,
-  Table,
   LayoutDashboard,
   ShieldCheck,
   Zap,
-  Image as ImageIcon,
-  Presentation,
-  FileCode,
   Wrench,
   Unlock,
   Type,
   Signature,
   Edit3,
   Hash,
-  Crop
+  Crop,
+  Search
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -51,7 +48,7 @@ export function Navbar() {
       label: "Organize & Edit",
       items: [
         { href: "/merge", icon: Merge, title: "Merge", desc: "Combine multiple PDFs" },
-        { href: "/split", icon: Scissors, title: "Split", desc: "Extract or divide pages" },
+        { href: "/split", icon: Scissors, title: "Split", desc: "Extract specific pages" },
         { href: "/organize", icon: RotateCw, title: "Organize", desc: "Reorder and rotate" },
         { href: "/edit", icon: Edit3, title: "Edit", desc: "Add text and shapes" },
         { href: "/crop", icon: Crop, title: "Crop", desc: "Trim page margins" },
@@ -124,13 +121,13 @@ export function Navbar() {
               </DropdownMenuContent>
             </DropdownMenu>
 
+            <Link href="/analyze" className="flex items-center gap-2 text-[11px] font-black uppercase tracking-widest text-accent/80 hover:text-accent transition-all">
+              <Search className="h-3.5 w-3.5 text-primary" />
+              Inspect
+            </Link>
             <Link href="/pricing" className="flex items-center gap-2 text-[11px] font-black uppercase tracking-widest text-accent/80 hover:text-accent transition-all">
               <Zap className="h-3.5 w-3.5 text-primary" />
               Pricing
-            </Link>
-            <Link href="/security" className="flex items-center gap-2 text-[11px] font-black uppercase tracking-widest text-accent/80 hover:text-accent transition-all">
-              <Lock className="h-3.5 w-3.5 text-primary" />
-              Security
             </Link>
           </div>
         </div>
@@ -140,16 +137,21 @@ export function Navbar() {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="h-12 px-5 rounded-2xl hover:bg-white/20 flex items-center gap-3">
+                  <div className="flex flex-col items-end mr-2 hidden sm:flex">
+                    <span className="text-[10px] font-black uppercase tracking-widest text-primary leading-none">Admin</span>
+                    <span className="text-[9px] font-bold text-accent/60 leading-tight">Professional Level</span>
+                  </div>
                   <div className="w-8 h-8 rounded-xl bg-accent text-white flex items-center justify-center text-[11px] font-bold">
-                    {user.email?.[0].toUpperCase() || 'U'}
+                    {user.email?.[0].toUpperCase() || 'A'}
                   </div>
                   <ChevronDown className="h-3 w-3 opacity-40 text-accent" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-64 p-3 rounded-[1.5rem] shadow-2xl bg-card">
-                <DropdownMenuLabel className="px-3 py-2 text-[10px] font-black uppercase tracking-widest text-primary/60">Professional Profile</DropdownMenuLabel>
+                <DropdownMenuLabel className="px-3 py-2 text-[10px] font-black uppercase tracking-widest text-primary/60">Admin Workspace</DropdownMenuLabel>
                 <DropdownMenuItem className="p-3 rounded-xl cursor-pointer font-bold text-xs text-accent">Workspace Overview</DropdownMenuItem>
                 <DropdownMenuItem className="p-3 rounded-xl cursor-pointer font-bold text-xs text-accent">Account Billing</DropdownMenuItem>
+                <DropdownMenuItem className="p-3 rounded-xl cursor-pointer font-bold text-xs text-accent">Organization Settings</DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleLogout} className="p-3 rounded-xl cursor-pointer text-destructive font-bold text-xs">
                   <LogOut className="h-4 w-4 mr-3" /> Terminate Session

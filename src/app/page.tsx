@@ -15,21 +15,16 @@ import {
   ArrowRight,
   Shield,
   Zap,
-  CheckCircle2,
+  CircleCheck,
   FileUp,
   Settings2,
   Download,
-  FilePenLine,
   Table,
-  Cpu,
   LayoutDashboard,
   Layers,
-  CircleCheck,
-  Building2,
   Sparkles,
   Presentation,
   FileCode,
-  ShieldAlert,
   Unlock,
   Type,
   Signature,
@@ -40,67 +35,34 @@ import {
   FileOutput,
   RefreshCw,
   Eraser,
-  Wrench
+  Wrench,
+  Search,
+  Building2
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
+import { FileDropzone } from '@/components/file-dropzone';
 
 export default function Home() {
   const toolCategories = [
     {
-      label: "Organize PDF",
-      description: "Advanced page manipulation and logic tools.",
-      items: [
-        { title: "Merge PDF", desc: "Combine multiple PDFs into one.", icon: Merge, href: "/merge" },
-        { title: "Split PDF", desc: "Extract or divide pages.", icon: Scissors, href: "/split" },
-        { title: "Remove Pages", desc: "Delete selected pages.", icon: Trash2, href: "/organize" },
-        { title: "Extract Pages", desc: "Create new PDF from selection.", icon: FileOutput, href: "/split" },
-        { title: "Organize PDF", desc: "Reorder and rotate pages.", icon: RotateCw, href: "/organize" },
-        { title: "Rotate PDF", desc: "Rotate pages permanently.", icon: RefreshCw, href: "/organize" },
-      ]
-    },
-    {
-      label: "Convert to PDF",
-      description: "Transform standard formats into high-fidelity PDFs.",
-      items: [
-        { title: "JPG to PDF", desc: "High-res image stitching.", icon: ImageIcon, href: "/convert?type=jpg-to-pdf" },
-        { title: "Word to PDF", desc: "Clean universal standards.", icon: FileText, href: "/convert?type=word-to-pdf" },
-        { title: "PowerPoint to PDF", desc: "Convert slides to PDF.", icon: Presentation, href: "/convert?type=ppt-to-pdf" },
-        { title: "Excel to PDF", desc: "Spreadsheets to documents.", icon: Table, href: "/convert?type=excel-to-pdf" },
-        { title: "HTML to PDF", desc: "Web pages to offline docs.", icon: FileCode, href: "/convert?type=html-to-pdf" },
-      ]
-    },
-    {
-      label: "Convert from PDF",
-      description: "Lossless transformation from PDF to industrial standards.",
+      label: "Convert & Export",
+      description: "Lossless transformation between formats.",
       items: [
         { title: "PDF to Word", desc: "Editable DOCX documents.", icon: FileText, href: "/convert?type=pdf-to-word" },
+        { title: "Word to PDF", desc: "Clean universal standards.", icon: FileText, href: "/convert?type=word-to-pdf" },
         { title: "PDF to Excel", desc: "Extract tables accurately.", icon: Table, href: "/convert?type=pdf-to-excel" },
-        { title: "PDF to PPT", desc: "PDF back to slides.", icon: Presentation, href: "/convert?type=pdf-to-ppt" },
-        { title: "PDF to JPG", desc: "Extract pages as images.", icon: ImageIcon, href: "/convert?type=pdf-to-jpg" },
-        { title: "PDF to PDF/A", desc: "Long-term archiving format.", icon: ShieldCheck, href: "/convert?type=pdf-to-pdfa" },
+        { title: "JPG to PDF", desc: "High-res image stitching.", icon: ImageIcon, href: "/convert?type=jpg-to-pdf" },
       ]
     },
     {
-      label: "Optimize & Edit",
-      description: "Performance tuning and visual refinements.",
+      label: "Structure & Flow",
+      description: "Advanced page manipulation tools.",
       items: [
-        { title: "Compress PDF", desc: "Reduce file size instantly.", icon: Maximize, href: "/compress" },
-        { title: "Repair PDF", desc: "Fix corrupted file structures.", icon: Wrench, href: "/repair" },
-        { title: "Edit PDF", desc: "Add text, shapes, and images.", icon: Edit3, href: "/edit" },
-        { title: "Add Page Numbers", desc: "Sequential page counters.", icon: Hash, href: "/numbers" },
-        { title: "Crop PDF", desc: "Trim page margins.", icon: Crop, href: "/crop" },
-      ]
-    },
-    {
-      label: "Security Tools",
-      description: "Industrial-grade protection and compliance.",
-      items: [
-        { title: "Unlock PDF", desc: "Remove password restrictions.", icon: Unlock, href: "/protect?mode=unlock" },
-        { title: "Protect PDF", desc: "Add 256-bit encryption.", icon: Lock, href: "/protect" },
-        { title: "Add Watermark", desc: "Text overlays for protection.", icon: Type, href: "/watermark" },
-        { title: "Remove Watermark", desc: "Sanitize tracking metadata.", icon: Eraser, href: "/sanitize" },
-        { title: "Sign PDF", desc: "Apply digital signatures.", icon: Signature, href: "/sign" },
+        { title: "Merge PDF", desc: "Unify multiple documents.", icon: Merge, href: "/merge" },
+        { title: "Split PDF", desc: "Extract specific page ranges.", icon: Scissors, href: "/split" },
+        { title: "Organize", desc: "Rotate and reorder pages.", icon: RotateCw, href: "/organize" },
+        { title: "Compress", desc: "Optimize for size and speed.", icon: Maximize, href: "/compress" },
       ]
     }
   ];
@@ -120,7 +82,7 @@ export default function Home() {
                   <span>Encrypted 256-bit AES Workspace</span>
                 </div>
                 
-                <h1 className="text-6xl md:text-8xl font-black tracking-tighter leading-[0.9] italic uppercase text-gradient">
+                <h1 className="text-6xl md:text-8xl font-black tracking-tighter text-accent leading-[0.9] italic uppercase text-gradient">
                   Intelligent <br />
                   <span className="not-italic text-accent">Document</span> <br />
                   Flow.
@@ -130,15 +92,10 @@ export default function Home() {
                   High-performance document intelligence for modern professionals. 
                   Encrypted, private, and powered by advanced logic.
                 </p>
+              </div>
 
-                <div className="flex flex-col sm:flex-row items-center justify-center gap-6 pt-4">
-                  <Button size="lg" asChild className="h-16 px-10 rounded-2xl bg-accent text-white font-black uppercase tracking-[0.2em] text-[11px] shadow-2xl shadow-accent/20 hover:scale-105 active:scale-95 transition-all">
-                    <Link href="/login">Initialize Workspace <Sparkles className="ml-3 h-4 w-4 text-primary" /></Link>
-                  </Button>
-                  <Button variant="outline" size="lg" asChild className="h-16 px-10 rounded-2xl border-accent/20 bg-white/40 backdrop-blur-sm text-accent font-black uppercase tracking-[0.2em] text-[11px] hover:bg-white/60 transition-all">
-                    <Link href="/enterprise">Enterprise Demo <Building2 className="ml-3 h-4 w-4" /></Link>
-                  </Button>
-                </div>
+              <div className="animate-in fade-in zoom-in-95 duration-1000 delay-300">
+                <FileDropzone isHero onFilesSelected={() => {}} className="max-w-4xl" />
               </div>
 
               <div className="flex items-center justify-center gap-12 pt-12 opacity-30 grayscale filter blur-[0.5px]">
@@ -149,22 +106,12 @@ export default function Home() {
             </div>
           </div>
 
-          {/* BACKGROUND DECORATION */}
           <div className="absolute top-1/2 left-0 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-primary/10 rounded-full blur-[120px] pointer-events-none" />
           <div className="absolute bottom-0 right-0 translate-x-1/4 translate-y-1/4 w-[600px] h-[600px] bg-secondary/10 rounded-full blur-[150px] pointer-events-none" />
         </section>
 
-        {/* QUICK ACCESS ANCHOR */}
-        <div id="tools" className="relative -mt-12 z-20 container mx-auto px-6">
-           <div className="max-w-4xl mx-auto p-1 bg-white/40 backdrop-blur-3xl border border-white/20 rounded-[2.5rem] shadow-2xl">
-              <div className="flex items-center justify-center gap-2 p-4 text-[10px] font-black uppercase tracking-[0.5em] text-accent/40">
-                 <LayoutDashboard className="h-3 w-3" /> Professional Toolkit Infrastructure
-              </div>
-           </div>
-        </div>
-
         {/* CATEGORIZED TOOLS SECTION */}
-        <section className="py-48 bg-white/40 border-y border-white/20 backdrop-blur-sm relative z-10">
+        <section id="tools" className="py-48 bg-white/40 border-y border-white/20 backdrop-blur-sm relative z-10">
           <div className="container mx-auto px-6">
             <div className="max-w-7xl mx-auto space-y-32">
               {toolCategories.map((cat, idx) => (
@@ -182,7 +129,7 @@ export default function Home() {
                     </div>
                   </div>
                   
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
                     {cat.items.map((tool) => (
                       <ToolCard key={tool.title} {...tool} />
                     ))}
@@ -214,7 +161,7 @@ export default function Home() {
                 { 
                   icon: Settings2, 
                   title: "Process", 
-                  desc: "Our high-fidelity engine reconstructs your document with industrial accuracy." 
+                  desc: "Our high-fidelity engine reconstruction your document with industrial accuracy." 
                 },
                 { 
                   icon: Download, 
@@ -223,8 +170,8 @@ export default function Home() {
                 }
               ].map((step, idx) => (
                 <div key={step.title} className="space-y-8 text-center relative group">
-                  <div className="w-24 h-24 flex items-center justify-center mx-auto transition-transform duration-500 group-hover:scale-110 group-hover:-rotate-6">
-                    <step.icon className="h-16 w-16 text-primary" />
+                  <div className="w-24 h-24 bg-secondary rounded-[2.5rem] flex items-center justify-center shadow-2xl mx-auto transition-transform duration-500 group-hover:scale-110 group-hover:-rotate-6">
+                    <step.icon className="h-10 w-10 text-primary" />
                   </div>
                   <div className="space-y-4">
                     <h3 className="text-3xl font-black text-accent uppercase italic">{idx + 1}. {step.title}</h3>
