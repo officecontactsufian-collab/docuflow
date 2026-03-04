@@ -4,11 +4,12 @@ import * as React from 'react';
 import { Navbar } from '@/components/navbar';
 import { FileDropzone } from '@/components/file-dropzone';
 import { Button } from '@/components/ui/button';
-import { Merge, Loader2, Download, FileText, X } from 'lucide-react';
+import { Merge, Loader2, Download, FileText, X, ArrowUp, ArrowDown, Plus, Trash2, LayoutGrid } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Progress } from '@/components/ui/progress';
 import { PDFDocument } from 'pdf-lib';
 import { PDFPreview } from '@/components/pdf-preview';
+import { Card } from '@/components/ui/card';
 
 export default function MergePage() {
   const [files, setFiles] = React.useState<File[]>([]);
@@ -76,6 +77,17 @@ export default function MergePage() {
     if (previewFile === files[index]) setPreviewFile(null);
   };
 
+  const moveFile = (index: number, direction: 'up' | 'down') => {
+    const newIndex = direction === 'up' ? index - 1 : index + 1;
+    if (newIndex < 0 || newIndex >= files.length) return;
+    
+    const newFiles = [...files];
+    const temp = newFiles[index];
+    newFiles[index] = newFiles[newIndex];
+    newFiles[newIndex] = temp;
+    setFiles(newFiles);
+  };
+
   const reset = () => {
     setIsDone(false);
     setFiles([]);
@@ -99,66 +111,122 @@ export default function MergePage() {
             </div>
             <h1 className="text-3xl font-bold tracking-tight font-headline">Merge PDF Files</h1>
             <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-              Combine multiple PDF documents into a single, unified file. Staging area allows for review and reordering.
+              Combine multiple PDF documents into a single, unified file. Manage your sequence with precision.
             </p>
           </div>
 
           {!isDone ? (
             <div className="space-y-8 animate-in fade-in zoom-in-95 duration-500">
-              <FileDropzone 
-                onFilesSelected={setFiles} 
-                maxFiles={20} 
-                isLoading={isProcessing} 
-              />
-              
-              {files.length > 0 && (
-                <div className="grid lg:grid-cols-3 gap-8 pt-8">
-                  <div className="lg:col-span-1 space-y-4">
-                    <h3 className="text-[10px] font-black uppercase tracking-widest text-accent/60 px-2">Staged Assets ({files.length})</h3>
-                    <div className="space-y-2 max-h-[500px] overflow-auto pr-2">
-                      {files.map((file, idx) => (
-                        <div 
-                          key={`${file.name}-${idx}`}
-                          onClick={() => setPreviewFile(file)}
-                          className={`group flex items-center justify-between p-4 rounded-2xl border transition-all cursor-pointer ${previewFile === file ? 'bg-primary/5 border-primary/20 ring-1 ring-primary/20' : 'bg-white border-white/40 hover:border-primary/20'}`}
-                        >
-                          <div className="flex items-center gap-3 min-w-0">
-                            <div className="p-2 bg-muted/20 rounded-lg group-hover:text-primary transition-colors">
-                              <FileText className="h-4 w-4" />
-                            </div>
-                            <span className="text-xs font-bold truncate max-w-[120px] uppercase italic">{file.name}</span>
-                          </div>
-                          <Button 
-                            variant="ghost" 
-                            size="icon" 
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              removeFile(idx);
-                            }}
-                            className="h-8 w-8 text-muted-foreground hover:text-destructive"
-                          >
-                            <X className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      ))}
+              {files.length === 0 ? (
+                <FileDropzone 
+                  onFilesSelected={setFiles} 
+                  maxFiles={20} 
+                  isLoading={isProcessing} 
+                />
+              ) : (
+                <div className="grid lg:grid-cols-3 gap-8">
+                  <div className="lg:col-span-1 space-y-6">
+                    <div className="flex items-center justify-between px-2">
+                      <h3 className="text-[10px] font-black uppercase tracking-widest text-accent/60 flex items-center gap-2">
+                        <LayoutGrid className="h-3 w-3" />
+                        Staged Assets ({files.length})
+                      </h3>
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        onClick={() => setFiles([])}
+                        className="text-[9px] font-black uppercase tracking-widest text-destructive hover:text-destructive hover:bg-destructive/5"
+                      >
+                        <Trash2 className="h-3 w-3 mr-1" /> Clear All
+                      </Button>
                     </div>
+
+                    <Card className="border-none shadow-xl bg-white/50 backdrop-blur-sm overflow-hidden">
+                      <div className="space-y-1 max-h-[500px] overflow-auto p-2 custom-scrollbar">
+                        {files.map((file, idx) => (
+                          <div 
+                            key={`${file.name}-${idx}`}
+                            onClick={() => setPreviewFile(file)}
+                            className={`group flex items-center justify-between p-3 rounded-xl border transition-all cursor-pointer ${previewFile === file ? 'bg-primary/5 border-primary/20 ring-1 ring-primary/20' : 'bg-white border-white/40 hover:border-primary/20 shadow-sm'}`}
+                          >
+                            <div className="flex items-center gap-3 min-w-0">
+                              <div className="p-2 bg-muted/20 rounded-lg group-hover:text-primary transition-colors shrink-0">
+                                <FileText className="h-4 w-4" />
+                              </div>
+                              <div className="flex flex-col min-w-0">
+                                <span className="text-[11px] font-bold truncate max-w-[140px] uppercase italic text-accent">{file.name}</span>
+                                <span className="text-[9px] text-muted-foreground">{(file.size / 1024).toFixed(0)} KB</span>
+                              </div>
+                            </div>
+                            
+                            <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                              <div className="flex flex-col gap-0.5">
+                                <Button 
+                                  variant="ghost" 
+                                  size="icon" 
+                                  disabled={idx === 0}
+                                  onClick={(e) => { e.stopPropagation(); moveFile(idx, 'up'); }}
+                                  className="h-6 w-6 rounded-md hover:bg-primary/10"
+                                >
+                                  <ArrowUp className="h-3 w-3" />
+                                </Button>
+                                <Button 
+                                  variant="ghost" 
+                                  size="icon" 
+                                  disabled={idx === files.length - 1}
+                                  onClick={(e) => { e.stopPropagation(); moveFile(idx, 'down'); }}
+                                  className="h-6 w-6 rounded-md hover:bg-primary/10"
+                                >
+                                  <ArrowDown className="h-3 w-3" />
+                                </Button>
+                              </div>
+                              <Button 
+                                variant="ghost" 
+                                size="icon" 
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  removeFile(idx);
+                                }}
+                                className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                              >
+                                <X className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </Card>
                     
-                    <div className="pt-4 space-y-4">
+                    <div className="space-y-4">
+                      <div className="grid grid-cols-2 gap-3">
+                        <Button 
+                          variant="outline" 
+                          className="h-14 rounded-2xl border-dashed border-accent/20 font-black uppercase tracking-widest text-[10px]"
+                          onClick={() => {
+                            // Focus or trigger the dropzone logic (for simplicity, we allow adding via the FileDropzone below the list if we wanted, 
+                            // but here we'll just show how to add more)
+                            toast({ title: "Add More", description: "Use the upload area to append more documents." });
+                          }}
+                        >
+                          <Plus className="mr-2 h-4 w-4" /> Add Files
+                        </Button>
+                        <Button 
+                          size="lg" 
+                          onClick={handleMerge}
+                          disabled={isProcessing || files.length < 2}
+                          className="h-14 rounded-2xl bg-accent text-white font-black uppercase tracking-[0.2em] text-[11px] shadow-2xl shadow-accent/20"
+                        >
+                          {isProcessing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Merge className="mr-2 h-4 w-4" />}
+                          Merge All
+                        </Button>
+                      </div>
+
                       {isProcessing && (
-                        <div className="space-y-2">
+                        <div className="space-y-2 animate-in fade-in">
                           <Progress value={progress} className="h-1.5" />
                           <p className="text-[10px] text-center font-bold text-primary uppercase tracking-widest">Compiling documents...</p>
                         </div>
                       )}
-                      <Button 
-                        size="lg" 
-                        onClick={handleMerge}
-                        disabled={isProcessing || files.length < 2}
-                        className="w-full h-14 rounded-2xl bg-accent text-white font-black uppercase tracking-[0.2em] text-[11px] shadow-2xl shadow-accent/20"
-                      >
-                        {isProcessing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Merge className="mr-2 h-4 w-4" />}
-                        Merge Sequences
-                      </Button>
                     </div>
                   </div>
 
@@ -174,6 +242,19 @@ export default function MergePage() {
                   </div>
                 </div>
               )}
+              
+              {/* Optional secondary dropzone for "Adding more" if list is active */}
+              {files.length > 0 && (
+                <div className="pt-12 border-t border-accent/5">
+                   <div className="max-w-xl mx-auto opacity-40 hover:opacity-100 transition-opacity">
+                      <FileDropzone 
+                        onFilesSelected={(newFiles) => setFiles([...files, ...newFiles])} 
+                        maxFiles={20} 
+                        className="py-8"
+                      />
+                   </div>
+                </div>
+              )}
             </div>
           ) : (
             <div className="max-w-md mx-auto space-y-8 text-center animate-in fade-in slide-in-from-bottom-8">
@@ -182,7 +263,7 @@ export default function MergePage() {
                   <Download className="h-10 w-10" />
                 </div>
                 <div className="space-y-2">
-                  <h2 className="text-2xl font-black uppercase italic tracking-tight">Ready to download!</h2>
+                  <h2 className="text-2xl font-black uppercase italic tracking-tight text-accent">Ready to download!</h2>
                   <p className="text-muted-foreground text-sm font-medium">Your combined document is ready for delivery.</p>
                 </div>
                 <Button 
@@ -200,7 +281,7 @@ export default function MergePage() {
                   Download Merged PDF
                 </Button>
               </div>
-              <Button variant="ghost" onClick={reset} className="text-[10px] font-bold uppercase tracking-widest">
+              <Button variant="ghost" onClick={reset} className="text-[10px] font-bold uppercase tracking-widest text-accent/60">
                 Merge more files
               </Button>
             </div>
