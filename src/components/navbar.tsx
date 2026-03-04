@@ -17,7 +17,8 @@ import {
   Zap,
   Globe,
   ShieldCheck,
-  Eraser
+  Eraser,
+  Hash
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
