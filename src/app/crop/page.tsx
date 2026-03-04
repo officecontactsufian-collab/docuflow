@@ -308,19 +308,19 @@ export default function CropPage() {
                     
                     <div 
                       ref={containerRef}
-                      className="relative rounded-[2.5rem] border-2 border-dashed border-accent/10 bg-white/40 overflow-hidden min-h-[600px] flex flex-col items-center justify-center p-12 select-none"
+                      className="relative rounded-[2.5rem] border-2 border-accent/10 bg-white shadow-2xl overflow-hidden min-h-[700px] flex flex-col items-center justify-center p-4 select-none"
                     >
                       {/* Base Content */}
                       <div className="relative w-full h-full max-w-full max-h-full flex items-center justify-center">
                         {isImage ? (
                           <img 
                             src={URL.createObjectURL(selectedFile)} 
-                            className="max-w-full max-h-[500px] rounded-lg shadow-2xl pointer-events-none"
+                            className="max-w-full max-h-[600px] rounded-lg shadow-2xl pointer-events-none"
                             alt="Crop target"
                           />
                         ) : (
-                          <div className="w-full h-[500px] opacity-40 grayscale-[0.5] pointer-events-none">
-                             <PDFPreview file={selectedFile} title="Structural Reference" />
+                          <div className="w-full h-[650px] pointer-events-none">
+                             <PDFPreview file={selectedFile} title="High-Fidelity Reference" className="h-full" />
                           </div>
                         )}
 
@@ -347,16 +347,16 @@ export default function CropPage() {
                           }}
                         >
                           {/* Corner Handles */}
-                          <div onMouseDown={onMouseDown('top-left')} className="absolute -top-2 -left-2 w-4 h-4 bg-white border-2 border-primary rounded-full cursor-nwse-resize shadow-lg hover:scale-125 transition-transform" />
-                          <div onMouseDown={onMouseDown('top-right')} className="absolute -top-2 -right-2 w-4 h-4 bg-white border-2 border-primary rounded-full cursor-nesw-resize shadow-lg hover:scale-125 transition-transform" />
-                          <div onMouseDown={onMouseDown('bottom-left')} className="absolute -bottom-2 -left-2 w-4 h-4 bg-white border-2 border-primary rounded-full cursor-nesw-resize shadow-lg hover:scale-125 transition-transform" />
-                          <div onMouseDown={onMouseDown('bottom-right')} className="absolute -bottom-2 -right-2 w-4 h-4 bg-white border-2 border-primary rounded-full cursor-nwse-resize shadow-lg hover:scale-125 transition-transform" />
+                          <div onMouseDown={onMouseDown('top-left')} className="absolute -top-3 -left-3 w-6 h-6 bg-white border-2 border-primary rounded-full cursor-nwse-resize shadow-lg hover:scale-125 transition-transform z-50" />
+                          <div onMouseDown={onMouseDown('top-right')} className="absolute -top-3 -right-3 w-6 h-6 bg-white border-2 border-primary rounded-full cursor-nesw-resize shadow-lg hover:scale-125 transition-transform z-50" />
+                          <div onMouseDown={onMouseDown('bottom-left')} className="absolute -bottom-3 -left-3 w-6 h-6 bg-white border-2 border-primary rounded-full cursor-nesw-resize shadow-lg hover:scale-125 transition-transform z-50" />
+                          <div onMouseDown={onMouseDown('bottom-right')} className="absolute -bottom-3 -right-3 w-6 h-6 bg-white border-2 border-primary rounded-full cursor-nwse-resize shadow-lg hover:scale-125 transition-transform z-50" />
                           
                           {/* Edge Handles */}
-                          <div onMouseDown={onMouseDown('top')} className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-8 h-1.5 bg-primary/80 rounded-full cursor-ns-resize" />
-                          <div onMouseDown={onMouseDown('bottom')} className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 w-8 h-1.5 bg-primary/80 rounded-full cursor-ns-resize" />
-                          <div onMouseDown={onMouseDown('left')} className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1/2 w-1.5 h-8 bg-primary/80 rounded-full cursor-ew-resize" />
-                          <div onMouseDown={onMouseDown('right')} className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 w-1.5 h-8 bg-primary/80 rounded-full cursor-ew-resize" />
+                          <div onMouseDown={onMouseDown('top')} className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-12 h-2 bg-primary/80 rounded-full cursor-ns-resize hover:bg-primary transition-colors" />
+                          <div onMouseDown={onMouseDown('bottom')} className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 w-12 h-2 bg-primary/80 rounded-full cursor-ns-resize hover:bg-primary transition-colors" />
+                          <div onMouseDown={onMouseDown('left')} className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1/2 w-2 h-12 bg-primary/80 rounded-full cursor-ew-resize hover:bg-primary transition-colors" />
+                          <div onMouseDown={onMouseDown('right')} className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 w-2 h-12 bg-primary/80 rounded-full cursor-ew-resize hover:bg-primary transition-colors" />
                         </div>
                       </div>
 
@@ -448,7 +448,6 @@ export default function CropPage() {
                           </Button>
                         </div>
                         
-                        {/* Status readout (Replaces Adjustment Bar) */}
                         <div className="pt-6 border-t border-accent/5 grid grid-cols-2 gap-4">
                            <div className="space-y-1">
                               <p className="text-[8px] font-black uppercase tracking-widest text-accent/40">Margins</p>
