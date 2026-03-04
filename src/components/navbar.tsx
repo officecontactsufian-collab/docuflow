@@ -47,10 +47,10 @@ export function Navbar() {
     {
       label: "Organize & Format",
       items: [
-        { href: "/merge", icon: Merge, title: "Merge", desc: "Combine multiple PDFs" },
-        { href: "/split", icon: Scissors, title: "Split", desc: "Extract specific pages" },
+        { href: "/merge", icon: Merge, title: "Merge PDF", desc: "Combine multiple PDFs" },
+        { href: "/split", icon: Scissors, title: "Split PDF", desc: "Extract specific pages" },
         { href: "/organize", icon: RotateCw, title: "Organize", desc: "Reorder and rotate" },
-        { href: "/crop", icon: Crop, title: "Crop", desc: "Trim page margins" },
+        { href: "/crop", icon: Crop, title: "Crop PDF", desc: "Trim page margins" },
         { href: "/numbers", icon: Hash, title: "Page Numbers", desc: "Add sequential counters" },
       ]
     },
@@ -65,7 +65,7 @@ export function Navbar() {
     {
       label: "Optimize & Secure",
       items: [
-        { href: "/compress", icon: Maximize, title: "Compress", desc: "Reduce file size" },
+        { href: "/compress", icon: Maximize, title: "Compress PDF", desc: "Reduce file size" },
         { href: "/repair", icon: Wrench, title: "Repair", desc: "Fix corrupted PDFs" },
         { href: "/protect", icon: Lock, title: "Protect", desc: "Add password lock" },
         { href: "/protect?mode=unlock", icon: Unlock, title: "Unlock", desc: "Remove restrictions" },
@@ -88,11 +88,24 @@ export function Navbar() {
             </span>
           </Link>
 
-          <div className="hidden lg:flex items-center gap-10">
+          <div className="hidden lg:flex items-center gap-8">
+            <Link href="/merge" className="text-[11px] font-black uppercase tracking-widest text-accent/80 hover:text-accent transition-all">
+              Merge PDF
+            </Link>
+            <Link href="/split" className="text-[11px] font-black uppercase tracking-widest text-accent/80 hover:text-accent transition-all">
+              Split PDF
+            </Link>
+            <Link href="/compress" className="text-[11px] font-black uppercase tracking-widest text-accent/80 hover:text-accent transition-all">
+              Compress PDF
+            </Link>
+            <Link href="/convert?type=word-to-pdf" className="text-[11px] font-black uppercase tracking-widest text-accent/80 hover:text-accent transition-all">
+              Convert PDF
+            </Link>
+
             <DropdownMenu>
               <DropdownMenuTrigger className="flex items-center gap-2 text-[11px] font-black uppercase tracking-widest text-accent/80 hover:text-accent transition-all outline-none">
                 <LayoutDashboard className="h-3.5 w-3.5 text-primary" />
-                Capabilities <ChevronDown className="h-3 w-3 opacity-40" />
+                All PDF Tools <ChevronDown className="h-3 w-3 opacity-40" />
               </DropdownMenuTrigger>
               <DropdownMenuContent align="start" className="w-[850px] p-8 rounded-[2rem] shadow-2xl border-white/20 grid grid-cols-3 gap-8">
                 {categories.map((cat) => (
@@ -119,7 +132,11 @@ export function Navbar() {
                 ))}
               </DropdownMenuContent>
             </DropdownMenu>
+          </div>
+        </div>
 
+        <div className="flex items-center gap-6">
+          <div className="hidden xl:flex items-center gap-6 mr-6">
             <Link href="/analyze" className="flex items-center gap-2 text-[11px] font-black uppercase tracking-widest text-accent/80 hover:text-accent transition-all">
               <Search className="h-3.5 w-3.5 text-primary" />
               Inspect
@@ -129,9 +146,7 @@ export function Navbar() {
               Pricing
             </Link>
           </div>
-        </div>
 
-        <div className="flex items-center gap-6">
           {!isUserLoading && user ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
