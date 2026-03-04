@@ -3,7 +3,6 @@
 import * as React from 'react';
 import { Navbar } from '@/components/navbar';
 import { ToolCard } from '@/components/tool-card';
-import { FileDropzone } from '@/components/file-dropzone';
 import { 
   Merge, 
   Scissors, 
@@ -26,7 +25,9 @@ import {
   Globe,
   LayoutDashboard,
   Layers,
-  CircleCheck
+  CircleCheck,
+  Building2,
+  Sparkles
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
@@ -35,7 +36,7 @@ export default function Home() {
   const toolCategories = [
     {
       label: "Convert & Export",
-      description: "Lossless transformation between formats.",
+      description: "Lossless transformation between industrial standard formats.",
       items: [
         { title: "PDF to Word", desc: "Editable DOCX documents.", icon: FileText, href: "/convert?type=pdf-to-word" },
         { title: "Word to PDF", desc: "Clean universal standards.", icon: FilePenLine, href: "/convert?type=word-to-pdf" },
@@ -45,7 +46,7 @@ export default function Home() {
     },
     {
       label: "Structure & Flow",
-      description: "Advanced page manipulation tools.",
+      description: "Advanced page manipulation and logic tools.",
       items: [
         { title: "Merge PDF", desc: "Unify multiple documents.", icon: Merge, href: "/merge" },
         { title: "Split PDF", desc: "Extract specific page ranges.", icon: Scissors, href: "/split" },
@@ -60,17 +61,17 @@ export default function Home() {
       <Navbar />
       
       <main className="flex-1">
-        {/* PREMIUM HERO SECTION */}
-        <section className="premium-hero pt-24 pb-48 lg:pt-32 lg:pb-64 relative overflow-hidden">
+        {/* PREMIUM ENTERPRISE HERO SECTION */}
+        <section className="premium-hero pt-24 pb-32 lg:pt-40 lg:pb-48 relative overflow-hidden">
           <div className="container relative mx-auto px-6">
-            <div className="max-w-5xl mx-auto space-y-16">
-              <div className="text-center space-y-8 animate-in fade-in slide-in-from-top-12 duration-1000">
+            <div className="max-w-5xl mx-auto space-y-12">
+              <div className="text-center space-y-10 animate-in fade-in slide-in-from-top-12 duration-1000">
                 <div className="section-label mx-auto brand-glow">
                   <ShieldCheck className="h-4 w-4 text-primary" />
                   <span>Encrypted 256-bit AES Workspace</span>
                 </div>
                 
-                <h1 className="text-6xl md:text-8xl font-black tracking-tighter leading-[0.9] italic uppercase text-gradient">
+                <h1 className="text-6xl md:text-[7rem] font-black tracking-tighter leading-[0.85] italic uppercase text-gradient">
                   Intelligent <br />
                   <span className="not-italic">Document</span> <br />
                   Flow.
@@ -80,18 +81,18 @@ export default function Home() {
                   High-performance document intelligence for modern professionals. 
                   Encrypted, private, and powered by advanced logic.
                 </p>
+
+                <div className="flex flex-col sm:flex-row items-center justify-center gap-6 pt-4">
+                  <Button size="lg" asChild className="h-16 px-10 rounded-2xl bg-accent text-white font-black uppercase tracking-[0.2em] text-[11px] shadow-2xl shadow-accent/20 hover:scale-105 active:scale-95 transition-all">
+                    <Link href="/login">Initialize Workspace <Sparkles className="ml-3 h-4 w-4 text-primary" /></Link>
+                  </Button>
+                  <Button variant="outline" size="lg" asChild className="h-16 px-10 rounded-2xl border-accent/20 bg-white/40 backdrop-blur-sm text-accent font-black uppercase tracking-[0.2em] text-[11px] hover:bg-white/60 transition-all">
+                    <Link href="/enterprise">Enterprise Demo <Building2 className="ml-3 h-4 w-4" /></Link>
+                  </Button>
+                </div>
               </div>
 
-              {/* CENTERED ACTION HUB */}
-              <div className="animate-in fade-in zoom-in-95 duration-1000 delay-300">
-                <FileDropzone 
-                  isHero 
-                  onFilesSelected={() => {}} 
-                  className="max-w-4xl"
-                />
-              </div>
-
-              <div className="flex items-center justify-center gap-12 pt-12 opacity-30 grayscale filter blur-[0.5px]">
+              <div className="flex items-center justify-center gap-12 pt-16 opacity-30 grayscale filter blur-[0.5px]">
                  <div className="font-black text-[10px] uppercase tracking-[0.4em] italic">ISO-27001 SECURE</div>
                  <div className="font-black text-[10px] uppercase tracking-[0.4em] italic">GDPR READY</div>
                  <div className="font-black text-[10px] uppercase tracking-[0.4em] italic">SOC2 COMPLIANT</div>
@@ -104,8 +105,17 @@ export default function Home() {
           <div className="absolute bottom-0 right-0 translate-x-1/4 translate-y-1/4 w-[600px] h-[600px] bg-secondary/10 rounded-full blur-[150px] pointer-events-none" />
         </section>
 
+        {/* QUICK ACCESS ANCHOR */}
+        <div id="tools" className="relative -mt-12 z-20 container mx-auto px-6">
+           <div className="max-w-4xl mx-auto p-1 bg-white/40 backdrop-blur-3xl border border-white/20 rounded-[2.5rem] shadow-2xl">
+              <div className="flex items-center justify-center gap-2 p-4 text-[10px] font-black uppercase tracking-[0.5em] text-accent/40">
+                 <LayoutDashboard className="h-3 w-3" /> Select a Capability Below to Begin
+              </div>
+           </div>
+        </div>
+
         {/* CATEGORIZED TOOLS SECTION */}
-        <section id="tools" className="py-48 bg-white/40 border-y border-white/20 backdrop-blur-sm relative z-10">
+        <section className="py-48 bg-white/40 border-y border-white/20 backdrop-blur-sm relative z-10">
           <div className="container mx-auto px-6">
             <div className="max-w-7xl mx-auto space-y-32">
               {toolCategories.map((cat, idx) => (
@@ -155,7 +165,7 @@ export default function Home() {
                 { 
                   icon: Settings2, 
                   title: "Process", 
-                  desc: "Our high-fidelity engine reconstruction your document with industrial accuracy." 
+                  desc: "Our high-fidelity engine reconstructs your document with industrial accuracy." 
                 },
                 { 
                   icon: Download, 
@@ -164,8 +174,8 @@ export default function Home() {
                 }
               ].map((step, idx) => (
                 <div key={step.title} className="space-y-8 text-center relative group">
-                  <div className="w-24 h-24 bg-secondary rounded-[2.5rem] flex items-center justify-center shadow-2xl mx-auto transition-transform duration-500 group-hover:scale-110 group-hover:-rotate-6">
-                    <step.icon className="h-10 w-10 text-primary" />
+                  <div className="w-24 h-24 flex items-center justify-center mx-auto transition-transform duration-500 group-hover:scale-110 group-hover:-rotate-6">
+                    <step.icon className="h-16 w-16 text-primary" />
                   </div>
                   <div className="space-y-4">
                     <h3 className="text-3xl font-black text-accent uppercase italic">{idx + 1}. {step.title}</h3>
