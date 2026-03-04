@@ -4,30 +4,31 @@
 
 @layer base {
   :root {
-    /* Background: #C4CBCA - HSL: 171 6% 78% */
+    /* Background: #C4CBCA - Grey Teal */
     --background: 171 6% 78%;
-    /* Foreground: #0A0F0D - HSL: 165 19% 5% */
+    /* Foreground: #0A0F0D - Rich Black */
     --foreground: 165 19% 5%;
     
-    --card: 0 0% 100%;
+    /* Card Background: Very light tint of brand teal */
+    --card: 175 20% 98%;
     --card-foreground: 165 19% 5%;
     
     --popover: 0 0% 100%;
     --popover-foreground: 165 19% 5%;
     
-    /* Primary (Icons): #DE496C - HSL: 346 71% 58% */
+    /* Primary (Icons): #DE496C - Pink Red */
     --primary: 346 71% 58%;
     --primary-foreground: 0 0% 100%;
     
-    /* Secondary (Icon Background): #77949A - HSL: 190 15% 54% */
+    /* Secondary (Icon BG): #77949A - Steel Blue */
     --secondary: 190 15% 54%;
     --secondary-foreground: 0 0% 100%;
     
-    /* Muted (Header Accent): #91C5C1 - HSL: 175 31% 67% */
+    /* Muted (Header): #91C5C1 - Soft Teal */
     --muted: 175 31% 67%;
     --muted-foreground: 165 19% 25%;
     
-    /* Accent: #2A1E5C (Deep Indigo) - HSL: 251 51% 24% */
+    /* Accent: #2A1E5C - Deep Indigo */
     --accent: 251 51% 24%;
     --accent-foreground: 0 0% 100%;
     
@@ -37,28 +38,7 @@
     --border: 175 10% 70%;
     --input: 175 10% 70%;
     --ring: 346 71% 58%;
-    --radius: 1.25rem;
-  }
-  .dark {
-    --background: 165 19% 5%;
-    --foreground: 0 0% 100%;
-    --card: 165 19% 7%;
-    --card-foreground: 0 0% 100%;
-    --popover: 165 19% 5%;
-    --popover-foreground: 0 0% 100%;
-    --primary: 346 71% 58%;
-    --primary-foreground: 0 0% 100%;
-    --secondary: 190 15% 40%;
-    --secondary-foreground: 0 0% 100%;
-    --muted: 165 19% 12%;
-    --muted-foreground: 175 20% 70%;
-    --accent: 175 31% 67%;
-    --accent-foreground: 165 19% 5%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 100%;
-    --border: 165 19% 15%;
-    --input: 165 19% 15%;
-    --ring: 346 71% 58%;
+    --radius: 1.5rem;
   }
 }
 
@@ -77,8 +57,8 @@
 }
 
 .hero-gradient {
-  background: radial-gradient(circle at top right, rgba(145, 197, 193, 0.2), transparent),
-              radial-gradient(circle at bottom left, rgba(222, 73, 108, 0.05), transparent);
+  background: radial-gradient(circle at top right, rgba(145, 197, 193, 0.4), transparent),
+              radial-gradient(circle at bottom left, rgba(222, 73, 108, 0.1), transparent);
 }
 
 .brand-text-gradient {
