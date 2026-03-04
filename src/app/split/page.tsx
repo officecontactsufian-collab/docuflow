@@ -4,12 +4,13 @@ import * as React from 'react';
 import { Navbar } from '@/components/navbar';
 import { FileDropzone } from '@/components/file-dropzone';
 import { Button } from '@/components/ui/button';
-import { Scissors, Loader2, Download, Layers } from 'lucide-react';
+import { Scissors, Loader2, Download, Layers, AlertCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { PDFDocument } from 'pdf-lib';
+import { PDFPreview } from '@/components/pdf-preview';
 
 export default function SplitPage() {
   const [selectedFile, setSelectedFile] = React.useState<File | null>(null);
@@ -28,7 +29,7 @@ export default function SplitPage() {
         const [start, end] = part.split('-').map(Number);
         if (!isNaN(start) && !isNaN(end)) {
           for (let i = Math.max(1, start); i <= Math.min(end, maxPages); i++) {
-            pages.add(i - 1); // 0-indexed for pdf-lib
+            pages.add(i - 1);
           }
         }
       } else {
@@ -83,17 +84,6 @@ export default function SplitPage() {
     }
   };
 
-  const handleDownload = () => {
-    if (downloadUrl) {
-      const link = document.createElement('a');
-      link.href = downloadUrl;
-      link.download = `split_${selectedFile?.name || 'document.pdf'}`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    }
-  };
-
   const reset = () => {
     setIsDone(false);
     setSelectedFile(null);
@@ -108,87 +98,103 @@ export default function SplitPage() {
       <Navbar />
       
       <main className="flex-1 container mx-auto px-4 py-12">
-        <div className="max-w-4xl mx-auto space-y-12">
+        <div className="max-w-6xl mx-auto space-y-12">
           <div className="text-center space-y-4">
-            <div className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-lg mb-2">
-              <Scissors className="h-6 w-6" />
+            <div className="inline-flex h-12 w-12 items-center justify-center text-primary mb-2">
+              <Scissors className="h-10 w-10" />
             </div>
             <h1 className="text-3xl font-bold tracking-tight font-headline">Split PDF Document</h1>
             <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-              Extract specific pages or ranges from your PDF. All processing happens securely in your browser.
+              Extract specific pages or ranges from your PDF securely in your browser.
             </p>
           </div>
 
           {!isDone ? (
             <div className="space-y-8 animate-in fade-in zoom-in-95">
-              <FileDropzone 
-                onFilesSelected={(files) => setSelectedFile(files[0] || null)} 
-                maxFiles={1} 
-                isLoading={isProcessing} 
-              />
-              
-              {selectedFile && (
-                <div className="grid md:grid-cols-3 gap-8">
-                  <div className="md:col-span-1">
-                    <Card>
-                      <CardHeader>
-                        <CardTitle className="text-lg flex items-center gap-2">
+              {!selectedFile ? (
+                <FileDropzone 
+                  onFilesSelected={(files) => setSelectedFile(files[0] || null)} 
+                  maxFiles={1} 
+                  isLoading={isProcessing} 
+                />
+              ) : (
+                <div className="grid lg:grid-cols-2 gap-12">
+                  <div className="space-y-8">
+                    <PDFPreview file={selectedFile} title="Source Document" />
+                  </div>
+                  
+                  <div className="space-y-6">
+                    <Card className="border-none shadow-2xl rounded-[2rem] bg-white/80 backdrop-blur-sm">
+                      <CardHeader className="pt-8 px-8">
+                        <CardTitle className="text-xl font-black uppercase italic tracking-tight flex items-center gap-3">
                           <Layers className="h-5 w-5 text-primary" />
-                          Split Options
+                          Split Configuration
                         </CardTitle>
                       </CardHeader>
-                      <CardContent className="space-y-4">
-                        <div className="space-y-2">
-                          <Label htmlFor="range">Page Range</Label>
+                      <CardContent className="space-y-6 p-8">
+                        <div className="space-y-3">
+                          <Label htmlFor="range" className="text-[10px] font-black uppercase tracking-widest text-accent/60">Selected Page Range</Label>
                           <Input 
                             id="range" 
                             placeholder="e.g. 1-3, 5, 8-10" 
                             value={splitRange}
                             onChange={(e) => setSplitRange(e.target.value)}
+                            className="h-12 rounded-xl bg-muted/20 border-accent/10 focus:ring-primary"
                           />
-                          <p className="text-[10px] text-muted-foreground">Use commas for multiple pages, or hyphens for ranges.</p>
+                          <div className="flex items-start gap-2 p-3 bg-primary/5 rounded-xl border border-primary/10">
+                            <AlertCircle className="h-3.5 w-3.5 text-primary mt-0.5 shrink-0" />
+                            <p className="text-[10px] leading-relaxed text-muted-foreground">
+                              Specify individual pages separated by commas, or ranges using hyphens. All selected pages will be combined into a new file.
+                            </p>
+                          </div>
                         </div>
-                        <Button 
-                          onClick={handleSplit}
-                          disabled={isProcessing}
-                          className="w-full shadow-md"
-                        >
-                          {isProcessing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Scissors className="mr-2 h-4 w-4" />}
-                          Extract Pages
-                        </Button>
+                        
+                        <div className="pt-4 flex flex-col gap-3">
+                          <Button 
+                            size="lg"
+                            onClick={handleSplit}
+                            disabled={isProcessing}
+                            className="w-full h-14 rounded-2xl bg-accent text-white font-black uppercase tracking-[0.2em] text-[11px] shadow-2xl shadow-accent/20"
+                          >
+                            {isProcessing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Scissors className="mr-2 h-4 w-4" />}
+                            Execute Split
+                          </Button>
+                          <Button variant="ghost" onClick={() => setSelectedFile(null)} className="text-[10px] font-bold uppercase tracking-widest">
+                            Change File
+                          </Button>
+                        </div>
                       </CardContent>
                     </Card>
-                  </div>
-                  <div className="md:col-span-2">
-                    <div className="border rounded-2xl bg-muted/30 aspect-[4/3] flex flex-col items-center justify-center text-muted-foreground p-8">
-                      <div className="text-center space-y-4">
-                        <div className="p-4 bg-white rounded-xl shadow-sm inline-block">
-                           <FileDropzone className="hidden" onFilesSelected={() => {}} />
-                           <p className="text-sm font-bold text-foreground">{selectedFile.name}</p>
-                           <p className="text-xs">{(selectedFile.size / 1024 / 1024).toFixed(2)} MB</p>
-                        </div>
-                        <p className="text-sm">Enter the page numbers you want to keep. The result will be a new PDF containing only those pages.</p>
-                      </div>
-                    </div>
                   </div>
                 </div>
               )}
             </div>
           ) : (
             <div className="max-w-md mx-auto space-y-8 text-center animate-in fade-in slide-in-from-bottom-8">
-              <div className="p-8 bg-white border rounded-2xl shadow-xl space-y-6">
-                <div className="w-16 h-16 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto">
-                  <Download className="h-8 w-8" />
+              <div className="p-12 bg-white border border-white/40 rounded-[3rem] shadow-2xl space-y-8">
+                <div className="w-20 h-20 bg-green-50 text-green-600 rounded-3xl flex items-center justify-center mx-auto shadow-inner">
+                  <Download className="h-10 w-10" />
                 </div>
-                <div>
-                  <h2 className="text-2xl font-bold font-headline">Pages extracted!</h2>
-                  <p className="text-muted-foreground mt-2">New document is ready with selected range: {splitRange}</p>
+                <div className="space-y-2">
+                  <h2 className="text-2xl font-black uppercase italic tracking-tight">Pages Extracted!</h2>
+                  <p className="text-muted-foreground text-sm font-medium">Your new PDF is ready with range: {splitRange}</p>
                 </div>
-                <Button size="lg" onClick={handleDownload} className="w-full bg-accent hover:bg-accent/90 shadow-lg shadow-accent/20">
-                  Download Extracted PDF
+                <Button 
+                  size="lg" 
+                  onClick={() => {
+                    const link = document.createElement('a');
+                    link.href = downloadUrl!;
+                    link.download = `split_${selectedFile?.name || 'document.pdf'}`;
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                  }} 
+                  className="w-full h-14 rounded-2xl bg-accent hover:bg-accent/90 shadow-xl shadow-accent/20 text-[11px] font-black uppercase tracking-widest"
+                >
+                  Download Result
                 </Button>
               </div>
-              <Button variant="ghost" onClick={reset}>
+              <Button variant="ghost" onClick={reset} className="text-[10px] font-bold uppercase tracking-widest">
                 Split another file
               </Button>
             </div>
