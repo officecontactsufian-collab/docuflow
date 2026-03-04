@@ -10,17 +10,14 @@ import {
   Lock,
   Menu,
   RotateCw,
-  Unlock,
   Type,
-  Hash,
-  Eraser,
   Signature,
-  Wrench,
   User,
   LogOut,
   Zap,
   Globe,
-  ShieldCheck
+  ShieldCheck,
+  Eraser
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -48,7 +45,7 @@ export function Navbar() {
         <div className="flex items-center gap-2">
           <Link href="/" className="flex items-center gap-3 group">
             <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#2A1E5C] text-white shadow-2xl shadow-accent/30 transition-transform group-hover:scale-110">
-              <FileText className="h-7 w-7 text-[#5EBFB8]" />
+              <FileText className="h-7 w-7 text-primary" />
             </div>
             <span className="text-2xl font-black tracking-tighter text-[#2A1E5C] font-headline hidden sm:block italic uppercase">
               DocuFlow <span className="text-white not-italic">Pro</span>
@@ -63,19 +60,19 @@ export function Navbar() {
             </DropdownMenuTrigger>
             <DropdownMenuContent align="start" className="w-[700px] p-8 grid grid-cols-2 gap-8 rounded-3xl shadow-2xl border-slate-100 bg-white">
               <div className="space-y-5">
-                <DropdownMenuLabel className="text-[10px] uppercase tracking-[0.2em] text-[#5EBFB8] font-black">Manipulation & Logic</DropdownMenuLabel>
+                <DropdownMenuLabel className="text-[10px] uppercase tracking-[0.2em] text-primary font-black">Manipulation & Logic</DropdownMenuLabel>
                 <div className="grid gap-2">
-                  <DropdownMenuItem asChild className="p-3 rounded-xl cursor-pointer hover:bg-[#5EBFB8]/5">
-                    <Link href="/merge" className="flex items-center gap-3"><Merge className="h-5 w-5 text-[#5EBFB8]" /> <div className="flex flex-col"><span className="font-bold text-[#2A1E5C]">Merge PDF</span><span className="text-[10px] text-[#0A0F0D]/40">Combine volumes</span></div></Link>
+                  <DropdownMenuItem asChild className="p-3 rounded-xl cursor-pointer hover:bg-primary/5">
+                    <Link href="/merge" className="flex items-center gap-3"><Merge className="h-5 w-5 text-primary" /> <div className="flex flex-col"><span className="font-bold text-[#2A1E5C]">Merge PDF</span><span className="text-[10px] text-[#0A0F0D]/40">Combine volumes</span></div></Link>
                   </DropdownMenuItem>
-                  <DropdownMenuItem asChild className="p-3 rounded-xl cursor-pointer hover:bg-[#5EBFB8]/5">
-                    <Link href="/split" className="flex items-center gap-3"><Scissors className="h-5 w-5 text-[#5EBFB8]" /> <div className="flex flex-col"><span className="font-bold text-[#2A1E5C]">Split PDF</span><span className="text-[10px] text-[#0A0F0D]/40">Extract pages</span></div></Link>
+                  <DropdownMenuItem asChild className="p-3 rounded-xl cursor-pointer hover:bg-primary/5">
+                    <Link href="/split" className="flex items-center gap-3"><Scissors className="h-5 w-5 text-primary" /> <div className="flex flex-col"><span className="font-bold text-[#2A1E5C]">Split PDF</span><span className="text-[10px] text-[#0A0F0D]/40">Extract pages</span></div></Link>
                   </DropdownMenuItem>
-                  <DropdownMenuItem asChild className="p-3 rounded-xl cursor-pointer hover:bg-[#5EBFB8]/5">
-                    <Link href="/organize" className="flex items-center gap-3"><RotateCw className="h-5 w-5 text-[#5EBFB8]" /> <div className="flex flex-col"><span className="font-bold text-[#2A1E5C]">Organize Pages</span><span className="text-[10px] text-[#0A0F0D]/40">Reorder & rotate</span></div></Link>
+                  <DropdownMenuItem asChild className="p-3 rounded-xl cursor-pointer hover:bg-primary/5">
+                    <Link href="/organize" className="flex items-center gap-3"><RotateCw className="h-5 w-5 text-primary" /> <div className="flex flex-col"><span className="font-bold text-[#2A1E5C]">Organize Pages</span><span className="text-[10px] text-[#0A0F0D]/40">Reorder & rotate</span></div></Link>
                   </DropdownMenuItem>
-                  <DropdownMenuItem asChild className="p-3 rounded-xl cursor-pointer hover:bg-[#5EBFB8]/5">
-                    <Link href="/watermark" className="flex items-center gap-3"><Type className="h-5 w-5 text-[#5EBFB8]" /> <div className="flex flex-col"><span className="font-bold text-[#2A1E5C]">Watermark</span><span className="text-[10px] text-[#0A0F0D]/40">Branding & security</span></div></Link>
+                  <DropdownMenuItem asChild className="p-3 rounded-xl cursor-pointer hover:bg-primary/5">
+                    <Link href="/watermark" className="flex items-center gap-3"><Type className="h-5 w-5 text-primary" /> <div className="flex flex-col"><span className="font-bold text-[#2A1E5C]">Watermark</span><span className="text-[10px] text-[#0A0F0D]/40">Branding & security</span></div></Link>
                   </DropdownMenuItem>
                 </div>
               </div>
@@ -117,7 +114,7 @@ export function Navbar() {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-64 p-2 rounded-2xl shadow-2xl border-slate-100 bg-white">
-                <DropdownMenuLabel className="px-3 py-2 text-[10px] font-black uppercase tracking-widest text-[#5EBFB8]">Account Control</DropdownMenuLabel>
+                <DropdownMenuLabel className="px-3 py-2 text-[10px] font-black uppercase tracking-widest text-primary">Account Control</DropdownMenuLabel>
                 <DropdownMenuItem className="p-3 rounded-xl cursor-pointer gap-3 font-medium"><User className="h-4 w-4" /> Account Settings</DropdownMenuItem>
                 <DropdownMenuItem className="p-3 rounded-xl cursor-pointer gap-3 font-medium"><Zap className="h-4 w-4" /> Usage Dashboard</DropdownMenuItem>
                 <DropdownMenuSeparator />
@@ -147,7 +144,7 @@ export function Navbar() {
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-64 p-4 rounded-2xl shadow-2xl border-slate-100 space-y-4 bg-white">
                 <div className="space-y-1">
-                  <DropdownMenuLabel className="text-[10px] uppercase tracking-widest text-[#5EBFB8] font-black">Navigation</DropdownMenuLabel>
+                  <DropdownMenuLabel className="text-[10px] uppercase tracking-widest text-primary font-black">Navigation</DropdownMenuLabel>
                   <DropdownMenuItem asChild className="p-3 rounded-xl"><Link href="/pricing" className="flex items-center gap-3 font-bold text-[#2A1E5C]"><Zap className="h-4 w-4" /> Pricing</Link></DropdownMenuItem>
                   <DropdownMenuItem asChild className="p-3 rounded-xl"><Link href="/enterprise" className="flex items-center gap-3 font-bold text-[#2A1E5C]"><Globe className="h-4 w-4" /> Enterprise</Link></DropdownMenuItem>
                   <DropdownMenuItem asChild className="p-3 rounded-xl"><Link href="/security" className="flex items-center gap-3 font-bold text-[#2A1E5C]"><ShieldCheck className="h-4 w-4" /> Security</Link></DropdownMenuItem>

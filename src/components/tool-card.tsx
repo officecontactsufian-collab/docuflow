@@ -14,7 +14,7 @@ export function ToolCard({ title, description, icon: Icon, href }: ToolCardProps
     <Link href={href} className="group h-full">
       <Card className="h-full transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl border-slate-200/60 overflow-hidden relative bg-white flex flex-col rounded-[1.5rem] group-hover:border-primary/40 group-hover:ring-1 group-hover:ring-primary/10">
         <CardHeader className="space-y-6 p-8 pb-4">
-          <div className="w-14 h-14 rounded-2xl flex items-center justify-center transition-all duration-500 bg-slate-50 text-slate-400 group-hover:bg-primary group-hover:text-white group-hover:shadow-xl group-hover:shadow-primary/30 group-hover:-rotate-3">
+          <div className="w-14 h-14 rounded-2xl flex items-center justify-center transition-all duration-500 bg-primary/5 text-primary group-hover:bg-primary group-hover:text-white group-hover:shadow-xl group-hover:shadow-primary/30 group-hover:-rotate-3">
             <Icon className="h-7 w-7" />
           </div>
           <div className="space-y-3">
