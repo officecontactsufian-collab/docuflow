@@ -26,10 +26,13 @@ export default function SplitPage() {
     
     parts.forEach(part => {
       if (part.includes('-')) {
-        const [start, end] = part.split('-').map(Number);
-        if (!isNaN(start) && !isNaN(end)) {
-          for (let i = Math.max(1, start); i <= Math.min(end, maxPages); i++) {
-            pages.add(i - 1);
+        const rangeParts = part.split('-').map(Number);
+        if (rangeParts.length === 2) {
+          const [start, end] = rangeParts;
+          if (!isNaN(start) && !isNaN(end)) {
+            for (let i = Math.max(1, Math.min(start, end)); i <= Math.min(Math.max(start, end), maxPages); i++) {
+              pages.add(i - 1);
+            }
           }
         }
       } else {
@@ -49,13 +52,13 @@ export default function SplitPage() {
     setIsProcessing(true);
     try {
       const arrayBuffer = await selectedFile.arrayBuffer();
-      const sourcePdf = await PDFDocument.load(arrayBuffer);
+      const sourcePdf = await PDFDocument.load(arrayBuffer, { ignoreEncryption: true });
       const totalPages = sourcePdf.getPageCount();
       
       const pageIndicesToExtract = parseRange(splitRange, totalPages);
       
       if (pageIndicesToExtract.length === 0) {
-        throw new Error("Invalid page range specified.");
+        throw new Error("Invalid page range specified. Please use numbers like '1-3' or '1, 5'.");
       }
 
       const newPdf = await PDFDocument.create();
@@ -74,7 +77,7 @@ export default function SplitPage() {
         description: `${pageIndicesToExtract.length} pages extracted and ready for download.`,
       });
     } catch (error: any) {
-      console.error(error);
+      console.error("Split error:", error);
       setIsProcessing(false);
       toast({
         variant: "destructive",
@@ -87,6 +90,7 @@ export default function SplitPage() {
   const reset = () => {
     setIsDone(false);
     setSelectedFile(null);
+    setSplitRange("1");
     if (downloadUrl) {
       URL.revokeObjectURL(downloadUrl);
       setDownloadUrl(null);
@@ -103,7 +107,7 @@ export default function SplitPage() {
             <div className="inline-flex h-12 w-12 items-center justify-center text-primary mb-2">
               <Scissors className="h-10 w-10" />
             </div>
-            <h1 className="text-3xl font-bold tracking-tight font-headline">Split PDF Document</h1>
+            <h1 className="text-3xl font-bold tracking-tight font-headline text-accent uppercase italic tracking-tighter">Split PDF Document</h1>
             <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
               Extract specific pages or ranges from your PDF securely in your browser.
             </p>
@@ -172,22 +176,24 @@ export default function SplitPage() {
           ) : (
             <div className="max-w-md mx-auto space-y-8 text-center animate-in fade-in slide-in-from-bottom-8">
               <div className="p-12 bg-white border border-white/40 rounded-[3rem] shadow-2xl space-y-8">
-                <div className="w-20 h-20 bg-green-50 text-green-600 rounded-3xl flex items-center justify-center mx-auto shadow-inner">
+                <div className="w-20 h-20 text-green-600 flex items-center justify-center mx-auto">
                   <Download className="h-10 w-10" />
                 </div>
                 <div className="space-y-2">
-                  <h2 className="text-2xl font-black uppercase italic tracking-tight">Pages Extracted!</h2>
+                  <h2 className="text-2xl font-black uppercase italic tracking-tight text-accent">Pages Extracted!</h2>
                   <p className="text-muted-foreground text-sm font-medium">Your new PDF is ready with range: {splitRange}</p>
                 </div>
                 <Button 
                   size="lg" 
                   onClick={() => {
-                    const link = document.createElement('a');
-                    link.href = downloadUrl!;
-                    link.download = `split_${selectedFile?.name || 'document.pdf'}`;
-                    document.body.appendChild(link);
-                    link.click();
-                    document.body.removeChild(link);
+                    if (downloadUrl) {
+                      const link = document.createElement('a');
+                      link.href = downloadUrl;
+                      link.download = `split_${selectedFile?.name || 'document.pdf'}`;
+                      document.body.appendChild(link);
+                      link.click();
+                      document.body.removeChild(link);
+                    }
                   }} 
                   className="w-full h-14 rounded-2xl bg-accent hover:bg-accent/90 shadow-xl shadow-accent/20 text-[11px] font-black uppercase tracking-widest"
                 >

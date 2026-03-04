@@ -39,7 +39,8 @@ export default function MergePage() {
       for (let i = 0; i < files.length; i++) {
         const file = files[i];
         const arrayBuffer = await file.arrayBuffer();
-        const pdf = await PDFDocument.load(arrayBuffer);
+        // Load with ignoreEncryption for robustness
+        const pdf = await PDFDocument.load(arrayBuffer, { ignoreEncryption: true });
         const copiedPages = await mergedPdf.copyPages(pdf, pdf.getPageIndices());
         copiedPages.forEach((page) => mergedPdf.addPage(page));
         
@@ -61,12 +62,12 @@ export default function MergePage() {
         description: "Your new PDF is ready for download.",
       });
     } catch (error) {
-      console.error(error);
+      console.error("Merge error:", error);
       setIsProcessing(false);
       toast({
         variant: "destructive",
         title: "Merge failed",
-        description: "An error occurred while merging your PDF files.",
+        description: "An error occurred while merging your PDF files. Some files might be protected.",
       });
     }
   };
@@ -86,6 +87,10 @@ export default function MergePage() {
     newFiles[index] = newFiles[newIndex];
     newFiles[newIndex] = temp;
     setFiles(newFiles);
+  };
+
+  const handleAddFiles = (newFiles: File[]) => {
+    setFiles(prev => [...prev, ...newFiles]);
   };
 
   const reset = () => {
@@ -109,7 +114,7 @@ export default function MergePage() {
             <div className="inline-flex h-12 w-12 items-center justify-center text-primary mb-2">
               <Merge className="h-10 w-10" />
             </div>
-            <h1 className="text-3xl font-bold tracking-tight font-headline">Merge PDF Files</h1>
+            <h1 className="text-3xl font-bold tracking-tight font-headline text-accent uppercase italic tracking-tighter">Merge PDF Files</h1>
             <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
               Combine multiple PDF documents into a single, unified file. Manage your sequence with precision.
             </p>
@@ -150,7 +155,7 @@ export default function MergePage() {
                             className={`group flex items-center justify-between p-3 rounded-xl border transition-all cursor-pointer ${previewFile === file ? 'bg-primary/5 border-primary/20 ring-1 ring-primary/20' : 'bg-white border-white/40 hover:border-primary/20 shadow-sm'}`}
                           >
                             <div className="flex items-center gap-3 min-w-0">
-                              <div className="p-2 bg-muted/20 rounded-lg group-hover:text-primary transition-colors shrink-0">
+                              <div className="p-2 rounded-lg group-hover:text-primary transition-colors shrink-0">
                                 <FileText className="h-4 w-4" />
                               </div>
                               <div className="flex flex-col min-w-0">
@@ -203,9 +208,15 @@ export default function MergePage() {
                           variant="outline" 
                           className="h-14 rounded-2xl border-dashed border-accent/20 font-black uppercase tracking-widest text-[10px]"
                           onClick={() => {
-                            // Focus or trigger the dropzone logic (for simplicity, we allow adding via the FileDropzone below the list if we wanted, 
-                            // but here we'll just show how to add more)
-                            toast({ title: "Add More", description: "Use the upload area to append more documents." });
+                            const input = document.createElement('input');
+                            input.type = 'file';
+                            input.accept = '.pdf';
+                            input.multiple = true;
+                            input.onchange = (e) => {
+                              const target = e.target as HTMLInputElement;
+                              if (target.files) handleAddFiles(Array.from(target.files));
+                            };
+                            input.click();
                           }}
                         >
                           <Plus className="mr-2 h-4 w-4" /> Add Files
@@ -242,24 +253,11 @@ export default function MergePage() {
                   </div>
                 </div>
               )}
-              
-              {/* Optional secondary dropzone for "Adding more" if list is active */}
-              {files.length > 0 && (
-                <div className="pt-12 border-t border-accent/5">
-                   <div className="max-w-xl mx-auto opacity-40 hover:opacity-100 transition-opacity">
-                      <FileDropzone 
-                        onFilesSelected={(newFiles) => setFiles([...files, ...newFiles])} 
-                        maxFiles={20} 
-                        className="py-8"
-                      />
-                   </div>
-                </div>
-              )}
             </div>
           ) : (
             <div className="max-w-md mx-auto space-y-8 text-center animate-in fade-in slide-in-from-bottom-8">
               <div className="p-12 bg-white border border-white/40 rounded-[3rem] shadow-2xl space-y-8">
-                <div className="w-20 h-20 bg-green-50 text-green-600 rounded-3xl flex items-center justify-center mx-auto shadow-inner">
+                <div className="w-20 h-20 text-green-600 flex items-center justify-center mx-auto">
                   <Download className="h-10 w-10" />
                 </div>
                 <div className="space-y-2">
@@ -269,12 +267,14 @@ export default function MergePage() {
                 <Button 
                   size="lg" 
                   onClick={() => {
-                    const link = document.createElement('a');
-                    link.href = downloadUrl!;
-                    link.download = 'merged_document.pdf';
-                    document.body.appendChild(link);
-                    link.click();
-                    document.body.removeChild(link);
+                    if (downloadUrl) {
+                      const link = document.createElement('a');
+                      link.href = downloadUrl;
+                      link.download = 'merged_document.pdf';
+                      document.body.appendChild(link);
+                      link.click();
+                      document.body.removeChild(link);
+                    }
                   }} 
                   className="w-full h-14 rounded-2xl bg-accent hover:bg-accent/90 shadow-xl shadow-accent/20 text-[11px] font-black uppercase tracking-widest"
                 >

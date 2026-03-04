@@ -4,7 +4,7 @@ import * as React from 'react';
 import { Navbar } from '@/components/navbar';
 import { FileDropzone } from '@/components/file-dropzone';
 import { Button } from '@/components/ui/button';
-import { Signature, Download, Loader2, CheckCircle2, UserCheck, ImageIcon } from 'lucide-react';
+import { Signature, Download, Loader2, CheckCircle2, UserCheck, ImageIcon, FileText } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { PDFDocument } from 'pdf-lib';
@@ -18,21 +18,35 @@ export default function SignPage() {
   const { toast } = useToast();
 
   const handleProcess = async () => {
-    if (!pdfFile || !signatureImage) return;
+    if (!pdfFile || !signatureImage) {
+      toast({
+        variant: "destructive",
+        title: "Incomplete details",
+        description: "Please upload both a PDF and a signature image.",
+      });
+      return;
+    }
+    
     setIsProcessing(true);
 
     try {
       const pdfBytes = await pdfFile.arrayBuffer();
       const sigBytes = await signatureImage.arrayBuffer();
       
-      const pdfDoc = await PDFDocument.load(pdfBytes);
-      const sigImg = signatureImage.type === 'image/png' 
-        ? await pdfDoc.embedPng(sigBytes) 
-        : await pdfDoc.embedJpg(sigBytes);
+      const pdfDoc = await PDFDocument.load(pdfBytes, { ignoreEncryption: true });
+      
+      let sigImg;
+      if (signatureImage.type === 'image/png') {
+        sigImg = await pdfDoc.embedPng(sigBytes);
+      } else if (signatureImage.type === 'image/jpeg' || signatureImage.type === 'image/jpg') {
+        sigImg = await pdfDoc.embedJpg(sigBytes);
+      } else {
+        throw new Error("Unsupported signature format. Use PNG or JPG.");
+      }
 
       const pages = pdfDoc.getPages();
       const lastPage = pages[pages.length - 1];
-      const { width, height } = lastPage.getSize();
+      const { width } = lastPage.getSize();
 
       // Default positioning: Bottom right
       const sigWidth = 150;
@@ -53,16 +67,24 @@ export default function SignPage() {
         title: "Document Signed",
         description: "Your electronic signature has been applied to the final page.",
       });
-    } catch (error) {
-      console.error(error);
+    } catch (error: any) {
+      console.error("Signing error:", error);
       toast({
         variant: "destructive",
         title: "Signing Failed",
-        description: "Ensure you are using standard PDF and image (PNG/JPG) formats.",
+        description: error.message || "Ensure you are using standard PDF and image (PNG/JPG) formats.",
       });
     } finally {
       setIsProcessing(false);
     }
+  };
+
+  const reset = () => {
+    setPdfFile(null);
+    setSignatureImage(null);
+    setIsDone(false);
+    if (downloadUrl) URL.revokeObjectURL(downloadUrl);
+    setDownloadUrl(null);
   };
 
   return (
@@ -71,62 +93,79 @@ export default function SignPage() {
       <main className="flex-1 container mx-auto px-4 py-12">
         <div className="max-w-4xl mx-auto space-y-12">
           <div className="text-center space-y-4">
-            <div className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-lg mb-2">
+            <div className="inline-flex h-12 w-12 items-center justify-center text-primary mb-2">
               <Signature className="h-6 w-6" />
             </div>
-            <h1 className="text-3xl font-bold tracking-tight font-headline">Digital Signature</h1>
+            <h1 className="text-3xl font-bold tracking-tight font-headline text-accent uppercase italic tracking-tighter">Digital Signature</h1>
             <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-              Securely apply your electronic signature to any PDF document.
+              Securely apply your electronic signature image to any PDF document.
             </p>
           </div>
 
           {!isDone ? (
-            <div className="grid md:grid-cols-2 gap-8">
+            <div className="grid md:grid-cols-2 gap-8 animate-in fade-in slide-in-from-bottom-4">
               <div className="space-y-4">
-                <h3 className="font-bold flex items-center gap-2"><FileText className="h-4 w-4" /> Step 1: Upload PDF</h3>
+                <h3 className="font-bold flex items-center gap-2 text-accent uppercase text-xs tracking-widest">
+                  <FileText className="h-4 w-4 text-primary" /> 
+                  Step 1: Upload PDF
+                </h3>
                 <FileDropzone 
                   onFilesSelected={(f) => setPdfFile(f[0] || null)} 
                   maxFiles={1} 
                   className="p-8"
                 />
+                {pdfFile && <p className="text-[10px] font-bold text-primary uppercase text-center">{pdfFile.name}</p>}
               </div>
               <div className="space-y-4">
-                <h3 className="font-bold flex items-center gap-2"><ImageIcon className="h-4 w-4" /> Step 2: Signature Image</h3>
+                <h3 className="font-bold flex items-center gap-2 text-accent uppercase text-xs tracking-widest">
+                  <ImageIcon className="h-4 w-4 text-primary" /> 
+                  Step 2: Signature Image
+                </h3>
                 <FileDropzone 
                   onFilesSelected={(f) => setSignatureImage(f[0] || null)} 
                   maxFiles={1} 
                   accept=".png,.jpg,.jpeg"
                   className="p-8"
                 />
+                {signatureImage && <p className="text-[10px] font-bold text-primary uppercase text-center">{signatureImage.name}</p>}
               </div>
               
-              {pdfFile && signatureImage && (
-                <div className="md:col-span-2 flex justify-center pt-8">
-                  <Button size="lg" onClick={handleProcess} disabled={isProcessing} className="min-w-[300px]">
-                    {isProcessing ? <Loader2 className="animate-spin mr-2 h-4 w-4" /> : <UserCheck className="mr-2 h-4 w-4" />}
-                    Place Signature & Finalize
-                  </Button>
-                </div>
-              )}
+              <div className="md:col-span-2 flex justify-center pt-8">
+                <Button 
+                  size="lg" 
+                  onClick={handleProcess} 
+                  disabled={isProcessing || !pdfFile || !signatureImage} 
+                  className="min-w-[300px] h-14 rounded-2xl bg-accent text-white font-black uppercase tracking-widest text-[11px] shadow-2xl"
+                >
+                  {isProcessing ? <Loader2 className="animate-spin mr-2 h-4 w-4" /> : <UserCheck className="mr-2 h-4 w-4" />}
+                  Place Signature & Finalize
+                </Button>
+              </div>
             </div>
           ) : (
             <div className="max-w-md mx-auto text-center animate-in zoom-in">
-              <Card className="p-12 border-2 border-primary/10 shadow-2xl">
+              <Card className="p-12 border-2 border-primary/10 shadow-2xl rounded-[3rem]">
                 <CheckCircle2 className="h-16 w-16 text-green-500 mx-auto mb-6" />
-                <h2 className="text-2xl font-bold font-headline mb-4">Signed & Ready!</h2>
-                <Button size="lg" onClick={() => {
-                  if (downloadUrl) {
-                    const link = document.createElement('a');
-                    link.href = downloadUrl;
-                    link.download = `signed_${pdfFile?.name || 'document.pdf'}`;
-                    document.body.appendChild(link);
-                    link.click();
-                  }
-                }} className="w-full bg-accent hover:bg-accent/90">
+                <h2 className="text-2xl font-black uppercase italic tracking-tighter text-accent mb-4">Signed & Ready!</h2>
+                <Button 
+                  size="lg" 
+                  onClick={() => {
+                    if (downloadUrl) {
+                      const link = document.createElement('a');
+                      link.href = downloadUrl;
+                      link.download = `signed_${pdfFile?.name || 'document.pdf'}`;
+                      document.body.appendChild(link);
+                      link.click();
+                      document.body.removeChild(link);
+                    }
+                  }} 
+                  className="w-full h-14 rounded-2xl bg-accent hover:bg-accent/90 shadow-xl"
+                >
+                  <Download className="mr-2 h-4 w-4" />
                   Download Signed PDF
                 </Button>
               </Card>
-              <Button variant="ghost" className="mt-6" onClick={() => {setIsDone(false); setPdfFile(null); setSignatureImage(null);}}>
+              <Button variant="ghost" className="mt-6 text-[10px] font-bold uppercase tracking-widest" onClick={reset}>
                 Sign another document
               </Button>
             </div>
@@ -136,5 +175,3 @@ export default function SignPage() {
     </div>
   );
 }
-
-import { FileText } from 'lucide-react';
