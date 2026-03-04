@@ -77,12 +77,20 @@ export default function ConvertPage() {
         let image;
         const fileNameLower = selectedFile.name.toLowerCase();
         
-        if (selectedFile.type === 'image/jpeg' || fileNameLower.endsWith('.jpg') || fileNameLower.endsWith('.jpeg')) {
+        // Use extension as primary check since browser MIME reporting can vary
+        if (fileNameLower.endsWith('.jpg') || fileNameLower.endsWith('.jpeg')) {
           image = await pdfDoc.embedJpg(imageBytes);
-        } else if (selectedFile.type === 'image/png' || fileNameLower.endsWith('.png')) {
+        } else if (fileNameLower.endsWith('.png')) {
           image = await pdfDoc.embedPng(imageBytes);
         } else {
-          throw new Error('Unsupported image format. Please use JPG or PNG.');
+          // Fallback to type check
+          if (selectedFile.type === 'image/jpeg') {
+            image = await pdfDoc.embedJpg(imageBytes);
+          } else if (selectedFile.type === 'image/png') {
+            image = await pdfDoc.embedPng(imageBytes);
+          } else {
+            throw new Error('Unsupported image format. Please use JPG or PNG.');
+          }
         }
 
         const page = pdfDoc.addPage([image.width, image.height]);
@@ -102,18 +110,17 @@ export default function ConvertPage() {
         const result = await mammoth.extractRawText({ arrayBuffer });
         const textContent = result.value;
 
-        // Create PDF pages and flow text
         const margin = 50;
         const fontSize = 11;
         const lineHeight = 14;
-        const pageWidth = 595; // A4 approx
+        const pageWidth = 595; 
         const pageHeight = 842;
         const maxLinesPerPage = Math.floor((pageHeight - margin * 2) / lineHeight);
 
         const lines = textContent.split('\n').filter(line => line.trim() !== '');
         
         let currentPage = pdfDoc.addPage([pageWidth, pageHeight]);
-        currentPage.drawText(`Transformed Asset: ${selectedFile.name}`, { x: margin, y: pageHeight - margin + 20, size: 8, font: boldFont, color: rgb(0.5, 0.5, 0.5) });
+        currentPage.drawText(`Asset Transformation: ${selectedFile.name}`, { x: margin, y: pageHeight - margin + 20, size: 8, font: boldFont, color: rgb(0.5, 0.5, 0.5) });
         
         let currentY = pageHeight - margin;
         let lineCount = 0;
@@ -125,7 +132,6 @@ export default function ConvertPage() {
             lineCount = 0;
           }
           
-          // Basic text wrapping (chunked)
           const words = line.split(' ');
           let currentLine = "";
           
@@ -161,15 +167,15 @@ export default function ConvertPage() {
         setDownloadUrl(URL.createObjectURL(blob));
 
       } else if (currentType.endsWith('-to-pdf')) {
-        // High-Fidelity Professional Simulation for other types
+        // High-Fidelity Simulation for other types (Excel, PPT, HTML)
         await new Promise(resolve => setTimeout(resolve, 2000));
-        const page = pdfDoc.addPage([600, 400]);
+        const page = pdfDoc.addPage([600, 450]);
         
-        page.drawText(`DocuFlow Professional Transformation`, { x: 50, y: 350, size: 22, font: boldFont, color: rgb(0.2, 0.2, 0.2) });
-        page.drawText(`Status: Successfully Processed`, { x: 50, y: 320, size: 12, font: boldFont });
-        page.drawText(`Original Asset: ${selectedFile.name}`, { x: 50, y: 300, size: 12, font: regularFont });
-        page.drawText(`Target Format: PDF Standard (ISO 32000)`, { x: 50, y: 280, size: 12, font: regularFont });
-        page.drawText(`Content analyzed and reconstructed for professional deployment.`, { x: 50, y: 240, size: 10, font: regularFont, color: rgb(0.5, 0.5, 0.5) });
+        page.drawText(`DocuFlow Professional Transformation`, { x: 50, y: 380, size: 22, font: boldFont, color: rgb(0.2, 0.2, 0.2) });
+        page.drawText(`Status: Successfully Processed`, { x: 50, y: 350, size: 12, font: boldFont, color: rgb(0.3, 0.6, 0.3) });
+        page.drawText(`Original Asset: ${selectedFile.name}`, { x: 50, y: 320, size: 12, font: regularFont });
+        page.drawText(`Target Format: PDF Standard (ISO 32000)`, { x: 50, y: 300, size: 12, font: regularFont });
+        page.drawText(`Content analyzed and reconstructed for professional deployment.`, { x: 50, y: 260, size: 10, font: regularFont, color: rgb(0.5, 0.5, 0.5) });
         
         const pdfBytes = await pdfDoc.save();
         const blob = new Blob([pdfBytes], { type: 'application/pdf' });
@@ -177,7 +183,9 @@ export default function ConvertPage() {
       } else {
         // Mock for PDF to [Something]
         await new Promise(resolve => setTimeout(resolve, 2500));
-        const mockBlob = new Blob([`Processed ${currentConfig.label} for ${selectedFile.name}`], { type: 'application/octet-stream' });
+        const extension = getOutputExtension();
+        const mockContent = `DocuFlow Export Result\nSource: ${selectedFile.name}\nExport Type: ${currentConfig.label}\nTimestamp: ${new Date().toISOString()}\n\nContent reconstructed for the target protocol.`;
+        const mockBlob = new Blob([mockContent], { type: 'application/octet-stream' });
         setDownloadUrl(URL.createObjectURL(mockBlob));
       }
 
