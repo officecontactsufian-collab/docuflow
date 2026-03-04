@@ -148,7 +148,7 @@ export default function Home() {
         <section className="relative py-24 lg:py-40 overflow-hidden hero-gradient">
           <div className="container relative mx-auto px-4">
             <div className="max-w-4xl mx-auto text-center space-y-10">
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-secondary/20 text-accent text-xs font-bold uppercase tracking-widest border border-secondary/30 animate-in fade-in slide-in-from-bottom-4 duration-700">
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#2A1E5C]/10 text-accent text-xs font-bold uppercase tracking-widest border border-[#2A1E5C]/20 animate-in fade-in slide-in-from-bottom-4 duration-700">
                 <Shield className="h-4 w-4" />
                 <span>Enterprise Grade Security</span>
               </div>
@@ -249,8 +249,8 @@ export default function Home() {
                 <h2 className="text-5xl font-black tracking-tight text-[#2A1E5C] leading-[1.1]">Trusted by global <br /> organizations.</h2>
                 <div className="space-y-8">
                   <div className="flex gap-6 items-start">
-                    <div className="h-14 w-14 shrink-0 rounded-2xl bg-secondary text-primary flex items-center justify-center shadow-inner">
-                      <Lock className="h-7 w-7" />
+                    <div className="h-14 w-14 shrink-0 rounded-2xl text-primary flex items-center justify-center">
+                      <Lock className="h-8 w-8" />
                     </div>
                     <div className="space-y-2">
                       <h4 className="text-xl font-bold text-[#0A0F0D]">Zero-Retention Policy</h4>
@@ -258,8 +258,8 @@ export default function Home() {
                     </div>
                   </div>
                   <div className="flex gap-6 items-start">
-                    <div className="h-14 w-14 shrink-0 rounded-2xl bg-secondary text-accent flex items-center justify-center shadow-inner">
-                      <CheckCircle2 className="h-7 w-7" />
+                    <div className="h-14 w-14 shrink-0 rounded-2xl text-accent flex items-center justify-center">
+                      <CheckCircle2 className="h-8 w-8" />
                     </div>
                     <div className="space-y-2">
                       <h4 className="text-xl font-bold text-[#0A0F0D]">Local-First Processing</h4>

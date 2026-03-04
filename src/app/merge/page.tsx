@@ -97,8 +97,8 @@ export default function MergePage() {
       <main className="flex-1 container mx-auto px-4 py-12">
         <div className="max-w-4xl mx-auto space-y-12">
           <div className="text-center space-y-4">
-            <div className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-secondary text-primary shadow-lg mb-2">
-              <Merge className="h-6 w-6" />
+            <div className="inline-flex h-12 w-12 items-center justify-center text-primary mb-2">
+              <Merge className="h-10 w-10" />
             </div>
             <h1 className="text-3xl font-bold tracking-tight font-headline">Merge PDF Files</h1>
             <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
