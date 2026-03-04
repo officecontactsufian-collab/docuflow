@@ -1,16 +1,18 @@
+
 "use client"
 
 import * as React from 'react';
 import { Navbar } from '@/components/navbar';
 import { FileDropzone } from '@/components/file-dropzone';
 import { Button } from '@/components/ui/button';
-import { Crop, Loader2, Download, CheckCircle2, Sliders, ShieldCheck, ImageIcon, FileText } from 'lucide-react';
+import { Crop, Loader2, Download, CheckCircle2, Sliders, ShieldCheck, ImageIcon, FileText, MousePointer2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Slider } from '@/components/ui/slider';
 import { Label } from '@/components/ui/label';
 import { PDFDocument } from 'pdf-lib';
 import { PDFPreview } from '@/components/pdf-preview';
+import { cn } from '@/lib/utils';
 
 export default function CropPage() {
   const [selectedFile, setSelectedFile] = React.useState<File | null>(null);
@@ -18,19 +20,26 @@ export default function CropPage() {
   const [isDone, setIsDone] = React.useState(false);
   const [downloadUrl, setDownloadUrl] = React.useState<string | null>(null);
   
-  // Crop settings (percentages)
-  const [cropTop, setCropTop] = React.useState([0]);
-  const [cropRight, setCropRight] = React.useState([0]);
-  const [cropBottom, setCropBottom] = React.useState([0]);
-  const [cropLeft, setCropLeft] = React.useState([0]);
+  // Crop settings (percentages 0-100)
+  const [cropTop, setCropTop] = React.useState([10]);
+  const [cropRight, setCropRight] = React.useState([10]);
+  const [cropBottom, setCropBottom] = React.useState([10]);
+  const [cropLeft, setCropLeft] = React.useState([10]);
 
   const { toast } = useToast();
+  const containerRef = React.useRef<HTMLDivElement>(null);
+  const [isDragging, setIsDragging] = React.useState<string | null>(null);
 
   const handleFilesSelected = (files: File[]) => {
     setSelectedFile(files[0] || null);
     setIsDone(false);
     if (downloadUrl) URL.revokeObjectURL(downloadUrl);
     setDownloadUrl(null);
+    // Reset to sensible defaults
+    setCropTop([10]);
+    setCropRight([10]);
+    setCropBottom([10]);
+    setCropLeft([10]);
   };
 
   const handleCrop = async () => {
@@ -46,7 +55,6 @@ export default function CropPage() {
         pages.forEach((page) => {
           const { width, height } = page.getSize();
           
-          // Calculate new bounds based on percentage sliders
           const x = (cropLeft[0] / 100) * width;
           const y = (cropBottom[0] / 100) * height;
           const newWidth = width - ((cropLeft[0] + cropRight[0]) / 100) * width;
@@ -59,7 +67,7 @@ export default function CropPage() {
         const blob = new Blob([pdfBytes], { type: 'application/pdf' });
         setDownloadUrl(URL.createObjectURL(blob));
       } else {
-        // High-fidelity simulation for image cropping
+        // Simulation for image cropping logic
         await new Promise(resolve => setTimeout(resolve, 2000));
         const mockBlob = new Blob([await selectedFile.arrayBuffer()], { type: selectedFile.type });
         setDownloadUrl(URL.createObjectURL(mockBlob));
@@ -82,13 +90,66 @@ export default function CropPage() {
     }
   };
 
+  // Mouse Interaction Logic
+  const onMouseDown = (handle: string) => (e: React.MouseEvent) => {
+    e.preventDefault();
+    setIsDragging(handle);
+  };
+
+  React.useEffect(() => {
+    const onMouseMove = (e: MouseEvent) => {
+      if (!isDragging || !containerRef.current) return;
+
+      const rect = containerRef.current.getBoundingClientRect();
+      const x = ((e.clientX - rect.left) / rect.width) * 100;
+      const y = ((e.clientY - rect.top) / rect.height) * 100;
+
+      const clampedX = Math.max(0, Math.min(100, x));
+      const clampedY = Math.max(0, Math.min(100, y));
+
+      if (isDragging === 'top') setCropTop([clampedY]);
+      if (isDragging === 'bottom') setCropBottom([100 - clampedY]);
+      if (isDragging === 'left') setCropLeft([clampedX]);
+      if (isDragging === 'right') setCropRight([100 - clampedX]);
+      
+      if (isDragging === 'top-left') {
+        setCropTop([clampedY]);
+        setCropLeft([clampedX]);
+      }
+      if (isDragging === 'top-right') {
+        setCropTop([clampedY]);
+        setCropRight([100 - clampedX]);
+      }
+      if (isDragging === 'bottom-left') {
+        setCropBottom([100 - clampedY]);
+        setCropLeft([clampedX]);
+      }
+      if (isDragging === 'bottom-right') {
+        setCropBottom([100 - clampedY]);
+        setCropRight([100 - clampedX]);
+      }
+    };
+
+    const onMouseUp = () => setIsDragging(null);
+
+    if (isDragging) {
+      window.addEventListener('mousemove', onMouseMove);
+      window.addEventListener('mouseup', onMouseUp);
+    }
+
+    return () => {
+      window.removeEventListener('mousemove', onMouseMove);
+      window.removeEventListener('mouseup', onMouseUp);
+    };
+  }, [isDragging]);
+
   const reset = () => {
     setSelectedFile(null);
     setIsDone(false);
-    setCropTop([0]);
-    setCropRight([0]);
-    setCropBottom([0]);
-    setCropLeft([0]);
+    setCropTop([10]);
+    setCropRight([10]);
+    setCropBottom([10]);
+    setCropLeft([10]);
   };
 
   const isImage = selectedFile?.type.startsWith('image/');
@@ -98,7 +159,7 @@ export default function CropPage() {
       <Navbar />
       
       <main className="flex-1 container mx-auto px-4 py-12">
-        <div className="max-w-6xl mx-auto space-y-12">
+        <div className="max-w-7xl mx-auto space-y-12">
           {/* Header */}
           <div className="text-center space-y-4">
             <div className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-lg mb-2">
@@ -106,7 +167,7 @@ export default function CropPage() {
             </div>
             <h1 className="text-3xl font-bold tracking-tight font-headline text-accent uppercase italic tracking-tighter">Precision Crop Engine</h1>
             <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-              Trim whitespace and adjust viewport dimensions for PDF documents and professional image assets.
+              Visual asset manipulation. Drag to define your crop area directly on the canvas.
             </p>
           </div>
 
@@ -121,50 +182,74 @@ export default function CropPage() {
                 />
               ) : (
                 <div className="grid lg:grid-cols-12 gap-12">
-                  {/* Left: Interactive Preview */}
-                  <div className="lg:col-span-7 space-y-6">
+                  {/* Left: Interactive Mouse Workspace */}
+                  <div className="lg:col-span-8 space-y-6">
                     <div className="flex items-center justify-between px-2">
                       <h3 className="text-[10px] font-black uppercase tracking-widest text-accent/60 flex items-center gap-2">
-                        {isImage ? <ImageIcon className="h-3.5 w-3.5" /> : <FileText className="h-3.5 w-3.5" />}
-                        Active Canvas Preview
+                        <MousePointer2 className="h-3.5 w-3.5" />
+                        Interactive Canvas (Drag Handles to Crop)
                       </h3>
                       <span className="text-[10px] font-bold text-primary uppercase">{selectedFile.name}</span>
                     </div>
                     
-                    <div className="relative rounded-[2rem] border-2 border-dashed border-accent/10 bg-white/40 overflow-hidden min-h-[500px] flex items-center justify-center p-8">
-                      {isImage ? (
-                        <div className="relative group">
+                    <div 
+                      ref={containerRef}
+                      className="relative rounded-[2.5rem] border-2 border-dashed border-accent/10 bg-white/40 overflow-hidden min-h-[600px] flex items-center justify-center p-12 select-none"
+                    >
+                      {/* Base Content */}
+                      <div className="relative w-full h-full max-w-full max-h-full flex items-center justify-center">
+                        {isImage ? (
                           <img 
                             src={URL.createObjectURL(selectedFile)} 
-                            className="max-w-full h-auto rounded-lg shadow-2xl transition-all"
-                            alt="To be cropped"
-                            style={{
-                              clipPath: `inset(${cropTop[0]}% ${cropRight[0]}% ${cropBottom[0]}% ${cropLeft[0]}%)`
-                            }}
+                            className="max-w-full max-h-[500px] rounded-lg shadow-2xl pointer-events-none"
+                            alt="Crop target"
                           />
-                          {/* Visual Crop Overlay handles */}
-                          <div className="absolute inset-0 pointer-events-none border-2 border-primary/40 opacity-50" />
+                        ) : (
+                          <div className="w-full h-[500px] opacity-40 grayscale-[0.5] pointer-events-none">
+                             <PDFPreview file={selectedFile} title="Structural Reference" />
+                          </div>
+                        )}
+
+                        {/* Shaded Area Overlay */}
+                        <div className="absolute inset-0 bg-black/40 pointer-events-none" style={{ 
+                          clipPath: `polygon(
+                            0% 0%, 100% 0%, 100% 100%, 0% 100%, 0% 0%,
+                            ${cropLeft[0]}% ${cropTop[0]}%, 
+                            ${cropLeft[0]}% ${100 - cropBottom[0]}%, 
+                            ${100 - cropRight[0]}% ${100 - cropBottom[0]}%, 
+                            ${100 - cropRight[0]}% ${cropTop[0]}%, 
+                            ${cropLeft[0]}% ${cropTop[0]}%
+                          )` 
+                        }} />
+
+                        {/* Interactive Crop Box */}
+                        <div 
+                          className="absolute border-2 border-primary shadow-[0_0_0_9999px_rgba(0,0,0,0)]"
+                          style={{
+                            top: `${cropTop[0]}%`,
+                            left: `${cropLeft[0]}%`,
+                            right: `${cropRight[0]}%`,
+                            bottom: `${cropBottom[0]}%`,
+                          }}
+                        >
+                          {/* Corner Handles */}
+                          <div onMouseDown={onMouseDown('top-left')} className="absolute -top-2 -left-2 w-4 h-4 bg-white border-2 border-primary rounded-full cursor-nwse-resize shadow-lg hover:scale-125 transition-transform" />
+                          <div onMouseDown={onMouseDown('top-right')} className="absolute -top-2 -right-2 w-4 h-4 bg-white border-2 border-primary rounded-full cursor-nesw-resize shadow-lg hover:scale-125 transition-transform" />
+                          <div onMouseDown={onMouseDown('bottom-left')} className="absolute -bottom-2 -left-2 w-4 h-4 bg-white border-2 border-primary rounded-full cursor-nesw-resize shadow-lg hover:scale-125 transition-transform" />
+                          <div onMouseDown={onMouseDown('bottom-right')} className="absolute -bottom-2 -right-2 w-4 h-4 bg-white border-2 border-primary rounded-full cursor-nwse-resize shadow-lg hover:scale-125 transition-transform" />
+                          
+                          {/* Edge Handles */}
+                          <div onMouseDown={onMouseDown('top')} className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-8 h-1.5 bg-primary/80 rounded-full cursor-ns-resize" />
+                          <div onMouseDown={onMouseDown('bottom')} className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 w-8 h-1.5 bg-primary/80 rounded-full cursor-ns-resize" />
+                          <div onMouseDown={onMouseDown('left')} className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1/2 w-1.5 h-8 bg-primary/80 rounded-full cursor-ew-resize" />
+                          <div onMouseDown={onMouseDown('right')} className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 w-1.5 h-8 bg-primary/80 rounded-full cursor-ew-resize" />
                         </div>
-                      ) : (
-                        <div className="w-full h-full opacity-80 grayscale-[0.5]">
-                           <PDFPreview file={selectedFile} title="Reference View" />
-                        </div>
-                      )}
-                      
-                      {/* Interactive Crop Guides */}
-                      <div className="absolute inset-0 pointer-events-none flex flex-col justify-between p-4">
-                         <div className="h-px w-full bg-primary/20 border-t border-dashed" style={{ marginTop: `${cropTop[0]}%` }} />
-                         <div className="h-px w-full bg-primary/20 border-t border-dashed" style={{ marginBottom: `${cropBottom[0]}%` }} />
-                      </div>
-                      <div className="absolute inset-0 pointer-events-none flex justify-between p-4">
-                         <div className="w-px h-full bg-primary/20 border-l border-dashed" style={{ marginLeft: `${cropLeft[0]}%` }} />
-                         <div className="w-px h-full bg-primary/20 border-l border-dashed" style={{ marginRight: `${cropRight[0]}%` }} />
                       </div>
                     </div>
                   </div>
 
-                  {/* Right: Controls */}
-                  <div className="lg:col-span-5 space-y-6">
+                  {/* Right: Fine-Tuning Controls */}
+                  <div className="lg:col-span-4 space-y-6">
                     <Card className="border-none shadow-2xl rounded-[2.5rem] bg-white/80 backdrop-blur-sm sticky top-24">
                       <CardHeader className="pt-8 px-8">
                         <CardTitle className="text-xl font-black uppercase italic tracking-tight flex items-center gap-3 text-accent">
@@ -172,7 +257,7 @@ export default function CropPage() {
                           Crop Geometry
                         </CardTitle>
                         <CardDescription className="text-[10px] font-bold uppercase tracking-widest text-accent/40">
-                          Adjust margins using percentage-based precision
+                          Refine coordinates or use handles
                         </CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-8 p-8">
@@ -182,7 +267,7 @@ export default function CropPage() {
                               <Label className="text-[10px] font-black uppercase tracking-widest text-accent/60">Top Margin</Label>
                               <span className="text-[10px] font-bold text-primary">{cropTop[0]}%</span>
                             </div>
-                            <Slider value={cropTop} onValueChange={setCropTop} max={45} step={1} />
+                            <Slider value={cropTop} onValueChange={setCropTop} max={90} step={1} />
                           </div>
 
                           <div className="space-y-3">
@@ -190,7 +275,7 @@ export default function CropPage() {
                               <Label className="text-[10px] font-black uppercase tracking-widest text-accent/60">Bottom Margin</Label>
                               <span className="text-[10px] font-bold text-primary">{cropBottom[0]}%</span>
                             </div>
-                            <Slider value={cropBottom} onValueChange={setCropBottom} max={45} step={1} />
+                            <Slider value={cropBottom} onValueChange={setCropBottom} max={90} step={1} />
                           </div>
 
                           <div className="space-y-3">
@@ -198,7 +283,7 @@ export default function CropPage() {
                               <Label className="text-[10px] font-black uppercase tracking-widest text-accent/60">Left Margin</Label>
                               <span className="text-[10px] font-bold text-primary">{cropLeft[0]}%</span>
                             </div>
-                            <Slider value={cropLeft} onValueChange={setCropLeft} max={45} step={1} />
+                            <Slider value={cropLeft} onValueChange={setCropLeft} max={90} step={1} />
                           </div>
 
                           <div className="space-y-3">
@@ -206,7 +291,7 @@ export default function CropPage() {
                               <Label className="text-[10px] font-black uppercase tracking-widest text-accent/60">Right Margin</Label>
                               <span className="text-[10px] font-bold text-primary">{cropRight[0]}%</span>
                             </div>
-                            <Slider value={cropRight} onValueChange={setCropRight} max={45} step={1} />
+                            <Slider value={cropRight} onValueChange={setCropRight} max={90} step={1} />
                           </div>
                         </div>
 
@@ -230,7 +315,7 @@ export default function CropPage() {
                       <div className="space-y-1">
                         <p className="text-xs font-black uppercase tracking-wider text-accent">Structural Integrity</p>
                         <p className="text-[10px] text-muted-foreground leading-relaxed">
-                          For PDFs, we permanently update the internal CropBox property. For images, we recalculate the pixel matrix.
+                          We update the internal CropBox property for PDFs and recalculate the pixel matrix for images in-memory.
                         </p>
                       </div>
                     </div>
