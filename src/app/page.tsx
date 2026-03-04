@@ -22,12 +22,25 @@ import {
   FilePenLine,
   Table,
   Cpu,
-  Globe,
   LayoutDashboard,
   Layers,
   CircleCheck,
   Building2,
-  Sparkles
+  Sparkles,
+  Presentation,
+  FileCode,
+  ShieldAlert,
+  Unlock,
+  Type,
+  Signature,
+  Edit3,
+  Hash,
+  Crop,
+  Trash2,
+  FileOutput,
+  RefreshCw,
+  Eraser,
+  Wrench
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
@@ -35,23 +48,59 @@ import Link from 'next/link';
 export default function Home() {
   const toolCategories = [
     {
-      label: "Convert & Export",
-      description: "Lossless transformation between industrial standard formats.",
+      label: "Organize PDF",
+      description: "Advanced page manipulation and logic tools.",
       items: [
-        { title: "PDF to Word", desc: "Editable DOCX documents.", icon: FileText, href: "/convert?type=pdf-to-word" },
-        { title: "Word to PDF", desc: "Clean universal standards.", icon: FilePenLine, href: "/convert?type=word-to-pdf" },
-        { title: "PDF to Excel", desc: "Extract tables accurately.", icon: Table, href: "/convert?type=pdf-to-excel" },
-        { title: "JPG to PDF", desc: "High-res image stitching.", icon: ImageIcon, href: "/convert?type=jpg-to-pdf" },
+        { title: "Merge PDF", desc: "Combine multiple PDFs into one.", icon: Merge, href: "/merge" },
+        { title: "Split PDF", desc: "Extract or divide pages.", icon: Scissors, href: "/split" },
+        { title: "Remove Pages", desc: "Delete selected pages.", icon: Trash2, href: "/organize" },
+        { title: "Extract Pages", desc: "Create new PDF from selection.", icon: FileOutput, href: "/split" },
+        { title: "Organize PDF", desc: "Reorder and rotate pages.", icon: RotateCw, href: "/organize" },
+        { title: "Rotate PDF", desc: "Rotate pages permanently.", icon: RefreshCw, href: "/organize" },
       ]
     },
     {
-      label: "Structure & Flow",
-      description: "Advanced page manipulation and logic tools.",
+      label: "Convert to PDF",
+      description: "Transform standard formats into high-fidelity PDFs.",
       items: [
-        { title: "Merge PDF", desc: "Unify multiple documents.", icon: Merge, href: "/merge" },
-        { title: "Split PDF", desc: "Extract specific page ranges.", icon: Scissors, href: "/split" },
-        { title: "Organize", desc: "Rotate and reorder pages.", icon: RotateCw, href: "/organize" },
-        { title: "Compress", desc: "Optimize for size and speed.", icon: Maximize, href: "/compress" },
+        { title: "JPG to PDF", desc: "High-res image stitching.", icon: ImageIcon, href: "/convert?type=jpg-to-pdf" },
+        { title: "Word to PDF", desc: "Clean universal standards.", icon: FileText, href: "/convert?type=word-to-pdf" },
+        { title: "PowerPoint to PDF", desc: "Convert slides to PDF.", icon: Presentation, href: "/convert?type=ppt-to-pdf" },
+        { title: "Excel to PDF", desc: "Spreadsheets to documents.", icon: Table, href: "/convert?type=excel-to-pdf" },
+        { title: "HTML to PDF", desc: "Web pages to offline docs.", icon: FileCode, href: "/convert?type=html-to-pdf" },
+      ]
+    },
+    {
+      label: "Convert from PDF",
+      description: "Lossless transformation from PDF to industrial standards.",
+      items: [
+        { title: "PDF to Word", desc: "Editable DOCX documents.", icon: FileText, href: "/convert?type=pdf-to-word" },
+        { title: "PDF to Excel", desc: "Extract tables accurately.", icon: Table, href: "/convert?type=pdf-to-excel" },
+        { title: "PDF to PPT", desc: "PDF back to slides.", icon: Presentation, href: "/convert?type=pdf-to-ppt" },
+        { title: "PDF to JPG", desc: "Extract pages as images.", icon: ImageIcon, href: "/convert?type=pdf-to-jpg" },
+        { title: "PDF to PDF/A", desc: "Long-term archiving format.", icon: ShieldCheck, href: "/convert?type=pdf-to-pdfa" },
+      ]
+    },
+    {
+      label: "Optimize & Edit",
+      description: "Performance tuning and visual refinements.",
+      items: [
+        { title: "Compress PDF", desc: "Reduce file size instantly.", icon: Maximize, href: "/compress" },
+        { title: "Repair PDF", desc: "Fix corrupted file structures.", icon: Wrench, href: "/repair" },
+        { title: "Edit PDF", desc: "Add text, shapes, and images.", icon: Edit3, href: "/edit" },
+        { title: "Add Page Numbers", desc: "Sequential page counters.", icon: Hash, href: "/numbers" },
+        { title: "Crop PDF", desc: "Trim page margins.", icon: Crop, href: "/crop" },
+      ]
+    },
+    {
+      label: "Security Tools",
+      description: "Industrial-grade protection and compliance.",
+      items: [
+        { title: "Unlock PDF", desc: "Remove password restrictions.", icon: Unlock, href: "/protect?mode=unlock" },
+        { title: "Protect PDF", desc: "Add 256-bit encryption.", icon: Lock, href: "/protect" },
+        { title: "Add Watermark", desc: "Text overlays for protection.", icon: Type, href: "/watermark" },
+        { title: "Remove Watermark", desc: "Sanitize tracking metadata.", icon: Eraser, href: "/sanitize" },
+        { title: "Sign PDF", desc: "Apply digital signatures.", icon: Signature, href: "/sign" },
       ]
     }
   ];
@@ -62,18 +111,18 @@ export default function Home() {
       
       <main className="flex-1">
         {/* PREMIUM ENTERPRISE HERO SECTION */}
-        <section className="premium-hero pt-24 pb-32 lg:pt-40 lg:pb-48 relative overflow-hidden">
+        <section className="premium-hero pt-24 pb-48 lg:pt-32 lg:pb-64 relative overflow-hidden">
           <div className="container relative mx-auto px-6">
-            <div className="max-w-5xl mx-auto space-y-12">
-              <div className="text-center space-y-10 animate-in fade-in slide-in-from-top-12 duration-1000">
+            <div className="max-w-5xl mx-auto space-y-16">
+              <div className="text-center space-y-8 animate-in fade-in slide-in-from-top-12 duration-1000">
                 <div className="section-label mx-auto brand-glow">
                   <ShieldCheck className="h-4 w-4 text-primary" />
                   <span>Encrypted 256-bit AES Workspace</span>
                 </div>
                 
-                <h1 className="text-6xl md:text-[7rem] font-black tracking-tighter leading-[0.85] italic uppercase text-gradient">
+                <h1 className="text-6xl md:text-8xl font-black tracking-tighter leading-[0.9] italic uppercase text-gradient">
                   Intelligent <br />
-                  <span className="not-italic">Document</span> <br />
+                  <span className="not-italic text-accent">Document</span> <br />
                   Flow.
                 </h1>
                 
@@ -92,7 +141,7 @@ export default function Home() {
                 </div>
               </div>
 
-              <div className="flex items-center justify-center gap-12 pt-16 opacity-30 grayscale filter blur-[0.5px]">
+              <div className="flex items-center justify-center gap-12 pt-12 opacity-30 grayscale filter blur-[0.5px]">
                  <div className="font-black text-[10px] uppercase tracking-[0.4em] italic">ISO-27001 SECURE</div>
                  <div className="font-black text-[10px] uppercase tracking-[0.4em] italic">GDPR READY</div>
                  <div className="font-black text-[10px] uppercase tracking-[0.4em] italic">SOC2 COMPLIANT</div>
@@ -109,7 +158,7 @@ export default function Home() {
         <div id="tools" className="relative -mt-12 z-20 container mx-auto px-6">
            <div className="max-w-4xl mx-auto p-1 bg-white/40 backdrop-blur-3xl border border-white/20 rounded-[2.5rem] shadow-2xl">
               <div className="flex items-center justify-center gap-2 p-4 text-[10px] font-black uppercase tracking-[0.5em] text-accent/40">
-                 <LayoutDashboard className="h-3 w-3" /> Select a Capability Below to Begin
+                 <LayoutDashboard className="h-3 w-3" /> Professional Toolkit Infrastructure
               </div>
            </div>
         </div>
@@ -133,7 +182,7 @@ export default function Home() {
                     </div>
                   </div>
                   
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                     {cat.items.map((tool) => (
                       <ToolCard key={tool.title} {...tool} />
                     ))}

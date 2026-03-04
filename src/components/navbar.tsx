@@ -12,10 +12,19 @@ import {
   LogOut,
   Maximize,
   Table,
-  Cpu,
   LayoutDashboard,
   ShieldCheck,
-  Zap
+  Zap,
+  Image as ImageIcon,
+  Presentation,
+  FileCode,
+  Wrench,
+  Unlock,
+  Type,
+  Signature,
+  Edit3,
+  Hash,
+  Crop
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -39,21 +48,33 @@ export function Navbar() {
 
   const categories = [
     {
-      label: "Manipulation & Logic",
+      label: "Organize & Edit",
       items: [
-        { href: "/merge", icon: Merge, title: "Merge", desc: "Combine PDFs" },
-        { href: "/split", icon: Scissors, title: "Split", desc: "Extract pages" },
-        { href: "/organize", icon: RotateCw, title: "Organize", desc: "Edit structure" },
-        { href: "/compress", icon: Maximize, title: "Compress", desc: "Shrink size" },
+        { href: "/merge", icon: Merge, title: "Merge", desc: "Combine multiple PDFs" },
+        { href: "/split", icon: Scissors, title: "Split", desc: "Extract or divide pages" },
+        { href: "/organize", icon: RotateCw, title: "Organize", desc: "Reorder and rotate" },
+        { href: "/edit", icon: Edit3, title: "Edit", desc: "Add text and shapes" },
+        { href: "/crop", icon: Crop, title: "Crop", desc: "Trim page margins" },
+        { href: "/numbers", icon: Hash, title: "Page Numbers", desc: "Add sequential counters" },
       ]
     },
     {
-      label: "Analysis & Compliance",
+      label: "Convert & Export",
       items: [
-        { href: "/analyze", icon: Cpu, title: "AI Analysis", desc: "Smart summaries" },
-        { href: "/convert", icon: Table, title: "Excel Export", desc: "Data extraction" },
-        { href: "/protect", icon: Lock, title: "Security", desc: "Password lock" },
-        { href: "/sign", icon: ShieldCheck, title: "Digital Sign", desc: "Add signatures" },
+        { href: "/convert?type=word-to-pdf", icon: FileText, title: "To PDF", desc: "Word, Excel, JPG, HTML" },
+        { href: "/convert?type=pdf-to-word", icon: FileText, title: "From PDF", desc: "Word, Excel, PPT, JPG" },
+        { href: "/convert?type=pdf-to-pdfa", icon: ShieldCheck, title: "PDF/A", desc: "Archival conversion" },
+      ]
+    },
+    {
+      label: "Optimize & Secure",
+      items: [
+        { href: "/compress", icon: Maximize, title: "Compress", desc: "Reduce file size" },
+        { href: "/repair", icon: Wrench, title: "Repair", desc: "Fix corrupted PDFs" },
+        { href: "/protect", icon: Lock, title: "Protect", desc: "Add password lock" },
+        { href: "/protect?mode=unlock", icon: Unlock, title: "Unlock", desc: "Remove restrictions" },
+        { href: "/watermark", icon: Type, title: "Watermark", desc: "Add text overlays" },
+        { href: "/sign", icon: Signature, title: "Digital Sign", desc: "Apply signatures" },
       ]
     }
   ];
@@ -77,7 +98,7 @@ export function Navbar() {
                 <LayoutDashboard className="h-3.5 w-3.5 text-primary" />
                 Capabilities <ChevronDown className="h-3 w-3 opacity-40" />
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="w-[600px] p-6 rounded-[2rem] shadow-2xl border-white/20 grid grid-cols-2 gap-8">
+              <DropdownMenuContent align="start" className="w-[850px] p-8 rounded-[2rem] shadow-2xl border-white/20 grid grid-cols-3 gap-8">
                 {categories.map((cat) => (
                   <div key={cat.label} className="space-y-4">
                     <DropdownMenuLabel className="px-0 text-[10px] font-black uppercase tracking-[0.3em] text-accent">
@@ -85,14 +106,14 @@ export function Navbar() {
                     </DropdownMenuLabel>
                     <div className="space-y-2">
                       {cat.items.map((item) => (
-                        <DropdownMenuItem key={item.href} asChild className="p-3 rounded-2xl cursor-pointer">
+                        <DropdownMenuItem key={item.href} asChild className="p-3 rounded-2xl cursor-pointer hover:bg-primary/5">
                           <Link href={item.href} className="flex items-center gap-4">
-                            <div className="h-10 w-10 text-primary flex items-center justify-center">
-                              <item.icon className="h-6 w-6" />
+                            <div className="h-8 w-8 text-primary flex items-center justify-center">
+                              <item.icon className="h-5 w-5" />
                             </div> 
                             <div className="flex flex-col">
                               <span className="font-bold text-xs text-accent">{item.title}</span>
-                              <span className="text-[10px] text-muted-foreground">{item.desc}</span>
+                              <span className="text-[9px] text-muted-foreground">{item.desc}</span>
                             </div>
                           </Link>
                         </DropdownMenuItem>

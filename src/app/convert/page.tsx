@@ -145,7 +145,7 @@ export default function ConvertPage() {
       <main className="flex-1 container mx-auto px-4 py-12">
         <div className="max-w-4xl mx-auto space-y-12">
           <div className="text-center space-y-4">
-            <div className={`inline-flex h-12 w-12 items-center justify-center rounded-xl ${currentConfig.bg} ${currentConfig.color} shadow-lg mb-2`}>
+            <div className={`inline-flex h-12 w-12 items-center justify-center rounded-xl bg-primary/5 ${currentConfig.color} shadow-lg mb-2`}>
               <currentConfig.icon className="h-6 w-6" />
             </div>
             <h1 className="text-3xl font-bold tracking-tight font-headline">{currentConfig.label}</h1>
@@ -166,7 +166,7 @@ export default function ConvertPage() {
               {selectedFile && !isProcessing && (
                 <div className="flex flex-col items-center gap-6">
                   <div className="flex items-center gap-4 p-4 bg-muted/30 rounded-2xl border border-dashed border-primary/20">
-                    <div className={`p-3 rounded-xl ${currentConfig.bg} ${currentConfig.color}`}>
+                    <div className={`p-3 rounded-xl bg-primary/5 ${currentConfig.color}`}>
                        <currentConfig.icon className="h-6 w-6" />
                     </div>
                     <div className="flex-1 min-w-0">
@@ -214,7 +214,7 @@ export default function ConvertPage() {
                 </CardHeader>
                 <CardContent className="space-y-6 pb-8">
                   <div className="p-4 bg-muted/50 rounded-xl flex items-center gap-3 text-left">
-                    <div className={`p-2 rounded-lg ${currentConfig.bg} ${currentConfig.color}`}>
+                    <div className={`p-2 rounded-lg bg-primary/5 ${currentConfig.color}`}>
                       <currentConfig.icon className="h-5 w-5" />
                     </div>
                     <span className="text-sm font-medium truncate flex-1">
@@ -244,7 +244,7 @@ export default function ConvertPage() {
                      onClick={() => setCurrentType(key as ConversionType)}
                      className={`p-4 rounded-xl border transition-all hover:shadow-md flex flex-col items-center gap-2 group ${currentType === key ? 'border-primary bg-primary/5 ring-1 ring-primary' : 'bg-white hover:border-primary/50'}`}
                    >
-                     <div className={`p-2 rounded-lg ${config.bg} ${config.color} group-hover:scale-110 transition-transform`}>
+                     <div className={`p-2 rounded-lg group-hover:scale-110 transition-transform ${config.color}`}>
                        <config.icon className="h-5 w-5" />
                      </div>
                      <span className="text-[10px] font-bold text-center uppercase tracking-wider">{config.label}</span>
