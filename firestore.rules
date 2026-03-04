@@ -6,30 +6,31 @@ service cloud.firestore {
      * PDF Spark Security Rules
      *
      * CORE PHILOSOPHY:
-     * This ruleset implements a strict User-Ownership model. All application data is 
-     * partitioned by the User's Unique Identifier (UID). This ensures that a user can 
-     * only access, modify, or delete their own files, operations, and AI results.
+     * This ruleset implements a strict user-ownership model where users manage their own files and operations
+     * within their own dedicated data trees. It utilizes path-based authorization to ensure that access is
+     * granted only to the owner of the data or a verified administrator.
      *
      * DATA STRUCTURE:
-     * Data is organized hierarchically under `/users/{userId}`.
-     * - Files: `/users/{userId}/files/{fileId}`
-     * - Operations: `/users/{userId}/operations/{operationId}`
-     * - AI Results: `/users/{userId}/operations/{operationId}/aiAnalysisResults/{resultId}`
+     * - /users/{userId}: Private user profile.
+     * - /roles_admin/{adminId}: Marker collection for administrative privileges.
+     * - /users/{userId}/files/{fileId}: User-specific file metadata.
+     * - /users/{userId}/operations/{operationId}: User-specific processing logs.
+     * - /conversion_presets/{presetId}: Publicly readable global configuration.
      *
      * KEY SECURITY DECISIONS:
-     * 1. Authorization Independence: All documents (including deeply nested ones like AI results)
-     *    contain a denormalized `userId` field. This allows rules to verify ownership 
-     *    instantly without performing expensive `get()` calls to parent documents.
-     * 2. Path-to-Data Consistency: We strictly enforce that the `userId` in the document
-     *    path matches the `userId` field inside the document data.
-     * 3. Prototyping Flexibility: While ownership is strictly enforced, the specific 
-     *    internal fields of documents (beyond the `userId`) are not validated for type 
-     *    or presence, allowing for rapid front-end iteration.
-     * 4. Immutable Ownership: Once a document is created, its `userId` field cannot 
-     *    be changed, preventing data from being "transferred" to other users maliciously.
+     * 1. Authorization Independence: Ownership is verified via the document path (userId), avoiding extra database lookups.
+     * 2. Administrative Access: A global isAdmin() check allows designated users (defined in /roles_admin) to
+     *    bypass ownership checks for dashboard and analytics purposes, as requested by 'office.contact.sufian@gmail.com'.
+     * 3. Relational Integrity: On creation of nested data, the system enforces that the internal 'userId' field
+     *    matches the path variable to ensure data consistency.
+     * 4. Structural Segregation: Public presets are stored separately from private user data to prevent accidental exposure.
+     *
+     * DENORMALIZATION FOR AUTHORIZATION:
+     * - The 'userId' is present both in the document path and as a field within File and Operation entities
+     *   to allow for efficient querying and path-consistency validation.
      */
 
-    // --- HELPER FUNCTIONS ---
+    // --- Helper Functions ---
 
     /** Checks if the request is from an authenticated user. */
     function isSignedIn() {
@@ -41,73 +42,88 @@ service cloud.firestore {
       return isSignedIn() && request.auth.uid == userId;
     }
 
-    /** Checks ownership and ensures the document exists for state-changing operations. */
+    /** Checks if the user exists in the admin roles collection. */
+    function isAdmin() {
+      return isSignedIn() && exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid));
+    }
+
+    /** Combined check for ownership or administrative privileges. */
+    function isOwnerOrAdmin(userId) {
+      return isOwner(userId) || isAdmin();
+    }
+
+    /** Validates that a document exists and the user is the owner. */
     function isExistingOwner(userId) {
-      return isOwner(userId) && resource != null;
+      return resource != null && isOwner(userId);
     }
 
-    /** Enforces that the internal userId field matches the path and is immutable. */
-    function isValidOwnership(userId) {
-      return request.resource.data.userId == userId;
-    }
-
-    // --- COLLECTION RULES ---
+    // --- Collection Rules ---
 
     /**
-     * @description Rules for the root User document, allowing users to manage their own profile.
+     * @description Rules for the User profile. Users can manage their own profile; admins can view all profiles.
      * @path /users/{userId}
-     * @allow Authenticated user (create) where UID matches document ID.
-     * @deny Any user (update) attempting to change a different user's document.
-     * @principle Self-Creation and Ownership.
+     * @allow get: if isOwnerOrAdmin(userId); (User viewing self or admin analytics)
+     * @deny list: if !isAdmin(); (Prevents users from enumerating other users)
+     * @principle Ownership and Self-Creation.
      */
     match /users/{userId} {
-      allow get: if isOwner(userId);
-      allow list: if false; // Users cannot be listed for privacy.
+      allow get: if isOwnerOrAdmin(userId);
+      allow list: if isAdmin();
       allow create: if isOwner(userId);
       allow update: if isExistingOwner(userId);
-      allow delete: if isExistingOwner(userId);
+      allow delete: if isAdmin();
+    }
 
-      /**
-       * @description Stores individual PDF or document files uploaded by or generated for a specific user.
-       * @path /users/{userId}/files/{fileId}
-       * @allow User (list) their own files.
-       * @deny User (create) a file with a 'userId' field that doesn't match their own.
-       * @principle Relational integrity and path-based ownership.
-       */
-      match /files/{fileId} {
-        allow get, list: if isOwner(userId);
-        allow create: if isOwner(userId) && isValidOwnership(userId);
-        allow update: if isExistingOwner(userId) && request.resource.data.userId == resource.data.userId;
-        allow delete: if isExistingOwner(userId);
-      }
+    /**
+     * @description Administrative marker collection. Purely for authorization logic.
+     * @path /roles_admin/{adminId}
+     * @allow get: if isAdmin(); (Admins checking their own or others' status)
+     * @deny create, update, delete: if true; (Management should happen via console or secure backend)
+     * @principle Restricted Global Roles.
+     */
+    match /roles_admin/{adminId} {
+      allow get, list: if isAdmin();
+      allow create, update, delete: if false;
+    }
 
-      /**
-       * @description Tracks PDF processing tasks (merge, split, AI) initiated by a specific user.
-       * @path /users/{userId}/operations/{operationId}
-       * @allow User (get) a specific operation status.
-       * @deny Unauthenticated access to operation history.
-       * @principle Denormalized ownership for performant authorization.
-       */
-      match /operations/{operationId} {
-        allow get, list: if isOwner(userId);
-        allow create: if isOwner(userId) && isValidOwnership(userId);
-        allow update: if isExistingOwner(userId) && request.resource.data.userId == resource.data.userId;
-        allow delete: if isExistingOwner(userId);
+    /**
+     * @description User-specific files. Access is restricted to the owner or admins.
+     * @path /users/{userId}/files/{fileId}
+     * @allow create: if isOwner(userId) && request.resource.data.userId == userId; (Consistency check)
+     * @deny update: if request.resource.data.userId != resource.data.userId; (Immutable owner)
+     * @principle Path-based ownership with relational integrity.
+     */
+    match /users/{userId}/files/{fileId} {
+      allow get, list: if isOwnerOrAdmin(userId);
+      allow create: if isOwner(userId) && request.resource.data.userId == userId;
+      allow update: if isExistingOwner(userId) && request.resource.data.userId == resource.data.userId;
+      allow delete: if isExistingOwner(userId) || isAdmin();
+    }
 
-        /**
-         * @description Results of AI content analysis. Requires a denormalized 'userId' for rule efficiency.
-         * @path /users/{userId}/operations/{operationId}/aiAnalysisResults/{aiAnalysisResultId}
-         * @allow User (create) an AI result for their own operation.
-         * @deny User (list) results belonging to a different user's operation path.
-         * @principle Authorization Independence (Mandate A).
-         */
-        match /aiAnalysisResults/{aiAnalysisResultId} {
-          allow get, list: if isOwner(userId);
-          allow create: if isOwner(userId) && isValidOwnership(userId);
-          allow update: if isExistingOwner(userId) && request.resource.data.userId == resource.data.userId;
-          allow delete: if isExistingOwner(userId);
-        }
-      }
+    /**
+     * @description User-specific operations/logs. Access is restricted to the owner or admins.
+     * @path /users/{userId}/operations/{operationId}
+     * @allow list: if isOwnerOrAdmin(userId); (User viewing history or admin dashboard)
+     * @deny delete: if !isAdmin(); (Protecting audit trails for standard users)
+     * @principle Path-based ownership and audit integrity.
+     */
+    match /users/{userId}/operations/{operationId} {
+      allow get, list: if isOwnerOrAdmin(userId);
+      allow create: if isOwner(userId) && request.resource.data.userId == userId;
+      allow update: if isExistingOwner(userId) && request.resource.data.userId == resource.data.userId;
+      allow delete: if isAdmin();
+    }
+
+    /**
+     * @description Global conversion presets. Publicly readable, admin-only writes.
+     * @path /conversion_presets/{presetId}
+     * @allow get, list: if true; (Publicly available configuration)
+     * @deny create, update, delete: if !isAdmin(); (Restricted to administrators)
+     * @principle Public Read with Owner-Only Writes (Admin).
+     */
+    match /conversion_presets/{presetId} {
+      allow get, list: if true;
+      allow create, update, delete: if isAdmin();
     }
   }
 }
