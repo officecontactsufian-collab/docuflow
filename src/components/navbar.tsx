@@ -22,6 +22,7 @@ import {
   Crop,
   Search,
   FilePenLine,
+  RefreshCcw,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -89,16 +90,20 @@ export function Navbar() {
           </Link>
 
           <div className="hidden lg:flex items-center gap-8">
-            <Link href="/merge" className="text-[11px] font-black uppercase tracking-widest text-accent/80 hover:text-accent transition-all">
+            <Link href="/merge" className="flex items-center gap-2 text-[11px] font-black uppercase tracking-widest text-accent/80 hover:text-accent transition-all">
+              <Merge className="h-3.5 w-3.5 text-primary" />
               Merge PDF
             </Link>
-            <Link href="/split" className="text-[11px] font-black uppercase tracking-widest text-accent/80 hover:text-accent transition-all">
+            <Link href="/split" className="flex items-center gap-2 text-[11px] font-black uppercase tracking-widest text-accent/80 hover:text-accent transition-all">
+              <Scissors className="h-3.5 w-3.5 text-primary" />
               Split PDF
             </Link>
-            <Link href="/compress" className="text-[11px] font-black uppercase tracking-widest text-accent/80 hover:text-accent transition-all">
+            <Link href="/compress" className="flex items-center gap-2 text-[11px] font-black uppercase tracking-widest text-accent/80 hover:text-accent transition-all">
+              <Maximize className="h-3.5 w-3.5 text-primary" />
               Compress PDF
             </Link>
-            <Link href="/convert?type=word-to-pdf" className="text-[11px] font-black uppercase tracking-widest text-accent/80 hover:text-accent transition-all">
+            <Link href="/convert?type=word-to-pdf" className="flex items-center gap-2 text-[11px] font-black uppercase tracking-widest text-accent/80 hover:text-accent transition-all">
+              <RefreshCcw className="h-3.5 w-3.5 text-primary" />
               Convert PDF
             </Link>
 
