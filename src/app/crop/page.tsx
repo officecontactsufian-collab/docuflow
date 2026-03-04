@@ -1,3 +1,4 @@
+
 "use client"
 
 import * as React from 'react';
@@ -126,14 +127,23 @@ export default function CropPage() {
 
   const applyCropToPage = (page: any, settings: CropSettings) => {
     const mediaBox = page.getMediaBox();
-    const x = mediaBox.x + (settings.l / 100) * mediaBox.width;
-    const y = mediaBox.y + (settings.b / 100) * mediaBox.height;
-    const newWidth = mediaBox.width * (1 - (settings.l + settings.r) / 100);
-    const newHeight = mediaBox.height * (1 - (settings.t + settings.b) / 100);
+    
+    // PDF coordinates are bottom-up. 
+    // l and r are percentages from left/right. 
+    // t and b are percentages from top/bottom.
+    const leftOffset = (settings.l / 100) * mediaBox.width;
+    const rightOffset = (settings.r / 100) * mediaBox.width;
+    const topOffset = (settings.t / 100) * mediaBox.height;
+    const bottomOffset = (settings.b / 100) * mediaBox.height;
+
+    const newX = mediaBox.x + leftOffset;
+    const newY = mediaBox.y + bottomOffset;
+    const newWidth = mediaBox.width - leftOffset - rightOffset;
+    const newHeight = mediaBox.height - topOffset - bottomOffset;
 
     page.setCropBox(
-      Math.max(mediaBox.x, x),
-      Math.max(mediaBox.y, y),
+      Math.max(mediaBox.x, newX),
+      Math.max(mediaBox.y, newY),
       Math.max(1, newWidth),
       Math.max(1, newHeight)
     );
@@ -153,7 +163,6 @@ export default function CropPage() {
         let resultPdf: PDFDocument;
         
         if (cropScope === "current") {
-          // Extract only the current page
           resultPdf = await PDFDocument.create();
           const [copiedPage] = await resultPdf.copyPages(sourcePdf, [currentPage]);
           resultPdf.addPage(copiedPage);
@@ -161,11 +170,13 @@ export default function CropPage() {
           const settings = allCrops[currentPage] || { t: 10, r: 10, b: 10, l: 10 };
           applyCropToPage(copiedPage, settings);
         } else {
-          // Process all pages
+          // Process all pages with their individual crops
           resultPdf = sourcePdf;
-          const settings = allCrops[currentPage] || { t: 10, r: 10, b: 10, l: 10 };
           const pages = resultPdf.getPages();
-          pages.forEach(page => applyCropToPage(page, settings));
+          pages.forEach((page, i) => {
+            const settings = allCrops[i] || allCrops[currentPage] || { t: 10, r: 10, b: 10, l: 10 };
+            applyCropToPage(page, settings);
+          });
         }
 
         const pdfBytes = await resultPdf.save();
@@ -216,16 +227,31 @@ export default function CropPage() {
         
         setDownloadUrl(URL.createObjectURL(finalBlob));
       } else {
-        // PDF to Image (Export Format is png or jpg but input is PDF)
-        // For simplicity in a browser context without a PDF renderer, we'll export as PDF but notify the user
-        // In a real prod app, we'd use pdf.js to render to canvas first
+        // PDF to Image export is simulated as PDF export with note
         const arrayBuffer = await selectedFile.arrayBuffer();
-        const pdfDoc = await PDFDocument.load(arrayBuffer, { ignoreEncryption: true });
-        const pdfBytes = await pdfDoc.save();
-        const blob = new Blob([pdfBytes], { type: 'application/pdf' });
-        setDownloadUrl(URL.createObjectURL(blob));
+        const sourcePdf = await PDFDocument.load(arrayBuffer, { ignoreEncryption: true });
+        
+        if (cropScope === "current") {
+          const resultPdf = await PDFDocument.create();
+          const [copiedPage] = await resultPdf.copyPages(sourcePdf, [currentPage]);
+          resultPdf.addPage(copiedPage);
+          const settings = allCrops[currentPage] || { t: 10, r: 10, b: 10, l: 10 };
+          applyCropToPage(copiedPage, settings);
+          const pdfBytes = await resultPdf.save();
+          const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+          setDownloadUrl(URL.createObjectURL(blob));
+        } else {
+          sourcePdf.getPages().forEach((page, i) => {
+            const settings = allCrops[i] || allCrops[currentPage] || { t: 10, r: 10, b: 10, l: 10 };
+            applyCropToPage(page, settings);
+          });
+          const pdfBytes = await sourcePdf.save();
+          const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+          setDownloadUrl(URL.createObjectURL(blob));
+        }
+        
         setExportFormat("pdf");
-        toast({ title: "Note", description: "PDF to Image conversion exported as cropped PDF." });
+        toast({ title: "Note", description: "Format conversion exported as cropped PDF." });
       }
 
       setIsDone(true);
@@ -262,40 +288,52 @@ export default function CropPage() {
       const clampedY = Math.max(0, Math.min(100, y));
 
       if (isDragging === 'top') {
-        setCropTop(clampedY);
-        updateCurrentCrop({ t: clampedY });
+        const nextT = Math.min(clampedY, 100 - cropBottom - 1);
+        setCropTop(nextT);
+        updateCurrentCrop({ t: nextT });
       }
       if (isDragging === 'bottom') {
-        setCropBottom(100 - clampedY);
-        updateCurrentCrop({ b: 100 - clampedY });
+        const nextB = Math.min(100 - clampedY, 100 - cropTop - 1);
+        setCropBottom(nextB);
+        updateCurrentCrop({ b: nextB });
       }
       if (isDragging === 'left') {
-        setCropLeft(clampedX);
-        updateCurrentCrop({ l: clampedX });
+        const nextL = Math.min(clampedX, 100 - cropRight - 1);
+        setCropLeft(nextL);
+        updateCurrentCrop({ l: nextL });
       }
       if (isDragging === 'right') {
-        setCropRight(100 - clampedX);
-        updateCurrentCrop({ r: 100 - clampedX });
+        const nextR = Math.min(100 - clampedX, 100 - cropLeft - 1);
+        setCropRight(nextR);
+        updateCurrentCrop({ r: nextR });
       }
       if (isDragging === 'top-left') {
-        setCropTop(clampedY);
-        setCropLeft(clampedX);
-        updateCurrentCrop({ t: clampedY, l: clampedX });
+        const nextT = Math.min(clampedY, 100 - cropBottom - 1);
+        const nextL = Math.min(clampedX, 100 - cropRight - 1);
+        setCropTop(nextT);
+        setCropLeft(nextL);
+        updateCurrentCrop({ t: nextT, l: nextL });
       }
       if (isDragging === 'top-right') {
-        setCropTop(clampedY);
-        setCropRight(100 - clampedX);
-        updateCurrentCrop({ t: clampedY, r: 100 - clampedX });
+        const nextT = Math.min(clampedY, 100 - cropBottom - 1);
+        const nextR = Math.min(100 - clampedX, 100 - cropLeft - 1);
+        setCropTop(nextT);
+        setCropRight(nextR);
+        updateCurrentCrop({ t: nextT, r: nextR });
       }
       if (isDragging === 'bottom-left') {
-        setCropBottom(100 - clampedY);
-        setCropLeft(clampedX);
-        updateCurrentCrop({ b: 100 - clampedY, l: clampedX });
+        const nextB = Math.min(100 - clampedY, 100 - cropTop - 1);
+        const nextL = Math.min(clampedX, 100 - cropRight - 1);
+        setCropBottom(nextB);
+        setCropLeft(nextL);
+        updateCurrentCrop({ b: nextB, l: nextL });
       }
       if (isDragging === 'bottom-right') {
-        setCropBottom(100 - clampedY);
-        setCropRight(100 - clampedX);
-        updateCurrentCrop({ b: 100 - clampedY, r: 100 - clampedX });
+        const nextB = Math.min(100 - clampedY, 100 - cropTop - 1);
+        const nextR = Math.min(100 - clampedX, 100 - cropLeft - 1);
+        setCropBottom(nextB);
+        setCropRight(nextR);
+        updateCurrentCrop({ b: nextB, r: nextR });
       }
     };
 
@@ -310,7 +348,7 @@ export default function CropPage() {
       window.removeEventListener('mousemove', onMouseMove);
       window.removeEventListener('mouseup', onMouseUp);
     };
-  }, [isDragging, currentPage]);
+  }, [isDragging, cropTop, cropBottom, cropLeft, cropRight, currentPage]);
 
   const reset = () => {
     setSelectedFile(null);
@@ -383,7 +421,7 @@ export default function CropPage() {
                           </div>
                         )}
 
-                        <div className="absolute inset-0 bg-black/5 pointer-events-none" style={{ 
+                        <div className="absolute inset-0 bg-black/10 pointer-events-none" style={{ 
                           clipPath: `polygon(
                             0% 0%, 100% 0%, 100% 100%, 0% 100%, 0% 0%,
                             ${cropLeft}% ${cropTop}%, 
@@ -407,6 +445,10 @@ export default function CropPage() {
                           <div onMouseDown={onMouseDown('top-right')} className="absolute -top-3 -right-3 w-6 h-6 bg-white border-2 border-primary rounded-full cursor-nesw-resize shadow-lg hover:scale-125 transition-transform z-50" />
                           <div onMouseDown={onMouseDown('bottom-left')} className="absolute -bottom-3 -left-3 w-6 h-6 bg-white border-2 border-primary rounded-full cursor-nesw-resize shadow-lg hover:scale-125 transition-transform z-50" />
                           <div onMouseDown={onMouseDown('bottom-right')} className="absolute -bottom-3 -right-3 w-6 h-6 bg-white border-2 border-primary rounded-full cursor-nwse-resize shadow-lg hover:scale-125 transition-transform z-50" />
+                          <div onMouseDown={onMouseDown('top')} className="absolute -top-1.5 left-1/2 -translate-x-1/2 w-10 h-3 bg-primary/20 rounded-full cursor-ns-resize hover:bg-primary/40 transition-colors" />
+                          <div onMouseDown={onMouseDown('bottom')} className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-10 h-3 bg-primary/20 rounded-full cursor-ns-resize hover:bg-primary/40 transition-colors" />
+                          <div onMouseDown={onMouseDown('left')} className="absolute top-1/2 -translate-y-1/2 -left-1.5 w-3 h-10 bg-primary/20 rounded-full cursor-ew-resize hover:bg-primary/40 transition-colors" />
+                          <div onMouseDown={onMouseDown('right')} className="absolute top-1/2 -translate-y-1/2 -right-1.5 w-3 h-10 bg-primary/20 rounded-full cursor-ew-resize hover:bg-primary/40 transition-colors" />
                         </div>
                       </div>
 
@@ -451,32 +493,37 @@ export default function CropPage() {
                           <div className="space-y-4">
                             <Label className="text-[10px] font-black uppercase tracking-widest text-accent/60">Target Scope</Label>
                             <RadioGroup 
-                              defaultValue="all" 
                               value={cropScope} 
                               onValueChange={(v) => setCropScope(v as any)}
                               className="grid grid-cols-1 gap-3"
                             >
-                              <div className={cn(
-                                "flex items-center space-x-3 p-4 rounded-2xl border transition-all cursor-pointer",
-                                cropScope === 'all' ? "bg-primary/5 border-primary/20" : "border-accent/10 hover:border-accent/20"
-                              )} onClick={() => setCropScope('all')}>
-                                <RadioGroupItem value="all" id="all-pages" />
-                                <Label htmlFor="all-pages" className="flex flex-col cursor-pointer">
+                              <div 
+                                className={cn(
+                                  "flex items-center space-x-3 p-4 rounded-2xl border transition-all cursor-pointer",
+                                  cropScope === 'all' ? "bg-primary/5 border-primary/20" : "border-accent/10 hover:border-accent/20"
+                                )} 
+                                onClick={() => setCropScope('all')}
+                              >
+                                <RadioGroupItem value="all" id="scope-all" />
+                                <Label htmlFor="scope-all" className="flex flex-col cursor-pointer flex-1">
                                   <span className="text-xs font-black uppercase italic">All Pages</span>
-                                  <span className="text-[9px] text-muted-foreground uppercase tracking-widest text-left">Apply crop to entire sequence</span>
+                                  <span className="text-[9px] text-muted-foreground uppercase tracking-widest">Apply crop to entire sequence</span>
                                 </Label>
-                                <Copy className="h-4 w-4 ml-auto text-primary/40" />
+                                <Copy className="h-4 w-4 text-primary/40" />
                               </div>
-                              <div className={cn(
-                                "flex items-center space-x-3 p-4 rounded-2xl border transition-all cursor-pointer",
-                                cropScope === 'current' ? "bg-primary/5 border-primary/20" : "border-accent/10 hover:border-accent/20"
-                              )} onClick={() => setCropScope('current')}>
-                                <RadioGroupItem value="current" id="current-page" />
-                                <Label htmlFor="current-page" className="flex flex-col cursor-pointer">
+                              <div 
+                                className={cn(
+                                  "flex items-center space-x-3 p-4 rounded-2xl border transition-all cursor-pointer",
+                                  cropScope === 'current' ? "bg-primary/5 border-primary/20" : "border-accent/10 hover:border-accent/20"
+                                )} 
+                                onClick={() => setCropScope('current')}
+                              >
+                                <RadioGroupItem value="current" id="scope-current" />
+                                <Label htmlFor="scope-current" className="flex flex-col cursor-pointer flex-1">
                                   <span className="text-xs font-black uppercase italic">Current Page</span>
-                                  <span className="text-[9px] text-muted-foreground uppercase tracking-widest text-left">Extract Page {currentPage + 1} ONLY</span>
+                                  <span className="text-[9px] text-muted-foreground uppercase tracking-widest">Extract Page {currentPage + 1} ONLY</span>
                                 </Label>
-                                <Scan className="h-4 w-4 ml-auto text-primary/40" />
+                                <Scan className="h-4 w-4 text-primary/40" />
                               </div>
                             </RadioGroup>
                           </div>
