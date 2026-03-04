@@ -10,12 +10,13 @@ import {
   Menu,
   RotateCw,
   LogOut,
-  Zap,
   Maximize,
-  LayoutGrid,
-  FilePenLine,
   Table,
-  Cpu
+  Cpu,
+  LayoutDashboard,
+  Files,
+  ShieldCheck,
+  Zap
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -37,112 +38,116 @@ export function Navbar() {
     signOut(auth);
   };
 
-  const manipulationTools = [
-    { href: "/merge", icon: Merge, title: "Merge PDF", desc: "Combine documents" },
-    { href: "/split", icon: Scissors, title: "Split PDF", desc: "Extract pages" },
-    { href: "/organize", icon: RotateCw, title: "Organize", desc: "Reorder & rotate" },
-    { href: "/compress", icon: Maximize, title: "Compress", desc: "Optimize size" },
-  ];
-
-  const analysisTools = [
-    { href: "/analyze", icon: Cpu, title: "AI Analysis", desc: "Summarize with AI" },
-    { href: "/protect", icon: Lock, title: "Security", desc: "Lock & sanitize" },
-    { href: "/convert", icon: Table, title: "Excel Export", desc: "Data extraction" },
+  const categories = [
+    {
+      label: "Manipulation",
+      items: [
+        { href: "/merge", icon: Merge, title: "Merge", desc: "Combine PDFs" },
+        { href: "/split", icon: Scissors, title: "Split", desc: "Extract pages" },
+        { href: "/organize", icon: RotateCw, title: "Organize", desc: "Edit structure" },
+        { href: "/compress", icon: Maximize, title: "Compress", desc: "Shrink size" },
+      ]
+    },
+    {
+      label: "Intelligence",
+      items: [
+        { href: "/analyze", icon: Cpu, title: "AI Analysis", desc: "Smart summaries" },
+        { href: "/convert", icon: Table, title: "Excel Export", desc: "Data extraction" },
+        { href: "/protect", icon: Lock, title: "Security", desc: "Password lock" },
+        { href: "/sign", icon: ShieldCheck, title: "Digital Sign", desc: "Add signatures" },
+      ]
+    }
   ];
 
   return (
     <nav className="glass-nav">
-      <div className="container mx-auto flex h-20 items-center justify-between px-6">
-        <div className="flex items-center gap-10">
+      <div className="container mx-auto flex h-24 items-center justify-between px-6">
+        <div className="flex items-center gap-12">
           <Link href="/" className="flex items-center gap-3 group">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-accent text-primary shadow-lg transition-transform group-hover:scale-105">
+            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-accent text-primary shadow-xl transition-transform group-hover:scale-105 group-hover:-rotate-3">
               <FileText className="h-6 w-6" />
             </div>
-            <span className="text-xl font-black tracking-tighter text-accent uppercase italic">
+            <span className="text-2xl font-black tracking-tighter text-accent uppercase italic">
               DocuFlow
             </span>
           </Link>
 
-          <div className="hidden lg:flex items-center gap-8">
+          <div className="hidden lg:flex items-center gap-10">
             <DropdownMenu>
-              <DropdownMenuTrigger className="flex items-center gap-1 text-[10px] font-black uppercase tracking-widest text-accent/70 hover:text-accent transition-colors outline-none">
-                Manipulation <ChevronDown className="h-3 w-3" />
+              <DropdownMenuTrigger className="flex items-center gap-2 text-[11px] font-black uppercase tracking-widest text-accent/80 hover:text-accent transition-all outline-none">
+                <LayoutDashboard className="h-3.5 w-3.5 text-primary" />
+                Tools <ChevronDown className="h-3 w-3 opacity-40" />
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="w-[300px] p-4 rounded-2xl shadow-2xl border-white/20">
-                {manipulationTools.map((item) => (
-                  <DropdownMenuItem key={item.href} asChild className="p-3 rounded-xl cursor-pointer hover:bg-muted/20">
-                    <Link href={item.href} className="flex items-center gap-3">
-                      <div className="h-8 w-8 bg-secondary text-primary rounded-lg flex items-center justify-center">
-                        <item.icon className="h-4 w-4" />
-                      </div> 
-                      <div className="flex flex-col">
-                        <span className="font-bold text-xs text-accent">{item.title}</span>
-                        <span className="text-[10px] text-muted-foreground">{item.desc}</span>
-                      </div>
-                    </Link>
-                  </DropdownMenuItem>
+              <DropdownMenuContent align="start" className="w-[600px] p-6 rounded-[2rem] shadow-2xl border-white/20 grid grid-cols-2 gap-8">
+                {categories.map((cat) => (
+                  <div key={cat.label} className="space-y-4">
+                    <DropdownMenuLabel className="px-0 text-[10px] font-black uppercase tracking-[0.3em] text-primary/60">
+                      {cat.label}
+                    </DropdownMenuLabel>
+                    <div className="space-y-2">
+                      {cat.items.map((item) => (
+                        <DropdownMenuItem key={item.href} asChild className="p-3 rounded-2xl cursor-pointer hover:bg-muted/10">
+                          <Link href={item.href} className="flex items-center gap-4">
+                            <div className="h-10 w-10 bg-secondary text-primary rounded-xl flex items-center justify-center shadow-sm">
+                              <item.icon className="h-5 w-5" />
+                            </div> 
+                            <div className="flex flex-col">
+                              <span className="font-bold text-xs text-accent">{item.title}</span>
+                              <span className="text-[10px] text-muted-foreground">{item.desc}</span>
+                            </div>
+                          </Link>
+                        </DropdownMenuItem>
+                      ))}
+                    </div>
+                  </div>
                 ))}
               </DropdownMenuContent>
             </DropdownMenu>
 
-            <DropdownMenu>
-              <DropdownMenuTrigger className="flex items-center gap-1 text-[10px] font-black uppercase tracking-widest text-accent/70 hover:text-accent transition-colors outline-none">
-                Analysis <ChevronDown className="h-3 w-3" />
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="w-[300px] p-4 rounded-2xl shadow-2xl border-white/20">
-                {analysisTools.map((item) => (
-                  <DropdownMenuItem key={item.href} asChild className="p-3 rounded-xl cursor-pointer hover:bg-muted/20">
-                    <Link href={item.href} className="flex items-center gap-3">
-                      <div className="h-8 w-8 bg-secondary text-primary rounded-lg flex items-center justify-center">
-                        <item.icon className="h-4 w-4" />
-                      </div> 
-                      <div className="flex flex-col">
-                        <span className="font-bold text-xs text-accent">{item.title}</span>
-                        <span className="text-[10px] text-muted-foreground">{item.desc}</span>
-                      </div>
-                    </Link>
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
-            
-            <Link href="/pricing" className="text-[10px] font-black uppercase tracking-widest text-accent/70 hover:text-accent transition-colors">Pricing</Link>
+            <Link href="/pricing" className="flex items-center gap-2 text-[11px] font-black uppercase tracking-widest text-accent/80 hover:text-accent transition-all">
+              <Zap className="h-3.5 w-3.5 text-primary" />
+              Pricing
+            </Link>
+            <Link href="/security" className="flex items-center gap-2 text-[11px] font-black uppercase tracking-widest text-accent/80 hover:text-accent transition-all">
+              <Lock className="h-3.5 w-3.5 text-primary" />
+              Security
+            </Link>
           </div>
         </div>
 
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-6">
           {!isUserLoading && user ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="h-10 px-4 rounded-xl hover:bg-white/10 flex items-center gap-3">
-                  <div className="w-7 h-7 rounded-lg bg-accent text-white flex items-center justify-center text-[10px] font-bold">
+                <Button variant="ghost" className="h-12 px-5 rounded-2xl hover:bg-white/20 flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-xl bg-accent text-white flex items-center justify-center text-[11px] font-bold">
                     {user.email?.[0].toUpperCase() || 'U'}
                   </div>
-                  <ChevronDown className="h-3 w-3 opacity-50 text-accent" />
+                  <ChevronDown className="h-3 w-3 opacity-40 text-accent" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56 p-2 rounded-2xl shadow-2xl bg-card">
-                <DropdownMenuLabel className="px-3 py-2 text-[10px] font-black uppercase tracking-widest text-primary/60">Professional Workspace</DropdownMenuLabel>
-                <DropdownMenuItem className="p-3 rounded-xl cursor-pointer font-bold text-xs text-accent hover:bg-muted/20">User Profile</DropdownMenuItem>
-                <DropdownMenuItem className="p-3 rounded-xl cursor-pointer font-bold text-xs text-accent hover:bg-muted/20">Team Settings</DropdownMenuItem>
+              <DropdownMenuContent align="end" className="w-64 p-3 rounded-[1.5rem] shadow-2xl bg-card">
+                <DropdownMenuLabel className="px-3 py-2 text-[10px] font-black uppercase tracking-widest text-primary/60">Professional Profile</DropdownMenuLabel>
+                <DropdownMenuItem className="p-3 rounded-xl cursor-pointer font-bold text-xs text-accent hover:bg-muted/10">Workspace Overview</DropdownMenuItem>
+                <DropdownMenuItem className="p-3 rounded-xl cursor-pointer font-bold text-xs text-accent hover:bg-muted/10">Account Billing</DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleLogout} className="p-3 rounded-xl cursor-pointer text-destructive font-bold text-xs">
-                  <LogOut className="h-4 w-4 mr-2" /> End Session
+                  <LogOut className="h-4 w-4 mr-3" /> Terminate Session
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           ) : (
-            <div className="flex items-center gap-4">
-              <Link href="/login" className="hidden md:block text-[10px] font-black uppercase tracking-widest text-accent/70 hover:text-accent transition-colors">Sign In</Link>
-              <Button asChild size="sm" className="h-10 px-6 rounded-xl bg-accent text-white font-black uppercase tracking-widest text-[10px] shadow-lg shadow-accent/20 hover:bg-accent/90 transition-all">
-                <Link href="/login">Get Started</Link>
+            <div className="flex items-center gap-5">
+              <Link href="/login" className="hidden md:block text-[11px] font-black uppercase tracking-widest text-accent/80 hover:text-accent transition-all">Sign In</Link>
+              <Button asChild className="h-12 px-8 rounded-2xl bg-accent text-white font-black uppercase tracking-[0.2em] text-[10px] shadow-2xl shadow-accent/20 hover:scale-105 active:scale-95 transition-all">
+                <Link href="/login">Start Free</Link>
               </Button>
             </div>
           )}
           
           <div className="lg:hidden">
-            <Button variant="ghost" size="icon" className="h-10 w-10 text-accent">
-              <Menu className="h-5 w-5" />
+            <Button variant="ghost" size="icon" className="h-11 w-11 text-accent">
+              <Menu className="h-6 w-6" />
             </Button>
           </div>
         </div>

@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from 'react';
-import { Upload, FileText, X, CheckCircle2, ImageIcon, FileCode, FileSpreadsheet, FileArchive } from 'lucide-react';
+import { Upload, FileText, X, CheckCircle2, ImageIcon, FileCode, FileSpreadsheet, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
@@ -11,9 +11,10 @@ interface FileDropzoneProps {
   maxFiles?: number;
   isLoading?: boolean;
   className?: string;
+  isHero?: boolean;
 }
 
-export function FileDropzone({ onFilesSelected, accept = ".pdf", maxFiles = 10, isLoading, className }: FileDropzoneProps) {
+export function FileDropzone({ onFilesSelected, accept = ".pdf", maxFiles = 10, isLoading, className, isHero }: FileDropzoneProps) {
   const [isDragging, setIsDragging] = React.useState(false);
   const [selectedFiles, setSelectedFiles] = React.useState<File[]>([]);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
@@ -31,7 +32,6 @@ export function FileDropzone({ onFilesSelected, accept = ".pdf", maxFiles = 10, 
     e.preventDefault();
     setIsDragging(false);
     const files = Array.from(e.dataTransfer.files);
-    // Simple filter based on accept string extensions if provided
     const acceptedFiles = files.filter(file => {
       if (accept === "*") return true;
       const exts = accept.split(',').map(s => s.trim().toLowerCase());
@@ -70,17 +70,18 @@ export function FileDropzone({ onFilesSelected, accept = ".pdf", maxFiles = 10, 
   };
 
   return (
-    <div className={cn("w-full max-w-3xl mx-auto", className)}>
+    <div className={cn("w-full max-w-4xl mx-auto", className)}>
       <div
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
         onClick={() => fileInputRef.current?.click()}
         className={cn(
-          "relative border-2 border-dashed rounded-2xl p-12 text-center transition-all cursor-pointer group",
+          "relative rounded-[2.5rem] transition-all cursor-pointer group flex flex-col items-center justify-center border-2 border-dashed",
+          isHero ? "p-16 min-h-[400px]" : "p-12",
           isDragging 
-            ? "border-accent bg-accent/5 scale-[1.01]" 
-            : "border-border hover:border-primary/50 hover:bg-primary/5",
+            ? "border-primary bg-primary/5 scale-[1.02]" 
+            : "border-accent/10 bg-white/40 hover:border-primary/40 hover:bg-white/60 shadow-2xl",
           isLoading && "pointer-events-none opacity-50"
         )}
       >
@@ -93,45 +94,49 @@ export function FileDropzone({ onFilesSelected, accept = ".pdf", maxFiles = 10, 
           className="hidden"
         />
         
-        <div className="flex flex-col items-center gap-4">
+        <div className="flex flex-col items-center gap-6 text-center">
           <div className={cn(
-            "w-16 h-16 rounded-full flex items-center justify-center transition-transform group-hover:scale-110",
-            isDragging ? "bg-accent text-accent-foreground" : "bg-muted text-muted-foreground"
+            "w-24 h-24 rounded-[2rem] flex items-center justify-center transition-all duration-500 group-hover:scale-110 group-hover:-rotate-3 shadow-2xl",
+            isDragging ? "bg-primary text-white" : "bg-accent text-primary"
           )}>
-            <Upload className="h-8 w-8" />
+            {isDragging ? <Plus className="h-12 w-12" /> : <Upload className="h-10 w-10" />}
           </div>
-          <div className="space-y-2">
-            <h3 className="text-xl font-semibold font-headline">Select files to upload</h3>
-            <p className="text-sm text-muted-foreground">Accepts: {accept.replace(/\./g, '').toUpperCase()}</p>
+          <div className="space-y-3">
+            <h3 className={cn("font-black tracking-tight uppercase italic text-accent", isHero ? "text-4xl" : "text-2xl")}>
+              {isDragging ? "Drop to Process" : "Select Documents"}
+            </h3>
+            <p className="text-accent/60 font-bold uppercase tracking-widest text-xs">
+              {isHero ? "Encrypted • Private • High-Fidelity" : `Accepts: ${accept.replace(/\./g, '').toUpperCase()}`}
+            </p>
           </div>
-          <Button type="button" size="lg" className="mt-2 shadow-md">
+          <Button type="button" size="lg" className="h-14 px-10 rounded-2xl bg-accent text-white font-black uppercase tracking-widest text-[10px] shadow-2xl transition-all">
             Choose Files
           </Button>
         </div>
       </div>
 
       {selectedFiles.length > 0 && (
-        <div className="mt-8 space-y-3 animate-in fade-in slide-in-from-top-4">
-          <div className="flex items-center justify-between px-2">
-            <h4 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Selected Files ({selectedFiles.length})</h4>
-            <Button variant="ghost" size="sm" onClick={() => {setSelectedFiles([]); onFilesSelected([]);}} className="text-xs">
-              Clear All
+        <div className="mt-12 space-y-4 animate-in fade-in slide-in-from-top-4">
+          <div className="flex items-center justify-between px-4">
+            <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-accent/50">Staged for Processing ({selectedFiles.length})</h4>
+            <Button variant="ghost" size="sm" onClick={() => {setSelectedFiles([]); onFilesSelected([]);}} className="text-[10px] font-black uppercase tracking-widest hover:text-destructive">
+              Discard All
             </Button>
           </div>
           <div className="grid gap-3">
             {selectedFiles.map((file, i) => (
-              <div key={`${file.name}-${i}`} className="flex items-center justify-between p-4 bg-card border rounded-xl shadow-sm group">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-primary/10 text-primary rounded-lg">
+              <div key={`${file.name}-${i}`} className="flex items-center justify-between p-5 bg-white/80 border border-white/40 rounded-3xl shadow-xl group hover:border-primary/20 transition-all">
+                <div className="flex items-center gap-4">
+                  <div className="p-3 bg-secondary/10 text-primary rounded-2xl shadow-sm">
                     {getFileIcon(file.name)}
                   </div>
                   <div className="flex flex-col">
-                    <span className="text-sm font-medium truncate max-w-[200px] sm:max-w-md">{file.name}</span>
-                    <span className="text-xs text-muted-foreground">{(file.size / 1024 / 1024).toFixed(2)} MB</span>
+                    <span className="text-sm font-black text-accent truncate max-w-[250px] sm:max-w-lg uppercase italic">{file.name}</span>
+                    <span className="text-[10px] font-black uppercase tracking-widest text-accent/40">{(file.size / 1024 / 1024).toFixed(2)} MB</span>
                   </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <CheckCircle2 className="h-5 w-5 text-green-500 opacity-0 group-hover:opacity-100 transition-opacity" />
+                <div className="flex items-center gap-3">
+                  <CheckCircle2 className="h-6 w-6 text-green-500 opacity-0 group-hover:opacity-100 transition-opacity" />
                   <Button
                     variant="ghost"
                     size="icon"
@@ -139,9 +144,9 @@ export function FileDropzone({ onFilesSelected, accept = ".pdf", maxFiles = 10, 
                       e.stopPropagation();
                       removeFile(i);
                     }}
-                    className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                    className="h-10 w-10 rounded-xl text-accent/40 hover:text-destructive transition-all"
                   >
-                    <X className="h-4 w-4" />
+                    <X className="h-5 w-5" />
                   </Button>
                 </div>
               </div>
