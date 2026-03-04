@@ -85,7 +85,7 @@ export function Navbar() {
                     </DropdownMenuLabel>
                     <div className="space-y-2">
                       {cat.items.map((item) => (
-                        <DropdownMenuItem key={item.href} asChild className="p-3 rounded-2xl cursor-pointer hover:bg-muted/10">
+                        <DropdownMenuItem key={item.href} asChild className="p-3 rounded-2xl cursor-pointer">
                           <Link href={item.href} className="flex items-center gap-4">
                             <div className="h-10 w-10 text-primary flex items-center justify-center">
                               <item.icon className="h-6 w-6" />
@@ -127,8 +127,8 @@ export function Navbar() {
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-64 p-3 rounded-[1.5rem] shadow-2xl bg-card">
                 <DropdownMenuLabel className="px-3 py-2 text-[10px] font-black uppercase tracking-widest text-primary/60">Professional Profile</DropdownMenuLabel>
-                <DropdownMenuItem className="p-3 rounded-xl cursor-pointer font-bold text-xs text-accent hover:bg-muted/10">Workspace Overview</DropdownMenuItem>
-                <DropdownMenuItem className="p-3 rounded-xl cursor-pointer font-bold text-xs text-accent hover:bg-muted/10">Account Billing</DropdownMenuItem>
+                <DropdownMenuItem className="p-3 rounded-xl cursor-pointer font-bold text-xs text-accent">Workspace Overview</DropdownMenuItem>
+                <DropdownMenuItem className="p-3 rounded-xl cursor-pointer font-bold text-xs text-accent">Account Billing</DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleLogout} className="p-3 rounded-xl cursor-pointer text-destructive font-bold text-xs">
                   <LogOut className="h-4 w-4 mr-3" /> Terminate Session
