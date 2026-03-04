@@ -9,8 +9,8 @@
     /* Foreground: #0A0F0D - Rich Black */
     --foreground: 165 19% 5%;
     
-    /* Card Background: Very light tint of brand teal */
-    --card: 175 20% 98%;
+    /* Card Background: #F8FAFA - Very light brand teal tint */
+    --card: 180 20% 98%;
     --card-foreground: 165 19% 5%;
     
     --popover: 0 0% 100%;
@@ -24,7 +24,7 @@
     --secondary: 190 15% 54%;
     --secondary-foreground: 0 0% 100%;
     
-    /* Muted (Header): #91C5C1 - Soft Teal */
+    /* Muted (Header/Navbar): #91C5C1 - Soft Teal */
     --muted: 175 31% 67%;
     --muted-foreground: 165 19% 25%;
     
@@ -47,7 +47,7 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-body;
     font-feature-settings: "rlig" 1, "calt" 1;
   }
 }
