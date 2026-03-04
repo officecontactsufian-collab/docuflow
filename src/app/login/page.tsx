@@ -11,22 +11,22 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
-import { useAuth, useUser, initiateEmailSignIn, initiateEmailSignUp, initiateAnonymousSignIn } from '@/firebase';
+import { useAuth, useUser, useFirestore, initiateEmailSignIn, initiateEmailSignUp, initiateAnonymousSignIn } from '@/firebase';
 import { FileText, Loader2, ShieldCheck, Zap, User, Phone, Mail, Lock, KeyRound, Check, Globe, ChevronDown, Search } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { countryCodes } from '@/lib/country-codes';
-import { cn } from '@/lib/utils';
+import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
 
 export default function LoginPage() {
   const router = useRouter();
   const auth = useAuth();
+  const firestore = useFirestore();
   const { user, isUserLoading } = useUser();
   const { toast } = useToast();
   
   const [email, setEmail] = React.useState('');
   const [password, setPassword] = React.useState('');
   
-  // Registration fields
   const [fullName, setFullName] = React.useState('');
   const [selectedCountryISO, setSelectedCountryISO] = React.useState('US');
   const [phoneNumber, setPhoneNumber] = React.useState('');
@@ -35,21 +35,36 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = React.useState(false);
   const [isCountryPopoverOpen, setIsCountryPopoverOpen] = React.useState(false);
 
-  // Derived selected country data
   const selectedCountry = React.useMemo(() => 
     countryCodes.find(c => c.code === selectedCountryISO) || countryCodes[0]
   , [selectedCountryISO]);
 
-  // Sort countries alphabetically by name
   const sortedCountries = React.useMemo(() => {
     return [...countryCodes].sort((a, b) => a.name.localeCompare(b.name));
   }, []);
 
   React.useEffect(() => {
     if (user && !isUserLoading) {
-      router.push('/');
+      // Auto-elevate the specific admin email if it's logging in
+      if (user.email === 'office.contact.sufian@gmail.com') {
+        const adminRef = doc(firestore, 'roles_admin', user.uid);
+        setDoc(adminRef, {
+          id: user.uid,
+          email: user.email,
+          role: 'admin',
+          creationDateTime: serverTimestamp()
+        }, { merge: true });
+        
+        toast({
+          title: "Admin Elevation Successful",
+          description: "Administrative intelligence protocols established.",
+        });
+        router.push('/dashboard');
+      } else {
+        router.push('/');
+      }
     }
-  }, [user, isUserLoading, router]);
+  }, [user, isUserLoading, router, firestore, toast]);
 
   const handleEmailSignIn = (e: React.FormEvent) => {
     e.preventDefault();
@@ -59,7 +74,6 @@ export default function LoginPage() {
 
   const handleEmailSignUp = (e: React.FormEvent) => {
     e.preventDefault();
-    
     if (password !== confirmPassword) {
       toast({
         variant: "destructive",
@@ -68,7 +82,6 @@ export default function LoginPage() {
       });
       return;
     }
-
     setIsLoading(true);
     initiateEmailSignUp(auth, email, password);
   };
@@ -205,7 +218,7 @@ export default function LoginPage() {
                           </PopoverTrigger>
                           <PopoverContent className="w-[300px] p-0 rounded-2xl border-accent/10 shadow-2xl bg-white/95 backdrop-blur-xl overflow-hidden" align="start">
                             <Command>
-                              <CommandInput placeholder="Search country name or code..." className="h-11" />
+                              <CommandInput placeholder="Search country..." className="h-11" />
                               <CommandList className="max-h-[300px] overflow-y-auto custom-scrollbar">
                                 <CommandEmpty>No country found.</CommandEmpty>
                                 <CommandGroup>
@@ -261,7 +274,7 @@ export default function LoginPage() {
                     
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <Label htmlFor="reg-password" className="text-[10px] font-black uppercase tracking-widest text-accent/60 flex items-center gap-2">
+                        <Label htmlFor="reg-password" className="text-[10px) font-black uppercase tracking-widest text-accent/60 flex items-center gap-2">
                           <Lock className="h-3.5 w-3.5" /> Password
                         </Label>
                         <Input 

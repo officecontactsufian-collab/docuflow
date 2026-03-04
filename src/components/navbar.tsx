@@ -1,3 +1,4 @@
+
 "use client"
 
 import Link from 'next/link';
@@ -22,6 +23,7 @@ import {
   Crop,
   FilePenLine,
   RefreshCcw,
+  Activity
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -32,12 +34,29 @@ import {
   DropdownMenuSeparator,
   DropdownMenuLabel,
 } from '@/components/ui/dropdown-menu';
-import { useUser, useAuth } from '@/firebase';
+import { useUser, useAuth, useFirestore } from '@/firebase';
 import { signOut } from 'firebase/auth';
+import { doc, getDoc } from 'firebase/firestore';
+import * as React from 'react';
 
 export function Navbar() {
   const { user, isUserLoading } = useUser();
   const auth = useAuth();
+  const firestore = useFirestore();
+  const [isAdmin, setIsAdmin] = React.useState(false);
+
+  React.useEffect(() => {
+    async function checkAdmin() {
+      if (user) {
+        const adminRef = doc(firestore, 'roles_admin', user.uid);
+        const adminSnap = await getDoc(adminRef);
+        setIsAdmin(adminSnap.exists());
+      } else {
+        setIsAdmin(false);
+      }
+    }
+    checkAdmin();
+  }, [user, firestore]);
 
   const handleLogout = () => {
     signOut(auth);
@@ -91,7 +110,7 @@ export function Navbar() {
 
           {/* Core Navigation Links */}
           <div className="hidden lg:flex items-center gap-6">
-            {/* Mega Menu Trigger - Now First after Brand */}
+            {/* Mega Menu Trigger */}
             <DropdownMenu>
               <DropdownMenuTrigger className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest text-accent hover:text-primary transition-all outline-none">
                 <LayoutDashboard className="h-3 w-3 text-primary" />
@@ -123,6 +142,13 @@ export function Navbar() {
               </DropdownMenuContent>
             </DropdownMenu>
 
+            {isAdmin && (
+              <Link href="/dashboard" className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest text-primary hover:text-primary transition-all group">
+                <Activity className="h-3 w-3 animate-pulse" />
+                Command Dashboard
+              </Link>
+            )}
+
             <Link href="/merge" className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest text-accent/80 hover:text-accent transition-all group">
               <Merge className="h-3 w-3 text-primary/60 group-hover:text-primary transition-colors" />
               Merge
@@ -134,10 +160,6 @@ export function Navbar() {
             <Link href="/compress" className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest text-accent/80 hover:text-accent transition-all group">
               <Maximize className="h-3 w-3 text-primary/60 group-hover:text-primary transition-colors" />
               Compress
-            </Link>
-            <Link href="/convert?type=word-to-pdf" className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest text-accent/80 hover:text-accent transition-all group">
-              <RefreshCcw className="h-3 w-3 text-primary/60 group-hover:text-primary transition-colors" />
-              Convert
             </Link>
           </div>
         </div>
@@ -156,7 +178,9 @@ export function Navbar() {
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="h-10 px-3 rounded-xl hover:bg-accent/5 flex items-center gap-2 transition-all">
                   <div className="flex flex-col items-end mr-1 hidden sm:flex">
-                    <span className="text-[9px] font-black uppercase tracking-widest text-primary leading-none">Admin</span>
+                    <span className="text-[9px] font-black uppercase tracking-widest text-primary leading-none">
+                      {isAdmin ? 'ADMIN' : 'MEMBER'}
+                    </span>
                     <span className="text-[8px] font-bold text-accent/40 leading-tight">Pro</span>
                   </div>
                   <div className="w-7 h-7 rounded-lg bg-accent text-white flex items-center justify-center text-[10px] font-black italic shadow-md">
@@ -167,7 +191,11 @@ export function Navbar() {
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56 p-2 rounded-2xl shadow-xl bg-white border-accent/10 mt-1">
                 <DropdownMenuLabel className="px-3 py-1.5 text-[9px] font-black uppercase tracking-widest text-primary/60">Workspace</DropdownMenuLabel>
-                <DropdownMenuItem className="p-2.5 rounded-lg cursor-pointer font-bold text-[10px] text-accent hover:bg-accent/5 transition-colors">Overview</DropdownMenuItem>
+                {isAdmin && (
+                  <DropdownMenuItem asChild className="p-2.5 rounded-lg cursor-pointer font-bold text-[10px] text-primary hover:bg-primary/5 transition-colors">
+                    <Link href="/dashboard">System Dashboard</Link>
+                  </DropdownMenuItem>
+                )}
                 <DropdownMenuItem className="p-2.5 rounded-lg cursor-pointer font-bold text-[10px] text-accent hover:bg-accent/5 transition-colors">Billing</DropdownMenuItem>
                 <DropdownMenuItem className="p-2.5 rounded-lg cursor-pointer font-bold text-[10px] text-accent hover:bg-accent/5 transition-colors">Settings</DropdownMenuItem>
                 <DropdownMenuSeparator className="my-1.5 bg-accent/5" />
@@ -185,7 +213,6 @@ export function Navbar() {
             </div>
           )}
           
-          {/* Mobile Navigation Trigger */}
           <div className="lg:hidden">
             <Button variant="ghost" size="icon" className="h-10 w-10 text-accent hover:bg-accent/5 rounded-xl">
               <Menu className="h-5 w-5" />
