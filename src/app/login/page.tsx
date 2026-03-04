@@ -8,9 +8,11 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useAuth, useUser, initiateEmailSignIn, initiateEmailSignUp, initiateAnonymousSignIn } from '@/firebase';
 import { FileText, Loader2, ShieldCheck, Zap, User, Phone, Mail, Lock, KeyRound } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { countryCodes } from '@/lib/country-codes';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -21,8 +23,9 @@ export default function LoginPage() {
   const [email, setEmail] = React.useState('');
   const [password, setPassword] = React.useState('');
   
-  // New registration fields
+  // Registration fields
   const [fullName, setFullName] = React.useState('');
+  const [countryCode, setCountryCode] = React.useState('+1');
   const [phoneNumber, setPhoneNumber] = React.useState('');
   const [confirmPassword, setConfirmPassword] = React.useState('');
   
@@ -54,7 +57,7 @@ export default function LoginPage() {
 
     setIsLoading(true);
     // Note: Standard Firebase initiateEmailSignUp only takes email/password.
-    // In a full implementation, we would update the profile with fullName/phone after creation.
+    // In a full implementation, the additional profile data would be saved here.
     initiateEmailSignUp(auth, email, password);
   };
 
@@ -154,35 +157,52 @@ export default function LoginPage() {
                 </CardHeader>
                 <form onSubmit={handleEmailSignUp}>
                   <CardContent className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="reg-name" className="flex items-center gap-2">
-                          <User className="h-3.5 w-3.5 text-muted-foreground" /> Full Name
-                        </Label>
-                        <Input 
-                          id="reg-name" 
-                          placeholder="Jane Doe" 
-                          required 
-                          value={fullName}
-                          onChange={(e) => setFullName(e.target.value)}
-                          className="bg-muted/20"
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="reg-phone" className="flex items-center gap-2">
-                          <Phone className="h-3.5 w-3.5 text-muted-foreground" /> Phone
-                        </Label>
+                    <div className="space-y-2">
+                      <Label htmlFor="reg-name" className="flex items-center gap-2">
+                        <User className="h-3.5 w-3.5 text-muted-foreground" /> Full Name
+                      </Label>
+                      <Input 
+                        id="reg-name" 
+                        placeholder="Jane Doe" 
+                        required 
+                        value={fullName}
+                        onChange={(e) => setFullName(e.target.value)}
+                        className="bg-muted/20"
+                      />
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label htmlFor="reg-phone" className="flex items-center gap-2">
+                        <Phone className="h-3.5 w-3.5 text-muted-foreground" /> Phone Number
+                      </Label>
+                      <div className="flex gap-2">
+                        <Select value={countryCode} onValueChange={setCountryCode}>
+                          <SelectTrigger className="w-[110px] bg-muted/20 shrink-0">
+                            <SelectValue placeholder="+1" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {countryCodes.map((country) => (
+                              <SelectItem key={`${country.code}-${country.dial_code}`} value={country.dial_code}>
+                                <span className="flex items-center gap-2">
+                                  <span>{country.flag}</span>
+                                  <span className="font-mono text-xs">{country.dial_code}</span>
+                                </span>
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
                         <Input 
                           id="reg-phone" 
                           type="tel" 
-                          placeholder="+1 (555) 000-0000" 
+                          placeholder="555-000-0000" 
                           required 
                           value={phoneNumber}
                           onChange={(e) => setPhoneNumber(e.target.value)}
-                          className="bg-muted/20"
+                          className="bg-muted/20 flex-1"
                         />
                       </div>
                     </div>
+
                     <div className="space-y-2">
                       <Label htmlFor="reg-email" className="flex items-center gap-2">
                         <Mail className="h-3.5 w-3.5 text-muted-foreground" /> Professional Email
@@ -197,6 +217,7 @@ export default function LoginPage() {
                         className="bg-muted/20"
                       />
                     </div>
+                    
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2">
                         <Label htmlFor="reg-password" className="flex items-center gap-2">
