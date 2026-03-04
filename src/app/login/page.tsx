@@ -9,11 +9,13 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 import { useAuth, useUser, initiateEmailSignIn, initiateEmailSignUp, initiateAnonymousSignIn } from '@/firebase';
-import { FileText, Loader2, ShieldCheck, Zap, User, Phone, Mail, Lock, KeyRound, Check, Globe } from 'lucide-react';
+import { FileText, Loader2, ShieldCheck, Zap, User, Phone, Mail, Lock, KeyRound, Check, Globe, ChevronDown, Search } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { countryCodes } from '@/lib/country-codes';
+import { cn } from '@/lib/utils';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -31,11 +33,17 @@ export default function LoginPage() {
   const [confirmPassword, setConfirmPassword] = React.useState('');
   
   const [isLoading, setIsLoading] = React.useState(false);
+  const [isCountryPopoverOpen, setIsCountryPopoverOpen] = React.useState(false);
 
   // Derived selected country data
   const selectedCountry = React.useMemo(() => 
     countryCodes.find(c => c.code === selectedCountryISO) || countryCodes[0]
   , [selectedCountryISO]);
+
+  // Sort countries alphabetically by name
+  const sortedCountries = React.useMemo(() => {
+    return [...countryCodes].sort((a, b) => a.name.localeCompare(b.name));
+  }, []);
 
   React.useEffect(() => {
     if (user && !isUserLoading) {
@@ -180,27 +188,50 @@ export default function LoginPage() {
                         <Globe className="h-3.5 w-3.5" /> Global Dialing Protocol
                       </Label>
                       <div className="flex gap-2">
-                        <Select value={selectedCountryISO} onValueChange={setSelectedCountryISO}>
-                          <SelectTrigger className="w-[120px] bg-muted/20 shrink-0 h-11 rounded-xl border-accent/10 focus:ring-primary shadow-sm">
-                            <div className="flex items-center gap-2 overflow-hidden">
-                              <span className="text-lg">{selectedCountry.flag}</span>
-                              <span className="font-bold text-xs text-accent">{selectedCountry.dial_code}</span>
-                            </div>
-                          </SelectTrigger>
-                          <SelectContent className="max-h-[300px] rounded-2xl border-accent/10 shadow-2xl bg-white/95 backdrop-blur-xl">
-                            {countryCodes.map((country) => (
-                              <SelectItem key={country.code} value={country.code} className="cursor-pointer focus:bg-primary/5 rounded-lg m-1 transition-colors">
-                                <div className="flex items-center gap-3 w-full">
-                                  <span className="text-xl shrink-0">{country.flag}</span>
-                                  <div className="flex flex-col min-w-0">
-                                    <span className="text-xs font-bold text-accent truncate max-w-[140px] uppercase tracking-tight">{country.name}</span>
-                                    <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">{country.dial_code}</span>
-                                  </div>
-                                </div>
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                        <Popover open={isCountryPopoverOpen} onOpenChange={setIsCountryPopoverOpen}>
+                          <PopoverTrigger asChild>
+                            <Button
+                              variant="outline"
+                              role="combobox"
+                              aria-expanded={isCountryPopoverOpen}
+                              className="w-[120px] bg-muted/20 shrink-0 h-11 rounded-xl border-accent/10 focus:ring-primary shadow-sm justify-between px-3"
+                            >
+                              <div className="flex items-center gap-2 overflow-hidden">
+                                <span className="text-lg">{selectedCountry.flag}</span>
+                                <span className="font-bold text-xs text-accent">{selectedCountry.dial_code}</span>
+                              </div>
+                              <ChevronDown className="h-3 w-3 opacity-40 shrink-0" />
+                            </Button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-[300px] p-0 rounded-2xl border-accent/10 shadow-2xl bg-white/95 backdrop-blur-xl overflow-hidden" align="start">
+                            <Command>
+                              <CommandInput placeholder="Search country name or code..." className="h-11" />
+                              <CommandList className="max-h-[300px] overflow-y-auto custom-scrollbar">
+                                <CommandEmpty>No country found.</CommandEmpty>
+                                <CommandGroup>
+                                  {sortedCountries.map((country) => (
+                                    <CommandItem
+                                      key={country.code}
+                                      value={`${country.name} ${country.dial_code} ${country.code}`}
+                                      onSelect={() => {
+                                        setSelectedCountryISO(country.code);
+                                        setIsCountryPopoverOpen(false);
+                                      }}
+                                      className="flex items-center gap-3 p-2.5 rounded-lg m-1 cursor-pointer transition-colors"
+                                    >
+                                      <span className="text-xl shrink-0">{country.flag}</span>
+                                      <div className="flex flex-col min-w-0 flex-1">
+                                        <span className="text-xs font-bold text-accent truncate uppercase tracking-tight">{country.name}</span>
+                                        <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">{country.dial_code}</span>
+                                      </div>
+                                      {selectedCountryISO === country.code && <Check className="h-3.5 w-3.5 text-primary shrink-0" />}
+                                    </CommandItem>
+                                  ))}
+                                </CommandGroup>
+                              </CommandList>
+                            </Command>
+                          </PopoverContent>
+                        </Popover>
                         <Input 
                           id="reg-phone" 
                           type="tel" 
