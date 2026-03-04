@@ -2,7 +2,7 @@
 "use client"
 
 import * as React from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { Navbar } from '@/components/navbar';
 import { FileDropzone } from '@/components/file-dropzone';
 import { Button } from '@/components/ui/button';
@@ -46,6 +46,7 @@ const conversionConfig: Record<string, { label: string; icon: any; color: string
 
 export default function ConvertPage() {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const [currentType, setCurrentType] = React.useState<ConversionType>((searchParams.get('type') as ConversionType) || 'word-to-pdf');
   const [selectedFile, setSelectedFile] = React.useState<File | null>(null);
   const [isProcessing, setIsProcessing] = React.useState(false);
@@ -53,14 +54,14 @@ export default function ConvertPage() {
   const [downloadUrl, setDownloadUrl] = React.useState<string | null>(null);
   const { toast } = useToast();
 
-  // Sync state with URL changes from Navbar
+  // Sync state with URL changes
   React.useEffect(() => {
     const typeFromUrl = searchParams.get('type') as ConversionType;
     if (typeFromUrl && typeFromUrl !== currentType) {
       setCurrentType(typeFromUrl);
       reset();
     }
-  }, [searchParams, currentType]);
+  }, [searchParams]);
 
   const currentConfig = conversionConfig[currentType] || conversionConfig['word-to-pdf'];
 
@@ -164,7 +165,6 @@ export default function ConvertPage() {
         setDownloadUrl(URL.createObjectURL(blob));
 
       } else if (currentType.endsWith('-to-pdf')) {
-        // High-Fidelity Professional Transformation Report for complex formats
         await new Promise(resolve => setTimeout(resolve, 2000));
         const page = pdfDoc.addPage([600, 450]);
         
@@ -178,7 +178,6 @@ export default function ConvertPage() {
         const blob = new Blob([pdfBytes], { type: 'application/pdf' });
         setDownloadUrl(URL.createObjectURL(blob));
       } else {
-        // PDF to [Target] Reconstruction
         await new Promise(resolve => setTimeout(resolve, 2500));
         const ext = getOutputExtension();
         const mockContent = `DocuFlow Professional Export\nProtocol: ${currentConfig.label}\nSource: ${selectedFile.name}\nExport Type: ${ext.toUpperCase()}\nTimestamp: ${new Date().toISOString()}\n\nAsset has been reconstructed for the target environment.`;
@@ -232,6 +231,10 @@ export default function ConvertPage() {
       URL.revokeObjectURL(downloadUrl);
       setDownloadUrl(null);
     }
+  };
+
+  const switchProtocol = (type: ConversionType) => {
+    router.push(`/convert?type=${type}`);
   };
 
   return (
@@ -338,10 +341,7 @@ export default function ConvertPage() {
                  {Object.entries(conversionConfig).map(([key, config]) => (
                    <button
                      key={key}
-                     onClick={() => {
-                       setCurrentType(key as ConversionType);
-                       reset();
-                     }}
+                     onClick={() => switchProtocol(key as ConversionType)}
                      className={`p-5 rounded-2xl border transition-all flex flex-col items-center gap-3 group ${currentType === key ? 'border-primary bg-primary/5 ring-1 ring-primary shadow-xl' : 'bg-white border-accent/5 hover:border-primary/40 hover:shadow-lg'}`}
                    >
                      <div className={`p-2.5 rounded-xl group-hover:scale-110 transition-transform shadow-sm bg-white ${config.color}`}>
