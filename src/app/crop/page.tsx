@@ -1,4 +1,3 @@
-
 "use client"
 
 import * as React from 'react';
@@ -10,17 +9,18 @@ import {
   Loader2, 
   Download, 
   CheckCircle2, 
-  Sliders, 
-  ShieldCheck, 
   MousePointer2, 
   ChevronLeft, 
   ChevronRight,
-  Layers
+  Layers,
+  Settings2,
+  Scan,
+  Copy
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Slider } from '@/components/ui/slider';
 import { Label } from '@/components/ui/label';
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { PDFDocument } from 'pdf-lib';
 import { PDFPreview } from '@/components/pdf-preview';
 import { cn } from '@/lib/utils';
@@ -38,16 +38,19 @@ export default function CropPage() {
   const [isDone, setIsDone] = React.useState(false);
   const [downloadUrl, setDownloadUrl] = React.useState<string | null>(null);
   
+  // Scoping
+  const [cropScope, setCropScope] = React.useState<"all" | "current">("all");
+
   // Per-page state
   const [currentPage, setCurrentPage] = React.useState(0);
   const [totalPages, setTotalPages] = React.useState(1);
   const [allCrops, setAllCrops] = React.useState<Record<number, CropSettings>>({});
 
-  // Individual margin states for the "current" view
-  const [cropTop, setCropTop] = React.useState([10]);
-  const [cropRight, setCropRight] = React.useState([10]);
-  const [cropBottom, setCropBottom] = React.useState([10]);
-  const [cropLeft, setCropLeft] = React.useState([10]);
+  // Individual margin states for the "current" view (synced with allCrops[currentPage])
+  const [cropTop, setCropTop] = React.useState(10);
+  const [cropRight, setCropRight] = React.useState(10);
+  const [cropBottom, setCropBottom] = React.useState(10);
+  const [cropLeft, setCropLeft] = React.useState(10);
 
   const { toast } = useToast();
   const containerRef = React.useRef<HTMLDivElement>(null);
@@ -89,10 +92,10 @@ export default function CropPage() {
   };
 
   const syncView = (settings: CropSettings) => {
-    setCropTop([settings.t]);
-    setCropRight([settings.r]);
-    setCropBottom([settings.b]);
-    setCropLeft([settings.l]);
+    setCropTop(settings.t);
+    setCropRight(settings.r);
+    setCropBottom(settings.b);
+    setCropLeft(settings.l);
   };
 
   const updateCurrentCrop = (updates: Partial<CropSettings>) => {
@@ -130,9 +133,22 @@ export default function CropPage() {
         const pages = pdfDoc.getPages();
 
         pages.forEach((page, i) => {
-          const settings = allCrops[i] || { t: 0, r: 0, b: 0, l: 0 };
-          const { width, height } = page.getSize();
+          let settings: CropSettings;
           
+          if (cropScope === "all") {
+            // Use current page settings for everyone
+            settings = allCrops[currentPage];
+          } else {
+            // Apply only to the current page, or use unique settings if they exist
+            if (i === currentPage) {
+               settings = allCrops[i];
+            } else {
+               // If scope is "current", only crop the active page
+               return; 
+            }
+          }
+          
+          const { width, height } = page.getSize();
           const x = (settings.l / 100) * width;
           const y = (settings.b / 100) * height;
           const newWidth = width - ((settings.l + settings.r) / 100) * width;
@@ -153,22 +169,21 @@ export default function CropPage() {
 
       setIsDone(true);
       toast({ 
-        title: "Per-Page Crop Complete", 
-        description: `Successfully dimensioned ${totalPages} ${totalPages === 1 ? 'page' : 'pages'}.` 
+        title: "Crop Applied", 
+        description: cropScope === "all" ? "Applied to all document pages." : "Applied to active page only." 
       });
     } catch (e) {
       console.error(e);
       toast({ 
         variant: "destructive", 
         title: "Process Failed", 
-        description: "Could not apply individual crop boundaries." 
+        description: "Could not apply geometric boundaries." 
       });
     } finally {
       setIsProcessing(false);
     }
   };
 
-  // Mouse Interaction Logic
   const onMouseDown = (handle: string) => (e: React.MouseEvent) => {
     e.preventDefault();
     setIsDragging(handle);
@@ -186,40 +201,40 @@ export default function CropPage() {
       const clampedY = Math.max(0, Math.min(100, y));
 
       if (isDragging === 'top') {
-        setCropTop([clampedY]);
+        setCropTop(clampedY);
         updateCurrentCrop({ t: clampedY });
       }
       if (isDragging === 'bottom') {
-        setCropBottom([100 - clampedY]);
+        setCropBottom(100 - clampedY);
         updateCurrentCrop({ b: 100 - clampedY });
       }
       if (isDragging === 'left') {
-        setCropLeft([clampedX]);
+        setCropLeft(clampedX);
         updateCurrentCrop({ l: clampedX });
       }
       if (isDragging === 'right') {
-        setCropRight([100 - clampedX]);
+        setCropRight(100 - clampedX);
         updateCurrentCrop({ r: 100 - clampedX });
       }
       
       if (isDragging === 'top-left') {
-        setCropTop([clampedY]);
-        setCropLeft([clampedX]);
+        setCropTop(clampedY);
+        setCropLeft(clampedX);
         updateCurrentCrop({ t: clampedY, l: clampedX });
       }
       if (isDragging === 'top-right') {
-        setCropTop([clampedY]);
-        setCropRight([100 - clampedX]);
+        setCropTop(clampedY);
+        setCropRight(100 - clampedX);
         updateCurrentCrop({ t: clampedY, r: 100 - clampedX });
       }
       if (isDragging === 'bottom-left') {
-        setCropBottom([100 - clampedY]);
-        setCropLeft([clampedX]);
+        setCropBottom(100 - clampedY);
+        setCropLeft(clampedX);
         updateCurrentCrop({ b: 100 - clampedY, l: clampedX });
       }
       if (isDragging === 'bottom-right') {
-        setCropBottom([100 - clampedY]);
-        setCropRight([100 - clampedX]);
+        setCropBottom(100 - clampedY);
+        setCropRight(100 - clampedX);
         updateCurrentCrop({ b: 100 - clampedY, r: 100 - clampedX });
       }
     };
@@ -258,9 +273,9 @@ export default function CropPage() {
             <div className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-lg mb-2">
               <Crop className="h-6 w-6" />
             </div>
-            <h1 className="text-3xl font-bold tracking-tight font-headline text-accent uppercase italic tracking-tighter">Precision Multi-Crop</h1>
+            <h1 className="text-3xl font-bold tracking-tight font-headline text-accent uppercase italic tracking-tighter">Visual Crop Engine</h1>
             <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-              Define unique dimensions for every page. High-fidelity structural manipulation.
+              Precision mouse-based cropping. Define unique page dimensions or apply to entire assets.
             </p>
           </div>
 
@@ -313,11 +328,11 @@ export default function CropPage() {
                         <div className="absolute inset-0 bg-black/40 pointer-events-none" style={{ 
                           clipPath: `polygon(
                             0% 0%, 100% 0%, 100% 100%, 0% 100%, 0% 0%,
-                            ${cropLeft[0]}% ${cropTop[0]}%, 
-                            ${cropLeft[0]}% ${100 - cropBottom[0]}%, 
-                            ${100 - cropRight[0]}% ${100 - cropBottom[0]}%, 
-                            ${100 - cropRight[0]}% ${cropTop[0]}%, 
-                            ${cropLeft[0]}% ${cropTop[0]}%
+                            ${cropLeft}% ${cropTop}%, 
+                            ${cropLeft}% ${100 - cropBottom}%, 
+                            ${100 - cropRight}% ${100 - cropBottom}%, 
+                            ${100 - cropRight}% ${cropTop}%, 
+                            ${cropLeft}% ${cropTop}%
                           )` 
                         }} />
 
@@ -325,10 +340,10 @@ export default function CropPage() {
                         <div 
                           className="absolute border-2 border-primary shadow-[0_0_0_9999px_rgba(0,0,0,0)]"
                           style={{
-                            top: `${cropTop[0]}%`,
-                            left: `${cropLeft[0]}%`,
-                            right: `${cropRight[0]}%`,
-                            bottom: `${cropBottom[0]}%`,
+                            top: `${cropTop}%`,
+                            left: `${cropLeft}%`,
+                            right: `${cropRight}%`,
+                            bottom: `${cropBottom}%`,
                           }}
                         >
                           {/* Corner Handles */}
@@ -374,71 +389,50 @@ export default function CropPage() {
                     </div>
                   </div>
 
-                  {/* Right: Fine-Tuning Controls */}
+                  {/* Right: Choices & Metadata */}
                   <div className="lg:col-span-4 space-y-6">
                     <Card className="border-none shadow-2xl rounded-[2.5rem] bg-white/80 backdrop-blur-sm sticky top-24">
                       <CardHeader className="pt-8 px-8">
                         <CardTitle className="text-xl font-black uppercase italic tracking-tight flex items-center gap-3 text-accent">
-                          <Sliders className="h-5 w-5 text-primary" />
-                          Page Geometry
+                          <Settings2 className="h-5 w-5 text-primary" />
+                          Crop Settings
                         </CardTitle>
                         <CardDescription className="text-[10px] font-bold uppercase tracking-widest text-accent/40">
-                          Adjusting Page {currentPage + 1}
+                          Scope & Application
                         </CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-8 p-8">
-                        <div className="space-y-6">
-                          <div className="space-y-3">
-                            <div className="flex justify-between items-center">
-                              <Label className="text-[10px] font-black uppercase tracking-widest text-accent/60">Top Margin</Label>
-                              <span className="text-[10px] font-bold text-primary">{cropTop[0]}%</span>
+                        <div className="space-y-4">
+                          <Label className="text-[10px] font-black uppercase tracking-widest text-accent/60">Target Pages</Label>
+                          <RadioGroup 
+                            defaultValue="all" 
+                            value={cropScope} 
+                            onValueChange={(v) => setCropScope(v as any)}
+                            className="grid grid-cols-1 gap-3"
+                          >
+                            <div className={cn(
+                              "flex items-center space-x-3 p-4 rounded-2xl border transition-all cursor-pointer",
+                              cropScope === 'all' ? "bg-primary/5 border-primary/20" : "border-accent/10 hover:border-accent/20"
+                            )} onClick={() => setCropScope('all')}>
+                              <RadioGroupItem value="all" id="all-pages" />
+                              <Label htmlFor="all-pages" className="flex flex-col cursor-pointer">
+                                <span className="text-xs font-black uppercase italic">All Pages</span>
+                                <span className="text-[9px] text-muted-foreground uppercase tracking-widest">Apply current crop to every page</span>
+                              </Label>
+                              <Copy className="h-4 w-4 ml-auto text-primary/40" />
                             </div>
-                            <Slider 
-                              value={cropTop} 
-                              onValueChange={(v) => { setCropTop(v); updateCurrentCrop({ t: v[0] }); }} 
-                              max={90} 
-                              step={1} 
-                            />
-                          </div>
-
-                          <div className="space-y-3">
-                            <div className="flex justify-between items-center">
-                              <Label className="text-[10px] font-black uppercase tracking-widest text-accent/60">Bottom Margin</Label>
-                              <span className="text-[10px] font-bold text-primary">{cropBottom[0]}%</span>
+                            <div className={cn(
+                              "flex items-center space-x-3 p-4 rounded-2xl border transition-all cursor-pointer",
+                              cropScope === 'current' ? "bg-primary/5 border-primary/20" : "border-accent/10 hover:border-accent/20"
+                            )} onClick={() => setCropScope('current')}>
+                              <RadioGroupItem value="current" id="current-page" />
+                              <Label htmlFor="current-page" className="flex flex-col cursor-pointer">
+                                <span className="text-xs font-black uppercase italic">Current Page</span>
+                                <span className="text-[9px] text-muted-foreground uppercase tracking-widest">Crop only Page {currentPage + 1}</span>
+                              </Label>
+                              <Scan className="h-4 w-4 ml-auto text-primary/40" />
                             </div>
-                            <Slider 
-                              value={cropBottom} 
-                              onValueChange={(v) => { setCropBottom(v); updateCurrentCrop({ b: v[0] }); }} 
-                              max={90} 
-                              step={1} 
-                            />
-                          </div>
-
-                          <div className="space-y-3">
-                            <div className="flex justify-between items-center">
-                              <Label className="text-[10px] font-black uppercase tracking-widest text-accent/60">Left Margin</Label>
-                              <span className="text-[10px] font-bold text-primary">{cropLeft[0]}%</span>
-                            </div>
-                            <Slider 
-                              value={cropLeft} 
-                              onValueChange={(v) => { setCropLeft(v); updateCurrentCrop({ l: v[0] }); }} 
-                              max={90} 
-                              step={1} 
-                            />
-                          </div>
-
-                          <div className="space-y-3">
-                            <div className="flex justify-between items-center">
-                              <Label className="text-[10px] font-black uppercase tracking-widest text-accent/60">Right Margin</Label>
-                              <span className="text-[10px] font-bold text-primary">{cropRight[0]}%</span>
-                            </div>
-                            <Slider 
-                              value={cropRight} 
-                              onValueChange={(v) => { setCropRight(v); updateCurrentCrop({ r: v[0] }); }} 
-                              max={90} 
-                              step={1} 
-                            />
-                          </div>
+                          </RadioGroup>
                         </div>
 
                         <div className="pt-4 flex flex-col gap-3">
@@ -447,24 +441,26 @@ export default function CropPage() {
                             disabled={isProcessing}
                             className="w-full h-14 rounded-2xl bg-accent text-white font-black uppercase tracking-[0.2em] text-[11px] shadow-2xl shadow-accent/20"
                           >
-                            {isProcessing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : "Apply Geometric Crop"}
+                            {isProcessing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : "Execute Precision Crop"}
                           </Button>
                           <Button variant="ghost" onClick={() => setSelectedFile(null)} className="text-[10px] font-bold uppercase tracking-widest text-accent/40 hover:text-accent">
-                            Discard Asset
+                            Change Asset
                           </Button>
+                        </div>
+                        
+                        {/* Status readout (Replaces Adjustment Bar) */}
+                        <div className="pt-6 border-t border-accent/5 grid grid-cols-2 gap-4">
+                           <div className="space-y-1">
+                              <p className="text-[8px] font-black uppercase tracking-widest text-accent/40">Margins</p>
+                              <p className="text-[10px] font-bold text-accent">T: {cropTop.toFixed(0)}% • B: {cropBottom.toFixed(0)}%</p>
+                           </div>
+                           <div className="space-y-1">
+                              <p className="text-[8px] font-black uppercase tracking-widest text-accent/40">Canvas</p>
+                              <p className="text-[10px] font-bold text-accent">L: {cropLeft.toFixed(0)}% • R: {cropRight.toFixed(0)}%</p>
+                           </div>
                         </div>
                       </CardContent>
                     </Card>
-
-                    <div className="flex items-start gap-3 p-6 bg-primary/5 rounded-[2rem] border border-primary/10">
-                      <ShieldCheck className="h-5 w-5 text-primary mt-0.5 shrink-0" />
-                      <div className="space-y-1">
-                        <p className="text-xs font-black uppercase tracking-wider text-accent">Per-Page Structural Integrity</p>
-                        <p className="text-[10px] text-muted-foreground leading-relaxed">
-                          Navigate pages to define specific bounds. We recalculate the CropBox array for each unique page sequence in the document tree.
-                        </p>
-                      </div>
-                    </div>
                   </div>
                 </div>
               )}
@@ -476,8 +472,8 @@ export default function CropPage() {
                   <CheckCircle2 className="h-10 w-10" />
                 </div>
                 <div className="space-y-2">
-                  <h2 className="text-2xl font-black uppercase italic tracking-tight text-accent">Re-dimensioned!</h2>
-                  <p className="text-muted-foreground text-sm font-medium">Successfully processed {totalPages} unique page dimensions.</p>
+                  <h2 className="text-2xl font-black uppercase italic tracking-tight text-accent">Cropping Complete</h2>
+                  <p className="text-muted-foreground text-sm font-medium">Successfully processed the selection scope.</p>
                 </div>
                 <Button 
                   size="lg" 
@@ -494,7 +490,7 @@ export default function CropPage() {
                   className="w-full h-14 rounded-2xl bg-accent hover:bg-accent/90 shadow-xl shadow-accent/20 text-[11px] font-black uppercase tracking-widest"
                 >
                   <Download className="mr-2 h-4 w-4" />
-                  Download Asset
+                  Download Result
                 </Button>
               </Card>
               <Button variant="ghost" onClick={reset} className="text-[10px] font-bold uppercase tracking-widest text-accent/60">
