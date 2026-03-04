@@ -149,28 +149,28 @@ export default function Home() {
         <section className="relative py-24 lg:py-40 overflow-hidden hero-gradient">
           <div className="container relative mx-auto px-4">
             <div className="max-w-4xl mx-auto text-center space-y-10">
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-xs font-bold uppercase tracking-widest border border-primary/20 animate-in fade-in slide-in-from-bottom-4 duration-700">
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-accent/10 text-accent text-xs font-bold uppercase tracking-widest border border-accent/20 animate-in fade-in slide-in-from-bottom-4 duration-700">
                 <Shield className="h-4 w-4" />
-                <span>Verified Enterprise Security</span>
+                <span>Enterprise Grade Security</span>
               </div>
               
               <div className="space-y-6">
-                <h1 className="text-6xl md:text-8xl font-black tracking-tighter text-slate-900 leading-[0.9] animate-in fade-in slide-in-from-bottom-8 duration-700 delay-100">
+                <h1 className="text-6xl md:text-8xl font-black tracking-tighter text-[#0A0F0D] leading-[0.9] animate-in fade-in slide-in-from-bottom-8 duration-700 delay-100">
                   Document Power <br />
-                  <span className="text-primary">Redefined.</span>
+                  <span className="brand-text-gradient">Redefined.</span>
                 </h1>
-                <p className="text-xl md:text-2xl text-slate-600 max-w-2xl mx-auto leading-relaxed animate-in fade-in slide-in-from-bottom-8 duration-700 delay-200">
-                  The definitive professional toolkit for high-fidelity document manipulation, conversion, and structural analysis.
+                <p className="text-xl md:text-2xl text-[#0A0F0D]/70 max-w-2xl mx-auto leading-relaxed animate-in fade-in slide-in-from-bottom-8 duration-700 delay-200 font-medium">
+                  High-fidelity document manipulation, conversion, and structural analysis built for modern professionals.
                 </p>
               </div>
 
               <div className="flex flex-col sm:flex-row items-center justify-center gap-6 animate-in fade-in slide-in-from-bottom-8 duration-700 delay-300">
-                <Button asChild size="lg" className="h-16 px-10 text-lg rounded-2xl shadow-2xl shadow-primary/25 hover:shadow-primary/40 transition-all duration-300 hover:-translate-y-1">
+                <Button asChild size="lg" className="h-16 px-10 text-lg rounded-2xl bg-[#2A1E5C] hover:bg-[#2A1E5C]/90 text-white shadow-2xl shadow-accent/25 hover:shadow-accent/40 transition-all duration-300 hover:-translate-y-1">
                   <Link href="#tools">
                     Get Started Now <ArrowRight className="ml-2 h-5 w-5" />
                   </Link>
                 </Button>
-                <Button asChild size="lg" variant="outline" className="h-16 px-10 text-lg rounded-2xl bg-white/50 backdrop-blur-sm border-slate-200 hover:bg-white transition-all duration-300 hover:-translate-y-1">
+                <Button asChild size="lg" variant="outline" className="h-16 px-10 text-lg rounded-2xl bg-white/50 backdrop-blur-sm border-[#5EBFB8]/30 hover:bg-white text-[#2A1E5C] transition-all duration-300 hover:-translate-y-1">
                   <Link href="/enterprise">
                     Enterprise Solutions
                   </Link>
@@ -181,15 +181,15 @@ export default function Home() {
         </section>
 
         {/* Tools Dashboard */}
-        <section id="tools" className="py-32 bg-slate-50 scroll-mt-20">
+        <section id="tools" className="py-32 bg-[#0A0F0D]/[0.02] scroll-mt-20">
           <div className="container mx-auto px-4 space-y-32">
             
             {/* Manipulation */}
             <div className="space-y-12">
               <div className="space-y-4">
-                <h2 className="text-4xl font-black tracking-tight text-slate-900">Document Manipulation</h2>
-                <div className="h-1.5 w-20 bg-primary rounded-full" />
-                <p className="text-slate-500 text-lg">Granular page control and size optimization.</p>
+                <h2 className="text-4xl font-black tracking-tight text-[#2A1E5C]">Document Manipulation</h2>
+                <div className="h-1.5 w-20 bg-[#5EBFB8] rounded-full" />
+                <p className="text-[#0A0F0D]/60 text-lg font-medium">Granular page control and size optimization.</p>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 {manipulationTools.map((tool) => (
@@ -201,9 +201,9 @@ export default function Home() {
             {/* Analysis */}
             <div className="space-y-12">
               <div className="space-y-4">
-                <h2 className="text-4xl font-black tracking-tight text-slate-900">Intelligence & Privacy</h2>
-                <div className="h-1.5 w-20 bg-accent rounded-full" />
-                <p className="text-slate-500 text-lg">In-depth metadata analysis and sanitization.</p>
+                <h2 className="text-4xl font-black tracking-tight text-[#2A1E5C]">Intelligence & Privacy</h2>
+                <div className="h-1.5 w-20 bg-[#80C3BE] rounded-full" />
+                <p className="text-[#0A0F0D]/60 text-lg font-medium">In-depth metadata analysis and sanitization.</p>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                 {analysisTools.map((tool) => (
@@ -215,9 +215,9 @@ export default function Home() {
             {/* Conversion */}
             <div className="space-y-12">
               <div className="space-y-4">
-                <h2 className="text-4xl font-black tracking-tight text-slate-900">High-Fidelity Conversion</h2>
-                <div className="h-1.5 w-20 bg-primary rounded-full" />
-                <p className="text-slate-500 text-lg">Industrial-grade conversion engines for every document format.</p>
+                <h2 className="text-4xl font-black tracking-tight text-[#2A1E5C]">High-Fidelity Conversion</h2>
+                <div className="h-1.5 w-20 bg-[#5EBFB8] rounded-full" />
+                <p className="text-[#0A0F0D]/60 text-lg font-medium">Industrial-grade conversion engines for every document format.</p>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 {convertTools.map((tool) => (
@@ -229,9 +229,9 @@ export default function Home() {
             {/* Security */}
             <div className="space-y-12">
               <div className="space-y-4">
-                <h2 className="text-4xl font-black tracking-tight text-slate-900">Security & Compliance</h2>
-                <div className="h-1.5 w-20 bg-slate-900 rounded-full" />
-                <p className="text-slate-500 text-lg">Military-grade protection and regulatory compliance tools.</p>
+                <h2 className="text-4xl font-black tracking-tight text-[#2A1E5C]">Security & Compliance</h2>
+                <div className="h-1.5 w-20 bg-[#2A1E5C] rounded-full" />
+                <p className="text-[#0A0F0D]/60 text-lg font-medium">Military-grade protection and regulatory compliance tools.</p>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 {securityTools.map((tool) => (
@@ -247,40 +247,40 @@ export default function Home() {
           <div className="container mx-auto px-4">
             <div className="grid lg:grid-cols-2 gap-20 items-center">
               <div className="space-y-10">
-                <h2 className="text-5xl font-black tracking-tight text-slate-900 leading-[1.1]">Trusted by the world's <br /> leading organizations.</h2>
+                <h2 className="text-5xl font-black tracking-tight text-[#2A1E5C] leading-[1.1]">Trusted by global <br /> organizations.</h2>
                 <div className="space-y-8">
                   <div className="flex gap-6 items-start">
-                    <div className="h-14 w-14 shrink-0 rounded-2xl bg-primary/10 text-primary flex items-center justify-center shadow-inner">
+                    <div className="h-14 w-14 shrink-0 rounded-2xl bg-[#5EBFB8]/10 text-[#5EBFB8] flex items-center justify-center shadow-inner">
                       <Lock className="h-7 w-7" />
                     </div>
                     <div className="space-y-2">
-                      <h4 className="text-xl font-bold text-slate-900">Zero-Retention Policy</h4>
-                      <p className="text-slate-500 leading-relaxed">Your documents are processed in-memory and destroyed immediately after the session. We never see your data.</p>
+                      <h4 className="text-xl font-bold text-[#0A0F0D]">Zero-Retention Policy</h4>
+                      <p className="text-[#0A0F0D]/60 leading-relaxed font-medium">Your documents are processed in-memory and destroyed immediately. We never see your data.</p>
                     </div>
                   </div>
                   <div className="flex gap-6 items-start">
-                    <div className="h-14 w-14 shrink-0 rounded-2xl bg-accent/10 text-accent flex items-center justify-center shadow-inner">
+                    <div className="h-14 w-14 shrink-0 rounded-2xl bg-[#2A1E5C]/10 text-[#2A1E5C] flex items-center justify-center shadow-inner">
                       <CheckCircle2 className="h-7 w-7" />
                     </div>
                     <div className="space-y-2">
-                      <h4 className="text-xl font-bold text-slate-900">Local-First Processing</h4>
-                      <p className="text-slate-500 leading-relaxed">Where possible, all manipulation occurs within your local environment to ensure maximum speed and compliance.</p>
+                      <h4 className="text-xl font-bold text-[#0A0F0D]">Local-First Processing</h4>
+                      <p className="text-[#0A0F0D]/60 leading-relaxed font-medium">Core manipulation occurs within your local browser environment to ensure maximum speed and compliance.</p>
                     </div>
                   </div>
                 </div>
-                <Button size="lg" variant="outline" className="h-14 px-8 rounded-xl border-slate-200 text-slate-700 hover:bg-slate-50 hover:text-primary transition-all">
-                  Download Security Whitepaper
+                <Button size="lg" variant="outline" className="h-14 px-8 rounded-xl border-[#2A1E5C]/20 text-[#2A1E5C] hover:bg-[#2A1E5C]/5 transition-all">
+                  Security Documentation
                 </Button>
               </div>
               <div className="relative group">
-                <div className="absolute -inset-4 bg-primary/5 rounded-[2rem] blur-2xl group-hover:bg-primary/10 transition-all duration-500" />
-                <div className="relative aspect-video rounded-[2rem] overflow-hidden shadow-2xl border border-slate-200 bg-slate-50">
+                <div className="absolute -inset-4 bg-[#5EBFB8]/5 rounded-[2rem] blur-2xl group-hover:bg-[#5EBFB8]/10 transition-all duration-500" />
+                <div className="relative aspect-video rounded-[2rem] overflow-hidden shadow-2xl border border-[#2A1E5C]/10 bg-[#0A0F0D]/5">
                   <img 
                     src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=2070&auto=format&fit=crop" 
                     alt="DocuFlow Pro Interface" 
                     className="object-cover w-full h-full"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-slate-900/40 to-transparent" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#2A1E5C]/40 to-transparent" />
                 </div>
               </div>
             </div>
@@ -288,47 +288,47 @@ export default function Home() {
         </section>
       </main>
 
-      <footer className="bg-slate-900 text-slate-400 py-24 border-t border-slate-800">
+      <footer className="bg-[#0A0F0D] text-[#80C3BE]/60 py-24 border-t border-white/5">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-12 mb-20">
             <div className="space-y-6">
-              <h4 className="text-white text-xs font-bold uppercase tracking-widest">Solutions</h4>
-              <ul className="space-y-4 text-sm">
-                <li><Link href="/merge" className="hover:text-primary transition-colors">Merge & Split</Link></li>
-                <li><Link href="/compress" className="hover:text-primary transition-colors">Optimization</Link></li>
-                <li><Link href="/analyze" className="hover:text-primary transition-colors">Inspection</Link></li>
-                <li><Link href="/convert" className="hover:text-primary transition-colors">Conversion</Link></li>
+              <h4 className="text-[#5EBFB8] text-xs font-bold uppercase tracking-widest">Solutions</h4>
+              <ul className="space-y-4 text-sm font-medium">
+                <li><Link href="/merge" className="hover:text-white transition-colors">Merge & Split</Link></li>
+                <li><Link href="/compress" className="hover:text-white transition-colors">Optimization</Link></li>
+                <li><Link href="/analyze" className="hover:text-white transition-colors">Inspection</Link></li>
+                <li><Link href="/convert" className="hover:text-white transition-colors">Conversion</Link></li>
               </ul>
             </div>
             <div className="space-y-6">
-              <h4 className="text-white text-xs font-bold uppercase tracking-widest">Trust</h4>
-              <ul className="space-y-4 text-sm">
-                <li><Link href="/security" className="hover:text-primary transition-colors">Security Policy</Link></li>
-                <li><Link href="/protect" className="hover:text-primary transition-colors">Privacy Controls</Link></li>
-                <li><Link href="/enterprise" className="hover:text-primary transition-colors">Compliance</Link></li>
+              <h4 className="text-[#5EBFB8] text-xs font-bold uppercase tracking-widest">Trust</h4>
+              <ul className="space-y-4 text-sm font-medium">
+                <li><Link href="/security" className="hover:text-white transition-colors">Security Policy</Link></li>
+                <li><Link href="/protect" className="hover:text-white transition-colors">Privacy Controls</Link></li>
+                <li><Link href="/enterprise" className="hover:text-white transition-colors">Compliance</Link></li>
               </ul>
             </div>
             <div className="space-y-6">
-              <h4 className="text-white text-xs font-bold uppercase tracking-widest">Company</h4>
-              <ul className="space-y-4 text-sm">
-                <li><Link href="/enterprise" className="hover:text-primary transition-colors">About Us</Link></li>
-                <li><Link href="/pricing" className="hover:text-primary transition-colors">Pricing</Link></li>
-                <li><Link href="#" className="hover:text-primary transition-colors">Developer API</Link></li>
+              <h4 className="text-[#5EBFB8] text-xs font-bold uppercase tracking-widest">Company</h4>
+              <ul className="space-y-4 text-sm font-medium">
+                <li><Link href="/enterprise" className="hover:text-white transition-colors">About Us</Link></li>
+                <li><Link href="/pricing" className="hover:text-white transition-colors">Pricing</Link></li>
+                <li><Link href="#" className="hover:text-white transition-colors">Developer API</Link></li>
               </ul>
             </div>
             <div className="space-y-6">
               <div className="flex items-center gap-3 mb-4">
-                <FileText className="h-8 w-8 text-primary" />
+                <FileText className="h-8 w-8 text-[#5EBFB8]" />
                 <span className="text-2xl font-black tracking-tighter text-white uppercase italic">DocuFlow</span>
               </div>
-              <p className="text-sm leading-relaxed">The definitive standard for professional document intelligence and secure manipulation.</p>
+              <p className="text-sm leading-relaxed font-medium">The definitive standard for professional document intelligence and secure manipulation.</p>
             </div>
           </div>
-          <div className="flex flex-col md:flex-row items-center justify-between gap-8 pt-12 border-t border-slate-800">
-            <p className="text-xs font-medium tracking-wide">
-              &copy; {new Date().getFullYear()} DocuFlow Professional. ISO 27001 Certified Infrastructure.
+          <div className="flex flex-col md:flex-row items-center justify-between gap-8 pt-12 border-t border-white/5">
+            <p className="text-xs font-bold tracking-wide text-white/40">
+              &copy; {new Date().getFullYear()} DocuFlow Professional. ISO 27001 Certified.
             </p>
-            <div className="flex items-center gap-6 text-xs font-medium uppercase tracking-widest">
+            <div className="flex items-center gap-6 text-xs font-bold uppercase tracking-widest">
               <Link href="#" className="hover:text-white transition-colors">Privacy</Link>
               <Link href="#" className="hover:text-white transition-colors">Terms</Link>
               <Link href="#" className="hover:text-white transition-colors">Status</Link>
