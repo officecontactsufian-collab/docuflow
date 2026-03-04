@@ -96,10 +96,10 @@ export function FileDropzone({ onFilesSelected, accept = ".pdf", maxFiles = 10, 
         
         <div className="flex flex-col items-center gap-6 text-center">
           <div className={cn(
-            "w-24 h-24 rounded-[2rem] flex items-center justify-center transition-all duration-500 group-hover:scale-110 group-hover:-rotate-3 shadow-2xl",
-            isDragging ? "bg-primary text-white" : "bg-accent text-primary"
+            "w-24 h-24 flex items-center justify-center transition-all duration-500 group-hover:scale-110 group-hover:-rotate-3",
+            isDragging ? "text-primary" : "text-accent"
           )}>
-            {isDragging ? <Plus className="h-12 w-12" /> : <Upload className="h-10 w-10" />}
+            {isDragging ? <Plus className="h-16 w-16" /> : <Upload className="h-14 w-14" />}
           </div>
           <div className="space-y-3">
             <h3 className={cn("font-black tracking-tight uppercase italic text-accent", isHero ? "text-4xl" : "text-2xl")}>
@@ -127,7 +127,7 @@ export function FileDropzone({ onFilesSelected, accept = ".pdf", maxFiles = 10, 
             {selectedFiles.map((file, i) => (
               <div key={`${file.name}-${i}`} className="flex items-center justify-between p-5 bg-white/80 border border-white/40 rounded-3xl shadow-xl group hover:border-primary/20 transition-all">
                 <div className="flex items-center gap-4">
-                  <div className="p-3 bg-secondary/10 text-primary rounded-2xl shadow-sm">
+                  <div className="p-3 text-primary">
                     {getFileIcon(file.name)}
                   </div>
                   <div className="flex flex-col">

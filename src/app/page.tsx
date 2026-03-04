@@ -24,7 +24,8 @@ import {
   Cpu,
   Globe,
   LayoutDashboard,
-  Layers
+  Layers,
+  CircleCheck
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
@@ -162,8 +163,8 @@ export default function Home() {
                 }
               ].map((step, idx) => (
                 <div key={step.title} className="space-y-8 text-center relative group">
-                  <div className="w-24 h-24 bg-secondary rounded-[2.5rem] flex items-center justify-center shadow-2xl mx-auto transition-transform duration-500 group-hover:scale-110 group-hover:-rotate-6">
-                    <step.icon className="h-10 w-10 text-primary" />
+                  <div className="w-24 h-24 flex items-center justify-center mx-auto transition-transform duration-500 group-hover:scale-110 group-hover:-rotate-6">
+                    <step.icon className="h-16 w-16 text-primary" />
                   </div>
                   <div className="space-y-4">
                     <h3 className="text-3xl font-black text-accent uppercase italic">{idx + 1}. {step.title}</h3>
@@ -198,7 +199,7 @@ export default function Home() {
                     "Zero Persistence"
                   ].map((item) => (
                     <div key={item} className="flex items-center gap-4 text-xs font-black uppercase tracking-[0.2em] opacity-80">
-                      <CheckCircle2 className="h-6 w-6 text-primary" />
+                      <CircleCheck className="h-6 w-6 text-primary" />
                       {item}
                     </div>
                   ))}

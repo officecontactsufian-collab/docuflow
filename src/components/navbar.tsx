@@ -14,7 +14,6 @@ import {
   Table,
   Cpu,
   LayoutDashboard,
-  Files,
   ShieldCheck,
   Zap
 } from 'lucide-react';
@@ -40,7 +39,7 @@ export function Navbar() {
 
   const categories = [
     {
-      label: "Manipulation",
+      label: "Manipulation & Logic",
       items: [
         { href: "/merge", icon: Merge, title: "Merge", desc: "Combine PDFs" },
         { href: "/split", icon: Scissors, title: "Split", desc: "Extract pages" },
@@ -49,7 +48,7 @@ export function Navbar() {
       ]
     },
     {
-      label: "Intelligence",
+      label: "Analysis & Compliance",
       items: [
         { href: "/analyze", icon: Cpu, title: "AI Analysis", desc: "Smart summaries" },
         { href: "/convert", icon: Table, title: "Excel Export", desc: "Data extraction" },
@@ -76,20 +75,20 @@ export function Navbar() {
             <DropdownMenu>
               <DropdownMenuTrigger className="flex items-center gap-2 text-[11px] font-black uppercase tracking-widest text-accent/80 hover:text-accent transition-all outline-none">
                 <LayoutDashboard className="h-3.5 w-3.5 text-primary" />
-                Tools <ChevronDown className="h-3 w-3 opacity-40" />
+                Capabilities <ChevronDown className="h-3 w-3 opacity-40" />
               </DropdownMenuTrigger>
               <DropdownMenuContent align="start" className="w-[600px] p-6 rounded-[2rem] shadow-2xl border-white/20 grid grid-cols-2 gap-8">
                 {categories.map((cat) => (
                   <div key={cat.label} className="space-y-4">
-                    <DropdownMenuLabel className="px-0 text-[10px] font-black uppercase tracking-[0.3em] text-primary/60">
+                    <DropdownMenuLabel className="px-0 text-[10px] font-black uppercase tracking-[0.3em] text-accent">
                       {cat.label}
                     </DropdownMenuLabel>
                     <div className="space-y-2">
                       {cat.items.map((item) => (
                         <DropdownMenuItem key={item.href} asChild className="p-3 rounded-2xl cursor-pointer hover:bg-muted/10">
                           <Link href={item.href} className="flex items-center gap-4">
-                            <div className="h-10 w-10 bg-secondary text-primary rounded-xl flex items-center justify-center shadow-sm">
-                              <item.icon className="h-5 w-5" />
+                            <div className="h-10 w-10 text-primary flex items-center justify-center">
+                              <item.icon className="h-6 w-6" />
                             </div> 
                             <div className="flex flex-col">
                               <span className="font-bold text-xs text-accent">{item.title}</span>
