@@ -9,7 +9,7 @@
     /* Foreground: #0A0F0D - Rich Black */
     --foreground: 165 19% 5%;
     
-    /* Card Background: #F8FAFA - Very light brand teal tint */
+    /* Card Background: #F8FAFA - Light Brand Teal */
     --card: 180 20% 98%;
     --card-foreground: 165 19% 5%;
     
@@ -38,7 +38,7 @@
     --border: 175 10% 70%;
     --input: 175 10% 70%;
     --ring: 346 71% 58%;
-    --radius: 2rem;
+    --radius: 1.5rem;
   }
 }
 
@@ -52,15 +52,10 @@
   }
 }
 
-.glass-panel {
-  @apply bg-white/70 backdrop-blur-md border border-white/20 shadow-xl;
+.brand-gradient {
+  background: linear-gradient(135deg, hsl(var(--accent)), hsl(var(--primary)));
 }
 
-.hero-gradient {
-  background: radial-gradient(circle at top right, rgba(145, 197, 193, 0.4), transparent),
-              radial-gradient(circle at bottom left, rgba(222, 73, 108, 0.1), transparent);
-}
-
-.brand-text-gradient {
-  @apply bg-clip-text text-transparent bg-gradient-to-r from-[#2A1E5C] to-[#DE496C];
+.text-brand-gradient {
+  @apply bg-clip-text text-transparent brand-gradient;
 }

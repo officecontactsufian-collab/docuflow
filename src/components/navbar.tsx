@@ -18,7 +18,9 @@ import {
   Globe,
   ShieldCheck,
   Eraser,
-  Hash
+  Hash,
+  FilePenLine,
+  Maximize
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -45,11 +47,11 @@ export function Navbar() {
       <div className="container mx-auto flex h-20 items-center justify-between px-4">
         <div className="flex items-center gap-2">
           <Link href="/" className="flex items-center gap-3 group">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-accent text-white shadow-2xl shadow-accent/30 transition-transform group-hover:scale-110">
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-accent text-white shadow-2xl transition-transform group-hover:scale-110">
               <FileText className="h-7 w-7 text-primary" />
             </div>
             <span className="text-2xl font-black tracking-tighter text-accent font-headline hidden sm:block italic uppercase">
-              DocuFlow <span className="text-white not-italic">Pro</span>
+              DocuFlow
             </span>
           </Link>
         </div>
@@ -57,17 +59,17 @@ export function Navbar() {
         <div className="hidden lg:flex items-center gap-10">
           <DropdownMenu>
             <DropdownMenuTrigger className="flex items-center gap-1.5 text-[13px] font-bold uppercase tracking-widest text-accent hover:text-accent/80 transition-colors outline-none">
-              Capabilities <ChevronDown className="h-3 w-3 opacity-50" />
+              All Tools <ChevronDown className="h-3 w-3 opacity-50" />
             </DropdownMenuTrigger>
             <DropdownMenuContent align="start" className="w-[700px] p-8 grid grid-cols-2 gap-8 rounded-[2rem] shadow-2xl border-border/40 bg-card">
               <div className="space-y-5">
-                <DropdownMenuLabel className="text-[10px] uppercase tracking-[0.2em] text-accent font-black border-b border-border/50 pb-2">Manipulation & Logic</DropdownMenuLabel>
+                <DropdownMenuLabel className="text-[10px] uppercase tracking-[0.2em] text-accent font-black border-b border-border/50 pb-2">Convert & Compress</DropdownMenuLabel>
                 <div className="grid gap-2">
                   {[
-                    { href: "/merge", icon: Merge, title: "Merge PDF", desc: "Combine volumes" },
-                    { href: "/split", icon: Scissors, title: "Split PDF", desc: "Extract pages" },
-                    { href: "/organize", icon: RotateCw, title: "Organize Pages", desc: "Reorder & rotate" },
-                    { href: "/watermark", icon: Type, title: "Watermark", desc: "Branding & security" },
+                    { href: "/compress", icon: Maximize, title: "Compress PDF", desc: "Reduce file size" },
+                    { href: "/convert?type=pdf-to-word", icon: FileText, title: "PDF to Word", desc: "Editable DOCX" },
+                    { href: "/convert?type=word-to-pdf", icon: FileText, title: "Word to PDF", desc: "Professional DOC to PDF" },
+                    { href: "/convert?type=jpg-to-pdf", icon: Globe, title: "JPG to PDF", desc: "Images to PDF" },
                   ].map((item) => (
                     <DropdownMenuItem key={item.href} asChild className="p-3 rounded-xl cursor-pointer hover:bg-accent/5 transition-colors">
                       <Link href={item.href} className="flex items-center gap-3">
@@ -79,13 +81,13 @@ export function Navbar() {
                 </div>
               </div>
               <div className="space-y-5 border-l border-border/50 pl-8">
-                <DropdownMenuLabel className="text-[10px] uppercase tracking-[0.2em] text-accent font-black border-b border-border/50 pb-2">Analysis & Compliance</DropdownMenuLabel>
+                <DropdownMenuLabel className="text-[10px] uppercase tracking-[0.2em] text-accent font-black border-b border-border/50 pb-2">Organize & Edit</DropdownMenuLabel>
                 <div className="grid gap-2">
                   {[
-                    { href: "/analyze", icon: Search, title: "Inspector", desc: "Metadata analysis" },
-                    { href: "/sanitize", icon: Eraser, title: "Sanitize", desc: "Strip tracking info" },
-                    { href: "/protect", icon: Lock, title: "Encrypt", desc: "AES-256 protection" },
-                    { href: "/sign", icon: Signature, title: "Digital Sign", desc: "E-signature flow" },
+                    { href: "/merge", icon: Merge, title: "Merge PDF", desc: "Combine files" },
+                    { href: "/split", icon: Scissors, title: "Split PDF", desc: "Extract pages" },
+                    { href: "/organize", icon: RotateCw, title: "Edit PDF", desc: "Edit text & more" },
+                    { href: "/protect", icon: Lock, title: "Protect PDF", desc: "AES-256 password" },
                   ].map((item) => (
                     <DropdownMenuItem key={item.href} asChild className="p-3 rounded-xl cursor-pointer hover:bg-accent/5 transition-colors">
                       <Link href={item.href} className="flex items-center gap-3">
@@ -101,7 +103,7 @@ export function Navbar() {
 
           <Link href="/pricing" className="text-[13px] font-bold uppercase tracking-widest text-accent hover:text-accent/70 transition-colors">Pricing</Link>
           <Link href="/enterprise" className="text-[13px] font-bold uppercase tracking-widest text-accent hover:text-accent/70 transition-colors">Enterprise</Link>
-          <Link href="/security" className="text-[13px] font-bold uppercase tracking-widest text-accent hover:text-accent/70 transition-colors">Trust Hub</Link>
+          <Link href="/security" className="text-[13px] font-bold uppercase tracking-widest text-accent hover:text-accent/70 transition-colors">Security Hub</Link>
         </div>
 
         <div className="flex items-center gap-5">
@@ -132,7 +134,7 @@ export function Navbar() {
               <div className="hidden md:flex items-center gap-6 mr-2">
                  <Link href="/login" className="text-[13px] font-bold uppercase tracking-widest text-accent hover:text-accent/80 transition-colors">Sign In</Link>
               </div>
-              <Button asChild size="lg" className="h-12 px-8 rounded-xl bg-accent text-white shadow-xl shadow-accent/20 hover:shadow-accent/30 transition-all">
+              <Button asChild size="lg" className="h-12 px-8 rounded-xl bg-accent text-white shadow-xl hover:shadow-accent/30 transition-all">
                 <Link href="/login">Get Started</Link>
               </Button>
             </>

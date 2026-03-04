@@ -7,330 +7,305 @@ import {
   Maximize, 
   RotateCw, 
   Lock, 
-  Unlock, 
   ShieldCheck, 
-  Signature, 
-  Table as TableIcon, 
   Image as ImageIcon,
   ArrowRight,
   Shield,
   Search,
-  Type,
   Hash,
-  Eraser,
-  Wrench,
-  CheckCircle2
+  CheckCircle2,
+  FileUp,
+  Settings2,
+  Download,
+  FilePenLine,
+  Table
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 
 export default function Home() {
-  const manipulationTools = [
+  const tools = [
     {
       title: "Merge PDF",
-      description: "Combine multiple volumes into a single archive with page re-ordering.",
+      description: "Combine multiple PDF files into one single document in seconds.",
       icon: Merge,
       href: "/merge",
     },
     {
       title: "Split PDF",
-      description: "Granular page extraction and multi-document splitting logic.",
+      description: "Extract specific pages or split one PDF into multiple files.",
       icon: Scissors,
       href: "/split",
     },
     {
       title: "Compress PDF",
-      description: "Optimize file size while maintaining professional print quality.",
+      description: "Reduce file size while maintaining the best possible quality.",
       icon: Maximize,
       href: "/compress",
     },
     {
-      title: "Organize PDF",
-      description: "Rotate, reorder, or delete pages with high-precision management.",
-      icon: RotateCw,
-      href: "/organize",
+      title: "PDF to Word",
+      description: "Convert PDFs to editable Microsoft Word documents accurately.",
+      icon: FileText,
+      href: "/convert?type=pdf-to-word",
     },
-    {
-      title: "Watermark PDF",
-      description: "Add professional text overlays for branding and security.",
-      icon: Type,
-      href: "/watermark",
-    },
-    {
-      title: "Add Page Numbers",
-      description: "Insert dynamic page counters in the footer section.",
-      icon: Hash,
-      href: "/numbers",
-    }
-  ];
-
-  const analysisTools = [
-    {
-      title: "Document Inspector",
-      description: "Extract high-fidelity structural metadata and security profiles.",
-      icon: Search,
-      href: "/analyze",
-    },
-    {
-      title: "Sanitize PDF",
-      description: "Remove hidden metadata and author tracking tags for privacy.",
-      icon: Eraser,
-      href: "/sanitize",
-    },
-    {
-      title: "Repair & Rebuild",
-      description: "Fix broken file structures and rebuild object cross-references.",
-      icon: Wrench,
-      href: "/repair",
-    }
-  ];
-
-  const convertTools = [
     {
       title: "Word to PDF",
-      description: "Lossless conversion for professional Microsoft Word documents.",
+      description: "Make DOC and DOCX files easy to read by converting them to PDF.",
       icon: FileText,
       href: "/convert?type=word-to-pdf",
     },
     {
-      title: "Excel to PDF",
-      description: "Preserve complex grid formatting and professional cell styling.",
-      icon: TableIcon,
-      href: "/convert?type=excel-to-pdf",
+      title: "Edit PDF",
+      description: "Add text, shapes, and freehand annotations to your PDF documents.",
+      icon: FilePenLine,
+      href: "/organize",
+    },
+    {
+      title: "PDF to Excel",
+      description: "Extract table data from PDF documents into Excel spreadsheets.",
+      icon: Table,
+      href: "/convert?type=pdf-to-excel",
     },
     {
       title: "JPG to PDF",
-      description: "High-DPI image conversion to professional PDF compilation.",
+      description: "Convert images to PDF files with custom orientation and margins.",
       icon: ImageIcon,
       href: "/convert?type=jpg-to-pdf",
-    },
-    {
-      title: "PDF to Word",
-      description: "Advanced layout reconstruction for editing in DOCX format.",
-      icon: FileText,
-      href: "/convert?type=pdf-to-word",
-    }
-  ];
-
-  const securityTools = [
-    {
-      title: "Digital Sign",
-      description: "Secure, verified electronic signature placement on any page.",
-      icon: Signature,
-      href: "/sign",
-    },
-    {
-      title: "Protect PDF",
-      description: "Apply military-grade 256-bit AES encryption to your files.",
-      icon: Lock,
-      href: "/protect",
-    },
-    {
-      title: "Unlock PDF",
-      description: "Remove security restrictions and owner passwords securely.",
-      icon: Unlock,
-      href: "/protect?mode=unlock",
-    },
-    {
-      title: "Compliance PDF/A",
-      description: "ISO-compliant formatting for long-term electronic archiving.",
-      icon: ShieldCheck,
-      href: "/convert?type=pdf-to-pdfa",
     }
   ];
 
   return (
-    <div className="flex min-h-screen flex-col selection:bg-[#DE496C]/20 selection:text-[#DE496C]">
+    <div className="flex min-h-screen flex-col">
       <Navbar />
       
       <main className="flex-1">
-        {/* Hero Section */}
-        <section className="relative py-24 lg:py-40 overflow-hidden hero-gradient border-b border-[#91C5C1]/20">
+        {/* HERO SECTION */}
+        <section className="relative py-24 lg:py-32 overflow-hidden border-b border-white/10">
           <div className="container relative mx-auto px-4">
-            <div className="max-w-4xl mx-auto text-center space-y-10">
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#2A1E5C]/10 text-[#2A1E5C] text-xs font-bold uppercase tracking-widest border border-[#2A1E5C]/20 animate-in fade-in slide-in-from-bottom-4 duration-700">
-                <Shield className="h-4 w-4 text-[#DE496C]" />
-                <span>Enterprise Grade Security</span>
+            <div className="max-w-4xl mx-auto text-center space-y-8">
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-accent/10 text-accent text-xs font-bold uppercase tracking-widest border border-accent/20">
+                <Shield className="h-4 w-4 text-primary" />
+                <span>100% Secure Document Processing</span>
               </div>
               
-              <div className="space-y-6">
-                <h1 className="text-6xl md:text-8xl font-black tracking-tighter text-[#0A0F0D] leading-[0.9] animate-in fade-in slide-in-from-bottom-8 duration-700 delay-100 uppercase">
-                  Precision <br />
-                  <span className="brand-text-gradient">Manipulation.</span>
-                </h1>
-                <p className="text-xl md:text-2xl text-[#0A0F0D]/70 max-w-2xl mx-auto leading-relaxed animate-in fade-in slide-in-from-bottom-8 duration-700 delay-200 font-medium italic">
-                  The definitive workspace for professional document intelligence and high-fidelity PDF solutions.
-                </p>
-              </div>
+              <h1 className="text-5xl md:text-7xl font-black tracking-tight text-accent leading-tight">
+                Every Tool You Need <br />
+                <span className="text-primary">for PDFs in One Place</span>
+              </h1>
+              
+              <p className="text-xl md:text-2xl text-accent/70 max-w-2xl mx-auto leading-relaxed font-medium">
+                Free, easy-to-use, and secure. Merge, split, compress, and convert documents in seconds.
+              </p>
 
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-6 animate-in fade-in slide-in-from-bottom-8 duration-700 delay-300">
-                <Button asChild size="lg" className="h-16 px-10 text-lg rounded-2xl bg-[#2A1E5C] hover:bg-[#2A1E5C]/90 text-white shadow-2xl shadow-[#2A1E5C]/20 transition-all duration-300 hover:-translate-y-1 uppercase font-black">
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+                <Button asChild size="lg" className="h-14 px-8 text-lg rounded-xl bg-accent hover:bg-accent/90 text-white shadow-xl transition-all">
                   <Link href="#tools">
-                    Launch Workspace <ArrowRight className="ml-2 h-5 w-5" />
+                    Explore All Tools <ArrowRight className="ml-2 h-5 w-5" />
                   </Link>
                 </Button>
-                <Button asChild size="lg" variant="outline" className="h-16 px-10 text-lg rounded-2xl bg-white/50 backdrop-blur-sm border-[#91C5C1]/30 hover:bg-white text-[#2A1E5C] transition-all duration-300 hover:-translate-y-1 uppercase font-black">
+                <Button asChild size="lg" variant="outline" className="h-14 px-8 text-lg rounded-xl bg-white/50 backdrop-blur-sm border-accent/20 text-accent hover:bg-white transition-all">
                   <Link href="/enterprise">
-                    Enterprise
+                    Try for Free
                   </Link>
                 </Button>
               </div>
+              
+              <p className="text-sm text-accent/50 font-medium">No installation required. All files deleted automatically after 2 hours.</p>
             </div>
           </div>
         </section>
 
-        {/* Tools Dashboard */}
-        <section id="tools" className="py-32 bg-background/50 scroll-mt-20">
-          <div className="container mx-auto px-4 space-y-32">
-            
-            {/* Manipulation */}
-            <div className="space-y-12">
-              <div className="space-y-4">
-                <h2 className="text-4xl font-black tracking-tight text-[#2A1E5C] uppercase italic">Manipulation Logic</h2>
-                <div className="h-1.5 w-24 bg-[#DE496C] rounded-full" />
-                <p className="text-[#0A0F0D]/60 text-lg font-bold">Granular page control and high-performance size optimization.</p>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                {manipulationTools.map((tool) => (
-                  <ToolCard key={tool.title} {...tool} />
-                ))}
-              </div>
-            </div>
-
-            {/* Analysis */}
-            <div className="space-y-12">
-              <div className="space-y-4">
-                <h2 className="text-4xl font-black tracking-tight text-[#2A1E5C] uppercase italic">Intelligence & Privacy</h2>
-                <div className="h-1.5 w-24 bg-[#DE496C] rounded-full opacity-70" />
-                <p className="text-[#0A0F0D]/60 text-lg font-bold">In-depth metadata analysis and ISO-compliant sanitization.</p>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                {analysisTools.map((tool) => (
-                  <ToolCard key={tool.title} {...tool} />
-                ))}
-              </div>
-            </div>
-
-            {/* Conversion */}
-            <div className="space-y-12">
-              <div className="space-y-4">
-                <h2 className="text-4xl font-black tracking-tight text-[#2A1E5C] uppercase italic">Format Conversion</h2>
-                <div className="h-1.5 w-24 bg-[#DE496C] rounded-full" />
-                <p className="text-[#0A0F0D]/60 text-lg font-bold">Industrial-grade conversion engines for lossless document formatting.</p>
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                {convertTools.map((tool) => (
-                  <ToolCard key={tool.title} {...tool} />
-                ))}
-              </div>
-            </div>
-
-            {/* Security */}
-            <div className="space-y-12">
-              <div className="space-y-4">
-                <h2 className="text-4xl font-black tracking-tight text-[#2A1E5C] uppercase italic">Security & Archiving</h2>
-                <div className="h-1.5 w-24 bg-[#2A1E5C] rounded-full" />
-                <p className="text-[#0A0F0D]/60 text-lg font-bold">Military-grade protection and regulatory compliance standards.</p>
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                {securityTools.map((tool) => (
-                  <ToolCard key={tool.title} {...tool} />
-                ))}
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Brand Proof */}
-        <section className="py-32 bg-card/50 border-y border-[#91C5C1]/20">
+        {/* TOOLS GRID SECTION */}
+        <section id="tools" className="py-24 bg-background/50">
           <div className="container mx-auto px-4">
-            <div className="grid lg:grid-cols-2 gap-20 items-center">
-              <div className="space-y-10">
-                <h2 className="text-5xl font-black tracking-tight text-[#2A1E5C] leading-[1.1] uppercase italic">Trusted Global <br /> Architecture.</h2>
-                <div className="space-y-8">
-                  <div className="flex gap-6 items-start">
-                    <div className="h-14 w-14 shrink-0 rounded-2xl bg-[#77949A] text-[#DE496C] flex items-center justify-center shadow-lg">
-                      <Lock className="h-7 w-7" />
-                    </div>
-                    <div className="space-y-2">
-                      <h4 className="text-xl font-bold text-[#2A1E5C] uppercase">Zero-Retention Policy</h4>
-                      <p className="text-[#0A0F0D]/60 leading-relaxed font-bold italic text-sm">Documents are processed in isolated memory and destroyed immediately. Absolute privacy by default.</p>
-                    </div>
-                  </div>
-                  <div className="flex gap-6 items-start">
-                    <div className="h-14 w-14 shrink-0 rounded-2xl bg-[#77949A] text-[#DE496C] flex items-center justify-center shadow-lg">
-                      <CheckCircle2 className="h-7 w-7" />
-                    </div>
-                    <div className="space-y-2">
-                      <h4 className="text-xl font-bold text-[#2A1E5C] uppercase">Local-First Engine</h4>
-                      <p className="text-[#0A0F0D]/60 leading-relaxed font-bold italic text-sm">Core manipulation occurs within your secure browser environment for maximum speed and data integrity.</p>
-                    </div>
-                  </div>
+            <div className="text-center mb-16 space-y-4">
+              <h2 className="text-4xl font-black text-accent uppercase">Popular PDF Tools</h2>
+              <p className="text-accent/60 text-lg max-w-2xl mx-auto">
+                Discover our range of easy-to-use tools designed to help you work faster and smarter with your documents.
+              </p>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {tools.map((tool) => (
+                <ToolCard key={tool.title} {...tool} />
+              ))}
+            </div>
+            
+            <div className="mt-16 text-center">
+              <Button variant="link" className="text-accent font-bold uppercase tracking-widest group">
+                View All PDF Solutions <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
+              </Button>
+            </div>
+          </div>
+        </section>
+
+        {/* HOW IT WORKS SECTION */}
+        <section className="py-24 bg-card/30 border-y border-white/5">
+          <div className="container mx-auto px-4">
+            <div className="text-center mb-16">
+              <h2 className="text-4xl font-black text-accent uppercase">How it Works</h2>
+            </div>
+            
+            <div className="grid md:grid-cols-3 gap-12 max-w-5xl mx-auto">
+              <div className="text-center space-y-4">
+                <div className="w-16 h-16 bg-secondary rounded-2xl flex items-center justify-center mx-auto shadow-lg">
+                  <FileUp className="h-8 w-8 text-primary" />
                 </div>
-                <Button size="lg" variant="outline" className="h-14 px-8 rounded-xl border-[#2A1E5C]/20 text-[#2A1E5C] hover:bg-[#2A1E5C] hover:text-white transition-all uppercase font-black tracking-widest">
-                  Compliance Docs
-                </Button>
+                <h3 className="text-xl font-bold text-accent">1. Select Files</h3>
+                <p className="text-accent/60">Upload your PDF or other documents from your computer or cloud storage.</p>
               </div>
-              <div className="relative group">
-                <div className="absolute -inset-4 bg-[#DE496C]/5 rounded-[2.5rem] blur-2xl group-hover:bg-[#DE496C]/10 transition-all duration-500" />
-                <div className="relative aspect-video rounded-[2.5rem] overflow-hidden shadow-2xl border border-[#2A1E5C]/10 bg-[#2A1E5C]/5">
-                  <img 
-                    src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=2070&auto=format&fit=crop" 
-                    alt="DocuFlow Pro Interface" 
-                    className="object-cover w-full h-full grayscale group-hover:grayscale-0 transition-all duration-700"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#2A1E5C]/40 to-transparent" />
+              
+              <div className="text-center space-y-4">
+                <div className="w-16 h-16 bg-secondary rounded-2xl flex items-center justify-center mx-auto shadow-lg">
+                  <Settings2 className="h-8 w-8 text-primary" />
                 </div>
+                <h3 className="text-xl font-bold text-accent">2. Process</h3>
+                <p className="text-accent/60">Our professional engine handles the heavy lifting in seconds with high precision.</p>
+              </div>
+              
+              <div className="text-center space-y-4">
+                <div className="w-16 h-16 bg-secondary rounded-2xl flex items-center justify-center mx-auto shadow-lg">
+                  <Download className="h-8 w-8 text-primary" />
+                </div>
+                <h3 className="text-xl font-bold text-accent">3. Download</h3>
+                <p className="text-accent/60">Save your new document instantly. Secure and verified for professional use.</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* SECURITY & PRIVACY SECTION */}
+        <section className="py-24 bg-accent text-white">
+          <div className="container mx-auto px-4">
+            <div className="grid lg:grid-cols-2 gap-16 items-center max-w-6xl mx-auto">
+              <div className="space-y-8">
+                <h2 className="text-4xl font-black uppercase">Your Security is Our Priority</h2>
+                <p className="text-lg text-white/70 leading-relaxed">
+                  We use military-grade encryption to ensure your documents are handled with the highest level of privacy. Every file is processed in an isolated environment and permanently deleted from our servers.
+                </p>
+                <ul className="grid sm:grid-cols-2 gap-4">
+                  {[
+                    "End-to-end 256-bit encryption",
+                    "Automatic file deletion after 2 hours",
+                    "Isolated processing environment",
+                    "GDPR & ISO compliant standards"
+                  ].map((item) => (
+                    <li key={item} className="flex items-center gap-2 text-sm font-medium">
+                      <CheckCircle2 className="h-5 w-5 text-primary" />
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <div className="relative">
+                <div className="aspect-square bg-white/5 rounded-3xl flex items-center justify-center p-12">
+                   <Lock className="w-48 h-48 text-primary/40" />
+                </div>
+                <div className="absolute -bottom-6 -left-6 bg-primary text-white p-6 rounded-2xl shadow-2xl">
+                   <ShieldCheck className="h-12 w-12" />
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* WHY CHOOSE DOCUFLOW SECTION */}
+        <section className="py-24">
+          <div className="container mx-auto px-4 text-center max-w-4xl">
+            <div className="space-y-8">
+              <h2 className="text-4xl font-black text-accent uppercase">Why Choose DocuFlow?</h2>
+              <p className="text-xl text-accent/60 leading-relaxed">
+                DocuFlow is the preferred choice for millions because we combine industrial-grade performance with a clean, simple interface that works everywhere.
+              </p>
+              <div className="grid md:grid-cols-3 gap-8 pt-8">
+                <div className="space-y-2">
+                  <h4 className="text-lg font-bold text-accent uppercase">Lightning Fast</h4>
+                  <p className="text-sm text-accent/60">Optimized processing engines that deliver results in seconds.</p>
+                </div>
+                <div className="space-y-2">
+                  <h4 className="text-lg font-bold text-accent uppercase">Works on Any Device</h4>
+                  <p className="text-sm text-accent/60">Fully responsive web application that works on mobile, tablet, and desktop.</p>
+                </div>
+                <div className="space-y-2">
+                  <h4 className="text-lg font-bold text-accent uppercase">High Quality</h4>
+                  <p className="text-sm text-accent/60">Advanced layout reconstruction for flawless document fidelity.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* OPTIONAL STATS SECTION */}
+        <section className="py-20 bg-muted/50 border-t border-white/10">
+          <div className="container mx-auto px-4">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+              <div>
+                <p className="text-4xl font-black text-accent">50M+</p>
+                <p className="text-sm font-bold uppercase text-accent/50 tracking-widest">Files Processed</p>
+              </div>
+              <div>
+                <p className="text-4xl font-black text-accent">100%</p>
+                <p className="text-sm font-bold uppercase text-accent/50 tracking-widest">Secure & Private</p>
+              </div>
+              <div>
+                <p className="text-4xl font-black text-accent">4.9/5</p>
+                <p className="text-sm font-bold uppercase text-accent/50 tracking-widest">Average Rating</p>
+              </div>
+              <div>
+                <p className="text-4xl font-black text-accent">25+</p>
+                <p className="text-sm font-bold uppercase text-accent/50 tracking-widest">Pro PDF Tools</p>
               </div>
             </div>
           </div>
         </section>
       </main>
 
-      <footer className="bg-[#0A0F0D] text-slate-400 py-24 border-t border-white/5">
+      <footer className="bg-accent text-white py-24 border-t border-white/5">
         <div className="container mx-auto px-4">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-12 mb-20">
-            <div className="space-y-6">
-              <h4 className="text-[#DE496C] text-[10px] font-black uppercase tracking-widest">Global Solutions</h4>
-              <ul className="space-y-4 text-sm font-bold italic">
-                <li><Link href="/merge" className="hover:text-white transition-colors">Merge & Split</Link></li>
-                <li><Link href="/compress" className="hover:text-white transition-colors">Optimization</Link></li>
-                <li><Link href="/analyze" className="hover:text-white transition-colors">Inspection</Link></li>
-                <li><Link href="/convert" className="hover:text-white transition-colors">Conversion</Link></li>
-              </ul>
-            </div>
-            <div className="space-y-6">
-              <h4 className="text-[#DE496C] text-[10px] font-black uppercase tracking-widest">Security Trust</h4>
-              <ul className="space-y-4 text-sm font-bold italic">
-                <li><Link href="/security" className="hover:text-white transition-colors">Privacy Policy</Link></li>
-                <li><Link href="/protect" className="hover:text-white transition-colors">Access Controls</Link></li>
-                <li><Link href="/enterprise" className="hover:text-white transition-colors">SOC 2 Compliance</Link></li>
-              </ul>
-            </div>
-            <div className="space-y-6">
-              <h4 className="text-[#DE496C] text-[10px] font-black uppercase tracking-widest">Organization</h4>
-              <ul className="space-y-4 text-sm font-bold italic">
-                <li><Link href="/enterprise" className="hover:text-white transition-colors">Enterprise Docs</Link></li>
-                <li><Link href="/pricing" className="hover:text-white transition-colors">License Tiers</Link></li>
-                <li><Link href="#" className="hover:text-white transition-colors">Industrial API</Link></li>
-              </ul>
-            </div>
-            <div className="space-y-6">
-              <div className="flex items-center gap-3 mb-4">
-                <FileText className="h-8 w-8 text-[#DE496C]" />
-                <span className="text-2xl font-black tracking-tighter text-white uppercase italic">DocuFlow</span>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-20">
+            <div className="col-span-1 md:col-span-1 space-y-6">
+              <div className="flex items-center gap-3">
+                <FileText className="h-8 w-8 text-primary" />
+                <span className="text-2xl font-black tracking-tighter uppercase italic">DocuFlow</span>
               </div>
-              <p className="text-sm leading-relaxed font-bold italic opacity-60">The definitive global standard for professional document intelligence and secure manipulation.</p>
+              <p className="text-sm leading-relaxed font-medium opacity-60">
+                The simple, secure, and professional way to manage your documents online. Helping millions of users every day.
+              </p>
+            </div>
+            <div className="space-y-6">
+              <h4 className="text-primary text-[10px] font-black uppercase tracking-widest">Solutions</h4>
+              <ul className="space-y-4 text-sm font-bold">
+                <li><Link href="/merge" className="hover:text-primary transition-colors">Merge PDF</Link></li>
+                <li><Link href="/split" className="hover:text-primary transition-colors">Split PDF</Link></li>
+                <li><Link href="/compress" className="hover:text-primary transition-colors">Compress PDF</Link></li>
+                <li><Link href="/convert" className="hover:text-primary transition-colors">PDF to Word</Link></li>
+              </ul>
+            </div>
+            <div className="space-y-6">
+              <h4 className="text-primary text-[10px] font-black uppercase tracking-widest">Company</h4>
+              <ul className="space-y-4 text-sm font-bold">
+                <li><Link href="/pricing" className="hover:text-primary transition-colors">Pricing</Link></li>
+                <li><Link href="/enterprise" className="hover:text-primary transition-colors">Enterprise</Link></li>
+                <li><Link href="/security" className="hover:text-primary transition-colors">Security Hub</Link></li>
+                <li><Link href="#" className="hover:text-primary transition-colors">Contact Us</Link></li>
+              </ul>
+            </div>
+            <div className="space-y-6">
+              <h4 className="text-primary text-[10px] font-black uppercase tracking-widest">Legal</h4>
+              <ul className="space-y-4 text-sm font-bold">
+                <li><Link href="#" className="hover:text-primary transition-colors">Privacy Policy</Link></li>
+                <li><Link href="#" className="hover:text-primary transition-colors">Terms of Service</Link></li>
+                <li><Link href="#" className="hover:text-primary transition-colors">Cookie Policy</Link></li>
+              </ul>
             </div>
           </div>
           <div className="flex flex-col md:flex-row items-center justify-between gap-8 pt-12 border-t border-white/5">
-            <p className="text-[10px] font-black uppercase tracking-widest text-white/40">
-              &copy; {new Date().getFullYear()} DocuFlow Professional. ISO 27001 Certified.
+            <p className="text-[10px] font-black uppercase tracking-widest opacity-40">
+              &copy; {new Date().getFullYear()} DocuFlow Professional. All Rights Reserved.
             </p>
-            <div className="flex items-center gap-6 text-[10px] font-black uppercase tracking-widest">
-              <Link href="#" className="hover:text-[#DE496C] transition-colors">Privacy</Link>
-              <Link href="#" className="hover:text-[#DE496C] transition-colors">Terms</Link>
-              <Link href="#" className="hover:text-[#DE496C] transition-colors">Status</Link>
+            <div className="flex items-center gap-6 text-[10px] font-black uppercase tracking-widest opacity-40">
+              <span>Made for Professionals</span>
             </div>
           </div>
         </div>
