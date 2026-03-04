@@ -1,4 +1,3 @@
-
 "use client"
 
 import * as React from 'react';
@@ -125,6 +124,21 @@ export default function CropPage() {
     }
   };
 
+  const applyCropToPage = (page: any, settings: CropSettings) => {
+    const mediaBox = page.getMediaBox();
+    const x = mediaBox.x + (settings.l / 100) * mediaBox.width;
+    const y = mediaBox.y + (settings.b / 100) * mediaBox.height;
+    const newWidth = mediaBox.width * (1 - (settings.l + settings.r) / 100);
+    const newHeight = mediaBox.height * (1 - (settings.t + settings.b) / 100);
+
+    page.setCropBox(
+      Math.max(mediaBox.x, x),
+      Math.max(mediaBox.y, y),
+      Math.max(1, newWidth),
+      Math.max(1, newHeight)
+    );
+  };
+
   const handleCrop = async () => {
     if (!selectedFile) return;
     setIsProcessing(true);
@@ -134,39 +148,31 @@ export default function CropPage() {
 
       if (isInputPdf && exportFormat === "pdf") {
         const arrayBuffer = await selectedFile.arrayBuffer();
-        const pdfDoc = await PDFDocument.load(arrayBuffer, { ignoreEncryption: true });
-        const pages = pdfDoc.getPages();
-
-        pages.forEach((page, i) => {
-          let settings: CropSettings;
-          if (cropScope === "all") {
-            settings = allCrops[currentPage] || { t: 10, r: 10, b: 10, l: 10 };
-          } else if (i === currentPage) {
-            settings = allCrops[i] || { t: 10, r: 10, b: 10, l: 10 };
-          } else {
-            return;
-          }
+        const sourcePdf = await PDFDocument.load(arrayBuffer, { ignoreEncryption: true });
+        
+        let resultPdf: PDFDocument;
+        
+        if (cropScope === "current") {
+          // Extract only the current page
+          resultPdf = await PDFDocument.create();
+          const [copiedPage] = await resultPdf.copyPages(sourcePdf, [currentPage]);
+          resultPdf.addPage(copiedPage);
           
-          const mediaBox = page.getMediaBox();
-          const x = mediaBox.x + (settings.l / 100) * mediaBox.width;
-          const y = mediaBox.y + (settings.b / 100) * mediaBox.height;
-          const newWidth = mediaBox.width * (1 - (settings.l + settings.r) / 100);
-          const newHeight = mediaBox.height * (1 - (settings.t + settings.b) / 100);
+          const settings = allCrops[currentPage] || { t: 10, r: 10, b: 10, l: 10 };
+          applyCropToPage(copiedPage, settings);
+        } else {
+          // Process all pages
+          resultPdf = sourcePdf;
+          const settings = allCrops[currentPage] || { t: 10, r: 10, b: 10, l: 10 };
+          const pages = resultPdf.getPages();
+          pages.forEach(page => applyCropToPage(page, settings));
+        }
 
-          // Ensure positive values to avoid empty/broken PDF
-          page.setCropBox(
-            Math.max(mediaBox.x, x), 
-            Math.max(mediaBox.y, y), 
-            Math.max(1, newWidth), 
-            Math.max(1, newHeight)
-          );
-        });
-
-        const pdfBytes = await pdfDoc.save();
+        const pdfBytes = await resultPdf.save();
         const blob = new Blob([pdfBytes], { type: 'application/pdf' });
         setDownloadUrl(URL.createObjectURL(blob));
       } else if (!isInputPdf) {
-        // Image Processing
+        // Image Processing for JPG/PNG
         const img = new Image();
         const objectUrl = URL.createObjectURL(selectedFile);
         img.src = objectUrl;
@@ -210,7 +216,9 @@ export default function CropPage() {
         
         setDownloadUrl(URL.createObjectURL(finalBlob));
       } else {
-        // Fallback for PDF to Image
+        // PDF to Image (Export Format is png or jpg but input is PDF)
+        // For simplicity in a browser context without a PDF renderer, we'll export as PDF but notify the user
+        // In a real prod app, we'd use pdf.js to render to canvas first
         const arrayBuffer = await selectedFile.arrayBuffer();
         const pdfDoc = await PDFDocument.load(arrayBuffer, { ignoreEncryption: true });
         const pdfBytes = await pdfDoc.save();
@@ -328,7 +336,7 @@ export default function CropPage() {
             </div>
             <h1 className="text-3xl font-bold tracking-tight font-headline text-accent uppercase italic tracking-tighter">Precision Crop Engine</h1>
             <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-              Visual mouse-driven cropping for PDF, JPG, and PNG. Define precise margins for single pages or entire documents.
+              Visual mouse-driven cropping. Define precise margins for single pages or entire documents.
             </p>
           </div>
 
@@ -466,7 +474,7 @@ export default function CropPage() {
                                 <RadioGroupItem value="current" id="current-page" />
                                 <Label htmlFor="current-page" className="flex flex-col cursor-pointer">
                                   <span className="text-xs font-black uppercase italic">Current Page</span>
-                                  <span className="text-[9px] text-muted-foreground uppercase tracking-widest text-left">Isolated crop for Page {currentPage + 1}</span>
+                                  <span className="text-[9px] text-muted-foreground uppercase tracking-widest text-left">Extract Page {currentPage + 1} ONLY</span>
                                 </Label>
                                 <Scan className="h-4 w-4 ml-auto text-primary/40" />
                               </div>
