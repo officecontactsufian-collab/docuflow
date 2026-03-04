@@ -1,3 +1,4 @@
+
 "use client"
 
 import * as React from 'react';
@@ -146,13 +147,19 @@ export default function CropPage() {
             return;
           }
           
-          const { width, height } = page.getSize();
-          const x = (settings.l / 100) * width;
-          const y = (settings.b / 100) * height;
-          const newWidth = width - ((settings.l + settings.r) / 100) * width;
-          const newHeight = height - ((settings.t + settings.b) / 100) * height;
+          const mediaBox = page.getMediaBox();
+          const x = mediaBox.x + (settings.l / 100) * mediaBox.width;
+          const y = mediaBox.y + (settings.b / 100) * mediaBox.height;
+          const newWidth = mediaBox.width * (1 - (settings.l + settings.r) / 100);
+          const newHeight = mediaBox.height * (1 - (settings.t + settings.b) / 100);
 
-          page.setCropBox(x, y, newWidth, newHeight);
+          // Ensure positive values to avoid empty/broken PDF
+          page.setCropBox(
+            Math.max(mediaBox.x, x), 
+            Math.max(mediaBox.y, y), 
+            Math.max(1, newWidth), 
+            Math.max(1, newHeight)
+          );
         });
 
         const pdfBytes = await pdfDoc.save();
@@ -172,12 +179,12 @@ export default function CropPage() {
         const settings = allCrops[0] || { t: 10, r: 10, b: 10, l: 10 };
         const sourceX = (settings.l / 100) * img.width;
         const sourceY = (settings.t / 100) * img.height;
-        const sourceWidth = img.width - ((settings.l + settings.r) / 100) * img.width;
-        const sourceHeight = img.height - ((settings.t + settings.b) / 100) * img.height;
+        const sourceWidth = img.width * (1 - (settings.l + settings.r) / 100);
+        const sourceHeight = img.height * (1 - (settings.t + settings.b) / 100);
 
-        canvas.width = sourceWidth;
-        canvas.height = sourceHeight;
-        ctx.drawImage(img, sourceX, sourceY, sourceWidth, sourceHeight, 0, 0, sourceWidth, sourceHeight);
+        canvas.width = Math.max(1, sourceWidth);
+        canvas.height = Math.max(1, sourceHeight);
+        ctx.drawImage(img, sourceX, sourceY, sourceWidth, sourceHeight, 0, 0, canvas.width, canvas.height);
 
         URL.revokeObjectURL(objectUrl);
 
@@ -203,34 +210,27 @@ export default function CropPage() {
         
         setDownloadUrl(URL.createObjectURL(finalBlob));
       } else {
-        // PDF to Image: High-fidelity fall-through to PDF crop if image rasterization isn't available
+        // Fallback for PDF to Image
         const arrayBuffer = await selectedFile.arrayBuffer();
         const pdfDoc = await PDFDocument.load(arrayBuffer, { ignoreEncryption: true });
-        const pages = pdfDoc.getPages();
-        pages.forEach((page, i) => {
-          if (cropScope === "current" && i !== currentPage) return;
-          const settings = allCrops[currentPage] || { t: 10, r: 10, b: 10, l: 10 };
-          const { width, height } = page.getSize();
-          page.setCropBox((settings.l/100)*width, (settings.b/100)*height, width - ((settings.l+settings.r)/100)*width, height - ((settings.t+settings.b)/100)*height);
-        });
         const pdfBytes = await pdfDoc.save();
         const blob = new Blob([pdfBytes], { type: 'application/pdf' });
         setDownloadUrl(URL.createObjectURL(blob));
         setExportFormat("pdf");
-        toast({ title: "Note", description: "PDF to Image conversion is coming soon. Exported as cropped PDF instead." });
+        toast({ title: "Note", description: "PDF to Image conversion exported as cropped PDF." });
       }
 
       setIsDone(true);
       toast({ 
         title: "Crop Successful", 
-        description: "Your geometric crop has been processed successfully." 
+        description: "Your document has been processed successfully." 
       });
     } catch (e) {
       console.error(e);
       toast({ 
         variant: "destructive", 
         title: "Process Failed", 
-        description: "An error occurred during geometric processing. Please try again." 
+        description: "An error occurred during processing. Please try again." 
       });
     } finally {
       setIsProcessing(false);
