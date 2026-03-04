@@ -91,26 +91,9 @@ export function Navbar() {
 
           {/* Core Navigation Links */}
           <div className="hidden lg:flex items-center gap-8">
-            <Link href="/merge" className="flex items-center gap-2 text-[11px] font-black uppercase tracking-widest text-accent/80 hover:text-accent transition-all group">
-              <Merge className="h-3.5 w-3.5 text-primary/60 group-hover:text-primary transition-colors" />
-              Merge PDF
-            </Link>
-            <Link href="/split" className="flex items-center gap-2 text-[11px] font-black uppercase tracking-widest text-accent/80 hover:text-accent transition-all group">
-              <Scissors className="h-3.5 w-3.5 text-primary/60 group-hover:text-primary transition-colors" />
-              Split PDF
-            </Link>
-            <Link href="/compress" className="flex items-center gap-2 text-[11px] font-black uppercase tracking-widest text-accent/80 hover:text-accent transition-all group">
-              <Maximize className="h-3.5 w-3.5 text-primary/60 group-hover:text-primary transition-colors" />
-              Compress PDF
-            </Link>
-            <Link href="/convert?type=word-to-pdf" className="flex items-center gap-2 text-[11px] font-black uppercase tracking-widest text-accent/80 hover:text-accent transition-all group">
-              <RefreshCcw className="h-3.5 w-3.5 text-primary/60 group-hover:text-primary transition-colors" />
-              Convert PDF
-            </Link>
-
-            {/* Mega Menu Trigger */}
+            {/* Mega Menu Trigger - Now First after Brand */}
             <DropdownMenu>
-              <DropdownMenuTrigger className="flex items-center gap-2 text-[11px] font-black uppercase tracking-widest text-accent/80 hover:text-accent transition-all outline-none">
+              <DropdownMenuTrigger className="flex items-center gap-2 text-[11px] font-black uppercase tracking-widest text-accent hover:text-primary transition-all outline-none">
                 <LayoutDashboard className="h-3.5 w-3.5 text-primary" />
                 All PDF Tools <ChevronDown className="h-3 w-3 opacity-40" />
               </DropdownMenuTrigger>
@@ -139,6 +122,23 @@ export function Navbar() {
                 ))}
               </DropdownMenuContent>
             </DropdownMenu>
+
+            <Link href="/merge" className="flex items-center gap-2 text-[11px] font-black uppercase tracking-widest text-accent/80 hover:text-accent transition-all group">
+              <Merge className="h-3.5 w-3.5 text-primary/60 group-hover:text-primary transition-colors" />
+              Merge PDF
+            </Link>
+            <Link href="/split" className="flex items-center gap-2 text-[11px] font-black uppercase tracking-widest text-accent/80 hover:text-accent transition-all group">
+              <Scissors className="h-3.5 w-3.5 text-primary/60 group-hover:text-primary transition-colors" />
+              Split PDF
+            </Link>
+            <Link href="/compress" className="flex items-center gap-2 text-[11px] font-black uppercase tracking-widest text-accent/80 hover:text-accent transition-all group">
+              <Maximize className="h-3.5 w-3.5 text-primary/60 group-hover:text-primary transition-colors" />
+              Compress PDF
+            </Link>
+            <Link href="/convert?type=word-to-pdf" className="flex items-center gap-2 text-[11px] font-black uppercase tracking-widest text-accent/80 hover:text-accent transition-all group">
+              <RefreshCcw className="h-3.5 w-3.5 text-primary/60 group-hover:text-primary transition-colors" />
+              Convert PDF
+            </Link>
           </div>
         </div>
 
