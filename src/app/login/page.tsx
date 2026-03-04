@@ -25,11 +25,16 @@ export default function LoginPage() {
   
   // Registration fields
   const [fullName, setFullName] = React.useState('');
-  const [countryCode, setCountryCode] = React.useState('+1');
+  const [selectedCountryISO, setSelectedCountryISO] = React.useState('US');
   const [phoneNumber, setPhoneNumber] = React.useState('');
   const [confirmPassword, setConfirmPassword] = React.useState('');
   
   const [isLoading, setIsLoading] = React.useState(false);
+
+  // Derived selected country data
+  const selectedCountry = React.useMemo(() => 
+    countryCodes.find(c => c.code === selectedCountryISO) || countryCodes[0]
+  , [selectedCountryISO]);
 
   React.useEffect(() => {
     if (user && !isUserLoading) {
@@ -57,7 +62,8 @@ export default function LoginPage() {
 
     setIsLoading(true);
     // Note: Standard Firebase initiateEmailSignUp only takes email/password.
-    // In a full implementation, the additional profile data would be saved here.
+    // Full user profile including phone prefix (selectedCountry.dial_code) and local number 
+    // would be persisted to Firestore in a production environment.
     initiateEmailSignUp(auth, email, password);
   };
 
@@ -176,17 +182,23 @@ export default function LoginPage() {
                         <Phone className="h-3.5 w-3.5 text-muted-foreground" /> Phone Number
                       </Label>
                       <div className="flex gap-2">
-                        <Select value={countryCode} onValueChange={setCountryCode}>
-                          <SelectTrigger className="w-[110px] bg-muted/20 shrink-0">
-                            <SelectValue placeholder="+1" />
+                        <Select value={selectedCountryISO} onValueChange={setSelectedCountryISO}>
+                          <SelectTrigger className="w-[120px] bg-muted/20 shrink-0">
+                            <SelectValue>
+                              <span className="flex items-center gap-2">
+                                <span>{selectedCountry.flag}</span>
+                                <span className="font-mono text-xs">{selectedCountry.dial_code}</span>
+                              </span>
+                            </SelectValue>
                           </SelectTrigger>
-                          <SelectContent>
+                          <SelectContent className="max-h-[300px]">
                             {countryCodes.map((country) => (
-                              <SelectItem key={`${country.code}-${country.dial_code}`} value={country.dial_code}>
-                                <span className="flex items-center gap-2">
-                                  <span>{country.flag}</span>
-                                  <span className="font-mono text-xs">{country.dial_code}</span>
-                                </span>
+                              <SelectItem key={country.code} value={country.code}>
+                                <div className="flex items-center gap-3 w-full">
+                                  <span className="shrink-0">{country.flag}</span>
+                                  <span className="text-xs font-medium truncate max-w-[140px]">{country.name}</span>
+                                  <span className="text-[10px] font-mono text-muted-foreground ml-auto">{country.dial_code}</span>
+                                </div>
                               </SelectItem>
                             ))}
                           </SelectContent>
