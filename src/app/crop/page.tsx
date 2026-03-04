@@ -15,7 +15,8 @@ import {
   Layers,
   Settings2,
   Scan,
-  Copy
+  Copy,
+  FileType
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -24,6 +25,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { PDFDocument } from 'pdf-lib';
 import { PDFPreview } from '@/components/pdf-preview';
 import { cn } from '@/lib/utils';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 type CropSettings = {
   t: number;
@@ -32,11 +34,14 @@ type CropSettings = {
   l: number;
 };
 
+type ExportFormat = "pdf" | "png" | "jpg";
+
 export default function CropPage() {
   const [selectedFile, setSelectedFile] = React.useState<File | null>(null);
   const [isProcessing, setIsProcessing] = React.useState(false);
   const [isDone, setIsDone] = React.useState(false);
   const [downloadUrl, setDownloadUrl] = React.useState<string | null>(null);
+  const [exportFormat, setExportFormat] = React.useState<ExportFormat>("pdf");
   
   // Scoping
   const [cropScope, setCropScope] = React.useState<"all" | "current">("all");
@@ -66,14 +71,15 @@ export default function CropPage() {
     setDownloadUrl(null);
     setCurrentPage(0);
 
+    // Set default export format based on file type
     if (file.type === 'application/pdf') {
+      setExportFormat("pdf");
       try {
         const buffer = await file.arrayBuffer();
         const pdf = await PDFDocument.load(buffer, { ignoreEncryption: true });
         const count = pdf.getPageCount();
         setTotalPages(count);
         
-        // Initialize all pages with default 10% crop
         const initialCrops: Record<number, CropSettings> = {};
         for (let i = 0; i < count; i++) {
           initialCrops[i] = { t: 10, r: 10, b: 10, l: 10 };
@@ -84,6 +90,7 @@ export default function CropPage() {
         toast({ variant: "destructive", title: "Error", description: "Failed to read PDF pages." });
       }
     } else {
+      setExportFormat(file.type.includes('png') ? "png" : "jpg");
       setTotalPages(1);
       const initial = { t: 10, r: 10, b: 10, l: 10 };
       setAllCrops({ 0: initial });
@@ -127,23 +134,19 @@ export default function CropPage() {
     setIsProcessing(true);
 
     try {
-      if (selectedFile.type === 'application/pdf') {
+      if (selectedFile.type === 'application/pdf' && exportFormat === "pdf") {
         const arrayBuffer = await selectedFile.arrayBuffer();
         const pdfDoc = await PDFDocument.load(arrayBuffer, { ignoreEncryption: true });
         const pages = pdfDoc.getPages();
 
         pages.forEach((page, i) => {
           let settings: CropSettings;
-          
           if (cropScope === "all") {
-            // Use current page settings for everyone
             settings = allCrops[currentPage];
           } else {
-            // Apply only to the current page, or use unique settings if they exist
             if (i === currentPage) {
                settings = allCrops[i];
             } else {
-               // If scope is "current", only crop the active page
                return; 
             }
           }
@@ -161,16 +164,48 @@ export default function CropPage() {
         const blob = new Blob([pdfBytes], { type: 'application/pdf' });
         setDownloadUrl(URL.createObjectURL(blob));
       } else {
-        // Simple simulation for image crop
-        await new Promise(resolve => setTimeout(resolve, 2000));
-        const mockBlob = new Blob([await selectedFile.arrayBuffer()], { type: selectedFile.type });
-        setDownloadUrl(URL.createObjectURL(mockBlob));
+        // High-fidelity image cropping using Canvas
+        const img = new Image();
+        img.src = URL.createObjectURL(selectedFile);
+        await new Promise((resolve) => (img.onload = resolve));
+
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        if (!ctx) throw new Error("Could not initialize canvas context");
+
+        const settings = allCrops[currentPage];
+        const sourceX = (settings.l / 100) * img.width;
+        const sourceY = (settings.t / 100) * img.height;
+        const sourceWidth = img.width - ((settings.l + settings.r) / 100) * img.width;
+        const sourceHeight = img.height - ((settings.t + settings.b) / 100) * img.height;
+
+        canvas.width = sourceWidth;
+        canvas.height = sourceHeight;
+        ctx.drawImage(img, sourceX, sourceY, sourceWidth, sourceHeight, 0, 0, sourceWidth, sourceHeight);
+
+        let finalBlob: Blob;
+        if (exportFormat === "pdf") {
+          const pdfDoc = await PDFDocument.create();
+          const imageBytes = await new Promise<ArrayBuffer>((resolve) => {
+             canvas.toBlob(async (blob) => resolve(await blob!.arrayBuffer()), 'image/jpeg', 0.95);
+          });
+          const embeddedImage = await pdfDoc.embedJpg(imageBytes);
+          const page = pdfDoc.addPage([embeddedImage.width, embeddedImage.height]);
+          page.drawImage(embeddedImage, { x: 0, y: 0, width: embeddedImage.width, height: embeddedImage.height });
+          const pdfBytes = await pdfDoc.save();
+          finalBlob = new Blob([pdfBytes], { type: 'application/pdf' });
+        } else {
+          const mimeType = exportFormat === "png" ? "image/png" : "image/jpeg";
+          finalBlob = await new Promise<Blob>((resolve) => canvas.toBlob((b) => resolve(b!), mimeType, 0.95));
+        }
+        
+        setDownloadUrl(URL.createObjectURL(finalBlob));
       }
 
       setIsDone(true);
       toast({ 
-        title: "Crop Applied", 
-        description: cropScope === "all" ? "Applied to all document pages." : "Applied to active page only." 
+        title: "Crop Executed", 
+        description: `Exported as ${exportFormat.toUpperCase()} with precision margins.` 
       });
     } catch (e) {
       console.error(e);
@@ -273,9 +308,9 @@ export default function CropPage() {
             <div className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-lg mb-2">
               <Crop className="h-6 w-6" />
             </div>
-            <h1 className="text-3xl font-bold tracking-tight font-headline text-accent uppercase italic tracking-tighter">Visual Crop Engine</h1>
+            <h1 className="text-3xl font-bold tracking-tight font-headline text-accent uppercase italic tracking-tighter">Precision Crop Engine</h1>
             <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-              Precision mouse-based cropping. Define unique page dimensions or apply to entire assets.
+              Visual mouse-driven cropping. Define independent dimensions or apply to entire assets.
             </p>
           </div>
 
@@ -315,7 +350,7 @@ export default function CropPage() {
                         {isImage ? (
                           <img 
                             src={URL.createObjectURL(selectedFile)} 
-                            className="max-w-full max-h-[600px] rounded-lg shadow-2xl pointer-events-none"
+                            className="max-w-full max-h-[650px] rounded-lg shadow-2xl pointer-events-none"
                             alt="Crop target"
                           />
                         ) : (
@@ -338,7 +373,7 @@ export default function CropPage() {
 
                         {/* Interactive Crop Box */}
                         <div 
-                          className="absolute border-2 border-primary shadow-[0_0_0_9999px_rgba(0,0,0,0)]"
+                          className="absolute border-2 border-primary shadow-2xl"
                           style={{
                             top: `${cropTop}%`,
                             left: `${cropLeft}%`,
@@ -395,44 +430,64 @@ export default function CropPage() {
                       <CardHeader className="pt-8 px-8">
                         <CardTitle className="text-xl font-black uppercase italic tracking-tight flex items-center gap-3 text-accent">
                           <Settings2 className="h-5 w-5 text-primary" />
-                          Crop Settings
+                          Crop Workspace
                         </CardTitle>
                         <CardDescription className="text-[10px] font-bold uppercase tracking-widest text-accent/40">
-                          Scope & Application
+                          Execution & Logic
                         </CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-8 p-8">
+                        {/* Scope Choice */}
+                        {!isImage && (
+                          <div className="space-y-4">
+                            <Label className="text-[10px] font-black uppercase tracking-widest text-accent/60">Target Sequence</Label>
+                            <RadioGroup 
+                              defaultValue="all" 
+                              value={cropScope} 
+                              onValueChange={(v) => setCropScope(v as any)}
+                              className="grid grid-cols-1 gap-3"
+                            >
+                              <div className={cn(
+                                "flex items-center space-x-3 p-4 rounded-2xl border transition-all cursor-pointer",
+                                cropScope === 'all' ? "bg-primary/5 border-primary/20" : "border-accent/10 hover:border-accent/20"
+                              )} onClick={() => setCropScope('all')}>
+                                <RadioGroupItem value="all" id="all-pages" />
+                                <Label htmlFor="all-pages" className="flex flex-col cursor-pointer">
+                                  <span className="text-xs font-black uppercase italic">All Pages</span>
+                                  <span className="text-[9px] text-muted-foreground uppercase tracking-widest text-left">Apply current crop to entire doc</span>
+                                </Label>
+                                <Copy className="h-4 w-4 ml-auto text-primary/40" />
+                              </div>
+                              <div className={cn(
+                                "flex items-center space-x-3 p-4 rounded-2xl border transition-all cursor-pointer",
+                                cropScope === 'current' ? "bg-primary/5 border-primary/20" : "border-accent/10 hover:border-accent/20"
+                              )} onClick={() => setCropScope('current')}>
+                                <RadioGroupItem value="current" id="current-page" />
+                                <Label htmlFor="current-page" className="flex flex-col cursor-pointer">
+                                  <span className="text-xs font-black uppercase italic">Current Page</span>
+                                  <span className="text-[9px] text-muted-foreground uppercase tracking-widest text-left">Crop only Page {currentPage + 1}</span>
+                                </Label>
+                                <Scan className="h-4 w-4 ml-auto text-primary/40" />
+                              </div>
+                            </RadioGroup>
+                          </div>
+                        )}
+
+                        {/* Export Format Choice */}
                         <div className="space-y-4">
-                          <Label className="text-[10px] font-black uppercase tracking-widest text-accent/60">Target Pages</Label>
-                          <RadioGroup 
-                            defaultValue="all" 
-                            value={cropScope} 
-                            onValueChange={(v) => setCropScope(v as any)}
-                            className="grid grid-cols-1 gap-3"
-                          >
-                            <div className={cn(
-                              "flex items-center space-x-3 p-4 rounded-2xl border transition-all cursor-pointer",
-                              cropScope === 'all' ? "bg-primary/5 border-primary/20" : "border-accent/10 hover:border-accent/20"
-                            )} onClick={() => setCropScope('all')}>
-                              <RadioGroupItem value="all" id="all-pages" />
-                              <Label htmlFor="all-pages" className="flex flex-col cursor-pointer">
-                                <span className="text-xs font-black uppercase italic">All Pages</span>
-                                <span className="text-[9px] text-muted-foreground uppercase tracking-widest">Apply current crop to every page</span>
-                              </Label>
-                              <Copy className="h-4 w-4 ml-auto text-primary/40" />
-                            </div>
-                            <div className={cn(
-                              "flex items-center space-x-3 p-4 rounded-2xl border transition-all cursor-pointer",
-                              cropScope === 'current' ? "bg-primary/5 border-primary/20" : "border-accent/10 hover:border-accent/20"
-                            )} onClick={() => setCropScope('current')}>
-                              <RadioGroupItem value="current" id="current-page" />
-                              <Label htmlFor="current-page" className="flex flex-col cursor-pointer">
-                                <span className="text-xs font-black uppercase italic">Current Page</span>
-                                <span className="text-[9px] text-muted-foreground uppercase tracking-widest">Crop only Page {currentPage + 1}</span>
-                              </Label>
-                              <Scan className="h-4 w-4 ml-auto text-primary/40" />
-                            </div>
-                          </RadioGroup>
+                          <Label className="text-[10px] font-black uppercase tracking-widest text-accent/60 flex items-center gap-2">
+                            <FileType className="h-3 w-3" /> Export Format
+                          </Label>
+                          <Select value={exportFormat} onValueChange={(v: any) => setExportFormat(v)}>
+                             <SelectTrigger className="h-12 rounded-xl bg-white border-accent/10 shadow-sm font-bold text-accent">
+                                <SelectValue placeholder="Choice Format" />
+                             </SelectTrigger>
+                             <SelectContent className="rounded-xl border-accent/10">
+                                <SelectItem value="pdf" className="text-xs font-bold uppercase">PDF Document</SelectItem>
+                                <SelectItem value="png" className="text-xs font-bold uppercase">PNG High-Res</SelectItem>
+                                <SelectItem value="jpg" className="text-xs font-bold uppercase">JPG Optimized</SelectItem>
+                             </SelectContent>
+                          </Select>
                         </div>
 
                         <div className="pt-4 flex flex-col gap-3">
@@ -441,7 +496,7 @@ export default function CropPage() {
                             disabled={isProcessing}
                             className="w-full h-14 rounded-2xl bg-accent text-white font-black uppercase tracking-[0.2em] text-[11px] shadow-2xl shadow-accent/20"
                           >
-                            {isProcessing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : "Execute Precision Crop"}
+                            {isProcessing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : "Deploy Precision Crop"}
                           </Button>
                           <Button variant="ghost" onClick={() => setSelectedFile(null)} className="text-[10px] font-bold uppercase tracking-widest text-accent/40 hover:text-accent">
                             Change Asset
@@ -450,11 +505,11 @@ export default function CropPage() {
                         
                         <div className="pt-6 border-t border-accent/5 grid grid-cols-2 gap-4">
                            <div className="space-y-1">
-                              <p className="text-[8px] font-black uppercase tracking-widest text-accent/40">Margins</p>
+                              <p className="text-[8px] font-black uppercase tracking-widest text-accent/40">Y-Axis</p>
                               <p className="text-[10px] font-bold text-accent">T: {cropTop.toFixed(0)}% • B: {cropBottom.toFixed(0)}%</p>
                            </div>
                            <div className="space-y-1">
-                              <p className="text-[8px] font-black uppercase tracking-widest text-accent/40">Canvas</p>
+                              <p className="text-[8px] font-black uppercase tracking-widest text-accent/40">X-Axis</p>
                               <p className="text-[10px] font-bold text-accent">L: {cropLeft.toFixed(0)}% • R: {cropRight.toFixed(0)}%</p>
                            </div>
                         </div>
@@ -472,7 +527,7 @@ export default function CropPage() {
                 </div>
                 <div className="space-y-2">
                   <h2 className="text-2xl font-black uppercase italic tracking-tight text-accent">Cropping Complete</h2>
-                  <p className="text-muted-foreground text-sm font-medium">Successfully processed the selection scope.</p>
+                  <p className="text-muted-foreground text-sm font-medium">Asset successfully processed in {exportFormat.toUpperCase()} format.</p>
                 </div>
                 <Button 
                   size="lg" 
@@ -480,7 +535,7 @@ export default function CropPage() {
                     if (downloadUrl) {
                       const link = document.createElement('a');
                       link.href = downloadUrl;
-                      link.download = `cropped_${selectedFile?.name || 'asset'}`;
+                      link.download = `cropped_${selectedFile?.name.split('.')[0] || 'asset'}.${exportFormat}`;
                       document.body.appendChild(link);
                       link.click();
                       document.body.removeChild(link);
@@ -489,7 +544,7 @@ export default function CropPage() {
                   className="w-full h-14 rounded-2xl bg-accent hover:bg-accent/90 shadow-xl shadow-accent/20 text-[11px] font-black uppercase tracking-widest"
                 >
                   <Download className="mr-2 h-4 w-4" />
-                  Download Result
+                  Download {exportFormat.toUpperCase()}
                 </Button>
               </Card>
               <Button variant="ghost" onClick={reset} className="text-[10px] font-bold uppercase tracking-widest text-accent/60">
