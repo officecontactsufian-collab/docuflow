@@ -64,25 +64,25 @@ export function Navbar() {
                 <div className="grid gap-2">
                   <DropdownMenuItem asChild className="p-3 rounded-xl cursor-pointer hover:bg-[#2A1E5C]/5 transition-colors">
                     <Link href="/merge" className="flex items-center gap-3">
-                      <div className="p-2 text-[#DE496C]"><Merge className="h-6 w-6" /></div> 
+                      <div className="p-2 bg-[#77949A] text-[#DE496C] rounded-lg shadow-sm"><Merge className="h-6 w-6" /></div> 
                       <div className="flex flex-col"><span className="font-bold text-[#2A1E5C]">Merge PDF</span><span className="text-[10px] text-[#0A0F0D]/60">Combine volumes</span></div>
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild className="p-3 rounded-xl cursor-pointer hover:bg-[#2A1E5C]/5 transition-colors">
                     <Link href="/split" className="flex items-center gap-3">
-                      <div className="p-2 text-[#DE496C]"><Scissors className="h-6 w-6" /></div> 
+                      <div className="p-2 bg-[#77949A] text-[#DE496C] rounded-lg shadow-sm"><Scissors className="h-6 w-6" /></div> 
                       <div className="flex flex-col"><span className="font-bold text-[#2A1E5C]">Split PDF</span><span className="text-[10px] text-[#0A0F0D]/60">Extract pages</span></div>
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild className="p-3 rounded-xl cursor-pointer hover:bg-[#2A1E5C]/5 transition-colors">
                     <Link href="/organize" className="flex items-center gap-3">
-                      <div className="p-2 text-[#DE496C]"><RotateCw className="h-6 w-6" /></div> 
+                      <div className="p-2 bg-[#77949A] text-[#DE496C] rounded-lg shadow-sm"><RotateCw className="h-6 w-6" /></div> 
                       <div className="flex flex-col"><span className="font-bold text-[#2A1E5C]">Organize Pages</span><span className="text-[10px] text-[#0A0F0D]/60">Reorder & rotate</span></div>
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild className="p-3 rounded-xl cursor-pointer hover:bg-[#2A1E5C]/5 transition-colors">
                     <Link href="/watermark" className="flex items-center gap-3">
-                      <div className="p-2 text-[#DE496C]"><Type className="h-6 w-6" /></div> 
+                      <div className="p-2 bg-[#77949A] text-[#DE496C] rounded-lg shadow-sm"><Type className="h-6 w-6" /></div> 
                       <div className="flex flex-col"><span className="font-bold text-[#2A1E5C]">Watermark</span><span className="text-[10px] text-[#0A0F0D]/60">Branding & security</span></div>
                     </Link>
                   </DropdownMenuItem>
@@ -93,25 +93,25 @@ export function Navbar() {
                 <div className="grid gap-2">
                   <DropdownMenuItem asChild className="p-3 rounded-xl cursor-pointer hover:bg-[#2A1E5C]/5 transition-colors">
                     <Link href="/analyze" className="flex items-center gap-3">
-                      <div className="p-2 text-[#DE496C]"><Search className="h-6 w-6" /></div> 
+                      <div className="p-2 bg-[#77949A] text-[#DE496C] rounded-lg shadow-sm"><Search className="h-6 w-6" /></div> 
                       <div className="flex flex-col"><span className="font-bold text-[#2A1E5C]">Inspector</span><span className="text-[10px] text-[#0A0F0D]/60">Metadata analysis</span></div>
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild className="p-3 rounded-xl cursor-pointer hover:bg-[#2A1E5C]/5 transition-colors">
                     <Link href="/sanitize" className="flex items-center gap-3">
-                      <div className="p-2 text-[#DE496C]"><Eraser className="h-6 w-6" /></div> 
+                      <div className="p-2 bg-[#77949A] text-[#DE496C] rounded-lg shadow-sm"><Eraser className="h-6 w-6" /></div> 
                       <div className="flex flex-col"><span className="font-bold text-[#2A1E5C]">Sanitize</span><span className="text-[10px] text-[#0A0F0D]/60">Strip tracking info</span></div>
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild className="p-3 rounded-xl cursor-pointer hover:bg-[#2A1E5C]/5 transition-colors">
                     <Link href="/protect" className="flex items-center gap-3">
-                      <div className="p-2 text-[#DE496C]"><Lock className="h-6 w-6" /></div> 
+                      <div className="p-2 bg-[#77949A] text-[#DE496C] rounded-lg shadow-sm"><Lock className="h-6 w-6" /></div> 
                       <div className="flex flex-col"><span className="font-bold text-[#2A1E5C]">Encrypt</span><span className="text-[10px] text-[#0A0F0D]/60">AES-256 protection</span></div>
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild className="p-3 rounded-xl cursor-pointer hover:bg-[#2A1E5C]/5 transition-colors">
                     <Link href="/sign" className="flex items-center gap-3">
-                      <div className="p-2 text-[#DE496C]"><Signature className="h-6 w-6" /></div> 
+                      <div className="p-2 bg-[#77949A] text-[#DE496C] rounded-lg shadow-sm"><Signature className="h-6 w-6" /></div> 
                       <div className="flex flex-col"><span className="font-bold text-[#2A1E5C]">Digital Sign</span><span className="text-[10px] text-[#0A0F0D]/60">E-signature flow</span></div>
                     </Link>
                   </DropdownMenuItem>
