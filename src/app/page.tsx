@@ -148,7 +148,7 @@ export default function Home() {
         <section className="relative py-24 lg:py-40 overflow-hidden hero-gradient">
           <div className="container relative mx-auto px-4">
             <div className="max-w-4xl mx-auto text-center space-y-10">
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-xs font-bold uppercase tracking-widest border border-primary/20 animate-in fade-in slide-in-from-bottom-4 duration-700">
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-secondary/20 text-accent text-xs font-bold uppercase tracking-widest border border-secondary/30 animate-in fade-in slide-in-from-bottom-4 duration-700">
                 <Shield className="h-4 w-4" />
                 <span>Enterprise Grade Security</span>
               </div>
@@ -169,7 +169,7 @@ export default function Home() {
                     Get Started Now <ArrowRight className="ml-2 h-5 w-5" />
                   </Link>
                 </Button>
-                <Button asChild size="lg" variant="outline" className="h-16 px-10 text-lg rounded-2xl bg-white/50 backdrop-blur-sm border-primary/30 hover:bg-white text-primary transition-all duration-300 hover:-translate-y-1">
+                <Button asChild size="lg" variant="outline" className="h-16 px-10 text-lg rounded-2xl bg-white/50 backdrop-blur-sm border-secondary/30 hover:bg-white text-accent transition-all duration-300 hover:-translate-y-1">
                   <Link href="/enterprise">
                     Enterprise Solutions
                   </Link>
@@ -249,7 +249,7 @@ export default function Home() {
                 <h2 className="text-5xl font-black tracking-tight text-[#2A1E5C] leading-[1.1]">Trusted by global <br /> organizations.</h2>
                 <div className="space-y-8">
                   <div className="flex gap-6 items-start">
-                    <div className="h-14 w-14 shrink-0 rounded-2xl bg-primary/10 text-primary flex items-center justify-center shadow-inner">
+                    <div className="h-14 w-14 shrink-0 rounded-2xl bg-secondary text-primary flex items-center justify-center shadow-inner">
                       <Lock className="h-7 w-7" />
                     </div>
                     <div className="space-y-2">
@@ -258,7 +258,7 @@ export default function Home() {
                     </div>
                   </div>
                   <div className="flex gap-6 items-start">
-                    <div className="h-14 w-14 shrink-0 rounded-2xl bg-[#2A1E5C]/10 text-[#2A1E5C] flex items-center justify-center shadow-inner">
+                    <div className="h-14 w-14 shrink-0 rounded-2xl bg-secondary text-accent flex items-center justify-center shadow-inner">
                       <CheckCircle2 className="h-7 w-7" />
                     </div>
                     <div className="space-y-2">

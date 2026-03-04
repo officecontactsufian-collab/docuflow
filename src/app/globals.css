@@ -19,11 +19,12 @@
     --primary: 346 71% 58%;
     --primary-foreground: 0 0% 100%;
     
-    /* Secondary: #91C5C1 (Header Teal) - HSL: 175 31% 67% */
-    --secondary: 175 31% 67%;
-    --secondary-foreground: 165 19% 5%;
+    /* Secondary (Icon Background): #77949A - HSL: 190 15% 54% */
+    --secondary: 190 15% 54%;
+    --secondary-foreground: 0 0% 100%;
     
-    --muted: 175 31% 90%;
+    /* Header Color: #91C5C1 - HSL: 175 31% 67% */
+    --muted: 175 31% 67%;
     --muted-foreground: 165 19% 25%;
     
     /* Accent: #2A1E5C (Deep Indigo) - HSL: 251 51% 24% */
@@ -47,7 +48,7 @@
     --popover-foreground: 0 0% 100%;
     --primary: 346 71% 58%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 251 51% 24%;
+    --secondary: 190 15% 40%;
     --secondary-foreground: 0 0% 100%;
     --muted: 165 19% 12%;
     --muted-foreground: 175 20% 70%;
