@@ -18,14 +18,10 @@ import {
   Unlock,
   Type,
   Signature,
-  Edit3,
   Hash,
   Crop,
   Search,
   FilePenLine,
-  FileOutput,
-  FileSearch,
-  Table
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -49,12 +45,11 @@ export function Navbar() {
 
   const categories = [
     {
-      label: "Organize & Edit",
+      label: "Organize & Format",
       items: [
         { href: "/merge", icon: Merge, title: "Merge", desc: "Combine multiple PDFs" },
         { href: "/split", icon: Scissors, title: "Split", desc: "Extract specific pages" },
         { href: "/organize", icon: RotateCw, title: "Organize", desc: "Reorder and rotate" },
-        { href: "/edit", icon: Edit3, title: "Edit", desc: "Add text and shapes" },
         { href: "/crop", icon: Crop, title: "Crop", desc: "Trim page margins" },
         { href: "/numbers", icon: Hash, title: "Page Numbers", desc: "Add sequential counters" },
       ]
