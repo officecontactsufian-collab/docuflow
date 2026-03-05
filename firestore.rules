@@ -23,7 +23,7 @@ service cloud.firestore {
 
     /**
      * isAdmin() checks for either:
-     * 1. The hardcoded master admin email (emergency access/bootstrap).
+     * 1. The hardcoded master admin email (Global Sovereignty).
      * 2. An existence marker in the roles_admin collection.
      */
     function isAdmin() {
@@ -56,10 +56,11 @@ service cloud.firestore {
      * @path /roles_admin/{adminId}
      */
     match /roles_admin/{adminId} {
+      // Master admin email can always get/list/manage markers
       allow get: if isOwnerOrAdmin(adminId);
       allow list: if isAdmin();
-      // Master admin can always create/update markers. Self-creation allowed for master email.
-      allow create, update: if (isOwner(adminId) && request.auth.token.email == "office.contact.sufian@gmail.com") || isAdmin();
+      // Master admin can always create/update markers.
+      allow create, update: if isAdmin() || (isOwner(adminId) && request.auth.token.email == "office.contact.sufian@gmail.com");
       allow delete: if isAdmin();
     }
 

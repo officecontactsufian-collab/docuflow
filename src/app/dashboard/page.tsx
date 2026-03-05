@@ -15,7 +15,6 @@ import {
   ArrowDownRight, 
   Clock,
   Search,
-  Filter,
   Download,
   Database,
   Plus,
@@ -46,7 +45,6 @@ import { Label } from '@/components/ui/label';
 import { doc, collection, deleteDoc } from 'firebase/firestore';
 import { useToast } from '@/hooks/use-toast';
 
-// Dynamically import chart to prevent chunk loading errors in Turbopack/Next.js hydration
 const OperationalChart = dynamic(
   () => import('@/components/dashboard/operational-chart'),
   { 
@@ -73,7 +71,6 @@ export default function DashboardPage() {
   const [searchTerm, setSearchTerm] = React.useState('');
   const [isLiveStreamActive, setIsLiveStreamActive] = React.useState(false);
 
-  // Admin Verification
   const adminRef = useMemoFirebase(() => {
     if (!firestore || !user) return null;
     return doc(firestore, 'roles_admin', user.uid);
@@ -81,7 +78,6 @@ export default function DashboardPage() {
 
   const { data: adminData, isLoading: isAdminLoading } = useDoc(adminRef);
 
-  // Users Intelligence Subscription
   const usersQuery = useMemoFirebase(() => {
     if (!firestore) return null;
     return collection(firestore, 'users');
@@ -96,13 +92,13 @@ export default function DashboardPage() {
     );
   }, [allUsers, searchTerm]);
 
-  // Redirection guard with special case for master admin
   React.useEffect(() => {
     if (isUserLoading) return;
     if (!user) {
       router.push('/login');
       return;
     }
+    // If master email is used, bypass document existence check to avoid race condition redirects
     const isMasterAdmin = user.email === MASTER_ADMIN_EMAIL;
     if (!isMasterAdmin && !isAdminLoading && !adminData) {
       router.push('/');
@@ -135,10 +131,8 @@ export default function DashboardPage() {
       provisionedBy: user?.email
     };
 
-    // Use non-blocking set for responsiveness
     setDocumentNonBlocking(userRef, userData, { merge: true });
     
-    // Provision administrative marker if elevated role selected
     if (newRole === 'admin') {
       const markerRef = doc(firestore, 'roles_admin', tempId);
       setDocumentNonBlocking(markerRef, { id: tempId, email: newEmail, role: 'admin' }, { merge: true });
@@ -153,7 +147,6 @@ export default function DashboardPage() {
     if (!firestore) return;
     try {
       await deleteDoc(doc(firestore, 'users', userId));
-      // Also cleanup admin markers
       await deleteDoc(doc(firestore, 'roles_admin', userId)).catch(() => {});
       toast({ title: "Record Shredded", description: "User intelligence data has been purged." });
     } catch (e) {
