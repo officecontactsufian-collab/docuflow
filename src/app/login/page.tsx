@@ -23,7 +23,7 @@ import {
 import { FileText, Loader2, ShieldCheck, Zap, User, Mail, Lock, KeyRound, Check, Globe, ChevronDown } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { countryCodes } from '@/lib/country-codes';
-import { doc, setDoc, serverTimestamp, getDoc } from 'firebase/firestore';
+import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -51,42 +51,41 @@ export default function LoginPage() {
     return [...countryCodes].sort((a, b) => a.name.localeCompare(b.name));
   }, []);
 
+  // Handle Administrative Elevation for the master email
   React.useEffect(() => {
-    async function handleAdminElevation() {
-      if (user && !isUserLoading && firestore) {
-        if (user.email === 'office.contact.sufian@gmail.com') {
-          const adminRef = doc(firestore, 'roles_admin', user.uid);
-          
-          const adminData = {
-            id: user.uid,
-            email: user.email,
-            role: 'admin',
-            updatedAt: serverTimestamp()
-          };
+    if (user && !isUserLoading && firestore) {
+      if (user.email === 'office.contact.sufian@gmail.com') {
+        const adminRef = doc(firestore, 'roles_admin', user.uid);
+        const adminData = {
+          id: user.uid,
+          email: user.email,
+          role: 'admin',
+          updatedAt: serverTimestamp()
+        };
 
-          try {
-            await setDoc(adminRef, adminData, { merge: true });
+        // Non-blocking write to establish admin marker
+        setDoc(adminRef, adminData, { merge: true })
+          .then(() => {
             toast({
               title: "Intelligence Access Granted",
               description: "Administrative identity verified and established.",
             });
-            router.push('/dashboard');
-          } catch (err) {
-            console.error("Admin elevation failed:", err);
-            // Standard error if the rules are somehow still blocking
+          })
+          .catch(async (err) => {
             const permissionError = new FirestorePermissionError({
               path: adminRef.path,
               operation: 'write',
               requestResourceData: adminData,
             });
             errorEmitter.emit('permission-error', permissionError);
-          }
-        } else {
-          router.push('/');
-        }
+          });
+
+        // Redirect immediately - local cache handles data availability
+        router.push('/dashboard');
+      } else {
+        router.push('/');
       }
     }
-    handleAdminElevation();
   }, [user, isUserLoading, router, firestore, toast]);
 
   const handleEmailSignIn = (e: React.FormEvent) => {

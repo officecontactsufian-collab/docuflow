@@ -36,6 +36,8 @@ const OperationalChart = dynamic(
   }
 );
 
+const MASTER_ADMIN_EMAIL = 'office.contact.sufian@gmail.com';
+
 export default function DashboardPage() {
   const { user, isUserLoading } = useUser();
   const firestore = useFirestore();
@@ -48,21 +50,24 @@ export default function DashboardPage() {
 
   const { data: adminData, isLoading: isAdminLoading } = useDoc(adminRef);
 
-  // Re-verify and redirect if not admin
+  // Robust redirection logic to prevent loops
   React.useEffect(() => {
-    if (!isUserLoading && !user) {
+    if (isUserLoading) return;
+
+    if (!user) {
       router.push('/login');
       return;
     }
     
-    // Redirect if we are sure the user is not an admin
-    if (user && !isUserLoading && !isAdminLoading && !adminData) {
-      // Only redirect if we checked and found no admin document
+    // Redirect ONLY if we are sure the user is not the master admin AND has no admin doc
+    const isMasterAdmin = user.email === MASTER_ADMIN_EMAIL;
+    if (!isMasterAdmin && !isAdminLoading && !adminData) {
       router.push('/');
     }
   }, [user, isUserLoading, adminData, isAdminLoading, router]);
 
-  if (isUserLoading || isAdminLoading || (!adminData && user)) {
+  // Loading state handling
+  if (isUserLoading || (isAdminLoading && user?.email !== MASTER_ADMIN_EMAIL)) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-muted/30">
         <div className="text-center space-y-4">
@@ -73,7 +78,9 @@ export default function DashboardPage() {
     );
   }
 
-  if (!user || !adminData) return null;
+  // Final check: must have user and (either master email or admin data)
+  const isAuthorized = user && (user.email === MASTER_ADMIN_EMAIL || adminData);
+  if (!isAuthorized) return null;
 
   return (
     <div className="flex min-h-screen flex-col bg-muted/20">
