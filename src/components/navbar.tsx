@@ -23,7 +23,8 @@ import {
   Search,
   Activity,
   LogOut,
-  User as UserIcon
+  User as UserIcon,
+  Settings
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -37,6 +38,8 @@ import * as React from 'react';
 import { useUser, useAuth } from '@/firebase';
 import { signOut } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
+
+const MASTER_ADMIN_EMAIL = 'office.contact.sufian@gmail.com';
 
 export function Navbar() {
   const { user } = useUser();
@@ -80,7 +83,7 @@ export function Navbar() {
     }
   ];
 
-  const isAdmin = user?.email === 'office.contact.sufian@gmail.com';
+  const isAdmin = user?.email === MASTER_ADMIN_EMAIL;
 
   return (
     <nav className="glass-nav border-b bg-white/80 backdrop-blur-md sticky top-0 z-50">
@@ -163,19 +166,21 @@ export function Navbar() {
             </Link>
           </div>
           
-          {user ? (
+          {user && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="sm" className="h-8 rounded-lg text-[9px] font-black uppercase tracking-widest gap-2 bg-accent/5">
                   <UserIcon className="h-3 w-3" />
-                  <span className="hidden sm:inline">Session</span>
+                  <span className="hidden sm:inline">Admin</span>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-48 rounded-xl bg-white shadow-2xl border-accent/5">
                 <DropdownMenuLabel className="text-[8px] font-black uppercase tracking-widest text-accent/40">{user.email}</DropdownMenuLabel>
                 {isAdmin && (
                   <DropdownMenuItem asChild>
-                    <Link href="/dashboard" className="cursor-pointer text-[10px] font-bold uppercase">Dashboard</Link>
+                    <Link href="/dashboard" className="cursor-pointer text-[10px] font-bold uppercase">
+                      <Activity className="h-3 w-3 mr-2" /> Dashboard
+                    </Link>
                   </DropdownMenuItem>
                 )}
                 <DropdownMenuItem onClick={handleLogout} className="text-destructive cursor-pointer text-[10px] font-bold uppercase">
@@ -183,10 +188,6 @@ export function Navbar() {
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
-          ) : (
-            <Button variant="outline" size="sm" asChild className="h-8 rounded-lg text-[9px] font-black uppercase tracking-widest border-accent/10">
-              <Link href="/login">Login</Link>
-            </Button>
           )}
 
           <div className="lg:hidden">

@@ -1,4 +1,3 @@
-
 "use client"
 
 import * as React from 'react';
@@ -72,12 +71,12 @@ export default function DashboardPage() {
   const [searchTerm, setSearchTerm] = React.useState('');
   const [isLiveStreamActive, setIsLiveStreamActive] = React.useState(false);
 
-  const adminRef = useMemoFirebase(() => {
-    if (!firestore || !user) return null;
-    return doc(firestore, 'roles_admin', user.uid);
-  }, [firestore, user]);
-
-  const { data: adminData, isLoading: isAdminLoading } = useDoc(adminRef);
+  // Security Guard: Instant ejection for unauthorized profiles
+  React.useEffect(() => {
+    if (!isUserLoading && (!user || user.email !== MASTER_ADMIN_EMAIL)) {
+      router.push('/');
+    }
+  }, [user, isUserLoading, router]);
 
   const usersQuery = useMemoFirebase(() => {
     if (!firestore) return null;
@@ -92,18 +91,6 @@ export default function DashboardPage() {
       u.email?.toLowerCase().includes(searchTerm.toLowerCase())
     );
   }, [allUsers, searchTerm]);
-
-  React.useEffect(() => {
-    if (isUserLoading) return;
-    if (!user) {
-      router.push('/login');
-      return;
-    }
-    const isMasterAdmin = user.email === MASTER_ADMIN_EMAIL;
-    if (!isMasterAdmin && !isAdminLoading && !adminData) {
-      router.push('/');
-    }
-  }, [user, isUserLoading, adminData, isAdminLoading, router]);
 
   const handleExportReport = async () => {
     if (!allUsers) return;
@@ -123,7 +110,7 @@ export default function DashboardPage() {
         y: height - 100,
         width: width,
         height: 100,
-        color: rgb(0.14, 0.12, 0.29), // Accent color
+        color: rgb(0.14, 0.12, 0.29),
       });
 
       page.drawText("DOCUFLOW SYSTEM INTELLIGENCE BRIEF", { 
@@ -167,7 +154,6 @@ export default function DashboardPage() {
       page.drawText("GLOBAL USER REGISTRY", { x: 50, y, size: 12, font: boldFont, color: rgb(0.87, 0.29, 0.42) });
       y -= 25;
 
-      // Table Headers
       page.drawRectangle({
         x: 40,
         y: y - 5,
@@ -185,13 +171,10 @@ export default function DashboardPage() {
       });
       y -= 30;
 
-      // Table Rows
       for (const userRow of allUsers) {
         if (y < 60) {
           page = pdfDoc.addPage([595, 842]);
           y = height - 50;
-          
-          // Repeat headers on new page
           page.drawRectangle({ x: 40, y: y - 5, width: width - 80, height: 25, color: rgb(0.95, 0.95, 0.95) });
           headers.forEach((header, i) => {
             const x = 50 + colWidths.slice(0, i).reduce((a, b) => a + b, 0);
@@ -212,7 +195,6 @@ export default function DashboardPage() {
           page.drawText(String(text).substring(0, 45), { x, y, size: 8, font, color: rgb(0.1, 0.1, 0.1) });
         });
 
-        // Subtle row line
         page.drawLine({
           start: { x: 40, y: y - 5 },
           end: { x: width - 40, y: y - 5 },
@@ -223,8 +205,7 @@ export default function DashboardPage() {
         y -= 22;
       }
 
-      // Final Legal Footer
-      const footerText = "CONFIDENTIAL SYSTEM INTELLIGENCE - DOCUFLOW PROFESSIONAL INTERNAL ARCHIVE";
+      const footerText = "CONFIDENTIAL SYSTEM INTELLIGENCE - DOCUFLOW MASTER ADMIN ARCHIVE";
       const footerWidth = font.widthOfTextAtSize(footerText, 7);
       page.drawText(footerText, { 
         x: (width / 2) - (footerWidth / 2), 
@@ -288,7 +269,7 @@ export default function DashboardPage() {
     }
   };
 
-  if (isUserLoading || (isAdminLoading && user?.email !== MASTER_ADMIN_EMAIL)) {
+  if (isUserLoading || user?.email !== MASTER_ADMIN_EMAIL) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-muted/30">
         <div className="text-center space-y-4">
@@ -298,9 +279,6 @@ export default function DashboardPage() {
       </div>
     );
   }
-
-  const isAuthorized = user && (user.email === MASTER_ADMIN_EMAIL || adminData);
-  if (!isAuthorized) return null;
 
   return (
     <div className="flex min-h-screen flex-col bg-muted/20">
@@ -360,7 +338,6 @@ export default function DashboardPage() {
             ))}
           </div>
 
-          {/* Charts Row */}
           <div className="grid lg:grid-cols-3 gap-8">
             <Card className="lg:col-span-2 border-none shadow-2xl rounded-[2.5rem] bg-white overflow-hidden">
               <CardHeader className="p-10 pb-0">
@@ -368,10 +345,6 @@ export default function DashboardPage() {
                   <div className="space-y-1">
                     <CardTitle className="text-xl font-black uppercase italic text-accent">Operational Throughput</CardTitle>
                     <CardDescription className="text-[10px] font-bold uppercase tracking-widest">Document transformations over last 30 days</CardDescription>
-                  </div>
-                  <div className="flex gap-2">
-                    <div className="h-2 w-2 rounded-full bg-primary" />
-                    <div className="h-2 w-2 rounded-full bg-accent opacity-20" />
                   </div>
                 </div>
               </CardHeader>
@@ -407,14 +380,10 @@ export default function DashboardPage() {
                     </div>
                   </div>
                 ))}
-                <Button variant="ghost" className="w-full text-white/40 hover:text-white font-black uppercase tracking-widest text-[9px] mt-4">
-                  View Full Audit Trail
-                </Button>
               </CardContent>
             </Card>
           </div>
 
-          {/* User Table */}
           <Card className="border-none shadow-2xl rounded-[3rem] bg-white overflow-hidden">
             <CardHeader className="p-10 border-b border-accent/5">
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
