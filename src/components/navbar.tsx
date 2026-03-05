@@ -41,8 +41,6 @@ import { useUser, useAuth } from '@/firebase';
 import { signOut } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
 
-const MASTER_ADMIN_EMAIL = 'office.contact.sufian@gmail.com';
-
 export function Navbar() {
   const { user } = useUser();
   const auth = useAuth();
@@ -85,7 +83,8 @@ export function Navbar() {
     }
   ];
 
-  const isAdmin = user?.email === MASTER_ADMIN_EMAIL;
+  // Note: Admin links are NOT shown on the public website per strict requirement.
+  // Access is only via direct URL navigation.
 
   return (
     <nav className="glass-nav border-b bg-white/80 backdrop-blur-md sticky top-0 z-50">
@@ -152,7 +151,7 @@ export function Navbar() {
             </Link>
           </div>
           
-          {isAdmin && (
+          {user?.email === 'office.contact.sufian@gmail.com' && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="sm" className="h-8 rounded-lg text-[9px] font-black uppercase tracking-widest gap-2 bg-accent text-white hover:bg-accent/90">

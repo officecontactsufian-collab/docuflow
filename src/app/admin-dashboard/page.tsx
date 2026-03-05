@@ -4,7 +4,7 @@
 import * as React from 'react';
 import dynamic from 'next/dynamic';
 import { Navbar } from '@/components/navbar';
-import { useUser, useFirestore, useCollection, useMemoFirebase } from '@/firebase';
+import { useUser, useFirestore, useCollection, useMemoFirebase, deleteDocumentNonBlocking } from '@/firebase';
 import { useRouter } from 'next/navigation';
 import { 
   Users, 
@@ -27,7 +27,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { doc, collection, deleteDoc } from 'firebase/firestore';
+import { doc, collection } from 'firebase/firestore';
 import { useToast } from '@/hooks/use-toast';
 import { PDFDocument, StandardFonts, rgb } from 'pdf-lib';
 import { signOut } from 'firebase/auth';
@@ -56,15 +56,10 @@ export default function AdminDashboardPage() {
   React.useEffect(() => {
     if (!isUserLoading) {
       if (!user || user.email !== MASTER_ADMIN_EMAIL) {
-        toast({
-          variant: "destructive",
-          title: "Protocol Violation",
-          description: "Unauthorized access to system intelligence is prohibited.",
-        });
         router.push('/');
       }
     }
-  }, [user, isUserLoading, router, toast]);
+  }, [user, isUserLoading, router]);
 
   const usersQuery = useMemoFirebase(() => {
     if (!firestore || user?.email !== MASTER_ADMIN_EMAIL) return null;
@@ -83,6 +78,13 @@ export default function AdminDashboardPage() {
   const handleLogout = async () => {
     await signOut(auth);
     router.push('/');
+  };
+
+  const handleDeleteUser = (userId: string) => {
+    if (!firestore) return;
+    const userRef = doc(firestore, 'users', userId);
+    deleteDocumentNonBlocking(userRef);
+    toast({ title: "Protocol Executed", description: "User record removal initiated." });
   };
 
   const handleExportReport = async () => {
@@ -112,7 +114,10 @@ export default function AdminDashboardPage() {
   if (isUserLoading || !user || user.email !== MASTER_ADMIN_EMAIL) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-muted/30">
-        <Loader2 className="h-12 w-12 animate-spin text-primary" />
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="h-12 w-12 animate-spin text-primary" />
+          <p className="text-[10px] font-black uppercase tracking-[0.3em] text-accent/40 italic">Authenticating Administrative Tunnel...</p>
+        </div>
       </div>
     );
   }
@@ -129,14 +134,14 @@ export default function AdminDashboardPage() {
                 <ShieldCheck className="h-3 w-3 text-primary" />
                 <span>Verified Master Admin: {user.email}</span>
               </div>
-              <h1 className="text-4xl font-black tracking-tighter text-accent uppercase italic">System Intelligence</h1>
+              <h1 className="text-4xl font-black tracking-tighter text-accent uppercase italic tracking-tighter">System Intelligence</h1>
               <p className="text-muted-foreground font-medium">Real-time Command Dashboard</p>
             </div>
             <div className="flex gap-3">
-              <Button onClick={handleExportReport} variant="outline" className="rounded-xl border-accent/10 bg-white shadow-sm font-bold text-[10px] uppercase h-11 px-6">
+              <Button onClick={handleExportReport} variant="outline" className="rounded-xl border-accent/10 bg-white shadow-sm font-bold text-[10px] uppercase h-11 px-6 tracking-widest">
                 <Download className="mr-2 h-3.5 w-3.5" /> Archive Report
               </Button>
-              <Button onClick={handleLogout} variant="destructive" className="rounded-xl shadow-xl font-bold text-[10px] uppercase h-11 px-6">
+              <Button onClick={handleLogout} variant="destructive" className="rounded-xl shadow-xl font-bold text-[10px] uppercase h-11 px-6 tracking-widest">
                 <LogOut className="mr-2 h-3.5 w-3.5" /> Terminate Session
               </Button>
             </div>
@@ -169,7 +174,7 @@ export default function AdminDashboardPage() {
           <div className="grid lg:grid-cols-3 gap-8">
             <Card className="lg:col-span-2 border-none shadow-2xl rounded-[2.5rem] bg-white overflow-hidden">
               <CardHeader className="p-10 pb-0">
-                <CardTitle className="text-xl font-black uppercase italic text-accent">Operational Throughput</CardTitle>
+                <CardTitle className="text-xl font-black uppercase italic text-accent tracking-tighter">Operational Throughput</CardTitle>
                 <CardDescription className="text-[10px] font-bold uppercase tracking-widest italic">Document Transformation Stream</CardDescription>
               </CardHeader>
               <CardContent className="p-10 pt-8 h-[400px]">
@@ -179,7 +184,7 @@ export default function AdminDashboardPage() {
 
             <Card className="border-none shadow-2xl rounded-[2.5rem] bg-accent text-white overflow-hidden">
               <CardHeader className="p-10">
-                <CardTitle className="text-xl font-black uppercase italic">Audit Registry</CardTitle>
+                <CardTitle className="text-xl font-black uppercase italic tracking-tighter">Audit Registry</CardTitle>
                 <CardDescription className="text-[10px] font-bold uppercase tracking-widest text-white/40">Recent Interactions</CardDescription>
               </CardHeader>
               <CardContent className="px-10 pb-10 space-y-6">
@@ -205,7 +210,7 @@ export default function AdminDashboardPage() {
             <CardHeader className="p-10 border-b border-accent/5">
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                 <div className="space-y-1">
-                  <CardTitle className="text-xl font-black uppercase italic text-accent">User Intelligence</CardTitle>
+                  <CardTitle className="text-xl font-black uppercase italic text-accent tracking-tighter">User Intelligence</CardTitle>
                   <CardDescription className="text-[10px] font-bold uppercase tracking-widest italic">Platform Identity Database</CardDescription>
                 </div>
                 <div className="relative">
@@ -214,7 +219,7 @@ export default function AdminDashboardPage() {
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     placeholder="FILTER REGISTRY..." 
-                    className="h-10 pl-10 w-[240px] rounded-xl bg-muted/20 border-accent/5 text-[10px] font-bold" 
+                    className="h-10 pl-10 w-[240px] rounded-xl bg-muted/20 border-accent/5 text-[10px] font-bold tracking-widest" 
                   />
                 </div>
               </div>
@@ -225,20 +230,27 @@ export default function AdminDashboardPage() {
                   <tr className="bg-muted/30 border-b border-accent/5">
                     <th className="px-10 py-5 text-[9px] font-black uppercase tracking-widest text-accent/40">Account Identity</th>
                     <th className="px-10 py-5 text-[9px] font-black uppercase tracking-widest text-accent/40">Status</th>
-                    <th className="px-10 py-5 text-[9px] font-black uppercase tracking-widest text-accent/40">Actions</th>
+                    <th className="px-10 py-5 text-[9px] font-black uppercase tracking-widest text-accent/40 text-right">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
                   {isUsersLoading ? (
                     <tr><td colSpan={3} className="p-20 text-center"><Loader2 className="animate-spin h-8 w-8 mx-auto opacity-10" /></td></tr>
+                  ) : filteredUsers.length === 0 ? (
+                    <tr><td colSpan={3} className="p-20 text-center font-bold text-accent/20 uppercase text-[10px] tracking-widest italic">No matching identities found.</td></tr>
                   ) : filteredUsers.map((u) => (
                     <tr key={u.id} className="border-b border-accent/5 hover:bg-primary/5 transition-colors group">
                       <td className="px-10 py-6 font-bold text-accent uppercase text-xs italic">{u.email}</td>
                       <td className="px-10 py-6">
                         <span className="text-[9px] font-black px-2 py-1 bg-green-50 text-green-600 rounded-full border border-green-100 uppercase tracking-widest">Active Protocol</span>
                       </td>
-                      <td className="px-10 py-6">
-                        <Button variant="ghost" size="icon" className="h-8 w-8 text-accent/20 hover:text-destructive transition-colors">
+                      <td className="px-10 py-6 text-right">
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          onClick={() => handleDeleteUser(u.id)}
+                          className="h-8 w-8 text-accent/20 hover:text-destructive transition-colors"
+                        >
                           <Trash2 className="h-4 w-4" />
                         </Button>
                       </td>
