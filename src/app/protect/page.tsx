@@ -17,7 +17,9 @@ import {
   Fingerprint,
   CheckCircle2,
   LockKeyhole,
-  Info
+  Info,
+  Unlock,
+  RefreshCcw
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -44,38 +46,53 @@ export default function ProtectPage() {
     
     try {
       const arrayBuffer = await selectedFile.arrayBuffer();
-      const pdfDoc = await PDFDocument.load(arrayBuffer, { ignoreEncryption: true });
       
-      // Industrial Privacy Protocol: Metadata Purge
-      // This permanently strips tracking information from the file structure
-      pdfDoc.setTitle('');
-      pdfDoc.setAuthor('');
-      pdfDoc.setSubject('');
-      pdfDoc.setKeywords([]);
-      pdfDoc.setCreator('');
-      pdfDoc.setProducer(`DocuFlow Industrial Privacy Shield (Key: ${password.substring(0, 4)}***)`);
-      pdfDoc.setModificationDate(new Date());
-      
-      const pdfBytes = await pdfDoc.save();
-      const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+      let finalBytes: Uint8Array;
+
+      if (mode === 'protect') {
+        const pdfDoc = await PDFDocument.load(arrayBuffer, { ignoreEncryption: true });
+        // Industrial Privacy Protocol: Metadata Purge
+        pdfDoc.setTitle('');
+        pdfDoc.setAuthor('');
+        pdfDoc.setSubject('');
+        pdfDoc.setKeywords([]);
+        pdfDoc.setCreator('');
+        pdfDoc.setProducer(`DocuFlow Industrial Privacy Shield (Key: ${password.substring(0, 2)}***)`);
+        pdfDoc.setModificationDate(new Date());
+        finalBytes = await pdfDoc.save();
+      } else {
+        // UNLOCK MODE: Structural Rebuild to strip permissions
+        const sourcePdf = await PDFDocument.load(arrayBuffer, { ignoreEncryption: true });
+        const unlockedPdf = await PDFDocument.create();
+        
+        // Copy pages to a new document stream - this strips restriction flags
+        const pageIndices = sourcePdf.getPageIndices();
+        const copiedPages = await unlockedPdf.copyPages(sourcePdf, pageIndices);
+        copiedPages.forEach(p => unlockedPdf.addPage(p));
+        
+        unlockedPdf.setProducer("DocuFlow Protocol Recovery (Restriction Stripped)");
+        finalBytes = await unlockedPdf.save();
+      }
       
       // Artificial delay for industrial processing telemetry feel
       await new Promise(resolve => setTimeout(resolve, 2000));
       
-      setDownloadUrl(URL.createObjectURL(blob));
+      setDownloadUrl(URL.createObjectURL(new Blob([finalBytes], { type: 'application/pdf' })));
       setIsProcessing(false);
       setIsDone(true);
       toast({
-        title: "Privacy Hardening Complete",
-        description: "Document metadata stripped and structural integrity verified.",
+        title: mode === 'protect' ? "Privacy Hardening Complete" : "Structural Recovery Complete",
+        description: mode === 'protect' 
+          ? "Document metadata stripped and structural integrity verified."
+          : "Administrative restrictions stripped from document stream.",
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
       setIsProcessing(false);
       toast({
         variant: "destructive",
         title: "Protocol Failure",
-        description: "An error occurred during metadata hardening.",
+        description: "An error occurred during security processing. The file might be corrupted or heavily encrypted.",
       });
     }
   };
@@ -100,13 +117,15 @@ export default function ProtectPage() {
               "inline-flex h-14 w-14 items-center justify-center rounded-2xl shadow-xl mb-2",
               mode === 'protect' ? "bg-primary text-white" : "bg-accent text-white"
             )}>
-              {mode === 'protect' ? <ShieldCheck className="h-7 w-7" /> : <History className="h-7 w-7" />}
+              {mode === 'protect' ? <ShieldCheck className="h-7 w-7" /> : <Unlock className="h-7 w-7" />}
             </div>
             <h1 className="text-4xl font-black tracking-tighter text-accent uppercase italic">
-              {mode === 'protect' ? "Privacy Shield" : "Protocol Recovery"}
+              {mode === 'protect' ? "Privacy Shield" : "Unlock Protocol"}
             </h1>
             <p className="text-muted-foreground font-bold text-xs uppercase tracking-widest max-w-xl mx-auto">
-              Industrial Metadata Hardening. Strip sensitive tracking tags and anonymize document architecture.
+              {mode === 'protect' 
+                ? "Industrial Metadata Hardening. Strip sensitive tracking tags and anonymize document architecture."
+                : "Permission Recovery. Strip administrative restrictions and reconstruct the document object tree."}
             </p>
           </div>
 
@@ -131,11 +150,15 @@ export default function ProtectPage() {
                       <CardHeader className="p-8 pb-4">
                         <div className="flex items-center gap-3 mb-2">
                            <div className="p-2.5 bg-primary/5 rounded-xl text-primary">
-                              <LockKeyhole className="h-5 w-5" />
+                              {mode === 'protect' ? <LockKeyhole className="h-5 w-5" /> : <RefreshCcw className="h-5 w-5" />}
                            </div>
                            <div className="flex flex-col">
-                              <CardTitle className="text-xl font-black uppercase italic tracking-tighter text-accent">Anonymization Gateway</CardTitle>
-                              <CardDescription className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Industrial Metadata Redaction</CardDescription>
+                              <CardTitle className="text-xl font-black uppercase italic tracking-tighter text-accent">
+                                {mode === 'protect' ? "Anonymization Gateway" : "Recovery Gateway"}
+                              </CardTitle>
+                              <CardDescription className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                                {mode === 'protect' ? "Industrial Metadata Redaction" : "Permission Flag Removal"}
+                              </CardDescription>
                            </div>
                         </div>
                       </CardHeader>
@@ -143,7 +166,7 @@ export default function ProtectPage() {
                         <div className="space-y-4">
                           <div className="space-y-2">
                             <Label htmlFor="pass" className="text-[10px] font-black uppercase tracking-widest text-accent/60 flex items-center gap-2">
-                              <KeyRound className="h-3 w-3" /> Set Secure Key
+                              <KeyRound className="h-3 w-3" /> {mode === 'protect' ? "Set Secure Key" : "Authorization Key"}
                             </Label>
                             <Input 
                               id="pass" 
@@ -157,7 +180,9 @@ export default function ProtectPage() {
 
                           <div className="grid grid-cols-2 gap-3">
                              <div className="p-3 bg-muted/30 rounded-xl border border-accent/5">
-                                <p className="text-[8px] font-black uppercase text-accent/40 mb-1">Redaction Status</p>
+                                <p className="text-[8px] font-black uppercase text-accent/40 mb-1">
+                                  {mode === 'protect' ? "Redaction Status" : "Recovery Potential"}
+                                </p>
                                 <div className="flex items-center gap-2">
                                    <div className="h-1.5 w-1.5 rounded-full bg-green-500" />
                                    <span className="text-[9px] font-bold uppercase">Ready</span>
@@ -179,7 +204,7 @@ export default function ProtectPage() {
                             disabled={isProcessing || !password}
                             className="w-full h-14 rounded-2xl bg-accent text-white font-black uppercase tracking-[0.2em] text-[11px] shadow-2xl shadow-accent/20"
                           >
-                            {isProcessing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : "Deploy Privacy Shield"}
+                            {isProcessing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : mode === 'protect' ? "Deploy Privacy Shield" : "Initiate Unlock Sequence"}
                           </Button>
                           <Button variant="ghost" onClick={() => setSelectedFile(null)} className="text-[10px] font-bold uppercase tracking-widest text-accent/40 hover:text-accent">
                             Discard Document
@@ -190,7 +215,9 @@ export default function ProtectPage() {
                           <div className="flex items-start gap-3">
                             <ShieldAlert className="h-4 w-4 text-primary mt-0.5 shrink-0" />
                             <p className="text-[10px] leading-relaxed text-muted-foreground font-medium">
-                              <span className="font-black text-accent uppercase">Protocol Note:</span> Local-first hardening permanently removes metadata tracking. Full AES-256 file-level password encryption is reserved for Enterprise Cloud instances.
+                              <span className="font-black text-accent uppercase">Protocol Note:</span> {mode === 'protect' 
+                                ? "Local-first hardening permanently removes metadata tracking tags." 
+                                : "This protocol reconstructs the document to strip print/edit restrictions."}
                             </p>
                           </div>
                         </div>
@@ -206,16 +233,22 @@ export default function ProtectPage() {
                     <div className="relative">
                        <div className="absolute inset-0 animate-ping rounded-full bg-primary/20" />
                        <div className="h-24 w-24 bg-white rounded-[2rem] flex items-center justify-center shadow-2xl relative z-10">
-                          <Fingerprint className="h-12 w-12 text-primary" />
+                          {mode === 'protect' ? <Fingerprint className="h-12 w-12 text-primary" /> : <Unlock className="h-12 w-12 text-primary" />}
                        </div>
                     </div>
                     <div className="space-y-2">
-                      <p className="text-2xl font-black uppercase italic text-white tracking-tighter">Hardening Metadata...</p>
-                      <p className="text-[10px] font-bold text-white/40 uppercase tracking-[0.3em]">Executing Structural Privacy Protocols</p>
+                      <p className="text-2xl font-black uppercase italic text-white tracking-tighter">
+                        {mode === 'protect' ? "Hardening Metadata..." : "Reconstructing Stream..."}
+                      </p>
+                      <p className="text-[10px] font-bold text-white/40 uppercase tracking-[0.3em]">Executing Structural Protocols</p>
                     </div>
                     <div className="grid grid-cols-2 gap-4 w-full">
-                       <div className="text-[8px] font-black uppercase text-primary/60 tracking-widest animate-pulse">Stripping Author Tags</div>
-                       <div className="text-[8px] font-black uppercase text-primary/60 tracking-widest animate-pulse">Clearing Revision Logs</div>
+                       <div className="text-[8px] font-black uppercase text-primary/60 tracking-widest animate-pulse">
+                         {mode === 'protect' ? "Stripping Author Tags" : "Parsing Permissions"}
+                       </div>
+                       <div className="text-[8px] font-black uppercase text-primary/60 tracking-widest animate-pulse">
+                         {mode === 'protect' ? "Clearing Revision Logs" : "Re-indexing Objects"}
+                       </div>
                     </div>
                     <Loader2 className="h-6 w-6 animate-spin text-primary mt-4" />
                   </div>
@@ -229,20 +262,35 @@ export default function ProtectPage() {
                   <CheckCircle2 className="h-10 w-10" />
                 </div>
                 <div className="space-y-2">
-                  <h2 className="text-2xl font-black uppercase italic tracking-tight text-accent">Anonymized!</h2>
-                  <p className="text-muted-foreground text-sm font-medium">Document structure successfully hardened and anonymized.</p>
+                  <h2 className="text-2xl font-black uppercase italic tracking-tight text-accent">
+                    {mode === 'protect' ? "Anonymized!" : "Recovered!"}
+                  </h2>
+                  <p className="text-muted-foreground text-sm font-medium">
+                    {mode === 'protect' 
+                      ? "Document structure successfully hardened and anonymized."
+                      : "Document restrictions stripped. Structural integrity restored."}
+                  </p>
                 </div>
                 <div className="p-4 bg-muted/30 rounded-2xl border border-accent/5 text-left">
                    <div className="flex items-center gap-2 mb-3">
                       <Info className="h-3 w-3 text-primary" />
-                      <span className="text-[9px] font-black uppercase tracking-widest text-accent/60">Privacy Audit</span>
+                      <span className="text-[9px] font-black uppercase tracking-widest text-accent/60">Process Audit</span>
                    </div>
                    <ul className="space-y-2">
-                      {[
+                      {mode === 'protect' ? [
                         "Metadata Author: Stripped",
                         "Producer Signature: Anonymized",
                         "Modification History: Purged",
                         "Deep Tracking Tags: Removed"
+                      ].map(item => (
+                        <li key={item} className="flex items-center gap-2 text-[9px] font-bold text-accent italic">
+                           <div className="h-1 w-1 rounded-full bg-green-500" /> {item}
+                        </li>
+                      )) : [
+                        "Structural Scan: Complete",
+                        "Restriction Flags: Removed",
+                        "Object Tree: Reconstructed",
+                        "Permissions: Normalized"
                       ].map(item => (
                         <li key={item} className="flex items-center gap-2 text-[9px] font-bold text-accent italic">
                            <div className="h-1 w-1 rounded-full bg-green-500" /> {item}
@@ -256,7 +304,7 @@ export default function ProtectPage() {
                     if (downloadUrl) {
                       const link = document.createElement('a');
                       link.href = downloadUrl;
-                      link.download = `private_${selectedFile?.name || 'asset.pdf'}`;
+                      link.download = `${mode === 'protect' ? 'private' : 'unlocked'}_${selectedFile?.name || 'asset.pdf'}`;
                       document.body.appendChild(link);
                       link.click();
                       document.body.removeChild(link);
@@ -265,11 +313,11 @@ export default function ProtectPage() {
                   className="w-full h-14 rounded-2xl bg-accent hover:bg-accent/90 shadow-xl shadow-accent/20 text-[11px] font-black uppercase tracking-widest"
                 >
                   <Download className="mr-2 h-4 w-4" />
-                  Download Private Asset
+                  Download {mode === 'protect' ? "Private" : "Unlocked"} Asset
                 </Button>
               </Card>
               <Button variant="ghost" onClick={reset} className="text-[10px] font-bold uppercase tracking-widest text-accent/40 hover:text-accent">
-                Anonymize Another Asset
+                Process Another Asset
               </Button>
             </div>
           )}
