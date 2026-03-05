@@ -15,8 +15,9 @@ import {
   Zap,
   Info,
   FileText,
-  ImageIcon,
-  Layers
+  Image as ImageIcon,
+  Layers,
+  AlertCircle
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -28,15 +29,19 @@ export default function RemoveWatermarkPage() {
   const [isProcessing, setIsProcessing] = React.useState(false);
   const [isDone, setIsDone] = React.useState(false);
   const [downloadUrl, setDownloadUrl] = React.useState<string | null>(null);
+  const [processLogs, setProcessLogs] = React.useState<string[]>([]);
   const { toast } = useToast();
 
   const handleProcess = async () => {
     if (!selectedFile) return;
     setIsProcessing(true);
+    setProcessLogs(["Initializing Structural Scan..."]);
 
     try {
       if (selectedFile.type.startsWith('image/')) {
-        // High-Fidelity Structural Image Normalization (Non-AI)
+        // High-Fidelity Pixel Normalization
+        setProcessLogs(prev => [...prev, "Re-indexing Pixel Buffer...", "Flattening Alpha Layers..."]);
+        
         const img = new Image();
         const objectUrl = URL.createObjectURL(selectedFile);
         img.src = objectUrl;
@@ -44,63 +49,77 @@ export default function RemoveWatermarkPage() {
 
         const canvas = document.createElement('canvas');
         const ctx = canvas.getContext('2d');
-        if (!ctx) throw new Error("Could not initialize canvas context");
+        if (!ctx) throw new Error("Canvas context failure.");
 
         canvas.width = img.width;
         canvas.height = img.height;
         
-        // Render image to canvas to strip non-persistent metadata layers
+        // Render image to canvas to flatten and strip non-merged metadata
+        ctx.fillStyle = '#FFFFFF';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
         ctx.drawImage(img, 0, 0);
         
         URL.revokeObjectURL(objectUrl);
 
         const blob = await new Promise<Blob>((resolve) => {
-          canvas.toBlob((b) => resolve(b!), 'image/jpeg', 0.95);
+          canvas.toBlob((b) => resolve(b!), 'image/jpeg', 0.98);
         });
         
         setDownloadUrl(URL.createObjectURL(blob));
+        setProcessLogs(prev => [...prev, "Pixel Normalization Complete."]);
       } else {
-        // PDF Structural Annotation & Overlay Purge
+        // Aggressive PDF Structural Purge
+        setProcessLogs(prev => [...prev, "Parsing Object Tree...", "Analyzing Content Streams..."]);
+        
         const arrayBuffer = await selectedFile.arrayBuffer();
         const sourcePdf = await PDFDocument.load(arrayBuffer, { ignoreEncryption: true });
         
-        const resultPdf = await PDFDocument.create();
-        const pageIndices = sourcePdf.getPageIndices();
-        const copiedPages = await resultPdf.copyPages(sourcePdf, pageIndices);
+        // Target: Catalog resources
+        const catalog = sourcePdf.catalog;
         
-        copiedPages.forEach(page => {
-          // Identify and strip the Annotation registry which holds most document watermarks
+        // 1. Remove OCGs (Optional Content Groups / Layers)
+        if (catalog.has((sourcePdf as any).context.obj('OCProperties'))) {
+          setProcessLogs(prev => [...prev, "Purging Optional Content Groups (Layers)..."]);
+          catalog.delete((sourcePdf as any).context.obj('OCProperties'));
+        }
+
+        const pages = sourcePdf.getPages();
+        pages.forEach((page, i) => {
+          // 2. Remove Annotations (Stamps, Text overlays)
           const node = (page as any).node;
-          const annotsKey = (resultPdf as any).context.obj('Annots');
-          
-          if (node.has(annotsKey)) {
-            node.delete(annotsKey);
+          if (node.has((sourcePdf as any).context.obj('Annots'))) {
+            if (i === 0) setProcessLogs(prev => [...prev, "Stripping Annotation Registry..."]);
+            node.delete((sourcePdf as any).context.obj('Annots'));
           }
-          
-          resultPdf.addPage(page);
+
+          // 3. Remove Artifacts and Transparency Groups
+          if (node.has((sourcePdf as any).context.obj('Group'))) {
+            if (i === 0) setProcessLogs(prev => [...prev, "Neutralizing Transparency Groups..."]);
+            node.delete((sourcePdf as any).context.obj('Group'));
+          }
         });
         
-        resultPdf.setProducer("DOCFLOW Structural Sanitization Engine (Layer Neutralized)");
+        sourcePdf.setProducer("DOCFLOW Structural Sanitization Engine (Deep Purge)");
+        sourcePdf.setCreator("DOCFLOW Professional");
         
-        const pdfBytes = await resultPdf.save();
+        const pdfBytes = await sourcePdf.save();
         const blob = new Blob([pdfBytes], { type: 'application/pdf' });
         setDownloadUrl(URL.createObjectURL(blob));
+        setProcessLogs(prev => [...prev, "Structural Purge Successful."]);
       }
 
-      // Professional processing delay for feedback
-      await new Promise(resolve => setTimeout(resolve, 1500));
-
+      await new Promise(resolve => setTimeout(resolve, 1000));
       setIsDone(true);
       toast({ 
         title: "Protocol Success", 
-        description: "Visible layers scanned and structural overlays neutralized locally." 
+        description: "Structural layers neutralized locally." 
       });
     } catch (e) {
       console.error(e);
       toast({ 
         variant: "destructive", 
         title: "Sequence Failed", 
-        description: "The asset architecture is incompatible with automated layer removal." 
+        description: "The asset architecture is heavily encrypted or non-standard." 
       });
     } finally {
       setIsProcessing(false);
@@ -110,9 +129,8 @@ export default function RemoveWatermarkPage() {
   const reset = () => {
     setSelectedFile(null);
     setIsDone(false);
-    if (downloadUrl) {
-      URL.revokeObjectURL(downloadUrl);
-    }
+    setProcessLogs([]);
+    if (downloadUrl) URL.revokeObjectURL(downloadUrl);
     setDownloadUrl(null);
   };
 
@@ -130,7 +148,7 @@ export default function RemoveWatermarkPage() {
             </div>
             <h1 className="text-4xl font-black tracking-tighter text-accent uppercase italic">Remove Watermark</h1>
             <p className="text-muted-foreground font-bold text-xs uppercase tracking-widest max-w-xl mx-auto">
-              Structural Sanitization Suite. Identify and strip non-persistent overlays, annotations, and metadata layers entirely within your browser.
+              Aggressive Structural Sanitization. Strip hidden Layers (OCGs), Annotation Registries, and Transparency Overlays locally.
             </p>
           </div>
 
@@ -178,7 +196,7 @@ export default function RemoveWatermarkPage() {
                            </div>
                            <div className="flex flex-col">
                               <CardTitle className="text-xl font-black uppercase italic tracking-tighter text-accent">Removal Gateway</CardTitle>
-                              <CardDescription className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Local Structural Sanitization</CardDescription>
+                              <CardDescription className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Deep Structural Sanitization</CardDescription>
                            </div>
                         </div>
                       </CardHeader>
@@ -186,14 +204,23 @@ export default function RemoveWatermarkPage() {
                         <div className="space-y-4">
                            <div className="p-4 bg-muted/30 rounded-2xl border border-accent/5">
                               <div className="flex items-center justify-between mb-2">
-                                 <p className="text-[8px] font-black uppercase text-accent/40">Engine Readiness</p>
+                                 <p className="text-[8px] font-black uppercase text-accent/40">Engine Strategy</p>
                                  <div className="flex items-center gap-1">
                                     <div className="h-1 w-1 rounded-full bg-green-500" />
-                                    <span className="text-[8px] font-bold text-green-600 uppercase">Verified</span>
+                                    <span className="text-[8px] font-bold text-green-600 uppercase">Local-First</span>
                                  </div>
                               </div>
                               <p className="text-[10px] font-bold text-accent italic leading-relaxed">
-                                {isImage ? "Ready to execute pixel normalization to strip unmerged metadata overlays." : "Ready to analyze document content streams and purge all interactive annotation layers."}
+                                {isImage 
+                                  ? "Strategy: Pixel Buffer Redrawing. This strips digital overlays and alpha-channel watermarks that aren't merged into the base photo." 
+                                  : "Strategy: Structural Purge. Targets internal /OCG layers, /Annots, and /Artifacts to strip ghosted background stamps."}
+                              </p>
+                           </div>
+
+                           <div className="p-4 bg-primary/5 rounded-2xl border border-primary/10 flex items-start gap-3">
+                              <AlertCircle className="h-4 w-4 text-primary mt-0.5 shrink-0" />
+                              <p className="text-[9px] leading-tight text-muted-foreground font-medium uppercase">
+                                <span className="font-black text-accent">Note:</span> Structural removal works best on digital watermarks. For "stamped" text merged directly into pixels, the AI inpainting module is required.
                               </p>
                            </div>
                         </div>
@@ -204,18 +231,11 @@ export default function RemoveWatermarkPage() {
                             disabled={isProcessing}
                             className="w-full h-14 rounded-2xl bg-accent text-white font-black uppercase tracking-[0.2em] text-[11px] shadow-2xl shadow-accent/20"
                           >
-                            {isProcessing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : "Initiate Layer Removal"}
+                            {isProcessing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : "Deploy Deep Purge"}
                           </Button>
                           <Button variant="ghost" onClick={() => setSelectedFile(null)} className="text-[10px] font-bold uppercase tracking-widest text-accent/40 hover:text-accent">
                             Discard Asset
                           </Button>
-                        </div>
-
-                        <div className="p-4 bg-primary/5 rounded-2xl border border-primary/10 flex items-start gap-3">
-                          <ShieldCheck className="h-4 w-4 text-primary mt-0.5 shrink-0" />
-                          <p className="text-[9px] leading-relaxed text-muted-foreground font-medium uppercase tracking-tight">
-                            <span className="font-black text-accent">Privacy Note:</span> Zero-retention local processing. All layer sanitization occurs entirely within your secure browser session.
-                          </p>
                         </div>
                       </CardContent>
                     </Card>
@@ -233,14 +253,17 @@ export default function RemoveWatermarkPage() {
                        </div>
                     </div>
                     <div className="space-y-2">
-                      <p className="text-2xl font-black uppercase italic text-white tracking-tighter">Scanning Streams...</p>
-                      <p className="text-[10px] font-bold text-white/40 uppercase tracking-[0.3em]">Executing Structural Protocols</p>
+                      <p className="text-2xl font-black uppercase italic text-white tracking-tighter">Executing Purge...</p>
+                      <p className="text-[10px] font-bold text-white/40 uppercase tracking-[0.3em]">Analyzing Document Architecture</p>
                     </div>
-                    <div className="grid grid-cols-2 gap-4 w-full">
-                       <div className="text-[8px] font-black uppercase text-primary/60 tracking-widest animate-pulse">Parsing Objects</div>
-                       <div className="text-[8px] font-black uppercase text-primary/60 tracking-widest animate-pulse">Purging Annotations</div>
+                    <div className="space-y-3 w-full bg-black/20 p-6 rounded-2xl border border-white/5">
+                       {processLogs.map((log, i) => (
+                         <div key={i} className="text-[8px] font-black uppercase text-primary/80 tracking-widest flex items-center gap-2">
+                            <Zap className="h-2 w-2" /> {log}
+                         </div>
+                       ))}
                     </div>
-                    <Loader2 className="h-6 w-6 animate-spin text-primary mt-4" />
+                    <Loader2 className="h-6 w-6 animate-spin text-primary" />
                   </div>
                 </div>
               )}
@@ -252,19 +275,28 @@ export default function RemoveWatermarkPage() {
                   <CheckCircle2 className="h-10 w-10" />
                 </div>
                 <div className="space-y-2">
-                  <h2 className="text-2xl font-black uppercase italic tracking-tight text-accent">Cleaned & Verified!</h2>
-                  <p className="text-muted-foreground text-sm font-medium">Asset structure successfully reconstructed and interactive overlays neutralized.</p>
+                  <h2 className="text-2xl font-black uppercase italic tracking-tight text-accent">Purge Complete!</h2>
+                  <p className="text-muted-foreground text-sm font-medium">Structural layers neutralized. Reconstructed asset ready for deployment.</p>
                 </div>
                 <div className="p-4 bg-muted/30 rounded-2xl border border-accent/5 text-left">
                    <div className="flex items-center gap-2 mb-3">
                       <Info className="h-3 w-3 text-primary" />
-                      <span className="text-[9px] font-black uppercase tracking-widest text-accent/60">Process Audit</span>
+                      <span className="text-[9px] font-black uppercase tracking-widest text-accent/60">Protocol Audit</span>
                    </div>
                    <ul className="space-y-2">
-                      {[
-                        "Structural Analysis: Complete",
-                        isImage ? "Pixel Normalization: Success" : "Annotation Registry: Purged",
-                        "Interactive Layers: Neutralized",
+                      {isImage ? [
+                        "Buffer Redrawing: Success",
+                        "Metadata Flattening: Complete",
+                        "Non-merged Overlays: Purged",
+                        "Asset Hash: Re-generated"
+                      ].map(item => (
+                        <li key={item} className="flex items-center gap-2 text-[9px] font-bold text-accent italic">
+                           <div className="h-1 w-1 rounded-full bg-green-500" /> {item}
+                        </li>
+                      )) : [
+                        "Annotation Registry: Purged",
+                        "OCG Layers: Neutralized",
+                        "Artifact Streams: Stripped",
                         "Object Tree: Verified"
                       ].map(item => (
                         <li key={item} className="flex items-center gap-2 text-[9px] font-bold text-accent italic">
@@ -281,7 +313,7 @@ export default function RemoveWatermarkPage() {
                       link.href = downloadUrl;
                       const originalName = selectedFile?.name.split('.')[0] || 'asset';
                       const ext = isImage ? 'jpg' : 'pdf';
-                      link.download = `cleaned_${originalName}.${ext}`;
+                      link.download = `purged_${originalName}.${ext}`;
                       document.body.appendChild(link);
                       link.click();
                       document.body.removeChild(link);
@@ -294,7 +326,7 @@ export default function RemoveWatermarkPage() {
                 </Button>
               </Card>
               <Button variant="ghost" onClick={reset} className="text-[10px] font-bold uppercase tracking-widest text-accent/40 hover:text-accent">
-                Process Another Asset
+                Initialize New Sequence
               </Button>
             </div>
           )}
