@@ -52,15 +52,16 @@ export default function RemoveWatermarkPage() {
         updateFileStatus(staged.id, 'processing', [
           "Analyzing Pixel Luminance (OpenCV-Grade)...", 
           "Creating Recovery Mask...", 
-          "Executing Neighborhood Healing (Inpainting)...", 
-          "Normalizing Contrast..."
+          "Executing 5x5 Neighborhood Healing...", 
+          "Normalizing Chroma & Contrast..."
         ]);
         resultUrl = await processImageRemovalAction(base64Data);
       } else {
         updateFileStatus(staged.id, 'processing', [
           "Deep Scanning PDF Object Tree (PyMuPDF-Grade)...", 
           "Stripping /Form XObjects & Patterns...", 
-          "Purging /OCG Layers & Transparency Groups...", 
+          "Neutralizing /ExtGState Transparency...",
+          "Purging /OCG Layers & SMask Fragments...", 
           "Hardening Metadata Registry..."
         ]);
         resultUrl = await processPdfRemovalAction(base64Data);
@@ -121,7 +122,7 @@ export default function RemoveWatermarkPage() {
             </div>
             <h1 className="text-4xl font-black tracking-tighter text-accent uppercase italic">Automated Watermark Removal</h1>
             <p className="text-muted-foreground font-bold text-xs uppercase tracking-widest max-w-xl mx-auto">
-              Mass Backend Sanitization. Reconstructs document streams and heals pixels using OpenCV-Equivalent inpainting logic.
+              Mass Backend Sanitization. Reconstructs document streams and heals pixels using 5x5 neighborhood-averaging inpainting.
             </p>
           </div>
 
@@ -209,7 +210,7 @@ export default function RemoveWatermarkPage() {
                                   <div className="space-y-1">
                                     <p className="text-[10px] font-black text-accent uppercase tracking-wider">Asset Hardened & Verified</p>
                                     <p className="text-[9px] font-bold text-muted-foreground leading-relaxed uppercase">
-                                      Structural Objects purged. Pixel luminance healed. Ready for industrial deployment.
+                                      Structural Objects purged. Pixel luminance healed via 5x5 radius inpainting.
                                     </p>
                                   </div>
                                 </div>
@@ -262,8 +263,8 @@ export default function RemoveWatermarkPage() {
             <div className="space-y-2">
               <p className="text-sm font-black uppercase tracking-widest text-accent italic">Automated Industrial Workflow</p>
               <p className="text-[11px] text-muted-foreground leading-relaxed font-bold uppercase tracking-tight">
-                DOCFLOW executes aggressive structural purges on PDF /Form XObjects, /Patterns, and /Shadings. 
-                For images, it applies neighborhood-averaging healing to pixel buffers. 
+                DOCFLOW executes aggressive structural purges on PDF /Form XObjects, /Patterns, and /ExtGState dictionaries. 
+                For images, it applies a 5x5 neighborhood-averaging inpainting logic to heal pixel buffers. 
                 This sequence provides **PyMuPDF-grade** stripping and **OpenCV-grade** pixel reconstruction without persistent cloud storage.
               </p>
             </div>

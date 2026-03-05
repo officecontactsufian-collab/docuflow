@@ -2,7 +2,7 @@
 'use server';
 
 import Jimp from 'jimp';
-import { PDFDocument, PDFDict, PDFName, PDFArray } from 'pdf-lib';
+import { PDFDocument, PDFDict, PDFName } from 'pdf-lib';
 
 /**
  * @fileOverview DOCFLOW Industrial Removal Protocols
@@ -20,13 +20,15 @@ export async function processImageRemovalAction(base64Data: string): Promise<str
     const height = image.bitmap.height;
 
     // STEP 1: CREATE WATERMARK MASK (OpenCV Threshold Logic)
-    const threshold = 215;
+    // We target bright or semi-transparent overlays typically used in professional stamps
+    const threshold = 205; 
     const mask: boolean[] = new Array(width * height).fill(false);
 
     image.scan(0, 0, width, height, function (x, y, idx) {
       const r = this.bitmap.data[idx + 0];
       const g = this.bitmap.data[idx + 1];
       const b = this.bitmap.data[idx + 2];
+      // Y'601 luminance calculation
       const luminance = 0.299 * r + 0.587 * g + 0.114 * b;
       
       if (luminance > threshold) {
@@ -35,18 +37,18 @@ export async function processImageRemovalAction(base64Data: string): Promise<str
     });
 
     // STEP 2: NEIGHBORHOOD HEALING (Advanced Inpainting Logic)
-    // We attempt to fill mask pixels with the average of non-mask neighbors
+    // We attempt to fill mask pixels with the average of non-mask neighbors in a 5x5 grid
     const resultImage = image.clone();
     
-    for (let y = 1; y < height - 1; y++) {
-      for (let x = 1; x < width - 1; x++) {
+    for (let y = 2; y < height - 2; y++) {
+      for (let x = 2; x < width - 2; x++) {
         const idx = y * width + x;
         if (mask[idx]) {
           let sumR = 0, sumG = 0, sumB = 0, count = 0;
           
-          // Check 3x3 neighborhood
-          for (let dy = -1; dy <= 1; dy++) {
-            for (let dx = -1; dy <= 1; dx++) {
+          // Check 5x5 neighborhood for more robust reconstruction
+          for (let dy = -2; dy <= 2; dy++) {
+            for (let dx = -2; dx <= 2; dx++) {
               if (dx === 0 && dy === 0) continue;
               const nIdx = (y + dy) * width + (x + dx);
               if (!mask[nIdx]) {
@@ -65,18 +67,18 @@ export async function processImageRemovalAction(base64Data: string): Promise<str
             resultImage.bitmap.data[targetIdx + 1] = sumG / count;
             resultImage.bitmap.data[targetIdx + 2] = sumB / count;
           } else {
-            // If surrounded by mask, push to pure white (fallback)
+            // Fallback: If surrounded by mask, push to pure white (standard document background)
             resultImage.bitmap.data[targetIdx + 0] = 255;
             resultImage.bitmap.data[targetIdx + 1] = 255;
             resultImage.bitmap.data[targetIdx + 2] = 255;
           }
-          resultImage.bitmap.data[targetIdx + 3] = 255;
+          resultImage.bitmap.data[targetIdx + 3] = 255; // Flatten alpha
         }
       }
     }
 
     // High-fidelity contrast normalization to flatten ghosted fragments
-    resultImage.contrast(0.1).brightness(0.02).quality(98);
+    resultImage.contrast(0.05).brightness(0.01).quality(95);
     
     const processedBase64 = await resultImage.getBase64Async(Jimp.MIME_JPEG);
     return processedBase64;
@@ -105,18 +107,16 @@ export async function processPdfRemovalAction(base64Data: string): Promise<strin
       // 2. Aggressive Annotation Shredding
       node.delete(PDFName.of('Annots'));
 
-      // 3. Transparency Neutralization
+      // 3. Transparency & Metadata Neutralization
       node.delete(PDFName.of('Group'));
-      
-      // 4. Metadata and Structural Purge
       node.delete(PDFName.of('PieceInfo'));
       node.delete(PDFName.of('Metadata'));
       node.delete(PDFName.of('LastModified'));
 
-      // 5. Recursive Resource Sweep (PyMuPDF-Grade logic)
+      // 4. Recursive Resource Sweep (PyMuPDF-Grade logic)
       const resources = node.get(PDFName.of('Resources'));
       if (resources instanceof PDFDict) {
-        // Clear global graphics states (Transparencies)
+        // Clear global graphics states (The primary container for watermark transparency)
         resources.delete(PDFName.of('ExtGState'));
         
         // Deep Sweep XObjects, Patterns, and Shadings
@@ -130,16 +130,18 @@ export async function processPdfRemovalAction(base64Data: string): Promise<strin
               const obj = dict.get(name);
               if (obj instanceof PDFDict) {
                 const subtype = obj.get(PDFName.of('Subtype'));
+                
                 // Aggressively remove Form subtypes (standard background container)
                 if (subtype === PDFName.of('Form')) {
                   dict.delete(name);
                 }
-                // Strip images with masks or transparency groups
+                
+                // Strip images with masks or transparency groups (common for ghosted watermarks)
                 if (obj.has(PDFName.of('SMask')) || obj.has(PDFName.of('OC')) || obj.has(PDFName.of('Group'))) {
                   dict.delete(name);
                 }
               } else {
-                // If it's a direct resource like a Pattern, remove it if it exists in the dictionary
+                // If it's a direct resource reference like a Pattern, remove it
                 dict.delete(name);
               }
             });
@@ -148,7 +150,7 @@ export async function processPdfRemovalAction(base64Data: string): Promise<strin
       }
     });
     
-    // 6. Industrial Metadata Hardening
+    // 5. Industrial Metadata Hardening
     sourcePdf.setTitle('');
     sourcePdf.setAuthor('');
     sourcePdf.setSubject('');
