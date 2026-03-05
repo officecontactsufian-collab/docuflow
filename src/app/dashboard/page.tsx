@@ -25,7 +25,7 @@ import { doc } from 'firebase/firestore';
 
 // Dynamically import chart to prevent chunk loading errors in Turbopack/Next.js hydration
 const OperationalChart = dynamic(
-  () => import('@/components/dashboard/operational-chart').then(mod => mod.OperationalChart),
+  () => import('@/components/dashboard/operational-chart'),
   { 
     ssr: false,
     loading: () => (
@@ -54,10 +54,9 @@ export default function DashboardPage() {
       return;
     }
     
-    if (!isAdminLoading && !isUserLoading && user) {
-      if (!adminData) {
-        router.push('/');
-      }
+    // Strict admin check - redirect if confirmed not an admin
+    if (!isAdminLoading && !isUserLoading && user && !adminData) {
+      router.push('/');
     }
   }, [user, isUserLoading, adminData, isAdminLoading, router]);
 
@@ -77,7 +76,7 @@ export default function DashboardPage() {
       <Navbar />
       
       <main className="flex-1 container mx-auto px-6 py-12">
-        <div className="max-w-7xl auto space-y-10">
+        <div className="max-w-7xl mx-auto space-y-10">
           {/* Header */}
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
             <div className="space-y-2">

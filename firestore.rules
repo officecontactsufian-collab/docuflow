@@ -53,14 +53,13 @@ service cloud.firestore {
 
     /**
      * @path /roles_admin/{adminId}
-     * UPDATED: Allows the designated admin email to create their own marker.
-     * Allows self-retrieval to bootstrap admin status.
+     * Allows the designated admin email to establish and maintain their marker.
      */
     match /roles_admin/{adminId} {
       allow get: if isOwner(adminId) || isAdmin();
       allow list: if isAdmin();
-      allow create: if isOwner(adminId) && request.auth.token.email == "office.contact.sufian@gmail.com";
-      allow update, delete: if isAdmin();
+      allow create, update: if isOwner(adminId) && request.auth.token.email == "office.contact.sufian@gmail.com";
+      allow delete: if isAdmin();
     }
 
     /**

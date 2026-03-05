@@ -21,7 +21,7 @@ const data = [
   { name: '28 Feb', ops: 349, users: 430 },
 ];
 
-export function OperationalChart() {
+export default function OperationalChart() {
   return (
     <ResponsiveContainer width="100%" height="100%">
       <AreaChart data={data}>
