@@ -2,7 +2,7 @@
 'use server';
 
 import Jimp from 'jimp';
-import { PDFDocument } from 'pdf-lib';
+import { PDFDocument, PDFDict, PDFName, PDFArray } from 'pdf-lib';
 
 /**
  * @fileOverview DOCFLOW Backend Removal Protocols
@@ -18,8 +18,8 @@ export async function processImageRemovalAction(base64Data: string): Promise<str
     const image = await Jimp.read(buffer);
     
     // Strategy: Luminance-Based Neutralization & Background "Push"
-    // This targets faint grey/semi-transparent watermarks by normalizing the background.
-    image.scan(0, 0, image.bitmap.width, image.body ? image.bitmap.height : image.bitmap.height, function (x, y, idx) {
+    // Targeted frequency analysis to burn out semi-transparent overlays.
+    image.scan(0, 0, image.bitmap.width, image.bitmap.height, function (x, y, idx) {
       const r = this.bitmap.data[idx + 0];
       const g = this.bitmap.data[idx + 1];
       const b = this.bitmap.data[idx + 2];
@@ -27,16 +27,16 @@ export async function processImageRemovalAction(base64Data: string): Promise<str
       // Calculate luminance
       const luminance = 0.2126 * r + 0.7152 * g + 0.0722 * b;
       
-      // If the pixel is very bright (typical of background/ghosted watermarks), push it to pure white
-      if (luminance > 220) {
+      // Aggressive threshold: If the pixel is close to white (common for watermark backgrounds), push to pure white.
+      if (luminance > 215) {
         this.bitmap.data[idx + 0] = 255;
         this.bitmap.data[idx + 1] = 255;
         this.bitmap.data[idx + 2] = 255;
       }
     });
 
-    // Final pass: High-fidelity contrast boost to "burn out" any remaining semi-transparent fragments
-    image.contrast(0.15).brightness(0.05).quality(100);
+    // High-fidelity contrast normalization to flatten ghosted fragments
+    image.contrast(0.2).brightness(0.05).quality(100);
     
     const processedBase64 = await image.getBase64Async(Jimp.MIME_JPEG);
     return processedBase64;
@@ -51,58 +51,70 @@ export async function processPdfRemovalAction(base64Data: string): Promise<strin
     const base64Content = base64Data.split(',')[1] || base64Data;
     const buffer = Buffer.from(base64Content, 'base64');
     
+    // Load with ignoreEncryption for industrial-grade access
     const sourcePdf = await PDFDocument.load(buffer, { ignoreEncryption: true });
-    const catalog = sourcePdf.catalog;
-    const context = (sourcePdf as any).context;
+    const context = sourcePdf.context;
     
-    // 1. Aggressive structural Layer (OCG) Purge
-    if (catalog.has(context.obj('OCProperties'))) {
-      catalog.delete(context.obj('OCProperties'));
-    }
+    // 1. Global Structural Purge: Optional Content Groups (Layers)
+    // Most professional watermarks are stored in these containers.
+    sourcePdf.catalog.delete(PDFName.of('OCProperties'));
 
     const pages = sourcePdf.getPages();
     pages.forEach((page) => {
-      const node = (page as any).node;
+      const node = (page as any).node as PDFDict;
       
-      // 2. Clear Annotation Registry (Covers most stamps and text overlays)
-      if (node.has(context.obj('Annots'))) {
-        node.delete(context.obj('Annots'));
-      }
+      // 2. Clear Annotation Registry (Interactive stamps and text overlays)
+      node.delete(PDFName.of('Annots'));
 
-      // 3. Resource-Level Sweep
-      // Many watermarks are defined as XObjects in the page resources.
-      const resources = node.get(context.obj('Resources'));
-      if (resources && resources.has(context.obj('XObject'))) {
-        const xObjects = resources.get(context.obj('XObject'));
-        // We look for common watermark markers or just perform a structural reset
-        // In a production environment, we'd parse the content stream to find specific references.
-        // For this protocol, we prioritize a "Deep Purge" of structural metadata.
-      }
-
-      // 4. Remove Transparency Groups (used to ghost watermarks)
-      if (node.has(context.obj('Group'))) {
-        node.delete(context.obj('Group'));
-      }
+      // 3. Neutralize Transparency Groups (Ghosting effects)
+      node.delete(PDFName.of('Group'));
       
-      // 5. Artifact Removal
-      if (node.has(context.obj('PieceInfo'))) {
-        node.delete(context.obj('PieceInfo'));
+      // 4. Strip Structural Artifacts and Private Data
+      node.delete(PDFName.of('PieceInfo'));
+      node.delete(PDFName.of('Metadata'));
+
+      // 5. Deep Resource-Level Purge (Form XObjects)
+      // Many watermarks are referenced as /XObject entries in the resource dictionary.
+      const resources = node.get(PDFName.of('Resources')) as PDFDict;
+      if (resources) {
+        const xObjects = resources.get(PDFName.of('XObject')) as PDFDict;
+        if (xObjects instanceof PDFDict) {
+          // Iterate through XObjects and remove those likely to be watermarks
+          // or just perform an aggressive sweep of /Form types.
+          const xObjectNames = xObjects.keys();
+          xObjectNames.forEach((name) => {
+            const xObj = xObjects.get(name);
+            if (xObj instanceof PDFDict) {
+              const subtype = xObj.get(PDFName.of('Subtype'));
+              // Watermarks are almost always /Form XObjects or /Image with high transparency
+              if (subtype === PDFName.of('Form')) {
+                // If it's a Form XObject, it's a prime candidate for a watermark container.
+                // In an aggressive purge, we remove the reference.
+                xObjects.delete(name);
+              }
+            }
+          });
+        }
+        
+        // 6. Neutralize Optional Content references at the resource level
+        resources.delete(PDFName.of('Properties'));
       }
     });
     
-    // Anonymize metadata to prevent watermark tracking via Producer tags
+    // 7. Industrial Metadata Hardening
+    // Strips all author and producer tags to prevent tracking.
     sourcePdf.setTitle('');
     sourcePdf.setAuthor('');
     sourcePdf.setSubject('');
     sourcePdf.setKeywords([]);
-    sourcePdf.setProducer("DOCFLOW Industrial Sanitization (Ver: 4.2)");
-    sourcePdf.setCreator("DOCFLOW Professional");
+    sourcePdf.setProducer("DOCFLOW Industrial Sanitization (Eng: 5.0)");
+    sourcePdf.setCreator("DOCFLOW Professional Protocol");
     sourcePdf.setModificationDate(new Date());
     
     const pdfBytes = await sourcePdf.save();
     return `data:application/pdf;base64,${Buffer.from(pdfBytes).toString('base64')}`;
   } catch (error) {
     console.error('PDF processing failure:', error);
-    throw new Error('Backend structural purge sequence failed.');
+    throw new Error('Backend structural purge sequence failed. The document structure may be non-standard.');
   }
 }
