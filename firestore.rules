@@ -1,37 +1,38 @@
+
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
     /**
-     * PDF Spark Security Rules
+     * DocuFlow Intelligence Security Rules
      *
      * CORE PHILOSOPHY:
-     * This ruleset implements a strict user-ownership model where users manage their own files and operations
-     * within their own dedicated data trees. It utilizes path-based authorization to ensure that access is
-     * granted only to the owner of the data or a verified administrator.
+     * Strict user ownership with master-admin override for intelligence monitoring
+     * and account provisioning.
      */
 
     // --- Helper Functions ---
 
-    /** Checks if the request is from an authenticated user. */
     function isSignedIn() {
       return request.auth != null;
     }
 
-    /** Checks if the authenticated user's UID matches the provided userId. */
     function isOwner(userId) {
       return isSignedIn() && request.auth.uid == userId;
     }
 
-    /** Checks if the user exists in the admin roles collection or is the master admin. */
+    /**
+     * isAdmin() checks for either:
+     * 1. The hardcoded master admin email (emergency access/bootstrap).
+     * 2. An existence marker in the roles_admin collection.
+     */
     function isAdmin() {
       return isSignedIn() && (
-        exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid)) ||
-        request.auth.token.email == "office.contact.sufian@gmail.com"
+        request.auth.token.email == "office.contact.sufian@gmail.com" ||
+        exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid))
       );
     }
 
-    /** Combined check for ownership or administrative privileges. */
     function isOwnerOrAdmin(userId) {
       return isOwner(userId) || isAdmin();
     }
@@ -44,18 +45,20 @@ service cloud.firestore {
     match /users/{userId} {
       allow get: if isOwnerOrAdmin(userId);
       allow list: if isAdmin();
+      // Allow creation if the user is self-registering OR an admin is provisioning them.
       allow create: if isOwner(userId) || isAdmin();
+      // Allow update if the user is modifying their own record OR an admin is managing them.
       allow update: if isOwner(userId) || isAdmin();
       allow delete: if isAdmin();
     }
 
     /**
      * @path /roles_admin/{adminId}
-     * Allows the designated admin email to establish and maintain their marker.
      */
     match /roles_admin/{adminId} {
-      allow get: if isOwner(adminId) || isAdmin();
+      allow get: if isOwnerOrAdmin(adminId);
       allow list: if isAdmin();
+      // Master admin can always create/update markers. Self-creation allowed for master email.
       allow create, update: if (isOwner(adminId) && request.auth.token.email == "office.contact.sufian@gmail.com") || isAdmin();
       allow delete: if isAdmin();
     }

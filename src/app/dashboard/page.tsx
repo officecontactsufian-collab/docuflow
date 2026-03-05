@@ -43,7 +43,7 @@ import {
   SelectValue 
 } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
-import { doc, collection, serverTimestamp, deleteDoc } from 'firebase/firestore';
+import { doc, collection, deleteDoc } from 'firebase/firestore';
 import { useToast } from '@/hooks/use-toast';
 
 // Dynamically import chart to prevent chunk loading errors in Turbopack/Next.js hydration
@@ -96,7 +96,7 @@ export default function DashboardPage() {
     );
   }, [allUsers, searchTerm]);
 
-  // Robust redirection logic
+  // Redirection guard with special case for master admin
   React.useEffect(() => {
     if (isUserLoading) return;
     if (!user) {
@@ -135,12 +135,13 @@ export default function DashboardPage() {
       provisionedBy: user?.email
     };
 
+    // Use non-blocking set for responsiveness
     setDocumentNonBlocking(userRef, userData, { merge: true });
     
-    // If worker/admin, also add to marker collections if needed (simplified for MVP)
+    // Provision administrative marker if elevated role selected
     if (newRole === 'admin') {
       const markerRef = doc(firestore, 'roles_admin', tempId);
-      setDocumentNonBlocking(markerRef, { id: tempId, email: newEmail }, { merge: true });
+      setDocumentNonBlocking(markerRef, { id: tempId, email: newEmail, role: 'admin' }, { merge: true });
     }
 
     toast({ title: "Protocol Initiated", description: `${newRole.toUpperCase()} account provisioned for ${newEmail}.` });
@@ -152,6 +153,8 @@ export default function DashboardPage() {
     if (!firestore) return;
     try {
       await deleteDoc(doc(firestore, 'users', userId));
+      // Also cleanup admin markers
+      await deleteDoc(doc(firestore, 'roles_admin', userId)).catch(() => {});
       toast({ title: "Record Shredded", description: "User intelligence data has been purged." });
     } catch (e) {
       toast({ variant: "destructive", title: "Shredder Error", description: "Failed to delete user record." });
