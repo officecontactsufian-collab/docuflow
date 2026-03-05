@@ -4,11 +4,7 @@ service cloud.firestore {
   match /databases/{database}/documents {
 
     /**
-     * DocuFlow Intelligence Security Rules
-     *
-     * CORE PHILOSOPHY:
-     * Strict user ownership with master-admin override for intelligence monitoring
-     * and account provisioning.
+     * DocuFlow Intelligence Security Rules - STRICT ADMIN SOVEREIGNTY
      */
 
     // --- Helper Functions ---
@@ -17,76 +13,40 @@ service cloud.firestore {
       return request.auth != null;
     }
 
-    function isOwner(userId) {
-      return isSignedIn() && request.auth.uid == userId;
-    }
-
-    /**
-     * isAdmin() checks for either:
-     * 1. The hardcoded master admin email (Global Sovereignty).
-     * 2. An existence marker in the roles_admin collection.
-     */
     function isAdmin() {
-      return isSignedIn() && (
-        request.auth.token.email == "office.contact.sufian@gmail.com" ||
-        exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid))
-      );
-    }
-
-    function isOwnerOrAdmin(userId) {
-      return isOwner(userId) || isAdmin();
+      return isSignedIn() && request.auth.token.email == "office.contact.sufian@gmail.com";
     }
 
     // --- Collection Rules ---
 
     /**
      * @path /users/{userId}
+     * Strictly restricted to the Master Admin for system intelligence.
      */
     match /users/{userId} {
-      allow get: if isOwnerOrAdmin(userId);
-      allow list: if isAdmin();
-      // Allow creation if the user is self-registering OR an admin is provisioning them.
-      allow create: if isOwner(userId) || isAdmin();
-      // Allow update if the user is modifying their own record OR an admin is managing them.
-      allow update: if isOwner(userId) || isAdmin();
-      allow delete: if isAdmin();
+      allow read, write: if isAdmin();
     }
 
     /**
      * @path /roles_admin/{adminId}
+     * Internal markers for privilege escalation.
      */
     match /roles_admin/{adminId} {
-      // Master admin email can always get/list/manage markers
-      allow get: if isOwnerOrAdmin(adminId);
-      allow list: if isAdmin();
-      // Master admin can always create/update markers.
-      allow create, update: if isAdmin() || (isOwner(adminId) && request.auth.token.email == "office.contact.sufian@gmail.com");
-      allow delete: if isAdmin();
+      allow read, write: if isAdmin();
     }
 
     /**
-     * @path /users/{userId}/files/{fileId}
+     * Public tools processing (Simulated persistence)
+     * Note: Most tools process in-memory, but metadata tracking is allowed for owners.
      */
     match /users/{userId}/files/{fileId} {
-      allow get, list: if isOwnerOrAdmin(userId);
-      allow create: if isOwner(userId) && request.resource.data.userId == userId;
-      allow update: if isOwner(userId) && request.resource.data.userId == resource.data.userId;
-      allow delete: if isOwner(userId) || isAdmin();
+      allow read, write: if isAdmin() || (isSignedIn() && request.auth.uid == userId);
     }
 
-    /**
-     * @path /users/{userId}/operations/{operationId}
-     */
     match /users/{userId}/operations/{operationId} {
-      allow get, list: if isOwnerOrAdmin(userId);
-      allow create: if isOwner(userId) && request.resource.data.userId == userId;
-      allow update: if isOwner(userId) && request.resource.data.userId == resource.data.userId;
-      allow delete: if isAdmin();
+      allow read, write: if isAdmin() || (isSignedIn() && request.auth.uid == userId);
     }
 
-    /**
-     * @path /conversion_presets/{presetId}
-     */
     match /conversion_presets/{presetId} {
       allow get, list: if true;
       allow create, update, delete: if isAdmin();

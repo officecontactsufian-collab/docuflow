@@ -1,3 +1,4 @@
+
 "use client"
 
 import Link from 'next/link';
@@ -24,7 +25,8 @@ import {
   Activity,
   LogOut,
   User as UserIcon,
-  Settings
+  Settings,
+  Layout
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -89,17 +91,13 @@ export function Navbar() {
     <nav className="glass-nav border-b bg-white/80 backdrop-blur-md sticky top-0 z-50">
       <div className="container mx-auto flex h-12 items-center justify-between px-6">
         <div className="flex items-center gap-8">
-          {/* Brand Identity */}
           <Link href="/" className="flex items-center gap-2 group mr-2">
             <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-accent text-primary shadow-lg transition-transform group-hover:scale-105 group-hover:-rotate-3">
               <FileText className="h-4 w-4" />
             </div>
-            <span className="text-base font-black tracking-tighter text-accent uppercase italic">
-              DocuFlow
-            </span>
+            <span className="text-base font-black tracking-tighter text-accent uppercase italic">DocuFlow</span>
           </Link>
 
-          {/* Core Navigation Links */}
           <div className="hidden lg:flex items-center gap-5">
             <DropdownMenu>
               <DropdownMenuTrigger className="flex items-center gap-1.5 text-[9px] font-black uppercase tracking-widest text-accent hover:text-primary transition-all outline-none">
@@ -133,58 +131,43 @@ export function Navbar() {
             </DropdownMenu>
 
             <Link href="/merge" className="flex items-center gap-1.5 text-[9px] font-black uppercase tracking-widest text-accent/80 hover:text-accent transition-all group">
-              <Merge className="h-3 w-3 text-primary/60 group-hover:text-primary transition-colors" />
-              Merge
+              <Merge className="h-3 w-3 text-primary/60 group-hover:text-primary transition-colors" /> Merge
             </Link>
             <Link href="/split" className="flex items-center gap-1.5 text-[9px] font-black uppercase tracking-widest text-accent/80 hover:text-accent transition-all group">
-              <Scissors className="h-3 w-3 text-primary/60 group-hover:text-primary transition-colors" />
-              Split
+              <Scissors className="h-3 w-3 text-primary/60 group-hover:text-primary transition-colors" /> Split
             </Link>
             <Link href="/compress" className="flex items-center gap-1.5 text-[9px] font-black uppercase tracking-widest text-accent/80 hover:text-accent transition-all group">
-              <Maximize className="h-3 w-3 text-primary/60 group-hover:text-primary transition-colors" />
-              Compress
+              <Maximize className="h-3 w-3 text-primary/60 group-hover:text-primary transition-colors" /> Compress
             </Link>
             <Link href="/convert?type=word-to-pdf" className="flex items-center gap-1.5 text-[9px] font-black uppercase tracking-widest text-accent/80 hover:text-accent transition-all group">
-              <FilePenLine className="h-3 w-3 text-primary/60 group-hover:text-primary transition-colors" />
-              Convert
+              <FilePenLine className="h-3 w-3 text-primary/60 group-hover:text-primary transition-colors" /> Convert
             </Link>
           </div>
         </div>
 
-        {/* Action Area */}
         <div className="flex items-center gap-4">
           <div className="hidden sm:flex items-center gap-6 mr-2">
-            {isAdmin && (
-              <Link href="/dashboard" className="flex items-center gap-1.5 text-[9px] font-black uppercase tracking-widest text-primary hover:text-primary/80 transition-all">
-                <Activity className="h-3 w-3" />
-                Command Dashboard
-              </Link>
-            )}
             <Link href="/analyze" className="flex items-center gap-1.5 text-[9px] font-black uppercase tracking-widest text-accent/80 hover:text-accent transition-all">
-              <Search className="h-3 w-3 text-primary" />
-              Inspect
+              <Search className="h-3 w-3 text-primary" /> Inspect
             </Link>
           </div>
           
-          {user && (
+          {isAdmin && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="sm" className="h-8 rounded-lg text-[9px] font-black uppercase tracking-widest gap-2 bg-accent/5">
-                  <UserIcon className="h-3 w-3" />
-                  <span className="hidden sm:inline">{isAdmin ? 'Admin' : 'User'}</span>
+                <Button variant="ghost" size="sm" className="h-8 rounded-lg text-[9px] font-black uppercase tracking-widest gap-2 bg-accent text-white hover:bg-accent/90">
+                  <Layout className="h-3 w-3" /> Admin Suite
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-48 rounded-xl bg-white shadow-2xl border-accent/5">
-                <DropdownMenuLabel className="text-[8px] font-black uppercase tracking-widest text-accent/40">{user.email}</DropdownMenuLabel>
-                {isAdmin && (
-                  <DropdownMenuItem asChild>
-                    <Link href="/dashboard" className="cursor-pointer text-[10px] font-bold uppercase">
-                      <Activity className="h-3 w-3 mr-2" /> Dashboard
-                    </Link>
-                  </DropdownMenuItem>
-                )}
+                <DropdownMenuLabel className="text-[8px] font-black uppercase tracking-widest text-accent/40">{user?.email}</DropdownMenuLabel>
+                <DropdownMenuItem asChild>
+                  <Link href="/admin-dashboard" className="cursor-pointer text-[10px] font-bold uppercase">
+                    <Activity className="h-3 w-3 mr-2" /> Command Center
+                  </Link>
+                </DropdownMenuItem>
                 <DropdownMenuItem onClick={handleLogout} className="text-destructive cursor-pointer text-[10px] font-bold uppercase">
-                  <LogOut className="h-3 w-3 mr-2" /> Sign Out
+                  <LogOut className="h-3 w-3 mr-2" /> End Session
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>

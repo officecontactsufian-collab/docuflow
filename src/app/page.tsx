@@ -1,3 +1,4 @@
+
 "use client"
 
 import * as React from 'react';
@@ -101,7 +102,7 @@ export default function Home() {
                   Private, instant, and processed locally.
                 </p>
 
-                <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
+                <div className="flex items-center justify-center pt-4">
                   <Button size="lg" className="h-14 px-10 rounded-xl bg-accent text-white font-black uppercase tracking-[0.2em] text-[10px] shadow-2xl shadow-accent/30 hover:scale-105 transition-all" asChild>
                     <Link href="#tools">Explore Core Protocols</Link>
                   </Button>
@@ -250,13 +251,10 @@ export default function Home() {
               </ul>
             </div>
             <div className="space-y-6">
-              <h4 className="text-primary text-[9px] font-black uppercase tracking-[0.5em]">System Intelligence</h4>
+              <h4 className="text-primary text-[9px] font-black uppercase tracking-[0.5em]">System Support</h4>
               <ul className="space-y-3 text-[10px] font-black uppercase tracking-[0.3em] opacity-60">
-                <li><Link href="/login" className="hover:text-primary transition-colors flex items-center gap-2 group">
-                  <Settings className="h-3 w-3 opacity-20 group-hover:opacity-100" /> 
-                  <span className="opacity-20 group-hover:opacity-100">System Login</span>
-                </Link></li>
                 <li><Link href="/security" className="hover:text-primary transition-colors">Security Standards</Link></li>
+                <li><Link href="/enterprise" className="hover:text-primary transition-colors">Enterprise Grade</Link></li>
               </ul>
             </div>
           </div>
