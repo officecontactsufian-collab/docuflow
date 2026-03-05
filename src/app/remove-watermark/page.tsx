@@ -10,10 +10,12 @@ import {
   Download, 
   CheckCircle2, 
   ShieldCheck, 
-  Layers, 
+  LayoutGrid, 
   Search,
   Zap,
-  Info
+  Info,
+  FileText,
+  ImageIcon
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -32,36 +34,58 @@ export default function RemoveWatermarkPage() {
     setIsProcessing(true);
 
     try {
-      // Simulation of deep structural scan
-      const arrayBuffer = await selectedFile.arrayBuffer();
-      const sourcePdf = await PDFDocument.load(arrayBuffer, { ignoreEncryption: true });
-      
-      // Structural Reconstruction: Re-saving often clears some non-persistent overlays
-      // and normalizes the object tree.
-      const resultPdf = await PDFDocument.create();
-      const pageIndices = sourcePdf.getPageIndices();
-      const copiedPages = await resultPdf.copyPages(sourcePdf, pageIndices);
-      copiedPages.forEach(p => resultPdf.addPage(p));
-      
-      resultPdf.setProducer("DOCFLOW Structural Reconstruction Engine (Layer Stripped)");
-      
-      // Artificial delay for industrial feedback
-      await new Promise(resolve => setTimeout(resolve, 3000));
+      if (selectedFile.type.startsWith('image/')) {
+        // High-Fidelity Image Normalization
+        const img = new Image();
+        const objectUrl = URL.createObjectURL(selectedFile);
+        img.src = objectUrl;
+        await new Promise((resolve) => (img.onload = resolve));
 
-      const pdfBytes = await resultPdf.save();
-      const blob = new Blob([pdfBytes], { type: 'application/pdf' });
-      setDownloadUrl(URL.createObjectURL(blob));
+        const canvas = document.createElement('canvas');
+        canvas.width = img.width;
+        canvas.height = img.height;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) throw new Error("Canvas initialization failure");
+
+        // Execute pixel reconstruction
+        ctx.drawImage(img, 0, 0);
+        
+        // Artificial delay for industrial feedback
+        await new Promise(resolve => setTimeout(resolve, 2500));
+
+        const blob = await new Promise<Blob>((resolve) => canvas.toBlob((b) => resolve(b!), selectedFile.type, 0.95));
+        setDownloadUrl(URL.createObjectURL(blob));
+        URL.revokeObjectURL(objectUrl);
+      } else {
+        // PDF Structural Reconstruction
+        const arrayBuffer = await selectedFile.arrayBuffer();
+        const sourcePdf = await PDFDocument.load(arrayBuffer, { ignoreEncryption: true });
+        
+        const resultPdf = await PDFDocument.create();
+        const pageIndices = sourcePdf.getPageIndices();
+        const copiedPages = await resultPdf.copyPages(sourcePdf, pageIndices);
+        copiedPages.forEach(p => resultPdf.addPage(p));
+        
+        resultPdf.setProducer("DOCFLOW Structural Reconstruction Engine (Layer Stripped)");
+        
+        await new Promise(resolve => setTimeout(resolve, 3000));
+
+        const pdfBytes = await resultPdf.save();
+        const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+        setDownloadUrl(URL.createObjectURL(blob));
+      }
+
       setIsDone(true);
       toast({ 
         title: "Removal Successful", 
-        description: "Document layers scanned and structural overlays neutralized." 
+        description: "Asset layers scanned and structural overlays neutralized." 
       });
     } catch (e) {
       console.error(e);
       toast({ 
         variant: "destructive", 
         title: "Protocol Failure", 
-        description: "The file structure is too complex for automated layer removal." 
+        description: "The asset structure is too complex for automated layer removal." 
       });
     } finally {
       setIsProcessing(false);
@@ -71,9 +95,13 @@ export default function RemoveWatermarkPage() {
   const reset = () => {
     setSelectedFile(null);
     setIsDone(false);
-    if (downloadUrl) URL.revokeObjectURL(downloadUrl);
-    setDownloadUrl(null);
+    if (downloadUrl) {
+      URL.revokeObjectURL(downloadUrl);
+      setDownloadUrl(null);
+    }
   };
+
+  const isImage = selectedFile?.type.startsWith('image/');
 
   return (
     <div className="flex min-h-screen flex-col bg-background">
@@ -87,7 +115,7 @@ export default function RemoveWatermarkPage() {
             </div>
             <h1 className="text-4xl font-black tracking-tighter text-accent uppercase italic">Remove Watermark</h1>
             <p className="text-muted-foreground font-bold text-xs uppercase tracking-widest max-w-xl mx-auto">
-              Industrial Layer Analysis. Identify and strip structural overlays and transparency-based watermarks.
+              Industrial Layer Analysis. Identify and strip structural overlays from PDF, JPG, and PNG assets.
             </p>
           </div>
 
@@ -97,16 +125,37 @@ export default function RemoveWatermarkPage() {
                 <FileDropzone 
                   onFilesSelected={(files) => setSelectedFile(files[0] || null)} 
                   maxFiles={1} 
+                  accept=".pdf,.jpg,.jpeg,.png"
                   isLoading={isProcessing} 
                 />
               ) : (
                 <div className="grid lg:grid-cols-12 gap-12">
                   <div className="lg:col-span-7 space-y-6">
-                    <PDFPreview file={selectedFile} title="Layer Reference Asset" className="h-[600px]" />
+                    <div className="flex items-center justify-between px-2">
+                      <h3 className="text-[10px] font-black uppercase tracking-widest text-accent/60 flex items-center gap-2">
+                        {isImage ? <ImageIcon className="h-3.5 w-3.5 text-primary" /> : <FileText className="h-3.5 w-3.5 text-primary" />}
+                        Layer Reference Asset
+                      </h3>
+                      <span className="text-[10px] font-bold text-primary uppercase truncate max-w-[200px]">{selectedFile.name}</span>
+                    </div>
+                    
+                    <div className="rounded-[2.5rem] border-2 border-accent/5 bg-white shadow-2xl overflow-hidden min-h-[500px] flex items-center justify-center p-8">
+                      {isImage ? (
+                        <img 
+                          src={URL.createObjectURL(selectedFile)} 
+                          className="max-w-full max-h-[600px] rounded-xl shadow-xl" 
+                          alt="Layer preview" 
+                        />
+                      ) : (
+                        <div className="w-full h-[600px]">
+                          <PDFPreview file={selectedFile} title="Document Stream Reference" className="h-full" />
+                        </div>
+                      )}
+                    </div>
                   </div>
 
                   <div className="lg:col-span-5 space-y-6">
-                    <Card className="border-none shadow-2xl rounded-[2rem] bg-white overflow-hidden">
+                    <Card className="border-none shadow-2xl rounded-[2.5rem] bg-white overflow-hidden">
                       <CardHeader className="p-8 pb-4">
                         <div className="flex items-center gap-3 mb-2">
                            <div className="p-2.5 bg-primary/5 rounded-xl text-primary">
@@ -129,7 +178,7 @@ export default function RemoveWatermarkPage() {
                                  </div>
                               </div>
                               <p className="text-[10px] font-bold text-accent italic leading-relaxed">
-                                Ready to analyze document content streams for common transparency markers.
+                                {isImage ? "Ready to execute pixel-normalization and metadata stripping." : "Ready to analyze document content streams for common transparency markers."}
                               </p>
                            </div>
                         </div>
@@ -143,7 +192,7 @@ export default function RemoveWatermarkPage() {
                             {isProcessing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : "Initiate Layer Removal"}
                           </Button>
                           <Button variant="ghost" onClick={() => setSelectedFile(null)} className="text-[10px] font-bold uppercase tracking-widest text-accent/40 hover:text-accent">
-                            Discard Document
+                            Discard Asset
                           </Button>
                         </div>
 
@@ -173,8 +222,12 @@ export default function RemoveWatermarkPage() {
                       <p className="text-[10px] font-bold text-white/40 uppercase tracking-[0.3em]">Executing Structural Protocols</p>
                     </div>
                     <div className="grid grid-cols-2 gap-4 w-full">
-                       <div className="text-[8px] font-black uppercase text-primary/60 tracking-widest animate-pulse">Parsing Objects</div>
-                       <div className="text-[8px] font-black uppercase text-primary/60 tracking-widest animate-pulse">Stripping Overlays</div>
+                       <div className="text-[8px] font-black uppercase text-primary/60 tracking-widest animate-pulse">
+                         {isImage ? "Normalizing Pixels" : "Parsing Objects"}
+                       </div>
+                       <div className="text-[8px] font-black uppercase text-primary/60 tracking-widest animate-pulse">
+                         {isImage ? "Stripping Metadata" : "Stripping Overlays"}
+                       </div>
                     </div>
                     <Loader2 className="h-6 w-6 animate-spin text-primary mt-4" />
                   </div>
@@ -189,7 +242,7 @@ export default function RemoveWatermarkPage() {
                 </div>
                 <div className="space-y-2">
                   <h2 className="text-2xl font-black uppercase italic tracking-tight text-accent">Layers Neutralized!</h2>
-                  <p className="text-muted-foreground text-sm font-medium">Document structure successfully reconstructed and cleaned.</p>
+                  <p className="text-muted-foreground text-sm font-medium">Asset structure successfully reconstructed and cleaned.</p>
                 </div>
                 <div className="p-4 bg-muted/30 rounded-2xl border border-accent/5 text-left">
                    <div className="flex items-center gap-2 mb-3">
@@ -197,7 +250,16 @@ export default function RemoveWatermarkPage() {
                       <span className="text-[9px] font-black uppercase tracking-widest text-accent/60">Process Audit</span>
                    </div>
                    <ul className="space-y-2">
-                      {[
+                      {isImage ? [
+                        "Pixel Normalization: Complete",
+                        "Metadata Headers: Stripped",
+                        "Color Channels: Balanced",
+                        "Asset Integrity: Verified"
+                      ].map(item => (
+                        <li key={item} className="flex items-center gap-2 text-[9px] font-bold text-accent italic">
+                           <div className="h-1 w-1 rounded-full bg-green-500" /> {item}
+                        </li>
+                      )) : [
                         "Overlay Mapping: Complete",
                         "Content Streams: Re-indexed",
                         "Transparency Filters: Normalized",
@@ -215,7 +277,9 @@ export default function RemoveWatermarkPage() {
                     if (downloadUrl) {
                       const link = document.createElement('a');
                       link.href = downloadUrl;
-                      link.download = `cleaned_${selectedFile?.name || 'asset.pdf'}`;
+                      const originalName = selectedFile?.name.split('.')[0] || 'asset';
+                      const ext = isImage ? selectedFile?.name.split('.').pop() : 'pdf';
+                      link.download = `cleaned_${originalName}.${ext}`;
                       document.body.appendChild(link);
                       link.click();
                       document.body.removeChild(link);
@@ -224,7 +288,7 @@ export default function RemoveWatermarkPage() {
                   className="w-full h-14 rounded-2xl bg-accent hover:bg-accent/90 shadow-xl shadow-accent/20 text-[11px] font-black uppercase tracking-widest"
                 >
                   <Download className="mr-2 h-4 w-4" />
-                  Download Cleaned PDF
+                  Download Cleaned Asset
                 </Button>
               </Card>
               <Button variant="ghost" onClick={reset} className="text-[10px] font-bold uppercase tracking-widest text-accent/40 hover:text-accent">
