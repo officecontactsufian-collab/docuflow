@@ -1,4 +1,3 @@
-
 "use client"
 
 import * as React from 'react';
@@ -11,13 +10,11 @@ import {
   Maximize, 
   RotateCw, 
   ShieldCheck, 
-  Image as ImageIcon,
   Shield,
   CircleCheck,
   FileUp,
   Settings2,
   Download,
-  Table,
   LayoutDashboard,
   Layers,
   Unlock,
@@ -25,12 +22,8 @@ import {
   Hash,
   Crop,
   FilePenLine,
-  EyeOff,
-  Eraser,
   Camera,
   Presentation,
-  Scan,
-  Layout,
   Search
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -50,7 +43,6 @@ export default function Home() {
       items: [
         { title: "Scan to PDF", desc: "Direct camera to document stream.", icon: Camera, href: "/scan-to-pdf" },
         { title: "Crop PDF", desc: "Trim page margins with precision.", icon: Crop, href: "/crop" },
-        { title: "Remove Background", desc: "Isolate foreground document elements.", icon: ImageIcon, href: "/remove-background" },
         { title: "Reorder & Rotate", desc: "Change page order and orientation.", icon: RotateCw, href: "/organize" },
       ]
     },
