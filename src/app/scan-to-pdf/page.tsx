@@ -14,7 +14,8 @@ import {
   RefreshCcw, 
   FileText,
   Plus,
-  Play
+  Play,
+  AlertCircle
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Card } from '@/components/ui/card';
@@ -22,7 +23,7 @@ import { PDFDocument } from 'pdf-lib';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 export default function ScanToPdfPage() {
-  const [hasCameraPermission, setHasCameraPermission] = React.useState(false);
+  const [hasCameraPermission, setHasCameraPermission] = React.useState(true);
   const [capturedImages, setCapturedImages] = React.useState<string[]>([]);
   const [isProcessing, setIsProcessing] = React.useState(false);
   const [isDone, setIsDone] = React.useState(false);
@@ -44,8 +45,8 @@ export default function ScanToPdfPage() {
         setHasCameraPermission(false);
         toast({
           variant: 'destructive',
-          title: 'Camera Access Denied',
-          description: 'Please enable camera permissions in your browser settings to use the scanner.',
+          title: 'Camera Access Required',
+          description: 'Please enable the camera option in your browser or system settings to use this tool.',
         });
       }
     };
@@ -137,25 +138,34 @@ export default function ScanToPdfPage() {
                   <canvas ref={canvasRef} className="hidden" />
                   
                   {!hasCameraPermission && (
-                    <div className="absolute inset-0 bg-accent/90 flex items-center justify-center p-8 text-center">
-                      <Alert variant="destructive" className="bg-white border-none rounded-3xl">
-                        <AlertTitle className="text-xl font-black uppercase italic tracking-tighter">Access Required</AlertTitle>
-                        <AlertDescription className="text-[10px] font-bold uppercase tracking-widest mt-2">
-                          Please enable camera access in your system preferences to activate the scanner protocol.
-                        </AlertDescription>
-                      </Alert>
+                    <div className="absolute inset-0 bg-accent/90 backdrop-blur-sm flex items-center justify-center p-8 text-center z-20">
+                      <div className="max-w-sm space-y-6">
+                        <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center mx-auto shadow-2xl">
+                          <AlertCircle className="h-10 w-10 text-destructive" />
+                        </div>
+                        <Alert variant="destructive" className="bg-white border-none rounded-[2rem] p-8 shadow-2xl text-left">
+                          <AlertTitle className="text-2xl font-black uppercase italic tracking-tighter text-destructive">Hardware Blocked</AlertTitle>
+                          <AlertDescription className="text-[11px] font-bold uppercase tracking-widest mt-4 leading-relaxed text-muted-foreground">
+                            Protocol initiation failed. Please go to your browser settings and <span className="text-destructive">enable the camera option</span> to permit the scanning sequence.
+                          </AlertDescription>
+                        </Alert>
+                        <Button variant="outline" className="bg-white/10 text-white border-white/20 hover:bg-white/20 rounded-xl px-8 font-black uppercase text-[10px] tracking-widest" onClick={() => window.location.reload()}>
+                          Retry Initialization
+                        </Button>
+                      </div>
                     </div>
                   )}
 
-                  <div className="absolute bottom-8 left-1/2 -translate-x-1/2">
-                    <Button 
-                      onClick={captureFrame} 
-                      disabled={!hasCameraPermission}
-                      className="h-20 w-20 rounded-full bg-white text-accent hover:scale-110 active:scale-95 transition-all shadow-2xl border-8 border-accent/20"
-                    >
-                      <Zap className="h-8 w-8 fill-primary text-primary" />
-                    </Button>
-                  </div>
+                  {hasCameraPermission && (
+                    <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10">
+                      <Button 
+                        onClick={captureFrame} 
+                        className="h-20 w-20 rounded-full bg-white text-accent hover:scale-110 active:scale-95 transition-all shadow-2xl border-8 border-accent/20"
+                      >
+                        <Zap className="h-8 w-8 fill-primary text-primary" />
+                      </Button>
+                    </div>
+                  )}
                 </div>
               </div>
 
