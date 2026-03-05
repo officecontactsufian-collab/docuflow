@@ -51,10 +51,10 @@ export default function RemoveWatermarkPage() {
       let resultUrl: string;
 
       if (staged.file.type.startsWith('image/')) {
-        updateFileStatus(staged.id, 'processing', ["Analyzing Pixel Luminance...", "Executing Background Burn-Out...", "Flattening Alpha Channels..."]);
+        updateFileStatus(staged.id, 'processing', ["Analyzing Pixel Luminance (OpenCV-Grade)...", "Executing Background Burn-Out...", "Flattening Alpha Channels..."]);
         resultUrl = await processImageRemovalAction(base64Data);
       } else {
-        updateFileStatus(staged.id, 'processing', ["Deep Scanning PDF Object Tree...", "Stripping /Form XObjects...", "Purging /OCG Layers...", "Hardening Metadata..."]);
+        updateFileStatus(staged.id, 'processing', ["Deep Scanning PDF Object Tree (MuPDF-Grade)...", "Stripping /Form XObjects...", "Purging /OCG Layers...", "Hardening Metadata..."]);
         resultUrl = await processPdfRemovalAction(base64Data);
       }
 

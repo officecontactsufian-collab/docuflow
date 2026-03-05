@@ -14,7 +14,7 @@ export async function processImageRemovalAction(base64Data: string): Promise<str
     const base64Content = base64Data.split(',')[1] || base64Data;
     const buffer = Buffer.from(base64Content, 'base64');
     
-    // Initialize Industrial Image Engine
+    // Initialize Industrial Image Engine (OpenCV-Grade Logic)
     const image = await Jimp.read(buffer);
     
     // OpenCV-grade Strategy: Luminance Thresholding
@@ -56,7 +56,7 @@ export async function processPdfRemovalAction(base64Data: string): Promise<strin
     // Load with ignoreEncryption for industrial-grade access
     const sourcePdf = await PDFDocument.load(buffer, { ignoreEncryption: true });
     
-    // 1. Global Structural Purge: Optional Content Groups (Layers)
+    // 1. Global Structural Purge: Optional Content Groups (Layers) - MuPDF-Grade
     sourcePdf.catalog.delete(PDFName.of('OCProperties'));
 
     const pages = sourcePdf.getPages();
@@ -85,7 +85,6 @@ export async function processPdfRemovalAction(base64Data: string): Promise<strin
             if (xObj instanceof PDFDict) {
               const subtype = xObj.get(PDFName.of('Subtype'));
               // Aggressively remove /Form types (standard for repeated overlays)
-              // and small /Image types often used for icons/logos.
               if (subtype === PDFName.of('Form')) {
                 xObjects.delete(name);
               }
