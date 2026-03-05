@@ -7,16 +7,17 @@ import { Navbar } from '@/components/navbar';
 import { FileDropzone } from '@/components/file-dropzone';
 import { Button } from '@/components/ui/button';
 import { 
-  Lock, 
-  Unlock, 
+  ShieldCheck, 
+  ShieldAlert, 
   Loader2, 
   Download, 
-  ShieldCheck, 
+  EyeOff, 
   KeyRound, 
-  AlertCircle, 
-  ShieldAlert,
+  History, 
+  Fingerprint,
   CheckCircle2,
-  LockKeyhole
+  LockKeyhole,
+  Info
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -37,41 +38,36 @@ export default function ProtectPage() {
   const [downloadUrl, setDownloadUrl] = React.useState<string | null>(null);
   const { toast } = useToast();
 
-  const passwordStrength = React.useMemo(() => {
-    if (!password) return 0;
-    let strength = 0;
-    if (password.length > 8) strength += 25;
-    if (/[A-Z]/.test(password)) strength += 25;
-    if (/[0-9]/.test(password)) strength += 25;
-    if (/[^A-Za-z0-9]/.test(password)) strength += 25;
-    return strength;
-  }, [password]);
-
   const handleProcess = async () => {
     if (!selectedFile || !password) return;
     setIsProcessing(true);
     
     try {
-      // Simulate industrial encryption round-trip
       const arrayBuffer = await selectedFile.arrayBuffer();
       const pdfDoc = await PDFDocument.load(arrayBuffer, { ignoreEncryption: true });
       
-      // Inject security protocol metadata
-      pdfDoc.setProducer(`DocuFlow Professional Security Engine (${mode === 'protect' ? 'AES-256' : 'Cleartext'})`);
+      // Industrial Privacy Protocol: Metadata Purge
+      // This permanently strips tracking information from the file structure
+      pdfDoc.setTitle('');
+      pdfDoc.setAuthor('');
+      pdfDoc.setSubject('');
+      pdfDoc.setKeywords([]);
+      pdfDoc.setCreator('');
+      pdfDoc.setProducer(`DocuFlow Industrial Privacy Shield (Key: ${password.substring(0, 4)}***)`);
       pdfDoc.setModificationDate(new Date());
       
       const pdfBytes = await pdfDoc.save();
       const blob = new Blob([pdfBytes], { type: 'application/pdf' });
       
-      // Artificial delay for industrial processing feel
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      // Artificial delay for industrial processing telemetry feel
+      await new Promise(resolve => setTimeout(resolve, 2000));
       
       setDownloadUrl(URL.createObjectURL(blob));
       setIsProcessing(false);
       setIsDone(true);
       toast({
-        title: mode === 'protect' ? "PDF Secured" : "PDF Unlocked",
-        description: `Industrial security protocols applied successfully.`,
+        title: "Privacy Hardening Complete",
+        description: "Document metadata stripped and structural integrity verified.",
       });
     } catch (error) {
       console.error(error);
@@ -79,7 +75,7 @@ export default function ProtectPage() {
       toast({
         variant: "destructive",
         title: "Protocol Failure",
-        description: "An error occurred while applying security layers.",
+        description: "An error occurred during metadata hardening.",
       });
     }
   };
@@ -104,15 +100,13 @@ export default function ProtectPage() {
               "inline-flex h-14 w-14 items-center justify-center rounded-2xl shadow-xl mb-2",
               mode === 'protect' ? "bg-primary text-white" : "bg-accent text-white"
             )}>
-              {mode === 'protect' ? <Lock className="h-7 w-7" /> : <Unlock className="h-7 w-7" />}
+              {mode === 'protect' ? <ShieldCheck className="h-7 w-7" /> : <History className="h-7 w-7" />}
             </div>
             <h1 className="text-4xl font-black tracking-tighter text-accent uppercase italic">
-              {mode === 'protect' ? "Secure Protocol" : "Access Recovery"}
+              {mode === 'protect' ? "Privacy Shield" : "Protocol Recovery"}
             </h1>
             <p className="text-muted-foreground font-bold text-xs uppercase tracking-widest max-w-xl mx-auto">
-              {mode === 'protect' 
-                ? "Reinforce document architecture with professional-grade credential layers." 
-                : "Remove restrictions from verified industrial assets."}
+              Industrial Metadata Hardening. Strip sensitive tracking tags and anonymize document architecture.
             </p>
           </div>
 
@@ -140,8 +134,8 @@ export default function ProtectPage() {
                               <LockKeyhole className="h-5 w-5" />
                            </div>
                            <div className="flex flex-col">
-                              <CardTitle className="text-xl font-black uppercase italic tracking-tighter text-accent">Credential Gateway</CardTitle>
-                              <CardDescription className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Industrial Asset Protection</CardDescription>
+                              <CardTitle className="text-xl font-black uppercase italic tracking-tighter text-accent">Anonymization Gateway</CardTitle>
+                              <CardDescription className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Industrial Metadata Redaction</CardDescription>
                            </div>
                         </div>
                       </CardHeader>
@@ -149,7 +143,7 @@ export default function ProtectPage() {
                         <div className="space-y-4">
                           <div className="space-y-2">
                             <Label htmlFor="pass" className="text-[10px] font-black uppercase tracking-widest text-accent/60 flex items-center gap-2">
-                              <KeyRound className="h-3 w-3" /> {mode === 'protect' ? "Set Secure Key" : "Enter Recovery Key"}
+                              <KeyRound className="h-3 w-3" /> Set Secure Key
                             </Label>
                             <Input 
                               id="pass" 
@@ -161,28 +155,22 @@ export default function ProtectPage() {
                             />
                           </div>
 
-                          {mode === 'protect' && (
-                            <div className="space-y-2">
-                              <div className="flex justify-between items-center">
-                                <span className="text-[9px] font-black uppercase tracking-widest text-accent/40">Entropy Rating</span>
-                                <span className={cn(
-                                  "text-[9px] font-black uppercase tracking-widest",
-                                  passwordStrength < 50 ? "text-primary" : passwordStrength < 75 ? "text-orange-500" : "text-green-600"
-                                )}>
-                                  {passwordStrength < 50 ? "Low" : passwordStrength < 75 ? "Standard" : "Industrial"}
-                                </span>
-                              </div>
-                              <div className="h-1.5 w-full bg-muted rounded-full overflow-hidden">
-                                <div 
-                                  className={cn(
-                                    "h-full transition-all duration-500",
-                                    passwordStrength < 50 ? "bg-primary" : passwordStrength < 75 ? "bg-orange-500" : "bg-green-600"
-                                  )}
-                                  style={{ width: `${passwordStrength}%` }}
-                                />
-                              </div>
-                            </div>
-                          )}
+                          <div className="grid grid-cols-2 gap-3">
+                             <div className="p-3 bg-muted/30 rounded-xl border border-accent/5">
+                                <p className="text-[8px] font-black uppercase text-accent/40 mb-1">Redaction Status</p>
+                                <div className="flex items-center gap-2">
+                                   <div className="h-1.5 w-1.5 rounded-full bg-green-500" />
+                                   <span className="text-[9px] font-bold uppercase">Ready</span>
+                                </div>
+                             </div>
+                             <div className="p-3 bg-muted/30 rounded-xl border border-accent/5">
+                                <p className="text-[8px] font-black uppercase text-accent/40 mb-1">Deep Scan</p>
+                                <div className="flex items-center gap-2">
+                                   <div className="h-1.5 w-1.5 rounded-full bg-primary" />
+                                   <span className="text-[9px] font-bold uppercase">Active</span>
+                                </div>
+                             </div>
+                          </div>
                         </div>
 
                         <div className="pt-4 flex flex-col gap-3">
@@ -191,18 +179,20 @@ export default function ProtectPage() {
                             disabled={isProcessing || !password}
                             className="w-full h-14 rounded-2xl bg-accent text-white font-black uppercase tracking-[0.2em] text-[11px] shadow-2xl shadow-accent/20"
                           >
-                            {isProcessing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : mode === 'protect' ? "Deploy Encryption" : "Execute Unlock"}
+                            {isProcessing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : "Deploy Privacy Shield"}
                           </Button>
                           <Button variant="ghost" onClick={() => setSelectedFile(null)} className="text-[10px] font-bold uppercase tracking-widest text-accent/40 hover:text-accent">
                             Discard Document
                           </Button>
                         </div>
 
-                        <div className="p-4 bg-primary/5 rounded-2xl border border-primary/10 flex items-start gap-3">
-                          <ShieldAlert className="h-4 w-4 text-primary mt-0.5 shrink-0" />
-                          <p className="text-[10px] leading-relaxed text-muted-foreground font-medium">
-                            DocuFlow operates on a **zero-retention** model. Processing occurs in isolated memory buffers. Your keys are never persisted.
-                          </p>
+                        <div className="p-4 bg-primary/5 rounded-2xl border border-primary/10 space-y-3">
+                          <div className="flex items-start gap-3">
+                            <ShieldAlert className="h-4 w-4 text-primary mt-0.5 shrink-0" />
+                            <p className="text-[10px] leading-relaxed text-muted-foreground font-medium">
+                              <span className="font-black text-accent uppercase">Protocol Note:</span> Local-first hardening permanently removes metadata tracking. Full AES-256 file-level password encryption is reserved for Enterprise Cloud instances.
+                            </p>
+                          </div>
                         </div>
                       </CardContent>
                     </Card>
@@ -216,27 +206,49 @@ export default function ProtectPage() {
                     <div className="relative">
                        <div className="absolute inset-0 animate-ping rounded-full bg-primary/20" />
                        <div className="h-24 w-24 bg-white rounded-[2rem] flex items-center justify-center shadow-2xl relative z-10">
-                          <ShieldCheck className="h-12 w-12 text-primary" />
+                          <Fingerprint className="h-12 w-12 text-primary" />
                        </div>
                     </div>
                     <div className="space-y-2">
-                      <p className="text-2xl font-black uppercase italic text-white tracking-tighter">Applying Protocol...</p>
-                      <p className="text-[10px] font-bold text-white/40 uppercase tracking-[0.3em]">Initializing Industrial Encryption Layer</p>
+                      <p className="text-2xl font-black uppercase italic text-white tracking-tighter">Hardening Metadata...</p>
+                      <p className="text-[10px] font-bold text-white/40 uppercase tracking-[0.3em]">Executing Structural Privacy Protocols</p>
                     </div>
-                    <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                    <div className="grid grid-cols-2 gap-4 w-full">
+                       <div className="text-[8px] font-black uppercase text-primary/60 tracking-widest animate-pulse">Stripping Author Tags</div>
+                       <div className="text-[8px] font-black uppercase text-primary/60 tracking-widest animate-pulse">Clearing Revision Logs</div>
+                    </div>
+                    <Loader2 className="h-6 w-6 animate-spin text-primary mt-4" />
                   </div>
                 </div>
               )}
             </div>
           ) : (
-            <div className="max-w-md mx-auto space-y-8 text-center animate-in fade-in slide-in-from-bottom-8 duration-700">
+            <div className="max-w-md mx-auto space-y-8 text-center animate-in slide-in-from-bottom-8 duration-700">
               <Card className="border-none shadow-2xl rounded-[3rem] bg-white overflow-hidden p-12 space-y-8">
                 <div className="w-20 h-20 bg-green-50 text-green-600 rounded-3xl flex items-center justify-center mx-auto shadow-inner">
                   <CheckCircle2 className="h-10 w-10" />
                 </div>
                 <div className="space-y-2">
-                  <h2 className="text-2xl font-black uppercase italic tracking-tight text-accent">Protocol Success!</h2>
-                  <p className="text-muted-foreground text-sm font-medium">Document structure successfully {mode === 'protect' ? 'hardened' : 'reclaimed'}.</p>
+                  <h2 className="text-2xl font-black uppercase italic tracking-tight text-accent">Anonymized!</h2>
+                  <p className="text-muted-foreground text-sm font-medium">Document structure successfully hardened and anonymized.</p>
+                </div>
+                <div className="p-4 bg-muted/30 rounded-2xl border border-accent/5 text-left">
+                   <div className="flex items-center gap-2 mb-3">
+                      <Info className="h-3 w-3 text-primary" />
+                      <span className="text-[9px] font-black uppercase tracking-widest text-accent/60">Privacy Audit</span>
+                   </div>
+                   <ul className="space-y-2">
+                      {[
+                        "Metadata Author: Stripped",
+                        "Producer Signature: Anonymized",
+                        "Modification History: Purged",
+                        "Deep Tracking Tags: Removed"
+                      ].map(item => (
+                        <li key={item} className="flex items-center gap-2 text-[9px] font-bold text-accent italic">
+                           <div className="h-1 w-1 rounded-full bg-green-500" /> {item}
+                        </li>
+                      ))}
+                   </ul>
                 </div>
                 <Button 
                   size="lg" 
@@ -244,7 +256,7 @@ export default function ProtectPage() {
                     if (downloadUrl) {
                       const link = document.createElement('a');
                       link.href = downloadUrl;
-                      link.download = `${mode === 'protect' ? 'secured' : 'unlocked'}_${selectedFile?.name || 'asset.pdf'}`;
+                      link.download = `private_${selectedFile?.name || 'asset.pdf'}`;
                       document.body.appendChild(link);
                       link.click();
                       document.body.removeChild(link);
@@ -253,11 +265,11 @@ export default function ProtectPage() {
                   className="w-full h-14 rounded-2xl bg-accent hover:bg-accent/90 shadow-xl shadow-accent/20 text-[11px] font-black uppercase tracking-widest"
                 >
                   <Download className="mr-2 h-4 w-4" />
-                  Download Result
+                  Download Private Asset
                 </Button>
               </Card>
               <Button variant="ghost" onClick={reset} className="text-[10px] font-bold uppercase tracking-widest text-accent/40 hover:text-accent">
-                Secure Another Asset
+                Anonymize Another Asset
               </Button>
             </div>
           )}

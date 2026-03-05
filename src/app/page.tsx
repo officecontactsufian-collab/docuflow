@@ -10,7 +10,6 @@ import {
   FileText, 
   Maximize, 
   RotateCw, 
-  Lock, 
   ShieldCheck, 
   Image as ImageIcon,
   Shield,
@@ -25,7 +24,8 @@ import {
   Signature,
   Hash,
   Crop,
-  FilePenLine
+  FilePenLine,
+  EyeOff
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
@@ -62,10 +62,10 @@ export default function Home() {
       label: "Security & Trust",
       description: "Industrial grade protection protocols.",
       items: [
-        { title: "Protect", desc: "AES-256 password lock.", icon: Lock, href: "/protect" },
+        { title: "Privacy Shield", desc: "Strip metadata tracking.", icon: ShieldCheck, href: "/protect" },
         { title: "Digital Sign", desc: "Apply e-signatures securely.", icon: Signature, href: "/sign" },
         { title: "Unlock PDF", desc: "Remove restricted access.", icon: Unlock, href: "/protect?mode=unlock" },
-        { title: "Sanitize", desc: "Strip hidden metadata.", icon: ShieldCheck, href: "/sanitize" },
+        { title: "Sanitize", desc: "Structural anonymization.", icon: EyeOff, href: "/sanitize" },
       ]
     },
     {
@@ -204,7 +204,7 @@ export default function Home() {
                 </div>
                 <h2 className="text-4xl md:text-6xl font-black uppercase italic leading-[1] tracking-tighter">Secure <br />By Nature.</h2>
                 <p className="text-xl text-white/60 leading-relaxed font-bold max-w-lg">
-                  Zero-retention for all assets. We use industrial 256-bit AES encryption applied locally within your secure session.
+                  Zero-retention for all assets. We use industrial structural hardening applied locally within your secure session.
                 </p>
                 <div className="grid sm:grid-cols-2 gap-6">
                   {[
@@ -222,7 +222,7 @@ export default function Home() {
               </div>
               <div className="relative">
                 <div className="aspect-square bg-white/5 rounded-3xl flex items-center justify-center p-16 backdrop-blur-3xl border border-white/10 shadow-2xl animate-pulse duration-[4000ms]">
-                   <Lock className="w-full h-full text-primary/20" />
+                   <ShieldCheck className="w-full h-full text-primary/20" />
                 </div>
               </div>
             </div>

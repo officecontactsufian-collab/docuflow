@@ -75,16 +75,13 @@ export function Navbar() {
       items: [
         { href: "/compress", icon: Maximize, title: "Compress PDF", desc: "Reduce file size" },
         { href: "/repair", icon: Wrench, title: "Repair", desc: "Fix corrupted PDFs" },
-        { href: "/protect", icon: Lock, title: "Protect", desc: "Add password lock" },
+        { href: "/protect", icon: ShieldCheck, title: "Privacy Shield", desc: "Hardened metadata" },
         { href: "/protect?mode=unlock", icon: Unlock, title: "Unlock", desc: "Remove restrictions" },
         { href: "/watermark", icon: Type, title: "Watermark", desc: "Add text overlays" },
         { href: "/sign", icon: Signature, title: "Digital Sign", desc: "Apply signatures" },
       ]
     }
   ];
-
-  // Note: Admin links are NOT shown on the public website per strict requirement.
-  // Access is only via direct URL navigation.
 
   return (
     <nav className="glass-nav border-b bg-white/80 backdrop-blur-md sticky top-0 z-50">
