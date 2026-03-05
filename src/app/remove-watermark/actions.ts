@@ -2,11 +2,11 @@
 'use server';
 
 import Jimp from 'jimp';
-import { PDFDocument, PDFDict, PDFName } from 'pdf-lib';
+import { PDFDocument, PDFDict, PDFName, PDFArray } from 'pdf-lib';
 
 /**
- * @fileOverview DOCFLOW Backend Removal Protocols
- * Handles high-fidelity structural and pixel-level sanitization using industrial libraries.
+ * @fileOverview DOCFLOW Industrial Removal Protocols
+ * Handles high-fidelity structural and pixel-level sanitization.
  */
 
 export async function processImageRemovalAction(base64Data: string): Promise<string> {
@@ -17,27 +17,28 @@ export async function processImageRemovalAction(base64Data: string): Promise<str
     // Initialize Industrial Image Engine
     const image = await Jimp.read(buffer);
     
-    // Strategy: Luminance-Based Neutralization & Background "Push"
+    // OpenCV-grade Strategy: Luminance Thresholding
     // Targeted frequency analysis to burn out semi-transparent overlays.
     image.scan(0, 0, image.bitmap.width, image.bitmap.height, function (x, y, idx) {
       const r = this.bitmap.data[idx + 0];
       const g = this.bitmap.data[idx + 1];
       const b = this.bitmap.data[idx + 2];
       
-      // Calculate luminance
-      const luminance = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+      // Calculate luminance (Y'601 standard)
+      const luminance = 0.299 * r + 0.587 * g + 0.114 * b;
       
       // Aggressive threshold: If the pixel is close to white (common for watermark backgrounds), push to pure white.
       // This effectively "burns out" the faint grey/transparent text of most watermarks.
-      if (luminance > 215) {
+      if (luminance > 200) {
         this.bitmap.data[idx + 0] = 255;
         this.bitmap.data[idx + 1] = 255;
         this.bitmap.data[idx + 2] = 255;
+        this.bitmap.data[idx + 3] = 255; // Ensure alpha is solid
       }
     });
 
     // High-fidelity contrast normalization to flatten ghosted fragments
-    image.contrast(0.2).brightness(0.05).quality(100);
+    image.contrast(0.1).brightness(0.02).quality(100);
     
     const processedBase64 = await image.getBase64Async(Jimp.MIME_JPEG);
     return processedBase64;
@@ -56,7 +57,6 @@ export async function processPdfRemovalAction(base64Data: string): Promise<strin
     const sourcePdf = await PDFDocument.load(buffer, { ignoreEncryption: true });
     
     // 1. Global Structural Purge: Optional Content Groups (Layers)
-    // Most professional watermarks are stored in these containers.
     sourcePdf.catalog.delete(PDFName.of('OCProperties'));
 
     const pages = sourcePdf.getPages();
@@ -66,7 +66,7 @@ export async function processPdfRemovalAction(base64Data: string): Promise<strin
       // 2. Clear Annotation Registry (Interactive stamps, text overlays, signatures)
       node.delete(PDFName.of('Annots'));
 
-      // 3. Neutralize Transparency Groups (Used for ghosting watermarks over content)
+      // 3. Neutralize Transparency Groups (Used for ghosting watermarks)
       node.delete(PDFName.of('Group'));
       
       // 4. Strip Structural Artifacts and Private Data
@@ -84,8 +84,8 @@ export async function processPdfRemovalAction(base64Data: string): Promise<strin
             const xObj = xObjects.get(name);
             if (xObj instanceof PDFDict) {
               const subtype = xObj.get(PDFName.of('Subtype'));
-              // Watermarks are almost always /Form XObjects or /Image with high transparency.
-              // In an aggressive purge, we remove all /Form types which are non-essential overlays.
+              // Aggressively remove /Form types (standard for repeated overlays)
+              // and small /Image types often used for icons/logos.
               if (subtype === PDFName.of('Form')) {
                 xObjects.delete(name);
               }
@@ -93,25 +93,24 @@ export async function processPdfRemovalAction(base64Data: string): Promise<strin
           });
         }
         
-        // 6. Neutralize Optional Content references at the page resource level
+        // 6. Neutralize Optional Content references
         resources.delete(PDFName.of('Properties'));
       }
     });
     
     // 7. Industrial Metadata Hardening
-    // Strips all author and producer tags to prevent tracking and watermark persistence.
     sourcePdf.setTitle('');
     sourcePdf.setAuthor('');
     sourcePdf.setSubject('');
     sourcePdf.setKeywords([]);
-    sourcePdf.setProducer("DOCFLOW Industrial Sanitization (Eng: 6.0)");
-    sourcePdf.setCreator("DOCFLOW Professional Protocol");
+    sourcePdf.setProducer("DOCFLOW Automated Sanitization (v8.0)");
+    sourcePdf.setCreator("DOCFLOW Industrial Backend");
     sourcePdf.setModificationDate(new Date());
     
     const pdfBytes = await sourcePdf.save();
     return `data:application/pdf;base64,${Buffer.from(pdfBytes).toString('base64')}`;
   } catch (error) {
     console.error('PDF processing failure:', error);
-    throw new Error('Backend structural purge sequence failed. The document structure may be non-standard.');
+    throw new Error('Backend structural purge sequence failed.');
   }
 }

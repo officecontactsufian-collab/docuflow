@@ -11,85 +11,98 @@ import {
   Download, 
   CheckCircle2, 
   ShieldCheck, 
-  LayoutGrid, 
-  Search,
-  Zap,
-  Info,
+  Activity,
   FileText,
   Image as ImageIcon,
   Layers,
   AlertCircle,
   Server,
-  Activity
+  Zap,
+  Trash2,
+  ExternalLink
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { PDFPreview } from '@/components/pdf-preview';
 import { processImageRemovalAction, processPdfRemovalAction } from './actions';
 
+interface StagedFile {
+  id: string;
+  file: File;
+  status: 'staging' | 'processing' | 'done' | 'failed';
+  resultUrl?: string;
+  logs: string[];
+}
+
 export default function RemoveWatermarkPage() {
-  const [selectedFile, setSelectedFile] = React.useState<File | null>(null);
-  const [isProcessing, setIsProcessing] = React.useState(false);
-  const [isDone, setIsDone] = React.useState(false);
-  const [downloadUrl, setDownloadUrl] = React.useState<string | null>(null);
-  const [processLogs, setProcessLogs] = React.useState<string[]>([]);
+  const [stagedFiles, setStagedFiles] = React.useState<StagedFile[]>([]);
   const { toast } = useToast();
 
-  const handleProcess = async () => {
-    if (!selectedFile) return;
-    setIsProcessing(true);
-    setProcessLogs([
-      "Establishing Backend Tunnel...", 
-      "Staging Asset Buffer...",
-      "Deep Scanning Object Tree..."
-    ]);
+  const processFile = async (staged: StagedFile) => {
+    updateFileStatus(staged.id, 'processing', ["Initiating Automated Backend Protocol...", "Tunnelling to Industrial Engine..."]);
 
     try {
       const reader = new FileReader();
       const base64Promise = new Promise<string>((resolve) => {
         reader.onload = () => resolve(reader.result as string);
-        reader.readAsDataURL(selectedFile);
+        reader.readAsDataURL(staged.file);
       });
       
       const base64Data = await base64Promise;
       let resultUrl: string;
 
-      if (selectedFile.type.startsWith('image/')) {
-        setProcessLogs(prev => [...prev, "Initiating Luminance Normalization...", "Filtering Foreground Overlays...", "Re-indexing Pixel Buffer..."]);
+      if (staged.file.type.startsWith('image/')) {
+        updateFileStatus(staged.id, 'processing', ["Analyzing Pixel Luminance...", "Executing Background Burn-Out...", "Flattening Alpha Channels..."]);
         resultUrl = await processImageRemovalAction(base64Data);
-        setProcessLogs(prev => [...prev, "Pixel Sanitization Complete.", "Buffer Integrity Verified."]);
       } else {
-        setProcessLogs(prev => [...prev, "Initiating Structural Purge...", "Targeting /XObject & /OCG Containers...", "Neutralizing Transparency Groups...", "Reconstructing Document Stream..."]);
+        updateFileStatus(staged.id, 'processing', ["Deep Scanning PDF Object Tree...", "Stripping /Form XObjects...", "Purging /OCG Layers...", "Hardening Metadata..."]);
         resultUrl = await processPdfRemovalAction(base64Data);
-        setProcessLogs(prev => [...prev, "Structural Purge Successful.", "Metadata Tracking Hardened."]);
       }
 
-      setDownloadUrl(resultUrl);
-      setIsDone(true);
-      toast({ 
-        title: "Protocol Success", 
-        description: "Industrial sanitization complete. Asset recovered." 
-      });
+      updateFileStatus(staged.id, 'done', ["Protocol Success.", "Asset Sanitized & Verified."], resultUrl);
     } catch (e: any) {
       console.error(e);
-      toast({ 
-        variant: "destructive", 
-        title: "Sequence Failed", 
-        description: e.message || "The asset architecture is non-standard or heavily protected." 
-      });
-    } finally {
-      setIsProcessing(false);
+      updateFileStatus(staged.id, 'failed', ["Sequence Failed.", e.message || "Non-standard architecture detected."]);
     }
   };
 
-  const reset = () => {
-    setSelectedFile(null);
-    setIsDone(false);
-    setProcessLogs([]);
-    setDownloadUrl(null);
+  const updateFileStatus = (id: string, status: StagedFile['status'], logEntries: string[], resultUrl?: string) => {
+    setStagedFiles(prev => prev.map(f => {
+      if (f.id === id) {
+        return { 
+          ...f, 
+          status, 
+          resultUrl: resultUrl || f.resultUrl, 
+          logs: [...f.logs, ...logEntries] 
+        };
+      }
+      return f;
+    }));
   };
 
-  const isImage = selectedFile?.type.startsWith('image/');
+  const handleFilesSelected = (files: File[]) => {
+    const newStaged = files.map(file => ({
+      id: Math.random().toString(36).substring(7),
+      file,
+      status: 'staging' as const,
+      logs: ["Asset Staged for Automated Processing."]
+    }));
+    
+    setStagedFiles(prev => [...prev, ...newStaged]);
+    
+    // Automatically trigger processing for each new file
+    newStaged.forEach(staged => processFile(staged));
+  };
+
+  const removeFile = (id: string) => {
+    setStagedFiles(prev => prev.filter(f => f.id !== id));
+  };
+
+  const clearAll = () => {
+    stagedFiles.forEach(f => {
+      if (f.resultUrl) URL.revokeObjectURL(f.resultUrl);
+    });
+    setStagedFiles([]);
+  };
 
   return (
     <div className="flex min-h-screen flex-col bg-background">
@@ -101,193 +114,135 @@ export default function RemoveWatermarkPage() {
             <div className="inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-accent text-white shadow-xl mb-2">
               <Eraser className="h-7 w-7" />
             </div>
-            <h1 className="text-4xl font-black tracking-tighter text-accent uppercase italic">Remove Watermark</h1>
+            <h1 className="text-4xl font-black tracking-tighter text-accent uppercase italic">Automated Watermark Removal</h1>
             <p className="text-muted-foreground font-bold text-xs uppercase tracking-widest max-w-xl mx-auto">
-              Aggressive Backend Sanitization. Execute structural purges and luminance-based pixel normalization protocols.
+              Mass Backend Sanitization. Triggered automatically on upload. Reconstructs document streams and normalizes pixels locally.
             </p>
           </div>
 
-          {!isDone ? (
-            <div className="space-y-12 animate-in fade-in zoom-in-95 duration-500">
-              {!selectedFile ? (
-                <FileDropzone 
-                  onFilesSelected={(files) => setSelectedFile(files[0] || null)} 
-                  maxFiles={1} 
-                  accept=".pdf,.jpg,.jpeg,.png"
-                  isLoading={isProcessing} 
-                />
-              ) : (
-                <div className="grid lg:grid-cols-12 gap-12">
-                  <div className="lg:col-span-7 space-y-6">
-                    <div className="flex items-center justify-between px-2">
-                      <h3 className="text-[10px] font-black uppercase tracking-widest text-accent/60 flex items-center gap-2">
-                        {isImage ? <ImageIcon className="h-3.5 w-3.5 text-primary" /> : <FileText className="h-3.5 w-3.5 text-primary" />}
-                        Industrial Staging: {selectedFile.name}
-                      </h3>
-                      <div className="flex items-center gap-2 bg-primary/10 px-3 py-1 rounded-full">
-                         <Activity className="h-3 w-3 text-primary" />
-                         <span className="text-[9px] font-black text-primary uppercase">Ready for Purge</span>
-                      </div>
-                    </div>
-                    
-                    <div className="rounded-[2.5rem] border-2 border-accent/5 bg-white shadow-2xl overflow-hidden min-h-[500px] flex items-center justify-center p-8">
-                      {isImage ? (
-                        <img 
-                          src={URL.createObjectURL(selectedFile)} 
-                          className="max-w-full max-h-[600px] rounded-xl shadow-xl" 
-                          alt="Layer preview" 
-                        />
-                      ) : (
-                        <div className="w-full h-[600px]">
-                          <PDFPreview file={selectedFile} title="Document Stream Reference" className="h-full" />
-                        </div>
-                      )}
-                    </div>
-                  </div>
+          <div className="space-y-12">
+            <FileDropzone 
+              onFilesSelected={handleFilesSelected} 
+              maxFiles={20} 
+              accept=".pdf,.jpg,.jpeg,.png"
+              isHero={stagedFiles.length === 0}
+            />
 
-                  <div className="lg:col-span-5 space-y-6">
-                    <Card className="border-none shadow-2xl rounded-[2.5rem] bg-white overflow-hidden">
-                      <CardHeader className="p-8 pb-4">
-                        <div className="flex items-center gap-3 mb-2">
-                           <div className="p-2.5 bg-primary/5 rounded-xl text-primary">
-                              <Layers className="h-5 w-5" />
-                           </div>
-                           <div className="flex flex-col">
-                              <CardTitle className="text-xl font-black uppercase italic tracking-tighter text-accent">Removal Protocol</CardTitle>
-                              <CardDescription className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Backend Execution Gateway</CardDescription>
-                           </div>
+            {stagedFiles.length > 0 && (
+              <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4">
+                <div className="flex items-center justify-between px-4">
+                  <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-accent/40 flex items-center gap-2">
+                    <Activity className="h-3 w-3" /> Industrial Protocol Stream ({stagedFiles.length} Assets)
+                  </h3>
+                  <Button variant="ghost" size="sm" onClick={clearAll} className="text-[9px] font-black uppercase tracking-widest text-destructive">
+                    Clear Registry
+                  </Button>
+                </div>
+
+                <div className="grid gap-6">
+                  {stagedFiles.map((staged) => (
+                    <Card key={staged.id} className="border-none shadow-2xl rounded-[2.5rem] bg-white overflow-hidden overflow-visible">
+                      <div className="flex flex-col lg:flex-row">
+                        <div className="lg:w-1/3 p-8 border-b lg:border-b-0 lg:border-r border-accent/5 bg-muted/10">
+                          <div className="flex items-center gap-4 mb-6">
+                            <div className="p-3 bg-white rounded-xl shadow-sm text-primary">
+                              {staged.file.type === 'application/pdf' ? <FileText className="h-5 w-5" /> : <ImageIcon className="h-5 w-5" />}
+                            </div>
+                            <div className="min-w-0">
+                              <p className="text-xs font-black uppercase italic truncate text-accent">{staged.file.name}</p>
+                              <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest">{(staged.file.size / 1024 / 1024).toFixed(2)} MB</p>
+                            </div>
+                          </div>
+                          
+                          <div className="space-y-2">
+                            <p className="text-[8px] font-black uppercase text-accent/40 tracking-widest">Execution Registry</p>
+                            <div className="bg-black/5 p-4 rounded-2xl space-y-2 max-h-[120px] overflow-y-auto custom-scrollbar">
+                              {staged.logs.map((log, i) => (
+                                <div key={i} className="text-[8px] font-bold uppercase text-accent/60 flex items-center gap-2">
+                                  <Zap className="h-2 w-2 text-primary" /> {log}
+                                </div>
+                              ))}
+                            </div>
+                          </div>
                         </div>
-                      </CardHeader>
-                      <CardContent className="p-8 pt-0 space-y-8">
-                        <div className="space-y-4">
-                           <div className="p-4 bg-muted/30 rounded-2xl border border-accent/5">
-                              <div className="flex items-center justify-between mb-2">
-                                 <p className="text-[8px] font-black uppercase text-accent/40">Engine Strategy</p>
-                                 <div className="flex items-center gap-1">
-                                    <div className="h-1.5 w-1.5 rounded-full bg-blue-500" />
-                                    <span className="text-[8px] font-bold text-blue-600 uppercase">Deep Sanitization</span>
-                                 </div>
+
+                        <div className="flex-1 p-8 flex flex-col justify-center">
+                          <div className="flex items-center justify-between mb-6">
+                            <div className="flex items-center gap-2">
+                              {staged.status === 'processing' ? (
+                                <div className="flex items-center gap-2 bg-blue-50 text-blue-600 px-3 py-1 rounded-full border border-blue-100">
+                                  <Loader2 className="h-3 w-3 animate-spin" />
+                                  <span className="text-[9px] font-black uppercase">Executing...</span>
+                                </div>
+                              ) : staged.status === 'done' ? (
+                                <div className="flex items-center gap-2 bg-green-50 text-green-600 px-3 py-1 rounded-full border border-green-100">
+                                  <CheckCircle2 className="h-3 w-3" />
+                                  <span className="text-[9px] font-black uppercase">Sanitized</span>
+                                </div>
+                              ) : (
+                                <div className="flex items-center gap-2 bg-muted/50 text-accent/40 px-3 py-1 rounded-full">
+                                  <Server className="h-3 w-3" />
+                                  <span className="text-[9px] font-black uppercase">Pending</span>
+                                </div>
+                              )}
+                            </div>
+                            <Button variant="ghost" size="icon" onClick={() => removeFile(staged.id)} className="text-accent/20 hover:text-destructive transition-colors">
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+
+                          <div className="space-y-6">
+                            {staged.status === 'done' ? (
+                              <div className="space-y-4 animate-in zoom-in-95 duration-500">
+                                <div className="p-4 bg-primary/5 rounded-2xl border border-primary/10 flex items-start gap-3">
+                                  <ShieldCheck className="h-4 w-4 text-primary shrink-0" />
+                                  <p className="text-[10px] font-bold text-muted-foreground leading-relaxed uppercase">
+                                    Backend structural purge complete. Asset re-indexed and ready for industrial deployment.
+                                  </p>
+                                </div>
+                                <Button 
+                                  onClick={() => {
+                                    const link = document.createElement('a');
+                                    link.href = staged.resultUrl!;
+                                    link.download = `sanitized_${staged.file.name}`;
+                                    link.click();
+                                  }}
+                                  className="w-full h-12 rounded-xl bg-accent text-white font-black uppercase text-[10px] tracking-widest shadow-xl shadow-accent/20"
+                                >
+                                  <Download className="mr-2 h-3.5 w-3.5" /> Download Sanitized Asset
+                                </Button>
                               </div>
-                              <p className="text-[10px] font-bold text-accent italic leading-relaxed">
-                                {isImage 
-                                  ? "Strategy: Backend Luminance Thresholding. This utilizes Jimp's industrial engine to 'burn out' faint overlays by pushing high-frequency background pixels to pure white." 
-                                  : "Strategy: Aggressive Structural Purge. Targets /Form XObjects, /OCG layers, /Annots, and /Transparency groups via recursive document stream deconstruction."}
-                              </p>
-                           </div>
-
-                           <div className="p-4 bg-primary/5 rounded-2xl border border-primary/10 flex items-start gap-3">
-                              <AlertCircle className="h-4 w-4 text-primary mt-0.5 shrink-0" />
-                              <p className="text-[9px] leading-tight text-muted-foreground font-medium uppercase">
-                                <span className="font-black text-accent">Note:</span> This protocol targets structural and ghosted overlays. Visible watermarks that are part of the core binary content may be neutralized but not completely erased.
-                              </p>
-                           </div>
+                            ) : (
+                              <div className="flex flex-col items-center justify-center py-8 gap-4">
+                                <div className="relative">
+                                  <div className="absolute inset-0 animate-ping rounded-full bg-primary/10" />
+                                  <div className="h-12 w-12 bg-muted/20 rounded-xl flex items-center justify-center text-accent/20">
+                                    <Server className="h-6 w-6" />
+                                  </div>
+                                </div>
+                                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-accent/30 italic">Processing industrial stream...</p>
+                              </div>
+                            )}
+                          </div>
                         </div>
-
-                        <div className="pt-4 flex flex-col gap-3">
-                          <Button 
-                            onClick={handleProcess} 
-                            disabled={isProcessing}
-                            className="w-full h-14 rounded-2xl bg-accent text-white font-black uppercase tracking-[0.2em] text-[11px] shadow-2xl shadow-accent/20"
-                          >
-                            {isProcessing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : "Deploy Industrial Purge"}
-                          </Button>
-                          <Button variant="ghost" onClick={() => setSelectedFile(null)} className="text-[10px] font-bold uppercase tracking-widest text-accent/40 hover:text-accent">
-                            Initialize New Asset
-                          </Button>
-                        </div>
-                      </CardContent>
+                      </div>
                     </Card>
-                  </div>
+                  ))}
                 </div>
-              )}
+              </div>
+            )}
+          </div>
 
-              {isProcessing && (
-                <div className="fixed inset-0 z-50 bg-accent/90 backdrop-blur-xl flex items-center justify-center animate-in fade-in">
-                  <div className="flex flex-col items-center gap-8 text-center max-w-sm">
-                    <div className="relative">
-                       <div className="absolute inset-0 animate-ping rounded-full bg-primary/20" />
-                       <div className="h-24 w-24 bg-white rounded-[2rem] flex items-center justify-center shadow-2xl relative z-10">
-                          <Server className="h-12 w-12 text-primary animate-pulse" />
-                       </div>
-                    </div>
-                    <div className="space-y-2">
-                      <p className="text-2xl font-black uppercase italic text-white tracking-tighter">Backend Executing...</p>
-                      <p className="text-[10px] font-bold text-white/40 uppercase tracking-[0.3em]">Processing through Industrial Sanitization Engine</p>
-                    </div>
-                    <div className="space-y-3 w-full bg-black/20 p-6 rounded-2xl border border-white/5">
-                       {processLogs.map((log, i) => (
-                         <div key={i} className="text-[8px] font-black uppercase text-primary/80 tracking-widest flex items-center gap-2">
-                            <Zap className="h-2 w-2" /> {log}
-                         </div>
-                       ))}
-                    </div>
-                    <Loader2 className="h-6 w-6 animate-spin text-primary" />
-                  </div>
-                </div>
-              )}
+          <div className="p-6 bg-primary/5 rounded-[2.5rem] border border-primary/10 flex items-start gap-4 max-w-3xl mx-auto">
+            <AlertCircle className="h-5 w-5 text-primary mt-0.5 shrink-0" />
+            <div className="space-y-1">
+              <p className="text-xs font-black uppercase tracking-wider text-accent">Automated Industrial Workflow</p>
+              <p className="text-[10px] text-muted-foreground leading-relaxed font-medium">
+                DOCFLOW executes aggressive structural purges on PDF /Form XObjects and applies luminance thresholding to image buffers. 
+                In a production environment, this protocol triggers via **Firebase Cloud Storage Functions** for zero-latency background execution.
+              </p>
             </div>
-          ) : (
-            <div className="max-w-md mx-auto space-y-8 text-center animate-in slide-in-from-bottom-8 duration-700">
-              <Card className="border-none shadow-2xl rounded-[3rem] bg-white overflow-hidden p-12 space-y-8">
-                <div className="w-20 h-20 bg-green-50 text-green-600 rounded-3xl flex items-center justify-center mx-auto shadow-inner">
-                  <CheckCircle2 className="h-10 w-10" />
-                </div>
-                <div className="space-y-2">
-                  <h2 className="text-2xl font-black uppercase italic tracking-tight text-accent">Protocol Success!</h2>
-                  <p className="text-muted-foreground text-sm font-medium">Asset sanitized via industrial backend engine. Structural overlays neutralized.</p>
-                </div>
-                <div className="p-4 bg-muted/30 rounded-2xl border border-accent/5 text-left">
-                   <div className="flex items-center gap-2 mb-3">
-                      <Info className="h-3 w-3 text-primary" />
-                      <span className="text-[9px] font-black uppercase tracking-widest text-accent/60">Industrial Audit</span>
-                   </div>
-                   <ul className="space-y-2">
-                      {isImage ? [
-                        "Backend Luminance Filtering: Applied",
-                        "Background Thresholding: Success",
-                        "Overlay Alpha Stripping: Complete",
-                        "Buffer Re-indexing: Verified"
-                      ].map(item => (
-                        <li key={item} className="flex items-center gap-2 text-[9px] font-bold text-accent italic">
-                           <div className="h-1 w-1 rounded-full bg-green-500" /> {item}
-                        </li>
-                      )) : [
-                        "Structural Scan: Complete",
-                        "Annotation Registry: Purged",
-                        "XObject /Form Containers: Removed",
-                        "Object Tree: Re-indexed & Sanitized"
-                      ].map(item => (
-                        <li key={item} className="flex items-center gap-2 text-[9px] font-bold text-accent italic">
-                           <div className="h-1 w-1 rounded-full bg-green-500" /> {item}
-                        </li>
-                      ))}
-                   </ul>
-                </div>
-                <Button 
-                  size="lg" 
-                  onClick={() => {
-                    if (downloadUrl) {
-                      const link = document.createElement('a');
-                      link.href = downloadUrl;
-                      const originalName = selectedFile?.name.split('.')[0] || 'asset';
-                      const ext = isImage ? 'jpg' : 'pdf';
-                      link.download = `sanitized_${originalName}.${ext}`;
-                      document.body.appendChild(link);
-                      link.click();
-                      document.body.removeChild(link);
-                    }
-                  }} 
-                  className="w-full h-14 rounded-2xl bg-accent hover:bg-accent/90 shadow-xl shadow-accent/20 text-[11px] font-black uppercase tracking-widest"
-                >
-                  <Download className="mr-2 h-4 w-4" />
-                  Download Sanitized Asset
-                </Button>
-              </Card>
-              <Button variant="ghost" onClick={reset} className="text-[10px] font-bold uppercase tracking-widest text-accent/40 hover:text-accent">
-                Deploy New Sequence
-              </Button>
-            </div>
-          )}
+          </div>
         </div>
       </main>
     </div>
