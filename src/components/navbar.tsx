@@ -1,4 +1,3 @@
-
 "use client"
 
 import Link from 'next/link';
@@ -34,29 +33,23 @@ import {
   DropdownMenuSeparator,
   DropdownMenuLabel,
 } from '@/components/ui/dropdown-menu';
-import { useUser, useAuth, useFirestore } from '@/firebase';
+import { useUser, useAuth, useFirestore, useDoc, useMemoFirebase } from '@/firebase';
 import { signOut } from 'firebase/auth';
-import { doc, getDoc } from 'firebase/firestore';
+import { doc } from 'firebase/firestore';
 import * as React from 'react';
 
 export function Navbar() {
   const { user, isUserLoading } = useUser();
   const auth = useAuth();
   const firestore = useFirestore();
-  const [isAdmin, setIsAdmin] = React.useState(false);
+  
+  const adminRef = useMemoFirebase(() => {
+    if (!firestore || !user) return null;
+    return doc(firestore, 'roles_admin', user.uid);
+  }, [firestore, user]);
 
-  React.useEffect(() => {
-    async function checkAdmin() {
-      if (user) {
-        const adminRef = doc(firestore, 'roles_admin', user.uid);
-        const adminSnap = await getDoc(adminRef);
-        setIsAdmin(adminSnap.exists());
-      } else {
-        setIsAdmin(false);
-      }
-    }
-    checkAdmin();
-  }, [user, firestore]);
+  const { data: adminData } = useDoc(adminRef);
+  const isAdmin = !!adminData;
 
   const handleLogout = () => {
     signOut(auth);

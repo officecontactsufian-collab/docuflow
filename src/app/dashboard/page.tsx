@@ -48,19 +48,21 @@ export default function DashboardPage() {
 
   const { data: adminData, isLoading: isAdminLoading } = useDoc(adminRef);
 
+  // Re-verify and redirect if not admin
   React.useEffect(() => {
     if (!isUserLoading && !user) {
       router.push('/login');
       return;
     }
     
-    // Strict admin check - redirect if confirmed not an admin
-    if (!isAdminLoading && !isUserLoading && user && !adminData) {
+    // Redirect if we are sure the user is not an admin
+    if (user && !isUserLoading && !isAdminLoading && !adminData) {
+      // Only redirect if we checked and found no admin document
       router.push('/');
     }
   }, [user, isUserLoading, adminData, isAdminLoading, router]);
 
-  if (isUserLoading || isAdminLoading || !adminData) {
+  if (isUserLoading || isAdminLoading || (!adminData && user)) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-muted/30">
         <div className="text-center space-y-4">
@@ -70,6 +72,8 @@ export default function DashboardPage() {
       </div>
     );
   }
+
+  if (!user || !adminData) return null;
 
   return (
     <div className="flex min-h-screen flex-col bg-muted/20">
