@@ -1,3 +1,4 @@
+
 "use client"
 
 import * as React from 'react';
@@ -15,15 +16,19 @@ import {
   Zap,
   Trash2,
   Server,
-  Layers
+  Layers,
+  Eye,
+  ArrowRight
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { Card } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { processBackgroundRemovalAction } from './actions';
+import { cn } from '@/lib/utils';
 
 interface StagedFile {
   id: string;
   file: File;
+  originalUrl: string;
   status: 'staging' | 'processing' | 'done' | 'failed';
   resultUrl?: string;
   logs: string[];
@@ -77,6 +82,7 @@ export default function RemoveBackgroundPage() {
     const newStaged = files.map(file => ({
       id: Math.random().toString(36).substring(7),
       file,
+      originalUrl: URL.createObjectURL(file),
       status: 'staging' as const,
       logs: ["Asset Staged for Automated Isolation."]
     }));
@@ -86,8 +92,18 @@ export default function RemoveBackgroundPage() {
   };
 
   const removeFile = (id: string) => {
-    setStagedFiles(prev => prev.filter(f => f.id !== id));
+    setStagedFiles(prev => {
+      const file = prev.find(f => f.id === id);
+      if (file) URL.revokeObjectURL(file.originalUrl);
+      return prev.filter(f => f.id !== id);
+    });
   };
+
+  React.useEffect(() => {
+    return () => {
+      stagedFiles.forEach(f => URL.revokeObjectURL(f.originalUrl));
+    };
+  }, []);
 
   return (
     <div className="flex min-h-screen flex-col bg-background">
@@ -114,19 +130,19 @@ export default function RemoveBackgroundPage() {
             />
 
             {stagedFiles.length > 0 && (
-              <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4">
+              <div className="space-y-10 animate-in fade-in slide-in-from-bottom-4">
                 <div className="flex items-center justify-between px-4">
                   <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-accent/40 flex items-center gap-2">
                     <Activity className="h-3 w-3" /> Isolation Stream ({stagedFiles.length} Assets)
                   </h3>
                 </div>
 
-                <div className="grid gap-6">
+                <div className="grid gap-10">
                   {stagedFiles.map((staged) => (
-                    <Card key={staged.id} className="border-none shadow-2xl rounded-[2.5rem] bg-white overflow-hidden group">
-                      <div className="flex flex-col lg:flex-row">
-                        <div className="lg:w-1/3 p-8 border-b lg:border-b-0 lg:border-r border-accent/5 bg-muted/10">
-                          <div className="flex items-center gap-4 mb-6">
+                    <Card key={staged.id} className="border-none shadow-2xl rounded-[3rem] bg-white overflow-hidden group border-2 border-transparent hover:border-primary/10 transition-all">
+                      <div className="flex flex-col">
+                        <div className="p-6 border-b border-accent/5 flex items-center justify-between bg-muted/5">
+                          <div className="flex items-center gap-4">
                             <div className="p-3 bg-white rounded-xl shadow-sm text-primary">
                               <ImageIcon className="h-5 w-5" />
                             </div>
@@ -135,53 +151,103 @@ export default function RemoveBackgroundPage() {
                               <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest">{(staged.file.size / 1024 / 1024).toFixed(2)} MB</p>
                             </div>
                           </div>
-                          
-                          <div className="space-y-2">
-                            <p className="text-[8px] font-black uppercase text-accent/40 tracking-widest">Process Log</p>
-                            <div className="bg-black/5 p-4 rounded-2xl space-y-2 max-h-[140px] overflow-y-auto custom-scrollbar">
-                              {staged.logs.map((log, i) => (
-                                <div key={i} className="text-[8px] font-bold uppercase text-accent/60 flex items-center gap-2">
-                                  <Zap className="h-2 w-2 text-primary" /> {log}
+                          <div className="flex items-center gap-3">
+                            {staged.status === 'processing' ? (
+                              <div className="flex items-center gap-2 bg-blue-50 text-blue-600 px-3 py-1 rounded-full border border-blue-100">
+                                <Loader2 className="h-3 w-3 animate-spin" />
+                                <span className="text-[9px] font-black uppercase">Isolating...</span>
+                              </div>
+                            ) : staged.status === 'done' ? (
+                              <div className="flex items-center gap-2 bg-green-50 text-green-600 px-3 py-1 rounded-full border border-green-100">
+                                <CheckCircle2 className="h-3 w-3" />
+                                <span className="text-[9px] font-black uppercase">Success</span>
+                              </div>
+                            ) : staged.status === 'failed' ? (
+                              <div className="flex items-center gap-2 bg-destructive/10 text-destructive px-3 py-1 rounded-full">
+                                <span className="text-[9px] font-black uppercase">Failed</span>
+                              </div>
+                            ) : null}
+                            <Button variant="ghost" size="icon" onClick={() => removeFile(staged.id)} className="h-10 w-10 rounded-xl text-accent/20 hover:text-destructive hover:bg-destructive/5 transition-all">
+                              <Trash2 className="h-5 w-5" />
+                            </Button>
+                          </div>
+                        </div>
+
+                        <div className="grid lg:grid-cols-2 gap-px bg-accent/5">
+                          {/* Original Image */}
+                          <div className="p-8 bg-white space-y-6">
+                            <div className="flex items-center justify-between">
+                              <h4 className="text-[10px] font-black uppercase tracking-widest text-accent/40 flex items-center gap-2">
+                                <Eye className="h-3 w-3" /> Source Asset
+                              </h4>
+                            </div>
+                            <div className="aspect-square rounded-3xl overflow-hidden bg-muted/20 border border-accent/5 relative shadow-inner group/preview">
+                              <img 
+                                src={staged.originalUrl} 
+                                className="w-full h-full object-contain p-4" 
+                                alt="Original"
+                              />
+                              <div className="absolute inset-0 bg-accent/5 opacity-0 group-hover/preview:opacity-100 transition-opacity pointer-events-none" />
+                            </div>
+                          </div>
+
+                          {/* Result Image */}
+                          <div className="p-8 bg-white space-y-6 border-l border-accent/5">
+                            <div className="flex items-center justify-between">
+                              <h4 className="text-[10px] font-black uppercase tracking-widest text-accent/40 flex items-center gap-2">
+                                <CheckCircle2 className="h-3 w-3" /> Sanitized Result
+                              </h4>
+                            </div>
+                            <div className={cn(
+                              "aspect-square rounded-3xl overflow-hidden border border-accent/5 relative shadow-inner group/preview",
+                              staged.status === 'done' ? "bg-[url('https://placehold.co/20x20/F0F0F0/E0E0E0?text=')] bg-repeat" : "bg-muted/10"
+                            )}>
+                              {staged.status === 'done' ? (
+                                <img 
+                                  src={staged.resultUrl} 
+                                  className="w-full h-full object-contain p-4 animate-in zoom-in-95 duration-500" 
+                                  alt="Result"
+                                />
+                              ) : staged.status === 'processing' ? (
+                                <div className="absolute inset-0 flex flex-col items-center justify-center gap-4">
+                                  <div className="relative">
+                                    <div className="absolute inset-0 animate-ping rounded-full bg-primary/20" />
+                                    <div className="h-16 w-16 bg-white rounded-2xl flex items-center justify-center shadow-xl relative z-10">
+                                      <Server className="h-8 w-8 text-primary animate-pulse" />
+                                    </div>
+                                  </div>
+                                  <p className="text-[10px] font-black uppercase tracking-[0.3em] text-accent/40 italic">Executing Backend Tunnel...</p>
                                 </div>
-                              ))}
+                              ) : (
+                                <div className="absolute inset-0 flex items-center justify-center opacity-10">
+                                  <ImageIcon className="h-20 w-20" />
+                                </div>
+                              )}
                             </div>
                           </div>
                         </div>
 
-                        <div className="flex-1 p-8 flex flex-col justify-center">
-                          <div className="flex items-center justify-between mb-6">
-                            <div className="flex items-center gap-2">
-                              {staged.status === 'processing' ? (
-                                <div className="flex items-center gap-2 bg-blue-50 text-blue-600 px-3 py-1 rounded-full border border-blue-100">
-                                  <Loader2 className="h-3 w-3 animate-spin" />
-                                  <span className="text-[9px] font-black uppercase">Isolating Foreground...</span>
+                        <div className="p-8 bg-muted/10 grid lg:grid-cols-2 gap-8 border-t border-accent/5">
+                          <div className="space-y-3">
+                            <p className="text-[8px] font-black uppercase text-accent/40 tracking-widest">Process Audit Log</p>
+                            <div className="bg-black/5 p-5 rounded-3xl space-y-2 max-h-[160px] overflow-y-auto custom-scrollbar border border-accent/5">
+                              {staged.logs.map((log, i) => (
+                                <div key={i} className="text-[9px] font-bold uppercase text-accent/60 flex items-center gap-3">
+                                  <Zap className="h-2.5 w-2.5 text-primary" /> {log}
                                 </div>
-                              ) : staged.status === 'done' ? (
-                                <div className="flex items-center gap-2 bg-green-50 text-green-600 px-3 py-1 rounded-full border border-green-100">
-                                  <CheckCircle2 className="h-3 w-3" />
-                                  <span className="text-[9px] font-black uppercase">Isolation Complete</span>
-                                </div>
-                              ) : (
-                                <div className="flex items-center gap-2 bg-muted/50 text-accent/40 px-3 py-1 rounded-full">
-                                  <Server className="h-3 w-3" />
-                                  <span className="text-[9px] font-black uppercase">Pending Command</span>
-                                </div>
-                              )}
+                              ))}
                             </div>
-                            <Button variant="ghost" size="icon" onClick={() => removeFile(staged.id)} className="h-8 w-8 text-accent/20 hover:text-destructive transition-colors">
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
                           </div>
 
-                          <div className="space-y-6">
+                          <div className="flex flex-col justify-end gap-4">
                             {staged.status === 'done' ? (
-                              <div className="space-y-4 animate-in zoom-in-95 duration-500">
-                                <div className="p-5 bg-primary/5 rounded-2xl border border-primary/10 flex items-start gap-3">
-                                  <ShieldCheck className="h-5 w-5 text-primary shrink-0" />
+                              <div className="space-y-4">
+                                <div className="p-5 bg-primary/5 rounded-[2rem] border border-primary/10 flex items-start gap-4">
+                                  <ShieldCheck className="h-6 w-6 text-primary shrink-0" />
                                   <div className="space-y-1">
-                                    <p className="text-[10px] font-black text-accent uppercase tracking-wider">Asset Sanitized</p>
-                                    <p className="text-[9px] font-bold text-muted-foreground leading-relaxed uppercase">
-                                      Background frequency removed. PNG Alpha-channel verified.
+                                    <p className="text-xs font-black text-accent uppercase tracking-wider italic">Asset Verified</p>
+                                    <p className="text-[10px] font-bold text-muted-foreground leading-relaxed uppercase tracking-tight">
+                                      Background removal protocol complete. Alpha-channel transparency embedded.
                                     </p>
                                   </div>
                                 </div>
@@ -192,22 +258,23 @@ export default function RemoveBackgroundPage() {
                                     link.download = `isolated_${staged.file.name.split('.')[0]}.png`;
                                     link.click();
                                   }}
-                                  className="w-full h-14 rounded-2xl bg-accent text-white font-black uppercase text-[11px] tracking-widest shadow-2xl shadow-accent/20"
+                                  className="w-full h-16 rounded-[1.5rem] bg-accent text-white font-black uppercase text-[11px] tracking-widest shadow-2xl shadow-accent/20 hover:scale-[1.01] active:scale-[0.99] transition-all"
                                 >
                                   <Download className="mr-2 h-4 w-4" /> Download Isolated PNG
                                 </Button>
                               </div>
+                            ) : staged.status === 'failed' ? (
+                              <Button 
+                                onClick={() => processFile(staged)}
+                                variant="outline"
+                                className="w-full h-16 rounded-[1.5rem] border-destructive/20 text-destructive font-black uppercase tracking-widest text-[11px]"
+                              >
+                                <RefreshCcw className="mr-2 h-4 w-4" /> Retry Protocol
+                              </Button>
                             ) : (
-                              <div className="flex flex-col items-center justify-center py-12 gap-6">
-                                <div className="relative">
-                                  <div className="absolute inset-0 animate-ping rounded-full bg-primary/10" />
-                                  <div className="h-16 w-16 bg-muted/20 rounded-2xl flex items-center justify-center text-accent/20 shadow-inner">
-                                    <Server className="h-8 w-8" />
-                                  </div>
-                                </div>
-                                <div className="text-center space-y-1">
-                                  <p className="text-[10px] font-black uppercase tracking-[0.3em] text-accent/40 italic animate-pulse">Executing industrial tunnel...</p>
-                                </div>
+                              <div className="flex items-center gap-3 p-6 bg-white/50 rounded-[2rem] border border-accent/5">
+                                <Loader2 className="h-5 w-5 text-primary animate-spin" />
+                                <span className="text-[10px] font-black uppercase tracking-widest text-accent/40 italic">Waiting for backend response...</span>
                               </div>
                             )}
                           </div>
@@ -218,6 +285,22 @@ export default function RemoveBackgroundPage() {
                 </div>
               </div>
             )}
+          </div>
+
+          <div className="p-10 bg-accent/5 rounded-[3rem] border border-accent/10 flex flex-col md:flex-row items-center gap-8 max-w-4xl mx-auto text-center md:text-left">
+            <div className="p-5 bg-white rounded-3xl shadow-xl">
+               <ShieldCheck className="h-8 w-8 text-primary" />
+            </div>
+            <div className="space-y-3">
+              <p className="text-sm font-black uppercase tracking-widest text-accent italic flex items-center justify-center md:justify-start gap-2">
+                Industrial Chroma-Keying Sequence <ArrowRight className="h-3 w-3 text-primary" />
+              </p>
+              <p className="text-[11px] text-muted-foreground leading-relaxed font-bold uppercase tracking-tight max-w-2xl">
+                DOCFLOW executes backend-driven pixel isolation using chroma-keying logic. 
+                The engine samples the primary background frequencies and performs color-distance thresholding 
+                to strip the background while preserving foreground structural integrity.
+              </p>
+            </div>
           </div>
         </div>
       </main>
