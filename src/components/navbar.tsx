@@ -171,7 +171,7 @@ export function Navbar() {
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="sm" className="h-8 rounded-lg text-[9px] font-black uppercase tracking-widest gap-2 bg-accent/5">
                   <UserIcon className="h-3 w-3" />
-                  <span className="hidden sm:inline">Admin</span>
+                  <span className="hidden sm:inline">{isAdmin ? 'Admin' : 'User'}</span>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-48 rounded-xl bg-white shadow-2xl border-accent/5">
