@@ -18,7 +18,8 @@ import {
   Server,
   Layers,
   Eye,
-  ArrowRight
+  ArrowRight,
+  RefreshCcw
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent } from '@/components/ui/card';
@@ -43,8 +44,9 @@ export default function RemoveBackgroundPage() {
 
     try {
       const reader = new FileReader();
-      const base64Promise = new Promise<string>((resolve) => {
+      const base64Promise = new Promise<string>((resolve, reject) => {
         reader.onload = () => resolve(reader.result as string);
+        reader.onerror = (e) => reject(e);
         reader.readAsDataURL(staged.file);
       });
       
@@ -58,9 +60,23 @@ export default function RemoveBackgroundPage() {
       
       const resultUrl = await processBackgroundRemovalAction(base64Data);
       updateFileStatus(staged.id, 'done', ["Isolation Success.", "Asset Sanitized & Reconstructed."], resultUrl);
+      
+      toast({
+        title: "Protocol Success",
+        description: `Background isolated for ${staged.file.name}.`,
+      });
     } catch (e: any) {
       console.error(e);
-      updateFileStatus(staged.id, 'failed', ["Sequence Failed.", e.message || "Non-standard pixel buffer detected."]);
+      let errorMsg = "Non-standard pixel buffer detected.";
+      if (e.message?.includes('Body exceeded')) {
+        errorMsg = "File size exceeds processing limits. Try a smaller asset.";
+      }
+      updateFileStatus(staged.id, 'failed', ["Sequence Failed.", errorMsg]);
+      toast({
+        variant: "destructive",
+        title: "Processing Error",
+        description: errorMsg,
+      });
     }
   };
 
