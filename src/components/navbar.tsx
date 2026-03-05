@@ -25,7 +25,8 @@ import {
   LogOut,
   User as UserIcon,
   Settings,
-  Layout
+  Layout,
+  Eraser
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -82,6 +83,7 @@ export function Navbar() {
         { href: "/protect", icon: ShieldCheck, title: "Privacy Shield", desc: "Hardened metadata" },
         { href: "/protect?mode=unlock", icon: Unlock, title: "Unlock", desc: "Remove restrictions" },
         { href: "/watermark", icon: Type, title: "Watermark", desc: "Add text overlays" },
+        { href: "/remove-watermark", icon: Eraser, title: "Remove Watermark", desc: "Strip overlays" },
         { href: "/sign", icon: Signature, title: "Digital Sign", desc: "Apply signatures" },
       ]
     }

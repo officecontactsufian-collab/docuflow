@@ -24,7 +24,8 @@ import {
   Hash,
   Crop,
   FilePenLine,
-  EyeOff
+  EyeOff,
+  Eraser
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
@@ -72,7 +73,7 @@ export default function Home() {
         { title: "Privacy Shield", desc: "Permanent metadata and tracking erasure.", icon: ShieldCheck, href: "/protect" },
         { title: "Unlock PDF", desc: "Recover and strip document restrictions.", icon: Unlock, href: "/protect?mode=unlock" },
         { title: "Digital Sign", desc: "Apply secure electronic signatures.", icon: Signature, href: "/sign" },
-        { title: "Sanitize PDF", desc: "Complete structural anonymization.", icon: EyeOff, href: "/sanitize" },
+        { title: "Remove Watermark", desc: "Structural cleanup of overlay layers.", icon: Eraser, href: "/remove-watermark" },
       ]
     }
   ];
@@ -152,7 +153,7 @@ export default function Home() {
 
         <section className="py-20 bg-background relative overflow-hidden">
           <div className="container mx-auto px-6">
-            <div className="text-center mb-20 space-y-3">
+            <div className="text-center mb-20 space-3">
               <div className="section-label mx-auto">
                 <Layers className="h-3 w-3 text-primary" />
                 <span>Operational Flow</span>
