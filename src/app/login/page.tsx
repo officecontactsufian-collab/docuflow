@@ -18,13 +18,29 @@ import {
   initiateEmailSignIn, 
   initiateEmailSignUp, 
   initiateAnonymousSignIn,
+  initiateGoogleSignIn,
   setDocumentNonBlocking
 } from '@/firebase';
-import { FileText, Loader2, ShieldCheck, Zap, User, Mail, Lock, KeyRound, Check, Globe, ChevronDown, ArrowRight, LogOut } from 'lucide-react';
+import { 
+  FileText, 
+  Loader2, 
+  ShieldCheck, 
+  Zap, 
+  User, 
+  Mail, 
+  Lock, 
+  KeyRound, 
+  Check, 
+  Globe, 
+  ChevronDown, 
+  ArrowRight, 
+  LogOut,
+  Chrome
+} from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { countryCodes } from '@/lib/country-codes';
 import { doc, serverTimestamp } from 'firebase/firestore';
-import { signOut } from 'firebase/auth';
+import { signOut, signInWithEmailAndPassword } from 'firebase/auth';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -55,7 +71,6 @@ export default function LoginPage() {
   // Handle Post-Auth Registration & Administrative Elevation
   React.useEffect(() => {
     if (user && !isUserLoading && firestore) {
-      // 1. Establish General User Profile
       const userRef = doc(firestore, 'users', user.uid);
       const profileData = {
         id: user.uid,
@@ -69,7 +84,6 @@ export default function LoginPage() {
       
       setDocumentNonBlocking(userRef, profileData, { merge: true });
 
-      // 2. Handle Master Admin Marker
       if (user.email === 'office.contact.sufian@gmail.com') {
         const adminRef = doc(firestore, 'roles_admin', user.uid);
         const adminData = {
@@ -82,15 +96,35 @@ export default function LoginPage() {
         setDocumentNonBlocking(adminRef, adminData, { merge: true });
       }
       
-      // Stop automatic redirect - User must now click a button to enter
       setIsLoading(false);
     }
   }, [user, isUserLoading, firestore, fullName]);
 
-  const handleEmailSignIn = (e: React.FormEvent) => {
+  const handleEmailSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    initiateEmailSignIn(auth, email, password);
+    
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+    } catch (error: any) {
+      console.error("Login error:", error);
+      setIsLoading(false);
+      
+      // Intelligent first-time user guidance
+      if (error.code === 'auth/user-not-found' || error.code === 'auth/invalid-credential') {
+        toast({
+          variant: "destructive",
+          title: "Account Not Found",
+          description: "This looks like your first time. Please use the 'Create Account' tab to establish your workspace identity.",
+        });
+      } else {
+        toast({
+          variant: "destructive",
+          title: "Authentication Failed",
+          description: "Invalid credentials. Please verify your email and password.",
+        });
+      }
+    }
   };
 
   const handleEmailSignUp = (e: React.FormEvent) => {
@@ -105,6 +139,11 @@ export default function LoginPage() {
     }
     setIsLoading(true);
     initiateEmailSignUp(auth, email, password);
+  };
+
+  const handleGoogleSignIn = () => {
+    setIsLoading(true);
+    initiateGoogleSignIn(auth);
   };
 
   const handleQuickStart = () => {
@@ -232,13 +271,20 @@ export default function LoginPage() {
                       <Button type="submit" className="w-full h-12 rounded-xl bg-accent text-white font-black uppercase tracking-widest text-[10px] shadow-xl shadow-accent/20" disabled={isLoading}>
                         {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : "Authenticate Session"}
                       </Button>
+                      
                       <div className="relative w-full py-2">
                         <div className="absolute inset-0 flex items-center"><span className="w-full border-t border-accent/5"></span></div>
-                        <div className="relative flex justify-center text-[9px] uppercase font-black tracking-[0.3em]"><span className="bg-white px-3 text-accent/30 italic">High-Fidelity Gateway</span></div>
+                        <div className="relative flex justify-center text-[9px] uppercase font-black tracking-[0.3em]"><span className="bg-white px-3 text-accent/30 italic">Professional Handshake</span></div>
                       </div>
-                      <Button type="button" variant="outline" className="w-full h-12 rounded-xl border-primary/20 hover:bg-primary/5 text-primary font-black uppercase tracking-widest text-[10px]" onClick={handleQuickStart} disabled={isLoading}>
-                        <Zap className="mr-2 h-4 w-4 fill-current" /> Initialize Anonymous Protocol
-                      </Button>
+
+                      <div className="grid grid-cols-2 gap-3">
+                        <Button type="button" variant="outline" className="h-12 rounded-xl border-accent/10 hover:bg-accent/5 text-accent font-black uppercase tracking-widest text-[9px]" onClick={handleGoogleSignIn} disabled={isLoading}>
+                          <Chrome className="mr-2 h-3.5 w-3.5" /> Google
+                        </Button>
+                        <Button type="button" variant="outline" className="h-12 rounded-xl border-primary/20 hover:bg-primary/5 text-primary font-black uppercase tracking-widest text-[9px]" onClick={handleQuickStart} disabled={isLoading}>
+                          <Zap className="mr-2 h-3.5 w-3.5 fill-current" /> Guest
+                        </Button>
+                      </div>
                     </CardFooter>
                   </form>
                 </Card>
@@ -373,9 +419,12 @@ export default function LoginPage() {
                         </div>
                       </div>
                     </CardContent>
-                    <CardFooter className="pb-8 pt-2">
+                    <CardFooter className="pb-8 pt-2 flex flex-col gap-4">
                       <Button type="submit" className="w-full h-12 rounded-xl bg-accent text-white font-black uppercase tracking-widest text-[10px] shadow-xl shadow-accent/20" disabled={isLoading}>
                         {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : "Establish Professional Identity"}
+                      </Button>
+                      <Button type="button" variant="outline" className="w-full h-12 rounded-xl border-accent/10 hover:bg-accent/5 text-accent font-black uppercase tracking-widest text-[9px]" onClick={handleGoogleSignIn} disabled={isLoading}>
+                        <Chrome className="mr-2 h-3.5 w-3.5" /> Join with Google
                       </Button>
                     </CardFooter>
                   </form>
