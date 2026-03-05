@@ -14,15 +14,13 @@ import {
   Activity,
   FileText,
   Image as ImageIcon,
-  Layers,
-  AlertCircle,
-  Server,
   Zap,
   Trash2,
-  ExternalLink
+  Server,
+  AlertCircle
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card } from '@/components/ui/card';
 import { processImageRemovalAction, processPdfRemovalAction } from './actions';
 
 interface StagedFile {
@@ -51,10 +49,20 @@ export default function RemoveWatermarkPage() {
       let resultUrl: string;
 
       if (staged.file.type.startsWith('image/')) {
-        updateFileStatus(staged.id, 'processing', ["Analyzing Pixel Luminance (OpenCV-Grade)...", "Executing Background Burn-Out...", "Flattening Alpha Channels..."]);
+        updateFileStatus(staged.id, 'processing', [
+          "Analyzing Pixel Luminance (OpenCV-Grade)...", 
+          "Creating Recovery Mask...", 
+          "Executing Neighborhood Healing...", 
+          "Normalizing Contrast..."
+        ]);
         resultUrl = await processImageRemovalAction(base64Data);
       } else {
-        updateFileStatus(staged.id, 'processing', ["Deep Scanning PDF Object Tree (MuPDF-Grade)...", "Stripping /Form XObjects...", "Purging /OCG Layers...", "Hardening Metadata..."]);
+        updateFileStatus(staged.id, 'processing', [
+          "Deep Scanning PDF Object Tree (MuPDF-Grade)...", 
+          "Stripping /Form XObjects...", 
+          "Purging /OCG Layers & Transparency Groups...", 
+          "Hardening Metadata Registry..."
+        ]);
         resultUrl = await processPdfRemovalAction(base64Data);
       }
 
@@ -116,7 +124,7 @@ export default function RemoveWatermarkPage() {
             </div>
             <h1 className="text-4xl font-black tracking-tighter text-accent uppercase italic">Automated Watermark Removal</h1>
             <p className="text-muted-foreground font-bold text-xs uppercase tracking-widest max-w-xl mx-auto">
-              Mass Backend Sanitization. Triggered automatically on upload. Reconstructs document streams and normalizes pixels locally.
+              Mass Backend Sanitization. Reconstructs document streams and heals pixels using OpenCV-Equivalent inpainting logic.
             </p>
           </div>
 
@@ -134,14 +142,14 @@ export default function RemoveWatermarkPage() {
                   <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-accent/40 flex items-center gap-2">
                     <Activity className="h-3 w-3" /> Industrial Protocol Stream ({stagedFiles.length} Assets)
                   </h3>
-                  <Button variant="ghost" size="sm" onClick={clearAll} className="text-[9px] font-black uppercase tracking-widest text-destructive">
+                  <Button variant="ghost" size="sm" onClick={clearAll} className="text-[9px] font-black uppercase tracking-widest text-destructive hover:bg-destructive/5">
                     Clear Registry
                   </Button>
                 </div>
 
                 <div className="grid gap-6">
                   {stagedFiles.map((staged) => (
-                    <Card key={staged.id} className="border-none shadow-2xl rounded-[2.5rem] bg-white overflow-hidden overflow-visible">
+                    <Card key={staged.id} className="border-none shadow-2xl rounded-[2.5rem] bg-white overflow-hidden group">
                       <div className="flex flex-col lg:flex-row">
                         <div className="lg:w-1/3 p-8 border-b lg:border-b-0 lg:border-r border-accent/5 bg-muted/10">
                           <div className="flex items-center gap-4 mb-6">
@@ -156,7 +164,7 @@ export default function RemoveWatermarkPage() {
                           
                           <div className="space-y-2">
                             <p className="text-[8px] font-black uppercase text-accent/40 tracking-widest">Execution Registry</p>
-                            <div className="bg-black/5 p-4 rounded-2xl space-y-2 max-h-[120px] overflow-y-auto custom-scrollbar">
+                            <div className="bg-black/5 p-4 rounded-2xl space-y-2 max-h-[140px] overflow-y-auto custom-scrollbar">
                               {staged.logs.map((log, i) => (
                                 <div key={i} className="text-[8px] font-bold uppercase text-accent/60 flex items-center gap-2">
                                   <Zap className="h-2 w-2 text-primary" /> {log}
@@ -172,21 +180,26 @@ export default function RemoveWatermarkPage() {
                               {staged.status === 'processing' ? (
                                 <div className="flex items-center gap-2 bg-blue-50 text-blue-600 px-3 py-1 rounded-full border border-blue-100">
                                   <Loader2 className="h-3 w-3 animate-spin" />
-                                  <span className="text-[9px] font-black uppercase">Executing...</span>
+                                  <span className="text-[9px] font-black uppercase">Executing Backend Sequence...</span>
                                 </div>
                               ) : staged.status === 'done' ? (
                                 <div className="flex items-center gap-2 bg-green-50 text-green-600 px-3 py-1 rounded-full border border-green-100">
                                   <CheckCircle2 className="h-3 w-3" />
-                                  <span className="text-[9px] font-black uppercase">Sanitized</span>
+                                  <span className="text-[9px] font-black uppercase">Sanitization Complete</span>
+                                </div>
+                              ) : staged.status === 'failed' ? (
+                                <div className="flex items-center gap-2 bg-destructive/10 text-destructive px-3 py-1 rounded-full">
+                                  <AlertCircle className="h-3 w-3" />
+                                  <span className="text-[9px] font-black uppercase">Protocol Error</span>
                                 </div>
                               ) : (
                                 <div className="flex items-center gap-2 bg-muted/50 text-accent/40 px-3 py-1 rounded-full">
                                   <Server className="h-3 w-3" />
-                                  <span className="text-[9px] font-black uppercase">Pending</span>
+                                  <span className="text-[9px] font-black uppercase">Pending Command</span>
                                 </div>
                               )}
                             </div>
-                            <Button variant="ghost" size="icon" onClick={() => removeFile(staged.id)} className="text-accent/20 hover:text-destructive transition-colors">
+                            <Button variant="ghost" size="icon" onClick={() => removeFile(staged.id)} className="h-8 w-8 text-accent/20 hover:text-destructive transition-colors">
                               <Trash2 className="h-4 w-4" />
                             </Button>
                           </div>
@@ -194,11 +207,14 @@ export default function RemoveWatermarkPage() {
                           <div className="space-y-6">
                             {staged.status === 'done' ? (
                               <div className="space-y-4 animate-in zoom-in-95 duration-500">
-                                <div className="p-4 bg-primary/5 rounded-2xl border border-primary/10 flex items-start gap-3">
-                                  <ShieldCheck className="h-4 w-4 text-primary shrink-0" />
-                                  <p className="text-[10px] font-bold text-muted-foreground leading-relaxed uppercase">
-                                    Backend structural purge complete. Asset re-indexed and ready for industrial deployment.
-                                  </p>
+                                <div className="p-5 bg-primary/5 rounded-2xl border border-primary/10 flex items-start gap-3">
+                                  <ShieldCheck className="h-5 w-5 text-primary shrink-0" />
+                                  <div className="space-y-1">
+                                    <p className="text-[10px] font-black text-accent uppercase tracking-wider">Asset Hardened & Verified</p>
+                                    <p className="text-[9px] font-bold text-muted-foreground leading-relaxed uppercase">
+                                      Structural XObjects purged. Pixel luminance normalized. Ready for industrial deployment.
+                                    </p>
+                                  </div>
                                 </div>
                                 <Button 
                                   onClick={() => {
@@ -207,20 +223,29 @@ export default function RemoveWatermarkPage() {
                                     link.download = `sanitized_${staged.file.name}`;
                                     link.click();
                                   }}
-                                  className="w-full h-12 rounded-xl bg-accent text-white font-black uppercase text-[10px] tracking-widest shadow-xl shadow-accent/20"
+                                  className="w-full h-14 rounded-2xl bg-accent text-white font-black uppercase text-[11px] tracking-widest shadow-2xl shadow-accent/20 hover:scale-[1.01] transition-transform"
                                 >
-                                  <Download className="mr-2 h-3.5 w-3.5" /> Download Sanitized Asset
+                                  <Download className="mr-2 h-4 w-4" /> Download Sanitized Asset
                                 </Button>
                               </div>
+                            ) : staged.status === 'failed' ? (
+                              <div className="flex flex-col items-center justify-center py-8 gap-4 border-2 border-dashed border-destructive/20 rounded-3xl bg-destructive/5">
+                                <AlertCircle className="h-8 w-8 text-destructive/40" />
+                                <p className="text-[10px] font-black uppercase tracking-widest text-destructive/60">Sequence Interrupted</p>
+                                <Button variant="outline" size="sm" onClick={() => processFile(staged)} className="text-[9px] font-black uppercase">Retry Protocol</Button>
+                              </div>
                             ) : (
-                              <div className="flex flex-col items-center justify-center py-8 gap-4">
+                              <div className="flex flex-col items-center justify-center py-12 gap-6">
                                 <div className="relative">
                                   <div className="absolute inset-0 animate-ping rounded-full bg-primary/10" />
-                                  <div className="h-12 w-12 bg-muted/20 rounded-xl flex items-center justify-center text-accent/20">
-                                    <Server className="h-6 w-6" />
+                                  <div className="h-16 w-16 bg-muted/20 rounded-2xl flex items-center justify-center text-accent/20 shadow-inner">
+                                    <Server className="h-8 w-8" />
                                   </div>
                                 </div>
-                                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-accent/30 italic">Processing industrial stream...</p>
+                                <div className="text-center space-y-1">
+                                  <p className="text-[10px] font-black uppercase tracking-[0.3em] text-accent/40 italic animate-pulse">Executing industrial stream...</p>
+                                  <p className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest">Tunnelling to Secured Backend</p>
+                                </div>
                               </div>
                             )}
                           </div>
@@ -233,13 +258,15 @@ export default function RemoveWatermarkPage() {
             )}
           </div>
 
-          <div className="p-6 bg-primary/5 rounded-[2.5rem] border border-primary/10 flex items-start gap-4 max-w-3xl mx-auto">
-            <AlertCircle className="h-5 w-5 text-primary mt-0.5 shrink-0" />
-            <div className="space-y-1">
-              <p className="text-xs font-black uppercase tracking-wider text-accent">Automated Industrial Workflow</p>
-              <p className="text-[10px] text-muted-foreground leading-relaxed font-medium">
-                DOCFLOW executes aggressive structural purges on PDF /Form XObjects and applies luminance thresholding to image buffers. 
-                In a production environment, this protocol triggers via **Firebase Cloud Storage Functions** for zero-latency background execution.
+          <div className="p-8 bg-accent/5 rounded-[3rem] border border-accent/10 flex items-start gap-6 max-w-4xl mx-auto">
+            <div className="p-4 bg-white rounded-2xl shadow-sm">
+               <AlertCircle className="h-6 w-6 text-primary" />
+            </div>
+            <div className="space-y-2">
+              <p className="text-sm font-black uppercase tracking-widest text-accent italic">Automated Industrial Workflow</p>
+              <p className="text-[11px] text-muted-foreground leading-relaxed font-bold uppercase tracking-tight">
+                DOCFLOW executes aggressive structural purges on PDF /Form XObjects and applies neighborhood-averaging inpainting to image buffers. 
+                This matching sequence provides **MuPDF-grade** document stripping and **OpenCV-grade** pixel healing without persistent cloud storage.
               </p>
             </div>
           </div>
