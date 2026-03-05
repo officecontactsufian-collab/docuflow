@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from 'react';
+import dynamic from 'next/dynamic';
 import { Navbar } from '@/components/navbar';
 import { useUser, useFirestore, useDoc, useMemoFirebase } from '@/firebase';
 import { useRouter } from 'next/navigation';
@@ -20,26 +21,20 @@ import {
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { 
-  AreaChart, 
-  Area, 
-  XAxis, 
-  YAxis, 
-  CartesianGrid, 
-  Tooltip, 
-  ResponsiveContainer
-} from 'recharts';
 import { doc } from 'firebase/firestore';
 
-const data = [
-  { name: '01 Feb', ops: 400, users: 240 },
-  { name: '05 Feb', ops: 300, users: 139 },
-  { name: '10 Feb', ops: 200, users: 980 },
-  { name: '15 Feb', ops: 278, users: 390 },
-  { name: '20 Feb', ops: 189, users: 480 },
-  { name: '25 Feb', ops: 239, users: 380 },
-  { name: '28 Feb', ops: 349, users: 430 },
-];
+// Dynamically import chart to prevent chunk loading errors in Turbopack/Next.js hydration
+const OperationalChart = dynamic(
+  () => import('@/components/dashboard/operational-chart').then(mod => mod.OperationalChart),
+  { 
+    ssr: false,
+    loading: () => (
+      <div className="w-full h-full flex items-center justify-center bg-accent/5 rounded-2xl animate-pulse">
+        <Activity className="h-8 w-8 text-primary/20" />
+      </div>
+    )
+  }
+);
 
 export default function DashboardPage() {
   const { user, isUserLoading } = useUser();
@@ -82,7 +77,7 @@ export default function DashboardPage() {
       <Navbar />
       
       <main className="flex-1 container mx-auto px-6 py-12">
-        <div className="max-w-7xl mx-auto space-y-10">
+        <div className="max-w-7xl auto space-y-10">
           {/* Header */}
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
             <div className="space-y-2">
@@ -145,34 +140,7 @@ export default function DashboardPage() {
                 </div>
               </CardHeader>
               <CardContent className="p-10 pt-8 h-[400px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={data}>
-                    <defs>
-                      <linearGradient id="colorOps" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.3}/>
-                        <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0}/>
-                      </linearGradient>
-                    </defs>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--accent)/0.05)" />
-                    <XAxis 
-                      dataKey="name" 
-                      axisLine={false} 
-                      tickLine={false} 
-                      tick={{fill: 'hsl(var(--accent)/0.4)', fontSize: 10, fontWeight: 'bold'}}
-                      dy={10}
-                    />
-                    <YAxis 
-                      axisLine={false} 
-                      tickLine={false} 
-                      tick={{fill: 'hsl(var(--accent)/0.4)', fontSize: 10, fontWeight: 'bold'}}
-                    />
-                    <Tooltip 
-                      contentStyle={{borderRadius: '1rem', border: 'none', boxShadow: '0 20px 50px rgba(0,0,0,0.1)'}}
-                      itemStyle={{fontSize: '10px', fontWeight: 'bold', textTransform: 'uppercase'}}
-                    />
-                    <Area type="monotone" dataKey="ops" stroke="hsl(var(--primary))" strokeWidth={4} fillOpacity={1} fill="url(#colorOps)" />
-                  </AreaChart>
-                </ResponsiveContainer>
+                <OperationalChart />
               </CardContent>
             </Card>
 
