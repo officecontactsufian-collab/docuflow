@@ -12,23 +12,23 @@ interface ToolCardProps {
 export function ToolCard({ title, description, icon: Icon, href }: ToolCardProps) {
   return (
     <Link href={href} className="group h-full block">
-      <Card className="tool-card h-full rounded-[2.5rem] p-4 border-none">
-        <CardHeader className="space-y-6 p-6">
+      <Card className="tool-card h-full rounded-2xl p-2 border-none">
+        <CardHeader className="space-y-4 p-4">
           <div className="icon-box">
-            <Icon className="h-6 w-6" />
+            <Icon className="h-5 w-5" />
           </div>
-          <div className="space-y-3">
-            <CardTitle className="text-xl font-black tracking-tight text-accent uppercase italic transition-colors group-hover:text-primary">
+          <div className="space-y-2">
+            <CardTitle className="text-lg font-black tracking-tight text-accent uppercase italic transition-colors group-hover:text-primary">
               {title}
             </CardTitle>
-            <CardDescription className="text-accent/60 text-xs leading-relaxed font-bold uppercase tracking-widest">
+            <CardDescription className="text-accent/60 text-[10px] leading-relaxed font-bold uppercase tracking-widest">
               {description}
             </CardDescription>
           </div>
         </CardHeader>
-        <CardContent className="px-6 pb-6 mt-auto">
-           <div className="flex items-center gap-3 text-[10px] font-black uppercase tracking-[0.25em] transition-all duration-300 text-accent/20 group-hover:text-primary group-hover:translate-x-1">
-             Process Asset <ArrowRight className="h-3 w-3" />
+        <CardContent className="px-4 pb-4 mt-auto">
+           <div className="flex items-center gap-2 text-[8px] font-black uppercase tracking-[0.25em] transition-all duration-300 text-accent/20 group-hover:text-primary group-hover:translate-x-1">
+             Process Asset <ArrowRight className="h-2.5 w-2.5" />
            </div>
         </CardContent>
       </Card>

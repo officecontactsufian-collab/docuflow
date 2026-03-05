@@ -34,7 +34,7 @@
     --border: 175 10% 70%;
     --input: 175 10% 70%;
     --ring: 346 71% 58%;
-    --radius: 1.5rem;
+    --radius: 0.75rem;
   }
 }
 
@@ -58,11 +58,11 @@
   }
 
   .tool-card {
-    @apply relative bg-white/80 backdrop-blur-sm border border-white/40 shadow-sm transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl hover:bg-white hover:border-primary/20;
+    @apply relative bg-white/80 backdrop-blur-sm border border-white/40 shadow-sm transition-all duration-500 hover:-translate-y-1 hover:shadow-2xl hover:bg-white hover:border-primary/20;
   }
 
   .icon-box {
-    @apply w-12 h-12 text-primary flex items-center justify-center transition-transform group-hover:scale-110 group-hover:rotate-3 bg-transparent;
+    @apply w-10 h-10 text-primary flex items-center justify-center transition-transform group-hover:scale-110 group-hover:rotate-3 bg-transparent;
   }
 
   .section-label {
