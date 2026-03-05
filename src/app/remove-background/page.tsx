@@ -1,4 +1,3 @@
-
 "use client"
 
 import * as React from 'react';
@@ -19,10 +18,11 @@ import {
   Layers,
   Eye,
   ArrowRight,
-  RefreshCcw
+  RefreshCcw,
+  Sparkles
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card } from '@/components/ui/card';
 import { processBackgroundRemovalAction } from './actions';
 import { cn } from '@/lib/utils';
 
@@ -40,7 +40,11 @@ export default function RemoveBackgroundPage() {
   const { toast } = useToast();
 
   const processFile = async (staged: StagedFile) => {
-    updateFileStatus(staged.id, 'processing', ["Initiating Background Isolation Protocol...", "Sampling Chroma Key Frequencies..."]);
+    updateFileStatus(staged.id, 'processing', [
+      "Initiating AI Subject Isolation...", 
+      "Analyzing Visual Hierarchy...",
+      "Synthesizing High-Contrast Green Screen..."
+    ]);
 
     try {
       const reader = new FileReader();
@@ -52,24 +56,24 @@ export default function RemoveBackgroundPage() {
       
       const base64Data = await base64Promise;
       
-      updateFileStatus(staged.id, 'processing', [
-        "Analyzing Color Variance...", 
-        "Executing Alpha-Channel Stripping...", 
-        "Executing Edge-Normalization Sequence..."
-      ]);
-      
       const resultUrl = await processBackgroundRemovalAction(base64Data);
-      updateFileStatus(staged.id, 'done', ["Isolation Success.", "Asset Sanitized & Reconstructed."], resultUrl);
+      
+      updateFileStatus(staged.id, 'done', [
+        "AI Subject Isolation Complete.",
+        "Executing Chroma-Keying Sequence...", 
+        "Executing Edge-Normalization...",
+        "Asset Sanitized & Reconstructed."
+      ], resultUrl);
       
       toast({
-        title: "Protocol Success",
-        description: `Background isolated for ${staged.file.name}.`,
+        title: "Isolation Complete",
+        description: `Successfully isolated subject for ${staged.file.name}.`,
       });
     } catch (e: any) {
       console.error(e);
-      let errorMsg = "Non-standard pixel buffer detected.";
+      let errorMsg = "Industrial isolation sequence interrupted.";
       if (e.message?.includes('Body exceeded')) {
-        errorMsg = "File size exceeds processing limits. Try a smaller asset.";
+        errorMsg = "File size exceeds 100MB processing limits.";
       }
       updateFileStatus(staged.id, 'failed', ["Sequence Failed.", errorMsg]);
       toast({
@@ -100,7 +104,7 @@ export default function RemoveBackgroundPage() {
       file,
       originalUrl: URL.createObjectURL(file),
       status: 'staging' as const,
-      logs: ["Asset Staged for Automated Isolation."]
+      logs: ["Asset Staged for AI-Assisted Isolation."]
     }));
     
     setStagedFiles(prev => [...prev, ...newStaged]);
@@ -129,11 +133,11 @@ export default function RemoveBackgroundPage() {
         <div className="max-w-6xl mx-auto space-y-12">
           <div className="text-center space-y-4">
             <div className="inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-accent text-white shadow-xl mb-2">
-              <Layers className="h-7 w-7" />
+              <Sparkles className="h-7 w-7 text-primary fill-primary/20" />
             </div>
-            <h1 className="text-4xl font-black tracking-tighter text-accent uppercase italic">Background Removal</h1>
+            <h1 className="text-4xl font-black tracking-tighter text-accent uppercase italic">AI Background Isolation</h1>
             <p className="text-muted-foreground font-bold text-xs uppercase tracking-widest max-w-xl mx-auto">
-              Industrial Pixel Isolation. Automatically identifies background frequencies and reconstructs assets with transparency.
+              Professional Subject Extraction. AI-assisted isolation with backend chroma-keying for high-fidelity alpha transparency.
             </p>
           </div>
 
@@ -171,7 +175,7 @@ export default function RemoveBackgroundPage() {
                             {staged.status === 'processing' ? (
                               <div className="flex items-center gap-2 bg-blue-50 text-blue-600 px-3 py-1 rounded-full border border-blue-100">
                                 <Loader2 className="h-3 w-3 animate-spin" />
-                                <span className="text-[9px] font-black uppercase">Isolating...</span>
+                                <span className="text-[9px] font-black uppercase">Isolating Subject...</span>
                               </div>
                             ) : staged.status === 'done' ? (
                               <div className="flex items-center gap-2 bg-green-50 text-green-600 px-3 py-1 rounded-full border border-green-100">
@@ -215,8 +219,8 @@ export default function RemoveBackgroundPage() {
                               </h4>
                             </div>
                             <div className={cn(
-                              "aspect-square rounded-3xl overflow-hidden border border-accent/5 relative shadow-inner group/preview",
-                              staged.status === 'done' ? "bg-[url('https://placehold.co/20x20/F0F0F0/E0E0E0?text=')] bg-repeat" : "bg-muted/10"
+                              "aspect-square rounded-3xl overflow-hidden border border-accent/5 relative shadow-inner group/preview bg-[url('https://placehold.co/20x20/F0F0F0/E0E0E0?text=')] bg-repeat",
+                              staged.status !== 'done' && "bg-none bg-muted/10"
                             )}>
                               {staged.status === 'done' ? (
                                 <img 
@@ -232,7 +236,7 @@ export default function RemoveBackgroundPage() {
                                       <Server className="h-8 w-8 text-primary animate-pulse" />
                                     </div>
                                   </div>
-                                  <p className="text-[10px] font-black uppercase tracking-[0.3em] text-accent/40 italic">Executing Backend Tunnel...</p>
+                                  <p className="text-[10px] font-black uppercase tracking-[0.3em] text-accent/40 italic">AI Isolation Phase...</p>
                                 </div>
                               ) : (
                                 <div className="absolute inset-0 flex items-center justify-center opacity-10">
@@ -263,7 +267,7 @@ export default function RemoveBackgroundPage() {
                                   <div className="space-y-1">
                                     <p className="text-xs font-black text-accent uppercase tracking-wider italic">Asset Verified</p>
                                     <p className="text-[10px] font-bold text-muted-foreground leading-relaxed uppercase tracking-tight">
-                                      Background removal protocol complete. Alpha-channel transparency embedded.
+                                      AI subject isolation complete. Chroma-keying has embedded true alpha-channel transparency.
                                     </p>
                                   </div>
                                 </div>
@@ -290,7 +294,7 @@ export default function RemoveBackgroundPage() {
                             ) : (
                               <div className="flex items-center gap-3 p-6 bg-white/50 rounded-[2rem] border border-accent/5">
                                 <Loader2 className="h-5 w-5 text-primary animate-spin" />
-                                <span className="text-[10px] font-black uppercase tracking-widest text-accent/40 italic">Waiting for backend response...</span>
+                                <span className="text-[10px] font-black uppercase tracking-widest text-accent/40 italic">Waiting for AI Subject Mapping...</span>
                               </div>
                             )}
                           </div>
@@ -309,12 +313,12 @@ export default function RemoveBackgroundPage() {
             </div>
             <div className="space-y-3">
               <p className="text-sm font-black uppercase tracking-widest text-accent italic flex items-center justify-center md:justify-start gap-2">
-                Industrial Chroma-Keying Sequence <ArrowRight className="h-3 w-3 text-primary" />
+                Industrial AI Isolation Protocol <ArrowRight className="h-3 w-3 text-primary" />
               </p>
               <p className="text-[11px] text-muted-foreground leading-relaxed font-bold uppercase tracking-tight max-w-2xl">
-                DOCFLOW executes backend-driven pixel isolation using chroma-keying logic. 
-                The engine samples the primary background frequencies and performs color-distance thresholding 
-                to strip the background while preserving foreground structural integrity.
+                DOCFLOW executes a dual-phase isolation sequence. First, Gemini 2.5 Flash maps the primary subject 
+                against a high-contrast green screen. Second, the backend chroma-keying engine strips the screen 
+                frequencies to deliver a clean, transparent PNG asset.
               </p>
             </div>
           </div>

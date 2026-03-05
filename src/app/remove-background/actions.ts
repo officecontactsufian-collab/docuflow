@@ -1,28 +1,33 @@
 'use server';
 
 import Jimp from 'jimp';
+import { removeBackgroundAI } from '@/ai/flows/remove-background-flow';
 
 /**
  * @fileOverview DOCFLOW Industrial Background Removal
- * Handles backend pixel-level sanitization using chroma-keying logic.
+ * Executes an AI-assisted isolation sequence followed by backend chroma-keying.
  */
 
 export async function processBackgroundRemovalAction(base64Data: string): Promise<string> {
   try {
-    const base64Content = base64Data.split(',')[1] || base64Data;
+    // PHASE 1: AI Subject Isolation (Synthesize Green Screen)
+    const greenScreenUri = await removeBackgroundAI({ imageDataUri: base64Data });
+    
+    // PHASE 2: Chroma-Keying Post-Processing
+    const base64Content = greenScreenUri.split(',')[1] || greenScreenUri;
     const buffer = Buffer.from(base64Content, 'base64');
     
     const image = await Jimp.read(buffer);
     const width = image.bitmap.width;
     const height = image.bitmap.height;
 
-    // STEP 1: SAMPLE BACKGROUND COLOR (Top-Left Pixel Heuristic)
-    const bgR = image.bitmap.data[0];
-    const bgG = image.bitmap.data[1];
-    const bgB = image.bitmap.data[2];
+    // Standard Green Screen Frequency (Pure Green #00FF00)
+    const targetR = 0;
+    const targetG = 255;
+    const targetB = 0;
 
-    // STEP 2: CHROMA-KEYING WITH TOLERANCE
-    const tolerance = 40; 
+    // Tolerance for AI artifacts in the green screen
+    const tolerance = 80; 
 
     image.scan(0, 0, width, height, function (x, y, idx) {
       const r = this.bitmap.data[idx + 0];
@@ -30,9 +35,9 @@ export async function processBackgroundRemovalAction(base64Data: string): Promis
       const b = this.bitmap.data[idx + 2];
 
       const distance = Math.sqrt(
-        Math.pow(r - bgR, 2) + 
-        Math.pow(g - bgG, 2) + 
-        Math.pow(b - bgB, 2)
+        Math.pow(r - targetR, 2) + 
+        Math.pow(g - targetG, 2) + 
+        Math.pow(b - targetB, 2)
       );
 
       if (distance < tolerance) {
@@ -40,13 +45,13 @@ export async function processBackgroundRemovalAction(base64Data: string): Promis
       }
     });
 
-    // High-fidelity edge smoothing
-    image.blur(1).contrast(0.1);
+    // Final smoothing and hardening
+    image.contrast(0.05);
     
     const processedBase64 = await image.getBase64Async(Jimp.MIME_PNG);
     return processedBase64;
-  } catch (error) {
+  } catch (error: any) {
     console.error('Background removal failure:', error);
-    throw new Error('Backend pixel isolation sequence failed.');
+    throw new Error(error.message || 'Industrial isolation sequence failed.');
   }
 }
