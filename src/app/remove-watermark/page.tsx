@@ -52,14 +52,14 @@ export default function RemoveWatermarkPage() {
         updateFileStatus(staged.id, 'processing', [
           "Analyzing Pixel Luminance (OpenCV-Grade)...", 
           "Creating Recovery Mask...", 
-          "Executing Neighborhood Healing...", 
+          "Executing Neighborhood Healing (Inpainting)...", 
           "Normalizing Contrast..."
         ]);
         resultUrl = await processImageRemovalAction(base64Data);
       } else {
         updateFileStatus(staged.id, 'processing', [
-          "Deep Scanning PDF Object Tree (MuPDF-Grade)...", 
-          "Stripping /Form XObjects...", 
+          "Deep Scanning PDF Object Tree (PyMuPDF-Grade)...", 
+          "Stripping /Form XObjects & Patterns...", 
           "Purging /OCG Layers & Transparency Groups...", 
           "Hardening Metadata Registry..."
         ]);
@@ -106,9 +106,6 @@ export default function RemoveWatermarkPage() {
   };
 
   const clearAll = () => {
-    stagedFiles.forEach(f => {
-      if (f.resultUrl) URL.revokeObjectURL(f.resultUrl);
-    });
     setStagedFiles([]);
   };
 
@@ -212,7 +209,7 @@ export default function RemoveWatermarkPage() {
                                   <div className="space-y-1">
                                     <p className="text-[10px] font-black text-accent uppercase tracking-wider">Asset Hardened & Verified</p>
                                     <p className="text-[9px] font-bold text-muted-foreground leading-relaxed uppercase">
-                                      Structural XObjects purged. Pixel luminance normalized. Ready for industrial deployment.
+                                      Structural Objects purged. Pixel luminance healed. Ready for industrial deployment.
                                     </p>
                                   </div>
                                 </div>
@@ -265,8 +262,9 @@ export default function RemoveWatermarkPage() {
             <div className="space-y-2">
               <p className="text-sm font-black uppercase tracking-widest text-accent italic">Automated Industrial Workflow</p>
               <p className="text-[11px] text-muted-foreground leading-relaxed font-bold uppercase tracking-tight">
-                DOCFLOW executes aggressive structural purges on PDF /Form XObjects and applies neighborhood-averaging inpainting to image buffers. 
-                This matching sequence provides **MuPDF-grade** document stripping and **OpenCV-grade** pixel healing without persistent cloud storage.
+                DOCFLOW executes aggressive structural purges on PDF /Form XObjects, /Patterns, and /Shadings. 
+                For images, it applies neighborhood-averaging healing to pixel buffers. 
+                This sequence provides **PyMuPDF-grade** stripping and **OpenCV-grade** pixel reconstruction without persistent cloud storage.
               </p>
             </div>
           </div>
