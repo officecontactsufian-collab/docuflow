@@ -25,7 +25,12 @@ import {
   Crop,
   FilePenLine,
   EyeOff,
-  Eraser
+  Eraser,
+  Camera,
+  Presentation,
+  Scan,
+  Layout,
+  Search
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
@@ -39,10 +44,12 @@ export default function Home() {
 
   const toolCategories = [
     {
-      label: "Modify PDF",
+      label: "Modify & Capture",
       description: "Direct page and structural modifications.",
       items: [
+        { title: "Scan to PDF", desc: "Direct camera to document stream.", icon: Camera, href: "/scan-to-pdf" },
         { title: "Crop PDF", desc: "Trim page margins with precision.", icon: Crop, href: "/crop" },
+        { title: "Remove Background", desc: "Isolate foreground document elements.", icon: ImageIcon, href: "/remove-background" },
         { title: "Reorder & Rotate", desc: "Change page order and orientation.", icon: RotateCw, href: "/organize" },
       ]
     },
@@ -51,9 +58,9 @@ export default function Home() {
       description: "Lossless transformation between industrial formats.",
       items: [
         { title: "PDF to Word", desc: "Convert to editable DOCX documents.", icon: FileText, href: "/convert?type=pdf-to-word" },
+        { title: "PDF to PowerPoint", desc: "Export slides for professional use.", icon: Presentation, href: "/convert?type=pdf-to-ppt" },
         { title: "Word to PDF", desc: "Standardize any Word document to PDF.", icon: FilePenLine, href: "/convert?type=word-to-pdf" },
-        { title: "PDF to Excel", desc: "Accurate table data extraction.", icon: Table, href: "/convert?type=pdf-to-excel" },
-        { title: "JPG to PDF", desc: "High-resolution image stitching.", icon: ImageIcon, href: "/convert?type=jpg-to-pdf" },
+        { title: "PPT to PDF", desc: "Industrial presentation conversion.", icon: FileUp, href: "/convert?type=ppt-to-pdf" },
       ]
     },
     {
@@ -73,7 +80,7 @@ export default function Home() {
         { title: "Privacy Shield", desc: "Permanent metadata and tracking erasure.", icon: ShieldCheck, href: "/protect" },
         { title: "Unlock PDF", desc: "Recover and strip document restrictions.", icon: Unlock, href: "/protect?mode=unlock" },
         { title: "Digital Sign", desc: "Apply secure electronic signatures.", icon: Signature, href: "/sign" },
-        { title: "Remove Watermark", desc: "Structural cleanup of overlay layers.", icon: Eraser, href: "/remove-watermark" },
+        { title: "Document Inspect", desc: "Deep metadata structural analysis.", icon: Search, href: "/analyze" },
       ]
     }
   ];

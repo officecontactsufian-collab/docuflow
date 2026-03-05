@@ -26,7 +26,11 @@ import {
   User as UserIcon,
   Settings,
   Layout,
-  Eraser
+  Eraser,
+  Camera,
+  Presentation,
+  Image as ImageIcon,
+  Scan
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -57,11 +61,13 @@ export function Navbar() {
       items: [
         { href: "/crop", icon: Crop, title: "Crop PDF", desc: "Trim page margins" },
         { href: "/organize", icon: RotateCw, title: "Reorder and rotate", desc: "Change page structure" },
+        { href: "/remove-background", icon: ImageIcon, title: "Remove Background", desc: "Isolate foreground" },
       ]
     },
     {
-      label: "Organize & Format",
+      label: "Capture & Format",
       items: [
+        { href: "/scan-to-pdf", icon: Camera, title: "Scan to PDF", desc: "Direct camera capture" },
         { href: "/merge", icon: Merge, title: "Merge PDF", desc: "Combine multiple PDFs" },
         { href: "/split", icon: Scissors, title: "Split PDF", desc: "Extract specific pages" },
         { href: "/numbers", icon: Hash, title: "Page Numbers", desc: "Add sequential counters" },
@@ -71,7 +77,7 @@ export function Navbar() {
       label: "Convert & Export",
       items: [
         { href: "/convert?type=word-to-pdf", icon: FilePenLine, title: "To PDF", desc: "Word, Excel, JPG, PPT" },
-        { href: "/convert?type=pdf-to-word", icon: FileText, title: "From PDF", desc: "Word, Excel, JPG, PDF/A" },
+        { href: "/convert?type=pdf-to-word", icon: FileText, title: "From PDF", desc: "Word, Excel, PPT, PDF/A" },
         { href: "/convert?type=pdf-to-pdfa", icon: ShieldCheck, title: "PDF/A", desc: "Archival conversion" },
       ]
     },
@@ -83,7 +89,6 @@ export function Navbar() {
         { href: "/protect", icon: ShieldCheck, title: "Privacy Shield", desc: "Hardened metadata" },
         { href: "/protect?mode=unlock", icon: Unlock, title: "Unlock", desc: "Remove restrictions" },
         { href: "/watermark", icon: Type, title: "Watermark", desc: "Add text overlays" },
-        { href: "/remove-watermark", icon: Eraser, title: "Remove Watermark", desc: "Strip overlays" },
         { href: "/sign", icon: Signature, title: "Digital Sign", desc: "Apply signatures" },
       ]
     }
@@ -132,14 +137,14 @@ export function Navbar() {
               </DropdownMenuContent>
             </DropdownMenu>
 
+            <Link href="/scan-to-pdf" className="flex items-center gap-1.5 text-[9px] font-black uppercase tracking-widest text-accent/80 hover:text-accent transition-all group">
+              <Camera className="h-3 w-3 text-primary/60 group-hover:text-primary transition-colors" /> Scan
+            </Link>
             <Link href="/merge" className="flex items-center gap-1.5 text-[9px] font-black uppercase tracking-widest text-accent/80 hover:text-accent transition-all group">
               <Merge className="h-3 w-3 text-primary/60 group-hover:text-primary transition-colors" /> Merge
             </Link>
             <Link href="/split" className="flex items-center gap-1.5 text-[9px] font-black uppercase tracking-widest text-accent/80 hover:text-accent transition-all group">
               <Scissors className="h-3 w-3 text-primary/60 group-hover:text-primary transition-colors" /> Split
-            </Link>
-            <Link href="/compress" className="flex items-center gap-1.5 text-[9px] font-black uppercase tracking-widest text-accent/80 hover:text-accent transition-all group">
-              <Maximize className="h-3 w-3 text-primary/60 group-hover:text-primary transition-colors" /> Compress
             </Link>
             <Link href="/convert?type=word-to-pdf" className="flex items-center gap-1.5 text-[9px] font-black uppercase tracking-widest text-accent/80 hover:text-accent transition-all group">
               <FilePenLine className="h-3 w-3 text-primary/60 group-hover:text-primary transition-colors" /> Convert
