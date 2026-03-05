@@ -52,12 +52,17 @@ export function Navbar() {
 
   const categories = [
     {
+      label: "Modify PDF",
+      items: [
+        { href: "/crop", icon: Crop, title: "Crop PDF", desc: "Trim page margins" },
+        { href: "/organize", icon: RotateCw, title: "Reorder and rotate", desc: "Change page structure" },
+      ]
+    },
+    {
       label: "Organize & Format",
       items: [
         { href: "/merge", icon: Merge, title: "Merge PDF", desc: "Combine multiple PDFs" },
         { href: "/split", icon: Scissors, title: "Split PDF", desc: "Extract specific pages" },
-        { href: "/organize", icon: RotateCw, title: "Organize", desc: "Reorder and rotate" },
-        { href: "/crop", icon: Crop, title: "Crop PDF", desc: "Trim page margins" },
         { href: "/numbers", icon: Hash, title: "Page Numbers", desc: "Add sequential counters" },
       ]
     },
@@ -99,7 +104,7 @@ export function Navbar() {
                 <LayoutDashboard className="h-3 w-3 text-primary" />
                 All PDF Tools <ChevronDown className="h-2.5 w-2.5 opacity-40" />
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="w-[700px] p-5 rounded-2xl shadow-2xl border-white/20 grid grid-cols-3 gap-5 bg-white/95 backdrop-blur-xl mt-2">
+              <DropdownMenuContent align="start" className="w-[850px] p-5 rounded-2xl shadow-2xl border-white/20 grid grid-cols-4 gap-5 bg-white/95 backdrop-blur-xl mt-2">
                 {categories.map((cat) => (
                   <div key={cat.label} className="space-y-3">
                     <DropdownMenuLabel className="px-0 text-[8px] font-black uppercase tracking-[0.2em] text-primary/40">
