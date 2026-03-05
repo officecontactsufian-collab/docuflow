@@ -21,7 +21,7 @@ export async function processImageRemovalAction(base64Data: string): Promise<str
 
     // STEP 1: CREATE WATERMARK MASK (OpenCV Threshold Logic)
     // We target bright or semi-transparent overlays typically used in professional stamps
-    const threshold = 205; 
+    const threshold = 210; 
     const mask: boolean[] = new Array(width * height).fill(false);
 
     image.scan(0, 0, width, height, function (x, y, idx) {
@@ -102,8 +102,10 @@ export async function processPdfRemovalAction(base64Data: string): Promise<strin
 
     const pages = sourcePdf.getPages();
     pages.forEach((page) => {
+      // Use internal node access for deep structural cleaning
       const node = (page as any).node as PDFDict;
-      
+      if (!node) return;
+
       // 2. Aggressive Annotation Shredding
       node.delete(PDFName.of('Annots'));
 
