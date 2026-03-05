@@ -13,7 +13,6 @@ import {
   Lock, 
   ShieldCheck, 
   Image as ImageIcon,
-  ArrowRight,
   Shield,
   CircleCheck,
   FileUp,
@@ -26,13 +25,18 @@ import {
   Signature,
   Hash,
   Crop,
-  FilePenLine,
-  Settings
+  FilePenLine
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 
 export default function Home() {
+  const [year, setYear] = React.useState<number | null>(null);
+
+  React.useEffect(() => {
+    setYear(new Date().getFullYear());
+  }, []);
+
   const toolCategories = [
     {
       label: "Convert & Export",
@@ -81,7 +85,6 @@ export default function Home() {
       <Navbar />
       
       <main className="flex-1">
-        {/* PREMIUM MINIMIZED HERO SECTION */}
         <section className="premium-hero pt-16 pb-24 lg:pt-20 lg:pb-32 relative overflow-hidden">
           <div className="container relative mx-auto px-6">
             <div className="max-w-4xl mx-auto space-y-10">
@@ -121,7 +124,6 @@ export default function Home() {
           <div className="absolute bottom-0 right-0 translate-x-1/4 translate-y-1/4 w-[400px] h-[400px] bg-secondary/10 rounded-full blur-[120px] pointer-events-none" />
         </section>
 
-        {/* CATEGORIZED TOOLS SECTION - MINIMIZED */}
         <section id="tools" className="py-20 bg-white/40 border-y border-white/20 backdrop-blur-sm relative z-10">
           <div className="container mx-auto px-6">
             <div className="max-w-7xl mx-auto space-y-20">
@@ -151,7 +153,6 @@ export default function Home() {
           </div>
         </section>
 
-        {/* HOW IT WORKS */}
         <section className="py-20 bg-background relative overflow-hidden">
           <div className="container mx-auto px-6">
             <div className="text-center mb-20 space-y-3">
@@ -194,7 +195,6 @@ export default function Home() {
           </div>
         </section>
 
-        {/* SECURITY */}
         <section className="py-20 bg-accent text-white relative overflow-hidden">
           <div className="container mx-auto px-6 relative z-10">
             <div className="grid lg:grid-cols-2 gap-20 items-center max-w-6xl mx-auto">
@@ -260,7 +260,7 @@ export default function Home() {
           </div>
           <div className="flex flex-col md:flex-row items-center justify-between gap-8 pt-10 border-t border-white/5 opacity-30">
             <p className="text-[8px] font-black uppercase tracking-[0.5em]">
-              &copy; {new Date().getFullYear()} DocuFlow. All Protocols Reserved.
+              &copy; {year || "...."} DocuFlow. All Protocols Reserved.
             </p>
             <div className="flex items-center gap-10 text-[8px] font-black uppercase tracking-[0.5em]">
               <span>SECURE TUNNEL 256-BIT AES</span>

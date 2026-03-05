@@ -4,25 +4,19 @@
 import * as React from 'react';
 import dynamic from 'next/dynamic';
 import { Navbar } from '@/components/navbar';
-import { useUser, useFirestore, useCollection, useMemoFirebase, deleteDocumentNonBlocking } from '@/firebase';
+import { useUser, useFirestore, useCollection, useMemoFirebase, deleteDocumentNonBlocking, useAuth } from '@/firebase';
 import { useRouter } from 'next/navigation';
 import { 
   Users, 
   Files, 
   Activity, 
   ShieldCheck, 
-  ArrowUpRight, 
-  ArrowDownRight, 
-  Clock,
   Search,
   Download,
   Database,
-  Plus,
   Loader2,
   Trash2,
-  UserPlus,
   LogOut,
-  Settings2
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -31,7 +25,6 @@ import { doc, collection } from 'firebase/firestore';
 import { useToast } from '@/hooks/use-toast';
 import { PDFDocument, StandardFonts, rgb } from 'pdf-lib';
 import { signOut } from 'firebase/auth';
-import { useAuth } from '@/firebase';
 
 const OperationalChart = dynamic(
   () => import('@/components/dashboard/operational-chart'),
@@ -52,7 +45,6 @@ export default function AdminDashboardPage() {
   
   const [searchTerm, setSearchTerm] = React.useState('');
 
-  // Security Guard: Strict identity validation
   React.useEffect(() => {
     if (!isUserLoading) {
       if (!user || user.email !== MASTER_ADMIN_EMAIL) {
@@ -83,6 +75,7 @@ export default function AdminDashboardPage() {
   const handleDeleteUser = (userId: string) => {
     if (!firestore) return;
     const userRef = doc(firestore, 'users', userId);
+    // Standard mutation pattern: Non-blocking with central error propagation
     deleteDocumentNonBlocking(userRef);
     toast({ title: "Protocol Executed", description: "User record removal initiated." });
   };
@@ -134,7 +127,7 @@ export default function AdminDashboardPage() {
                 <ShieldCheck className="h-3 w-3 text-primary" />
                 <span>Verified Master Admin: {user.email}</span>
               </div>
-              <h1 className="text-4xl font-black tracking-tighter text-accent uppercase italic tracking-tighter">System Intelligence</h1>
+              <h1 className="text-4xl font-black tracking-tighter text-accent uppercase italic">System Intelligence</h1>
               <p className="text-muted-foreground font-medium">Real-time Command Dashboard</p>
             </div>
             <div className="flex gap-3">
@@ -149,7 +142,7 @@ export default function AdminDashboardPage() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {[
-              { label: "Active Users", val: allUsers?.length || "0", delta: "Live", icon: Users, up: true },
+              { label: "Active Users", val: allUsers?.length || "...", delta: "Live", icon: Users, up: true },
               { label: "Total Assets", val: "849,201", delta: "+24%", icon: Files, up: true },
               { label: "System Health", val: "99.9%", delta: "Stable", icon: Activity, up: true },
               { label: "Gateway Status", val: "Active", delta: "Secure", icon: Database, up: true },
