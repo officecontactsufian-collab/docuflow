@@ -1,4 +1,3 @@
-
 "use client"
 
 import Link from 'next/link';
@@ -91,7 +90,7 @@ export function Navbar() {
             <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-accent text-primary shadow-lg transition-transform group-hover:scale-105 group-hover:-rotate-3">
               <FileText className="h-4 w-4" />
             </div>
-            <span className="text-base font-black tracking-tighter text-accent uppercase italic">DocuFlow</span>
+            <span className="text-base font-black tracking-tighter text-accent uppercase italic">DOCFLOW</span>
           </Link>
 
           <div className="hidden lg:flex items-center gap-5">

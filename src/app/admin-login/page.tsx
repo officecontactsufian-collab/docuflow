@@ -1,4 +1,3 @@
-
 "use client"
 
 import * as React from 'react';
@@ -41,14 +40,11 @@ export default function AdminLoginPage() {
   const [password, setPassword] = React.useState('');
   const [isLoading, setIsLoading] = React.useState(false);
 
-  // Security Guard: Prevent logged-in non-admins from even seeing this page
-  // And redirect logged-in admins to the dashboard
   React.useEffect(() => {
     if (!isUserLoading && user) {
       if (user.email === MASTER_ADMIN_EMAIL) {
         router.push('/admin-dashboard');
       } else {
-        // Eject unauthorized session
         signOut(auth);
         router.push('/');
       }
@@ -122,7 +118,7 @@ export default function AdminLoginPage() {
                   <Input 
                     id="email" 
                     type="email" 
-                    placeholder="ADMIN@DOCUFLOW.PRO" 
+                    placeholder="ADMIN@DOCFLOW.PRO" 
                     required 
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}

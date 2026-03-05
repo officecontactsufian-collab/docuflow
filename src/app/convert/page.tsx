@@ -1,4 +1,3 @@
-
 "use client"
 
 import * as React from 'react';
@@ -283,7 +282,7 @@ export default function ConvertPage() {
       } else if (currentType === 'pdf-to-excel') {
         const wb = XLSX.utils.book_new();
         const data = [
-          ["Asset Reconstruction Protocol", "DocuFlow Professional"],
+          ["Asset Reconstruction Protocol", "DOCFLOW Professional"],
           ["Original File", selectedFile.name],
           ["Transformation Time", new Date().toLocaleString()],
           ["Status", "Verified Structural Integrity"],
@@ -298,12 +297,12 @@ export default function ConvertPage() {
         setDownloadUrl(URL.createObjectURL(new Blob([wbout], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' })));
 
       } else if (currentType === 'pdf-to-word') {
-        const header = "DocuFlow Asset Reconstruction\n--------------------------\nSource Asset: " + selectedFile.name + "\nTransformation Status: Verified\nTimestamp: " + new Date().toLocaleString() + "\n\nThis asset has been reconstructed for professional deployment.";
+        const header = "DOCFLOW Asset Reconstruction\n--------------------------\nSource Asset: " + selectedFile.name + "\nTransformation Status: Verified\nTimestamp: " + new Date().toLocaleString() + "\n\nThis asset has been reconstructed for professional deployment.";
         const blob = new Blob([header], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
         setDownloadUrl(URL.createObjectURL(blob));
 
       } else if (currentType === 'pdf-to-ppt') {
-        const header = "DocuFlow Presentation Reconstruction\n--------------------------\nSource Asset: " + selectedFile.name + "\nTransformation Status: High-Fidelity Verified\n\nSlide structure preserved for industrial deployment.";
+        const header = "DOCFLOW Presentation Reconstruction\n--------------------------\nSource Asset: " + selectedFile.name + "\nTransformation Status: High-Fidelity Verified\n\nSlide structure preserved for industrial deployment.";
         const blob = new Blob([header], { type: 'application/vnd.openxmlformats-officedocument.presentationml.presentation' });
         setDownloadUrl(URL.createObjectURL(blob));
 
@@ -338,15 +337,13 @@ export default function ConvertPage() {
         const sourcePdf = await PDFDocument.load(arrayBuffer, { ignoreEncryption: true });
         const archivalPdf = await PDFDocument.create();
         
-        // Deep copy pages to strip dynamic features and standardize structure
         const pagesToCopy = sourcePdf.getPageIndices();
         const copiedPages = await archivalPdf.copyPages(sourcePdf, pagesToCopy);
         copiedPages.forEach(p => archivalPdf.addPage(p));
         
-        // Inject ISO-compliant metadata tags
         archivalPdf.setTitle(`Archival Asset: ${selectedFile.name}`);
-        archivalPdf.setProducer("DocuFlow Archival Engine (ISO 19005-1)");
-        archivalPdf.setCreator("DocuFlow Professional Transformation");
+        archivalPdf.setProducer("DOCFLOW Archival Engine (ISO 19005-1)");
+        archivalPdf.setCreator("DOCFLOW Professional Transformation");
         
         const pdfBytes = await archivalPdf.save();
         setDownloadUrl(URL.createObjectURL(new Blob([pdfBytes], { type: 'application/pdf' })));
@@ -414,7 +411,6 @@ export default function ConvertPage() {
       
       <main className="flex-1 container mx-auto px-4 py-12">
         <div className="max-w-4xl mx-auto space-y-12">
-          {/* Header */}
           <div className="text-center space-y-4">
             <div className={`inline-flex h-12 w-12 items-center justify-center rounded-xl bg-primary/5 ${currentConfig.color} shadow-lg mb-2`}>
               <currentConfig.icon className="h-6 w-6" />
@@ -504,7 +500,6 @@ export default function ConvertPage() {
             </div>
           )}
 
-          {/* Protocol Switcher */}
           {!isProcessing && !isDone && (
             <div className="pt-16 border-t border-accent/5">
                <h3 className="text-center font-black text-[10px] uppercase tracking-[0.4em] text-accent/40 mb-10">Select Transformation Protocol</h3>

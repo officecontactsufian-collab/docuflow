@@ -1,4 +1,3 @@
-
 "use client"
 
 import * as React from 'react';
@@ -236,7 +235,7 @@ export default function Home() {
             <div className="space-y-6">
               <div className="flex items-center gap-3">
                 <FileText className="h-8 w-8 text-primary" />
-                <span className="text-2xl font-black tracking-tighter uppercase italic">DocuFlow</span>
+                <span className="text-2xl font-black tracking-tighter uppercase italic">DOCFLOW</span>
               </div>
               <p className="text-[9px] leading-relaxed font-black opacity-50 uppercase tracking-[0.3em] max-w-[200px]">
                 The industrial standard for high-performance document intelligence.
@@ -260,7 +259,7 @@ export default function Home() {
           </div>
           <div className="flex flex-col md:flex-row items-center justify-between gap-8 pt-10 border-t border-white/5 opacity-30">
             <p className="text-[8px] font-black uppercase tracking-[0.5em]">
-              &copy; {year || "...."} DocuFlow. All Protocols Reserved.
+              &copy; {year || "...."} DOCFLOW. All Protocols Reserved.
             </p>
             <div className="flex items-center gap-10 text-[8px] font-black uppercase tracking-[0.5em]">
               <span>SECURE TUNNEL 256-BIT AES</span>

@@ -1,4 +1,3 @@
-
 "use client"
 
 import * as React from 'react';
@@ -75,7 +74,6 @@ export default function AdminDashboardPage() {
   const handleDeleteUser = (userId: string) => {
     if (!firestore) return;
     const userRef = doc(firestore, 'users', userId);
-    // Standard mutation pattern: Non-blocking with central error propagation
     deleteDocumentNonBlocking(userRef);
     toast({ title: "Protocol Executed", description: "User record removal initiated." });
   };
@@ -88,7 +86,7 @@ export default function AdminDashboardPage() {
       const page = pdfDoc.addPage([595, 842]);
       const { height } = page.getSize();
       
-      page.drawText("DOCUFLOW SYSTEM INTELLIGENCE", { x: 50, y: height - 50, size: 20, font: boldFont, color: rgb(0.14, 0.12, 0.29) });
+      page.drawText("DOCFLOW SYSTEM INTELLIGENCE", { x: 50, y: height - 50, size: 20, font: boldFont, color: rgb(0.14, 0.12, 0.29) });
       page.drawText(`SECURITY CLEARANCE: MASTER ADMIN | ${new Date().toLocaleString()}`, { x: 50, y: height - 75, size: 8 });
       
       const pdfBytes = await pdfDoc.save();
@@ -96,7 +94,7 @@ export default function AdminDashboardPage() {
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = `DocuFlow_Intelligence_Report.pdf`;
+      link.download = `DOCFLOW_Intelligence_Report.pdf`;
       link.click();
       toast({ title: "Report Exported", description: "System telemetry archived successfully." });
     } catch (e) {

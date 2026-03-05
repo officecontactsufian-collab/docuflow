@@ -1,11 +1,10 @@
-
 {
   "entities": {
     "User": {
       "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "User",
       "type": "object",
-      "description": "Represents a user of the DocuFlow application. Authentication is handled externally, so this entity primarily stores user identification and role information within the application context.",
+      "description": "Represents a user of the DOCFLOW application. Authentication is handled externally, so this entity primarily stores user identification and role information within the application context.",
       "properties": {
         "id": {
           "type": "string",

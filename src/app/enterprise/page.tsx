@@ -1,4 +1,3 @@
-
 "use client"
 
 import * as React from 'react';
@@ -21,7 +20,7 @@ export default function EnterprisePage() {
     },
     {
       title: "Custom Workflows",
-      description: "Tailor DocuFlow to your business processes with custom API endpoints and automated integrations.",
+      description: "Tailor DOCFLOW to your business processes with custom API endpoints and automated integrations.",
       icon: Workflow
     },
     {
@@ -46,13 +45,12 @@ export default function EnterprisePage() {
       <Navbar />
       
       <main className="flex-1">
-        {/* Hero Section */}
         <section className="bg-primary text-primary-foreground py-24 lg:py-32">
           <div className="container mx-auto px-4 text-center">
             <div className="max-w-4xl mx-auto space-y-8">
               <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 text-white text-xs font-bold uppercase tracking-wider border border-white/20">
                 <Building2 className="h-3.5 w-3.5" />
-                <span>DocuFlow Enterprise</span>
+                <span>DOCFLOW Enterprise</span>
               </div>
               <h1 className="text-4xl md:text-6xl font-bold tracking-tight font-headline">Scale Your Document Workflows with Confidence</h1>
               <p className="text-xl text-primary-foreground/80 max-w-2xl mx-auto leading-relaxed">
@@ -66,7 +64,6 @@ export default function EnterprisePage() {
           </div>
         </section>
 
-        {/* Features Grid */}
         <section className="py-24 bg-white">
           <div className="container mx-auto px-4">
             <div className="text-center mb-16 space-y-4">
@@ -88,12 +85,11 @@ export default function EnterprisePage() {
           </div>
         </section>
 
-        {/* Call to Action */}
         <section className="py-24 bg-muted/30 border-t">
           <div className="container mx-auto px-4">
             <div className="max-w-3xl mx-auto text-center space-y-8">
               <h2 className="text-3xl font-bold font-headline">Ready to transform your document workspace?</h2>
-              <p className="text-muted-foreground text-lg">Join 500+ global enterprises using DocuFlow Professional to secure their critical assets.</p>
+              <p className="text-muted-foreground text-lg">Join 500+ global enterprises using DOCFLOW Professional to secure their critical assets.</p>
               <Button size="lg" className="h-14 px-12 text-base shadow-xl shadow-primary/20">Get in Touch</Button>
             </div>
           </div>

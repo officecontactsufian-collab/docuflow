@@ -1,10 +1,9 @@
-
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
     /**
-     * DocuFlow Intelligence Security Rules - STRICT ADMIN SOVEREIGNTY
+     * DOCFLOW Intelligence Security Rules - STRICT ADMIN SOVEREIGNTY
      */
 
     // --- Helper Functions ---

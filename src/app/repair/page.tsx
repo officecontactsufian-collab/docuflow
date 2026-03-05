@@ -22,10 +22,7 @@ export default function RepairPage() {
 
     try {
       const arrayBuffer = await selectedFile.arrayBuffer();
-      // Load with ignoreEncryption to handle structural issues in protected files
       const pdfDoc = await PDFDocument.load(arrayBuffer, { ignoreEncryption: true });
-      
-      // Re-saving forces a full structural rebuild and re-indexing of objects
       const pdfBytes = await pdfDoc.save();
       
       const blob = new Blob([pdfBytes], { type: 'application/pdf' });
@@ -67,7 +64,7 @@ export default function RepairPage() {
                         Structural Recovery
                       </CardTitle>
                       <CardDescription>
-                        DocuFlow will attempt to reconstruct the internal object tree and cross-reference table.
+                        DOCFLOW will attempt to reconstruct the internal object tree and cross-reference table.
                       </CardDescription>
                     </CardHeader>
                     <CardContent>

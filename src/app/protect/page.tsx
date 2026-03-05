@@ -1,4 +1,3 @@
-
 "use client"
 
 import * as React from 'react';
@@ -51,30 +50,26 @@ export default function ProtectPage() {
 
       if (mode === 'protect') {
         const pdfDoc = await PDFDocument.load(arrayBuffer, { ignoreEncryption: true });
-        // Industrial Privacy Protocol: Metadata Purge
         pdfDoc.setTitle('');
         pdfDoc.setAuthor('');
         pdfDoc.setSubject('');
         pdfDoc.setKeywords([]);
         pdfDoc.setCreator('');
-        pdfDoc.setProducer(`DocuFlow Industrial Privacy Shield (Key: ${password.substring(0, 2)}***)`);
+        pdfDoc.setProducer(`DOCFLOW Industrial Privacy Shield (Key: ${password.substring(0, 2)}***)`);
         pdfDoc.setModificationDate(new Date());
         finalBytes = await pdfDoc.save();
       } else {
-        // UNLOCK MODE: Structural Rebuild to strip permissions
         const sourcePdf = await PDFDocument.load(arrayBuffer, { ignoreEncryption: true });
         const unlockedPdf = await PDFDocument.create();
         
-        // Copy pages to a new document stream - this strips restriction flags
         const pageIndices = sourcePdf.getPageIndices();
         const copiedPages = await unlockedPdf.copyPages(sourcePdf, pageIndices);
         copiedPages.forEach(p => unlockedPdf.addPage(p));
         
-        unlockedPdf.setProducer("DocuFlow Protocol Recovery (Restriction Stripped)");
+        unlockedPdf.setProducer("DOCFLOW Protocol Recovery (Restriction Stripped)");
         finalBytes = await unlockedPdf.save();
       }
       
-      // Artificial delay for industrial processing telemetry feel
       await new Promise(resolve => setTimeout(resolve, 2000));
       
       setDownloadUrl(URL.createObjectURL(new Blob([finalBytes], { type: 'application/pdf' })));
@@ -111,7 +106,6 @@ export default function ProtectPage() {
       
       <main className="flex-1 container mx-auto px-6 py-12">
         <div className="max-w-6xl mx-auto space-y-12">
-          {/* Header */}
           <div className="text-center space-y-4">
             <div className={cn(
               "inline-flex h-14 w-14 items-center justify-center rounded-2xl shadow-xl mb-2",
@@ -139,12 +133,10 @@ export default function ProtectPage() {
                 />
               ) : (
                 <div className="grid lg:grid-cols-12 gap-12">
-                  {/* Left: Preview */}
                   <div className="lg:col-span-7 space-y-6">
                     <PDFPreview file={selectedFile} title="Security Reference Asset" className="h-[600px]" />
                   </div>
 
-                  {/* Right: Settings */}
                   <div className="lg:col-span-5 space-y-6">
                     <Card className="border-none shadow-2xl rounded-[2rem] bg-white overflow-hidden">
                       <CardHeader className="p-8 pb-4">

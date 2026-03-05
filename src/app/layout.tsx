@@ -4,7 +4,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { FirebaseClientProvider } from '@/firebase/client-provider';
 
 export const metadata: Metadata = {
-  title: 'DocuFlow Professional - Advanced PDF Solutions',
+  title: 'DOCFLOW Professional - Advanced PDF Solutions',
   description: 'The ultimate professional document management platform with high-fidelity conversion, manipulation, and security tools.',
 };
 
