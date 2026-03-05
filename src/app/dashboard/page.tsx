@@ -1,9 +1,10 @@
+
 "use client"
 
 import * as React from 'react';
 import dynamic from 'next/dynamic';
 import { Navbar } from '@/components/navbar';
-import { useUser, useFirestore, useDoc, useMemoFirebase } from '@/firebase';
+import { useUser, useFirestore, useDoc, useCollection, useMemoFirebase, setDocumentNonBlocking } from '@/firebase';
 import { useRouter } from 'next/navigation';
 import { 
   Users, 
@@ -16,12 +17,34 @@ import {
   Search,
   Filter,
   Download,
-  Database
+  Database,
+  Plus,
+  Loader2,
+  Trash2,
+  UserPlus
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { doc } from 'firebase/firestore';
+import { 
+  Dialog, 
+  DialogContent, 
+  DialogDescription, 
+  DialogFooter, 
+  DialogHeader, 
+  DialogTitle, 
+  DialogTrigger 
+} from '@/components/ui/dialog';
+import { 
+  Select, 
+  SelectContent, 
+  SelectItem, 
+  SelectTrigger, 
+  SelectValue 
+} from '@/components/ui/select';
+import { Label } from '@/components/ui/label';
+import { doc, collection, serverTimestamp, deleteDoc } from 'firebase/firestore';
+import { useToast } from '@/hooks/use-toast';
 
 // Dynamically import chart to prevent chunk loading errors in Turbopack/Next.js hydration
 const OperationalChart = dynamic(
@@ -42,7 +65,15 @@ export default function DashboardPage() {
   const { user, isUserLoading } = useUser();
   const firestore = useFirestore();
   const router = useRouter();
+  const { toast } = useToast();
   
+  const [isProvisioning, setIsProvisioning] = React.useState(false);
+  const [newEmail, setNewEmail] = React.useState('');
+  const [newRole, setNewRole] = React.useState('standard');
+  const [searchTerm, setSearchTerm] = React.useState('');
+  const [isLiveStreamActive, setIsLiveStreamActive] = React.useState(false);
+
+  // Admin Verification
   const adminRef = useMemoFirebase(() => {
     if (!firestore || !user) return null;
     return doc(firestore, 'roles_admin', user.uid);
@@ -50,23 +81,83 @@ export default function DashboardPage() {
 
   const { data: adminData, isLoading: isAdminLoading } = useDoc(adminRef);
 
-  // Robust redirection logic to prevent loops
+  // Users Intelligence Subscription
+  const usersQuery = useMemoFirebase(() => {
+    if (!firestore) return null;
+    return collection(firestore, 'users');
+  }, [firestore]);
+
+  const { data: allUsers, isLoading: isUsersLoading } = useCollection(usersQuery);
+
+  const filteredUsers = React.useMemo(() => {
+    if (!allUsers) return [];
+    return allUsers.filter(u => 
+      u.email?.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  }, [allUsers, searchTerm]);
+
+  // Robust redirection logic
   React.useEffect(() => {
     if (isUserLoading) return;
-
     if (!user) {
       router.push('/login');
       return;
     }
-    
-    // Redirect ONLY if we are sure the user is not the master admin AND has no admin doc
     const isMasterAdmin = user.email === MASTER_ADMIN_EMAIL;
     if (!isMasterAdmin && !isAdminLoading && !adminData) {
       router.push('/');
     }
   }, [user, isUserLoading, adminData, isAdminLoading, router]);
 
-  // Loading state handling
+  const handleExportReport = () => {
+    if (!allUsers) return;
+    const blob = new Blob([JSON.stringify(allUsers, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `DocuFlow_Intelligence_Brief_${new Date().toISOString().split('T')[0]}.json`;
+    link.click();
+    toast({ title: "Intelligence Exported", description: "Global user registry has been archived." });
+  };
+
+  const handleProvisionAccount = () => {
+    if (!firestore || !newEmail) return;
+    setIsProvisioning(true);
+
+    const tempId = Math.random().toString(36).substring(7);
+    const userRef = doc(firestore, 'users', tempId);
+    const userData = {
+      id: tempId,
+      email: newEmail,
+      role: newRole,
+      status: 'active',
+      creationDateTime: new Date().toISOString(),
+      provisionedBy: user?.email
+    };
+
+    setDocumentNonBlocking(userRef, userData, { merge: true });
+    
+    // If worker/admin, also add to marker collections if needed (simplified for MVP)
+    if (newRole === 'admin') {
+      const markerRef = doc(firestore, 'roles_admin', tempId);
+      setDocumentNonBlocking(markerRef, { id: tempId, email: newEmail }, { merge: true });
+    }
+
+    toast({ title: "Protocol Initiated", description: `${newRole.toUpperCase()} account provisioned for ${newEmail}.` });
+    setNewEmail('');
+    setIsProvisioning(false);
+  };
+
+  const handleDeleteUser = async (userId: string) => {
+    if (!firestore) return;
+    try {
+      await deleteDoc(doc(firestore, 'users', userId));
+      toast({ title: "Record Shredded", description: "User intelligence data has been purged." });
+    } catch (e) {
+      toast({ variant: "destructive", title: "Shredder Error", description: "Failed to delete user record." });
+    }
+  };
+
   if (isUserLoading || (isAdminLoading && user?.email !== MASTER_ADMIN_EMAIL)) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-muted/30">
@@ -78,7 +169,6 @@ export default function DashboardPage() {
     );
   }
 
-  // Final check: must have user and (either master email or admin data)
   const isAuthorized = user && (user.email === MASTER_ADMIN_EMAIL || adminData);
   if (!isAuthorized) return null;
 
@@ -99,11 +189,17 @@ export default function DashboardPage() {
               <p className="text-muted-foreground font-medium">Real-time telemetry and global asset analytics.</p>
             </div>
             <div className="flex gap-3">
-              <Button variant="outline" className="rounded-xl border-accent/10 bg-white shadow-sm font-bold text-[10px] uppercase tracking-widest h-11 px-6">
+              <Button onClick={handleExportReport} variant="outline" className="rounded-xl border-accent/10 bg-white shadow-sm font-bold text-[10px] uppercase tracking-widest h-11 px-6">
                 <Download className="mr-2 h-3.5 w-3.5" /> Export Report
               </Button>
-              <Button className="rounded-xl bg-accent text-white shadow-xl shadow-accent/20 font-bold text-[10px] uppercase tracking-widest h-11 px-6">
-                <Activity className="mr-2 h-3.5 w-3.5" /> Live Stream
+              <Button 
+                onClick={() => {
+                  setIsLiveStreamActive(!isLiveStreamActive);
+                  toast({ title: isLiveStreamActive ? "Stream Terminated" : "Stream Active", description: "Live telemetry synchronization updated." });
+                }}
+                className={`rounded-xl shadow-xl font-bold text-[10px] uppercase tracking-widest h-11 px-6 transition-all ${isLiveStreamActive ? 'bg-primary text-white shadow-primary/20' : 'bg-accent text-white shadow-accent/20'}`}
+              >
+                <Activity className={`mr-2 h-3.5 w-3.5 ${isLiveStreamActive ? 'animate-pulse' : ''}`} /> {isLiveStreamActive ? 'Live Syncing' : 'Live Stream'}
               </Button>
             </div>
           </div>
@@ -111,7 +207,7 @@ export default function DashboardPage() {
           {/* Stats Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {[
-              { label: "Active Users", val: "12,842", delta: "+12%", icon: Users, up: true },
+              { label: "Platform Users", val: allUsers?.length || "...", delta: "+12%", icon: Users, up: true },
               { label: "Assets Processed", val: "849,201", delta: "+24%", icon: Files, up: true },
               { label: "System Health", val: "99.9%", delta: "Stable", icon: Activity, up: true },
               { label: "Network Latency", val: "14ms", delta: "-2ms", icon: Database, up: true },
@@ -199,11 +295,61 @@ export default function DashboardPage() {
                 <div className="flex items-center gap-3">
                   <div className="relative">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-accent/30" />
-                    <Input placeholder="SEARCH EMAIL..." className="h-10 pl-10 w-[240px] rounded-xl bg-muted/20 border-accent/5 text-[10px] font-bold" />
+                    <Input 
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      placeholder="SEARCH EMAIL..." 
+                      className="h-10 pl-10 w-[240px] rounded-xl bg-muted/20 border-accent/5 text-[10px] font-bold" 
+                    />
                   </div>
-                  <Button variant="outline" size="icon" className="h-10 w-10 rounded-xl border-accent/10">
-                    <Filter className="h-4 w-4 text-accent/40" />
-                  </Button>
+                  
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <Button className="h-10 rounded-xl bg-primary text-white shadow-lg shadow-primary/20 font-bold text-[10px] uppercase tracking-widest px-6">
+                        <Plus className="mr-2 h-3.5 w-3.5" /> Provision Account
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="rounded-[2rem] border-none shadow-2xl bg-white max-w-md">
+                      <DialogHeader>
+                        <DialogTitle className="text-xl font-black uppercase italic text-accent">New Intelligence Profile</DialogTitle>
+                        <DialogDescription className="text-[10px] font-bold uppercase tracking-widest">Establish a new professional user or worker identity.</DialogDescription>
+                      </DialogHeader>
+                      <div className="space-y-6 py-6">
+                        <div className="space-y-2">
+                          <Label className="text-[10px] font-black uppercase tracking-widest text-accent/60">Email Protocol</Label>
+                          <Input 
+                            value={newEmail}
+                            onChange={(e) => setNewEmail(e.target.value)}
+                            placeholder="NAME@COMPANY.COM" 
+                            className="h-12 rounded-xl bg-muted/20 border-accent/10 font-bold"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label className="text-[10px] font-black uppercase tracking-widest text-accent/60">Privilege Level</Label>
+                          <Select value={newRole} onValueChange={setNewRole}>
+                            <SelectTrigger className="h-12 rounded-xl bg-muted/20 border-accent/10 font-bold uppercase text-[10px]">
+                              <SelectValue placeholder="Select Role" />
+                            </SelectTrigger>
+                            <SelectContent className="rounded-xl border-accent/10">
+                              <SelectItem value="standard" className="text-xs font-bold uppercase">Standard User</SelectItem>
+                              <SelectItem value="worker" className="text-xs font-bold uppercase">Worker Protocol</SelectItem>
+                              <SelectItem value="admin" className="text-xs font-bold uppercase">Intelligence Admin</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
+                      <DialogFooter>
+                        <Button 
+                          onClick={handleProvisionAccount}
+                          disabled={isProvisioning || !newEmail}
+                          className="w-full h-12 rounded-xl bg-accent text-white font-black uppercase tracking-widest text-[10px]"
+                        >
+                          {isProvisioning ? <Loader2 className="animate-spin mr-2 h-4 w-4" /> : <UserPlus className="mr-2 h-4 w-4" />}
+                          Establish Profile
+                        </Button>
+                      </DialogFooter>
+                    </DialogContent>
+                  </Dialog>
                 </div>
               </div>
             </CardHeader>
@@ -214,41 +360,57 @@ export default function DashboardPage() {
                     <tr className="bg-muted/30 border-b border-accent/5">
                       <th className="px-10 py-5 text-[9px] font-black uppercase tracking-widest text-accent/40">User Account</th>
                       <th className="px-10 py-5 text-[9px] font-black uppercase tracking-widest text-accent/40">Role</th>
-                      <th className="px-10 py-5 text-[9px] font-black uppercase tracking-widest text-accent/40">Operations</th>
+                      <th className="px-10 py-5 text-[9px] font-black uppercase tracking-widest text-accent/40">Registered</th>
                       <th className="px-10 py-5 text-[9px] font-black uppercase tracking-widest text-accent/40">Status</th>
-                      <th className="px-10 py-5 text-[9px] font-black uppercase tracking-widest text-accent/40">Last Active</th>
+                      <th className="px-10 py-5 text-[9px] font-black uppercase tracking-widest text-accent/40">Actions</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {[
-                      { email: "office.contact.sufian@gmail.com", role: "ADMIN", ops: 124, status: "Active", time: "NOW" },
-                      { email: "sarah.connor@sky.net", role: "PRO", ops: 45, status: "Active", time: "12m ago" },
-                      { email: "bruce.wayne@wayne.co", role: "ENTERPRISE", ops: 892, status: "Idle", time: "1h ago" },
-                      { email: "clark.kent@daily.planet", role: "FREE", ops: 12, status: "Active", time: "2h ago" },
-                      { email: "tony.stark@stark.ind", role: "ENTERPRISE", ops: 1542, status: "Active", time: "4h ago" },
-                    ].map((row, i) => (
-                      <tr key={i} className="border-b border-accent/5 hover:bg-primary/5 transition-colors group">
+                    {isUsersLoading ? (
+                      <tr>
+                        <td colSpan={5} className="px-10 py-20 text-center">
+                          <Loader2 className="h-8 w-8 animate-spin text-primary/20 mx-auto" />
+                          <p className="text-[10px] font-black uppercase tracking-widest text-accent/20 mt-4 italic">Retrieving Global Registry...</p>
+                        </td>
+                      </tr>
+                    ) : filteredUsers.map((userRow, i) => (
+                      <tr key={userRow.id} className="border-b border-accent/5 hover:bg-primary/5 transition-colors group">
                         <td className="px-10 py-6">
                           <div className="flex items-center gap-3">
                             <div className="h-8 w-8 rounded-lg bg-accent text-white flex items-center justify-center text-[10px] font-black italic">
-                              {row.email[0].toUpperCase()}
+                              {userRow.email?.[0].toUpperCase() || 'U'}
                             </div>
-                            <span className="text-[11px] font-bold text-accent uppercase italic">{row.email}</span>
+                            <span className="text-[11px] font-bold text-accent uppercase italic">{userRow.email}</span>
                           </div>
                         </td>
                         <td className="px-10 py-6">
-                          <span className={`text-[9px] font-black px-2.5 py-1 rounded-full border ${row.role === 'ADMIN' ? 'bg-primary/10 border-primary/20 text-primary' : 'bg-accent/5 border-accent/10 text-accent/60'}`}>
-                            {row.role}
+                          <span className={`text-[9px] font-black px-2.5 py-1 rounded-full border ${
+                            userRow.role === 'admin' ? 'bg-primary/10 border-primary/20 text-primary' : 
+                            userRow.role === 'worker' ? 'bg-secondary/10 border-secondary/20 text-secondary' : 
+                            'bg-accent/5 border-accent/10 text-accent/60'
+                          }`}>
+                            {(userRow.role || 'standard').toUpperCase()}
                           </span>
                         </td>
-                        <td className="px-10 py-6 text-[11px] font-black text-accent/60 italic">{row.ops} Units</td>
+                        <td className="px-10 py-6 text-[10px] font-bold text-accent/40 uppercase tracking-widest">
+                          {userRow.creationDateTime ? new Date(userRow.creationDateTime).toLocaleDateString() : 'LEGACY'}
+                        </td>
                         <td className="px-10 py-6">
                           <div className="flex items-center gap-2">
-                            <div className={`h-1.5 w-1.5 rounded-full ${row.status === 'Active' ? 'bg-green-500' : 'bg-orange-400'}`} />
-                            <span className="text-[10px] font-bold uppercase tracking-widest text-accent/40">{row.status}</span>
+                            <div className={`h-1.5 w-1.5 rounded-full ${userRow.status === 'active' ? 'bg-green-500' : 'bg-orange-400'}`} />
+                            <span className="text-[10px] font-bold uppercase tracking-widest text-accent/40">{userRow.status || 'Active'}</span>
                           </div>
                         </td>
-                        <td className="px-10 py-6 text-[10px] font-bold text-accent/40 uppercase tracking-widest">{row.time}</td>
+                        <td className="px-10 py-6">
+                          <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            onClick={() => handleDeleteUser(userRow.id)}
+                            className="h-8 w-8 rounded-lg text-accent/20 hover:text-destructive transition-all"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </td>
                       </tr>
                     ))}
                   </tbody>

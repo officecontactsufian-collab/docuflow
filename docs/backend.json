@@ -1,3 +1,4 @@
+
 {
   "entities": {
     "User": {
@@ -17,16 +18,18 @@
         },
         "role": {
           "type": "string",
-          "description": "The role assigned to the user within the application, such as 'admin' or 'standard'.",
-          "format": "enum",
-          "items": {
-            "type": "string"
-          }
+          "description": "The role assigned to the user within the application, such as 'admin', 'worker', or 'standard'.",
+          "enum": ["admin", "worker", "standard"]
         },
         "creationDateTime": {
           "type": "string",
           "description": "Timestamp indicating when the user's record was created in the system.",
           "format": "date-time"
+        },
+        "status": {
+          "type": "string",
+          "description": "The current status of the user account.",
+          "enum": ["active", "suspended", "pending"]
         }
       },
       "required": [
@@ -79,11 +82,6 @@
         "status": {
           "type": "string",
           "description": "The current status of the file (e.g., 'uploaded', 'processing', 'processed', 'deleted', 'temporary')."
-        },
-        "expirationDateTime": {
-          "type": "string",
-          "description": "Optional timestamp indicating when a temporary file is scheduled to be deleted.",
-          "format": "date-time"
         }
       },
       "required": [
@@ -116,93 +114,16 @@
           "type": "string",
           "description": "The type of PDF operation performed (e.g., 'merge', 'split', 'convert', 'ai_analysis')."
         },
-        "inputFilesIds": {
-          "type": "array",
-          "description": "An array of IDs referencing the File entities that were used as input for this operation. (Relationship: File N:N Operation)",
-          "items": {
-            "type": "string"
-          }
-        },
-        "outputFileId": {
-          "type": "string",
-          "description": "Reference to the File entity that was generated as output from this operation, if any. (Relationship: File 1:1 Operation)"
-        },
-        "parameters": {
-          "type": "string",
-          "description": "A JSON string storing specific parameters and settings for the operation (e.g., page ranges for split, merge order, conversion format, AI analysis prompt)."
-        },
-        "startDateTime": {
-          "type": "string",
-          "description": "Timestamp indicating when the operation began.",
-          "format": "date-time"
-        },
-        "endDateTime": {
-          "type": "string",
-          "description": "Timestamp indicating when the operation completed or failed.",
-          "format": "date-time"
-        },
         "status": {
           "type": "string",
           "description": "The current status of the operation (e.g., 'pending', 'processing', 'completed', 'failed')."
-        },
-        "errorMessage": {
-          "type": "string",
-          "description": "If the operation failed, a description of the error."
         }
       },
       "required": [
         "id",
         "userId",
         "operationType",
-        "inputFilesIds",
-        "parameters",
-        "startDateTime",
         "status"
-      ]
-    },
-    "ConversionPreset": {
-      "$schema": "http://json-schema.org/draft-07/schema#",
-      "title": "ConversionPreset",
-      "type": "object",
-      "description": "Defines available conversion options and presets (e.g., PDF to Word, PDF to JPG).",
-      "properties": {
-        "id": {
-          "type": "string",
-          "description": "Unique identifier for the ConversionPreset entity."
-        },
-        "name": {
-          "type": "string",
-          "description": "A user-friendly display name for the conversion preset (e.g., 'PDF to Word (.docx)', 'PDF to JPEG')."
-        },
-        "sourceFormat": {
-          "type": "string",
-          "description": "The original file format this preset converts from (e.g., 'pdf', 'docx', 'jpg')."
-        },
-        "targetFormat": {
-          "type": "string",
-          "description": "The desired output file format for this preset (e.g., 'docx', 'jpg', 'pdf')."
-        },
-        "options": {
-          "type": "string",
-          "description": "A JSON string storing format-specific options for the conversion (e.g., image quality, OCR setting, page orientation)."
-        },
-        "description": {
-          "type": "string",
-          "description": "A detailed description of what this conversion preset does."
-        },
-        "isEnabled": {
-          "type": "boolean",
-          "description": "A boolean indicating whether this conversion preset is active and available for users."
-        }
-      },
-      "required": [
-        "id",
-        "name",
-        "sourceFormat",
-        "targetFormat",
-        "options",
-        "description",
-        "isEnabled"
       ]
     }
   },
@@ -221,13 +142,7 @@
           "schema": {
             "$ref": "#/backend/entities/User"
           },
-          "description": "Stores core user profile information such as email and creation date. The document ID (`userId`) must match the `id` field within the document and the authenticated user's UID. This is primarily for individual user profile management.",
-          "params": [
-            {
-              "name": "userId",
-              "description": "The unique identifier of the user, matching their Firebase Authentication UID."
-            }
-          ]
+          "description": "Stores core user profile information."
         }
       },
       {
@@ -237,72 +152,9 @@
           "schema": {
             "$ref": "#/backend/entities/User"
           },
-          "description": "A top-level collection to define administrators. The mere existence of a document with the user's UID as its `adminId` grants administrative privileges. This supports Database Access Control (DBAC) and enables efficient admin role checks using `exists()`. Includes denormalized 'id' for authorization independence.",
-          "params": [
-            {
-              "name": "adminId",
-              "description": "The unique identifier of the user who is an administrator, matching their Firebase Authentication UID."
-            }
-          ]
-        }
-      },
-      {
-        "path": "/users/{userId}/files/{fileId}",
-        "definition": {
-          "entityName": "File",
-          "schema": {
-            "$ref": "#/backend/entities/File"
-          },
-          "description": "Stores metadata for each file uploaded by a specific user. The `userId` in the path identifies the file's owner. This design provides strong ownership-based security and ensures authorization independence, as the owner's UID is part of the document's path.",
-          "params": [
-            {
-              "name": "userId",
-              "description": "The unique identifier of the user who owns this file."
-            },
-            {
-              "name": "fileId",
-              "description": "The unique identifier for the specific file."
-            }
-          ]
-        }
-      },
-      {
-        "path": "/users/{userId}/operations/{operationId}",
-        "definition": {
-          "entityName": "Operation",
-          "schema": {
-            "$ref": "#/backend/entities/Operation"
-          },
-          "description": "Records details of each PDF operation performed by a specific user. The `userId` in the path identifies the user who initiated the operation. This maintains a strong user-operation relationship and ensures authorization independence, as the initiating user's UID is part of the document's path.",
-          "params": [
-            {
-              "name": "userId",
-              "description": "The unique identifier of the user who performed this operation."
-            },
-            {
-              "name": "operationId",
-              "description": "The unique identifier for the specific operation."
-            }
-          ]
-        }
-      },
-      {
-        "path": "/conversion_presets/{presetId}",
-        "definition": {
-          "entityName": "ConversionPreset",
-          "schema": {
-            "$ref": "#/backend/entities/ConversionPreset"
-          },
-          "description": "Stores globally available conversion presets (e.g., PDF to Word). These documents are publicly readable by all users, but write access is restricted to administrators. This collection supports structural segregation for global, non-user-specific data.",
-          "params": [
-            {
-              "name": "presetId",
-              "description": "The unique identifier for the conversion preset."
-            }
-          ]
+          "description": "Administrator markers."
         }
       }
-    ],
-    "reasoning": "The Firestore structure for PDF Spark is designed around the core principles of Authorization Independence, Structural Segregation, and clear Access Modeling to ensure security, scalability, and debuggability. \n\n**Authorization Independence via Denormalization:**\nFor all user-specific data (Files and Operations), ownership is established through the document path itself. For example, a user's files are stored under `/users/{userId}/files/{fileId}`. This design mandates that the `{userId}` wildcard in the path must match `request.auth.uid` for any read/write operation on that user's data. This eliminates the need for `get()` calls in security rules to check parent document ownership or membership, as the authorization context is fully present within the path or the document itself. This is crucial for enabling atomic operations and simplifying rules.\n\n**Structural Segregation & Homogeneous Security Posture:**\n\n1.  **User-Owned Private Data:** Collections like `/users/{userId}/files` and `/users/{userId}/operations` are segregated. All documents within `/users/{userId}/files` are owned by `{userId}`. Similarly, all documents in `/users/{userId}/operations` are owned by the same `{userId}`. This ensures a homogeneous security posture: only the owner (or an admin) can access their respective subcollections, making rules simple and explicit.\n\n2.  **Global Roles:** A dedicated top-level collection, `/roles_admin/{adminId}`, is used to manage administrative roles. The mere existence of a document with an `adminId` matching a user's `request.auth.uid` grants them admin privileges. This approach (`Existence over Content`) is highly efficient for checking global roles, avoiding complex queries or custom claims.\n\n3.  **Public/Global Data:** Conversion presets are global and intended for all users to read. They reside in a top-level collection `/conversion_presets/{presetId}`. This segregation ensures that publicly readable data is clearly separated from private user data, and write access can be restricted solely to administrators.\n\n**Querying for Authorization Purposes (QAPs - Rules are not Filters):**\nThe structural design inherently supports secure `list` operations without relying on rules as filters:\n\n*   **User's Files/Operations:** When a user requests their own files or operations (e.g., `/users/$(request.auth.uid)/files`), the path itself acts as a natural filter, ensuring only documents belonging to the authenticated user are returned. The rules will simply confirm `userId == request.auth.uid` from the path. This allows for efficient and secure queries for a user's own data.\n\n*   **Global Data:** For `/conversion_presets`, all documents are intended to be readable by all, so `list` operations are inherently secure and don't require further filtering by rules.\n\n*   **Admin Access:** An administrator's dashboard that requires access to *all* users' files or operations would be handled by specific rules that check `exists(/roles_admin/$(request.auth.uid))` in addition to `request.auth.uid == userId`. This allows an admin to bypass the `userId` constraint when needed, while still maintaining the primary security pattern for regular users. For analytics, admins would be able to `list` documents across collections like `/users` to gather aggregate data, also secured by the `roles_admin` check.\n\nThis structure prioritizes explicit authorization logic within the paths and dedicated collections, minimizing complex rule logic and maximizing the clarity and debuggability of the security model."
+    ]
   }
 }

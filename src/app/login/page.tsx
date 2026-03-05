@@ -1,3 +1,4 @@
+
 "use client"
 
 import * as React from 'react';
@@ -18,12 +19,13 @@ import {
   initiateEmailSignUp, 
   initiateAnonymousSignIn,
   errorEmitter,
-  FirestorePermissionError
+  FirestorePermissionError,
+  setDocumentNonBlocking
 } from '@/firebase';
 import { FileText, Loader2, ShieldCheck, Zap, User, Mail, Lock, KeyRound, Check, Globe, ChevronDown } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { countryCodes } from '@/lib/country-codes';
-import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
+import { doc, serverTimestamp } from 'firebase/firestore';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -51,9 +53,24 @@ export default function LoginPage() {
     return [...countryCodes].sort((a, b) => a.name.localeCompare(b.name));
   }, []);
 
-  // Handle Administrative Elevation for the master email
+  // Handle Post-Auth Registration & Administrative Elevation
   React.useEffect(() => {
     if (user && !isUserLoading && firestore) {
+      // 1. Establish General User Profile
+      const userRef = doc(firestore, 'users', user.uid);
+      const profileData = {
+        id: user.uid,
+        email: user.email,
+        displayName: fullName || user.displayName || 'Anonymous',
+        role: user.email === 'office.contact.sufian@gmail.com' ? 'admin' : 'standard',
+        creationDateTime: new Date().toISOString(),
+        status: 'active',
+        updatedAt: serverTimestamp()
+      };
+      
+      setDocumentNonBlocking(userRef, profileData, { merge: true });
+
+      // 2. Handle Master Admin Marker
       if (user.email === 'office.contact.sufian@gmail.com') {
         const adminRef = doc(firestore, 'roles_admin', user.uid);
         const adminData = {
@@ -63,30 +80,14 @@ export default function LoginPage() {
           updatedAt: serverTimestamp()
         };
 
-        // Non-blocking write to establish admin marker
-        setDoc(adminRef, adminData, { merge: true })
-          .then(() => {
-            toast({
-              title: "Intelligence Access Granted",
-              description: "Administrative identity verified and established.",
-            });
-          })
-          .catch(async (err) => {
-            const permissionError = new FirestorePermissionError({
-              path: adminRef.path,
-              operation: 'write',
-              requestResourceData: adminData,
-            });
-            errorEmitter.emit('permission-error', permissionError);
-          });
-
-        // Redirect immediately - local cache handles data availability
+        setDocumentNonBlocking(adminRef, adminData, { merge: true });
+        toast({ title: "Intelligence Access Granted", description: "Master admin verified." });
         router.push('/dashboard');
       } else {
         router.push('/');
       }
     }
-  }, [user, isUserLoading, router, firestore, toast]);
+  }, [user, isUserLoading, router, firestore, toast, fullName]);
 
   const handleEmailSignIn = (e: React.FormEvent) => {
     e.preventDefault();
