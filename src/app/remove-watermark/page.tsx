@@ -41,7 +41,7 @@ export default function RemoveWatermarkPage() {
     setProcessLogs([
       "Establishing Backend Tunnel...", 
       "Staging Asset Buffer...",
-      "Analyzing Object Tree & Pixels..."
+      "Deep Scanning Object Tree..."
     ]);
 
     try {
@@ -59,7 +59,7 @@ export default function RemoveWatermarkPage() {
         resultUrl = await processImageRemovalAction(base64Data);
         setProcessLogs(prev => [...prev, "Pixel Sanitization Complete.", "Buffer Integrity Verified."]);
       } else {
-        setProcessLogs(prev => [...prev, "Initiating Structural Purge...", "Targeting /OCG & /Annots Registries...", "Neutralizing Transparency Groups...", "Reconstructing Document Stream..."]);
+        setProcessLogs(prev => [...prev, "Initiating Structural Purge...", "Targeting /XObject & /OCG Containers...", "Neutralizing Transparency Groups...", "Reconstructing Document Stream..."]);
         resultUrl = await processPdfRemovalAction(base64Data);
         setProcessLogs(prev => [...prev, "Structural Purge Successful.", "Metadata Tracking Hardened."]);
       }
@@ -164,21 +164,21 @@ export default function RemoveWatermarkPage() {
                               <div className="flex items-center justify-between mb-2">
                                  <p className="text-[8px] font-black uppercase text-accent/40">Engine Strategy</p>
                                  <div className="flex items-center gap-1">
-                                    <div className="h-1 w-1 rounded-full bg-blue-500" />
-                                    <span className="text-[8px] font-bold text-blue-600 uppercase">Aggressive Sanitization</span>
+                                    <div className="h-1.5 w-1.5 rounded-full bg-blue-500" />
+                                    <span className="text-[8px] font-bold text-blue-600 uppercase">Deep Sanitization</span>
                                  </div>
                               </div>
                               <p className="text-[10px] font-bold text-accent italic leading-relaxed">
                                 {isImage 
-                                  ? "Strategy: Backend Luminance Thresholding. This utilizes Jimp's industrial pixel engine to 'burn out' faint overlays and normalize the background buffer." 
-                                  : "Strategy: Structural Object Purge. Targets /OCG layers, /Annots, and /Transparency groups via a deep backend document stream reconstruction."}
+                                  ? "Strategy: Backend Luminance Thresholding. This utilizes Jimp's industrial engine to 'burn out' faint overlays by pushing high-frequency background pixels to pure white." 
+                                  : "Strategy: Aggressive Structural Purge. Targets /Form XObjects, /OCG layers, /Annots, and /Transparency groups via recursive document stream deconstruction."}
                               </p>
                            </div>
 
                            <div className="p-4 bg-primary/5 rounded-2xl border border-primary/10 flex items-start gap-3">
                               <AlertCircle className="h-4 w-4 text-primary mt-0.5 shrink-0" />
                               <p className="text-[9px] leading-tight text-muted-foreground font-medium uppercase">
-                                <span className="font-black text-accent">Note:</span> This protocol targets structural and ghosted watermarks. Pixel-burned logos merged into dense photos may be faded but not fully erased without AI inpainting.
+                                <span className="font-black text-accent">Note:</span> This protocol targets structural and ghosted overlays. Visible watermarks that are part of the core binary content may be neutralized but not completely erased.
                               </p>
                            </div>
                         </div>
@@ -234,7 +234,7 @@ export default function RemoveWatermarkPage() {
                 </div>
                 <div className="space-y-2">
                   <h2 className="text-2xl font-black uppercase italic tracking-tight text-accent">Protocol Success!</h2>
-                  <p className="text-muted-foreground text-sm font-medium">Asset sanitized via industrial backend engine. Overlays neutralized.</p>
+                  <p className="text-muted-foreground text-sm font-medium">Asset sanitized via industrial backend engine. Structural overlays neutralized.</p>
                 </div>
                 <div className="p-4 bg-muted/30 rounded-2xl border border-accent/5 text-left">
                    <div className="flex items-center gap-2 mb-3">
@@ -253,8 +253,8 @@ export default function RemoveWatermarkPage() {
                         </li>
                       )) : [
                         "Structural Scan: Complete",
-                        "Annotation registry: Purged",
-                        "Layer OCGs: Neutralized",
+                        "Annotation Registry: Purged",
+                        "XObject /Form Containers: Removed",
                         "Object Tree: Re-indexed & Sanitized"
                       ].map(item => (
                         <li key={item} className="flex items-center gap-2 text-[9px] font-bold text-accent italic">

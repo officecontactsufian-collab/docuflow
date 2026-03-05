@@ -2,7 +2,7 @@
 'use server';
 
 import Jimp from 'jimp';
-import { PDFDocument, PDFDict, PDFName, PDFArray } from 'pdf-lib';
+import { PDFDocument, PDFDict, PDFName } from 'pdf-lib';
 
 /**
  * @fileOverview DOCFLOW Backend Removal Protocols
@@ -28,6 +28,7 @@ export async function processImageRemovalAction(base64Data: string): Promise<str
       const luminance = 0.2126 * r + 0.7152 * g + 0.0722 * b;
       
       // Aggressive threshold: If the pixel is close to white (common for watermark backgrounds), push to pure white.
+      // This effectively "burns out" the faint grey/transparent text of most watermarks.
       if (luminance > 215) {
         this.bitmap.data[idx + 0] = 255;
         this.bitmap.data[idx + 1] = 255;
@@ -53,7 +54,6 @@ export async function processPdfRemovalAction(base64Data: string): Promise<strin
     
     // Load with ignoreEncryption for industrial-grade access
     const sourcePdf = await PDFDocument.load(buffer, { ignoreEncryption: true });
-    const context = sourcePdf.context;
     
     // 1. Global Structural Purge: Optional Content Groups (Layers)
     // Most professional watermarks are stored in these containers.
@@ -63,51 +63,48 @@ export async function processPdfRemovalAction(base64Data: string): Promise<strin
     pages.forEach((page) => {
       const node = (page as any).node as PDFDict;
       
-      // 2. Clear Annotation Registry (Interactive stamps and text overlays)
+      // 2. Clear Annotation Registry (Interactive stamps, text overlays, signatures)
       node.delete(PDFName.of('Annots'));
 
-      // 3. Neutralize Transparency Groups (Ghosting effects)
+      // 3. Neutralize Transparency Groups (Used for ghosting watermarks over content)
       node.delete(PDFName.of('Group'));
       
       // 4. Strip Structural Artifacts and Private Data
       node.delete(PDFName.of('PieceInfo'));
       node.delete(PDFName.of('Metadata'));
 
-      // 5. Deep Resource-Level Purge (Form XObjects)
-      // Many watermarks are referenced as /XObject entries in the resource dictionary.
-      const resources = node.get(PDFName.of('Resources')) as PDFDict;
-      if (resources) {
-        const xObjects = resources.get(PDFName.of('XObject')) as PDFDict;
+      // 5. Deep Resource-Level Purge (XObjects & Properties)
+      const resources = node.get(PDFName.of('Resources'));
+      if (resources instanceof PDFDict) {
+        // Purge XObjects (Most watermarks are /Form XObjects)
+        const xObjects = resources.get(PDFName.of('XObject'));
         if (xObjects instanceof PDFDict) {
-          // Iterate through XObjects and remove those likely to be watermarks
-          // or just perform an aggressive sweep of /Form types.
           const xObjectNames = xObjects.keys();
           xObjectNames.forEach((name) => {
             const xObj = xObjects.get(name);
             if (xObj instanceof PDFDict) {
               const subtype = xObj.get(PDFName.of('Subtype'));
-              // Watermarks are almost always /Form XObjects or /Image with high transparency
+              // Watermarks are almost always /Form XObjects or /Image with high transparency.
+              // In an aggressive purge, we remove all /Form types which are non-essential overlays.
               if (subtype === PDFName.of('Form')) {
-                // If it's a Form XObject, it's a prime candidate for a watermark container.
-                // In an aggressive purge, we remove the reference.
                 xObjects.delete(name);
               }
             }
           });
         }
         
-        // 6. Neutralize Optional Content references at the resource level
+        // 6. Neutralize Optional Content references at the page resource level
         resources.delete(PDFName.of('Properties'));
       }
     });
     
     // 7. Industrial Metadata Hardening
-    // Strips all author and producer tags to prevent tracking.
+    // Strips all author and producer tags to prevent tracking and watermark persistence.
     sourcePdf.setTitle('');
     sourcePdf.setAuthor('');
     sourcePdf.setSubject('');
     sourcePdf.setKeywords([]);
-    sourcePdf.setProducer("DOCFLOW Industrial Sanitization (Eng: 5.0)");
+    sourcePdf.setProducer("DOCFLOW Industrial Sanitization (Eng: 6.0)");
     sourcePdf.setCreator("DOCFLOW Professional Protocol");
     sourcePdf.setModificationDate(new Date());
     
