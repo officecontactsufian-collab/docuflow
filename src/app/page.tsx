@@ -38,43 +38,41 @@ export default function Home() {
 
   const toolCategories = [
     {
-      label: "Convert & Export",
-      description: "Lossless transformation between formats.",
+      label: "Modify PDF",
+      description: "Direct page and structural modifications.",
       items: [
-        { title: "PDF to Word", desc: "Editable DOCX documents.", icon: FileText, href: "/convert?type=pdf-to-word" },
-        { title: "Word to PDF", desc: "Clean universal standards.", icon: FilePenLine, href: "/convert?type=word-to-pdf" },
-        { title: "PDF to Excel", desc: "Extract tables accurately.", icon: Table, href: "/convert?type=pdf-to-excel" },
-        { title: "JPG to PDF", desc: "High-res image stitching.", icon: ImageIcon, href: "/convert?type=jpg-to-pdf" },
+        { title: "Crop PDF", desc: "Trim page margins with precision.", icon: Crop, href: "/crop" },
+        { title: "Reorder & Rotate", desc: "Change page order and orientation.", icon: RotateCw, href: "/organize" },
+      ]
+    },
+    {
+      label: "Convert & Export",
+      description: "Lossless transformation between industrial formats.",
+      items: [
+        { title: "PDF to Word", desc: "Convert to editable DOCX documents.", icon: FileText, href: "/convert?type=pdf-to-word" },
+        { title: "Word to PDF", desc: "Standardize any Word document to PDF.", icon: FilePenLine, href: "/convert?type=word-to-pdf" },
+        { title: "PDF to Excel", desc: "Accurate table data extraction.", icon: Table, href: "/convert?type=pdf-to-excel" },
+        { title: "JPG to PDF", desc: "High-resolution image stitching.", icon: ImageIcon, href: "/convert?type=jpg-to-pdf" },
       ]
     },
     {
       label: "Structure & Flow",
-      description: "Advanced page manipulation tools.",
+      description: "Advanced page manipulation and optimization.",
       items: [
-        { title: "Merge PDF", desc: "Unify multiple documents.", icon: Merge, href: "/merge" },
-        { title: "Split PDF", desc: "Extract specific page ranges.", icon: Scissors, href: "/split" },
-        { title: "Organize", desc: "Rotate and reorder pages.", icon: RotateCw, href: "/organize" },
-        { title: "Compress", desc: "Optimize for size and speed.", icon: Maximize, href: "/compress" },
+        { title: "Merge PDF", desc: "Combine multiple files into one.", icon: Merge, href: "/merge" },
+        { title: "Split PDF", desc: "Extract specific ranges or pages.", icon: Scissors, href: "/split" },
+        { title: "Compress PDF", desc: "Optimize file size for web delivery.", icon: Maximize, href: "/compress" },
+        { title: "Add Numbers", desc: "Sequential page counter placement.", icon: Hash, href: "/numbers" },
       ]
     },
     {
       label: "Security & Trust",
-      description: "Industrial grade protection protocols.",
+      description: "Industrial grade metadata and access protection.",
       items: [
-        { title: "Privacy Shield", desc: "Strip metadata tracking.", icon: ShieldCheck, href: "/protect" },
-        { title: "Digital Sign", desc: "Apply e-signatures securely.", icon: Signature, href: "/sign" },
-        { title: "Unlock PDF", desc: "Remove restricted access.", icon: Unlock, href: "/protect?mode=unlock" },
-        { title: "Sanitize", desc: "Structural anonymization.", icon: EyeOff, href: "/sanitize" },
-      ]
-    },
-    {
-      label: "Formatting Tools",
-      description: "Visual adjustments and annotations.",
-      items: [
-        { title: "Add Numbers", desc: "Sequential page counters.", icon: Hash, href: "/numbers" },
-        { title: "Crop Pages", desc: "Trim document margins.", icon: Crop, href: "/crop" },
-        { title: "Watermark", desc: "Custom text overlays.", icon: FileText, href: "/watermark" },
-        { title: "Repair PDF", desc: "Rebuild corrupted files.", icon: Settings2, href: "/repair" },
+        { title: "Privacy Shield", desc: "Permanent metadata and tracking erasure.", icon: ShieldCheck, href: "/protect" },
+        { title: "Unlock PDF", desc: "Recover and strip document restrictions.", icon: Unlock, href: "/protect?mode=unlock" },
+        { title: "Digital Sign", desc: "Apply secure electronic signatures.", icon: Signature, href: "/sign" },
+        { title: "Sanitize PDF", desc: "Complete structural anonymization.", icon: EyeOff, href: "/sanitize" },
       ]
     }
   ];
@@ -101,7 +99,7 @@ export default function Home() {
                 
                 <p className="text-lg md:text-xl text-accent/60 max-w-xl mx-auto leading-relaxed font-bold">
                   High-performance document intelligence for professionals. 
-                  Private, instant, and processed locally.
+                  Private, instant, and processed entirely locally.
                 </p>
 
                 <div className="flex items-center justify-center pt-4">
@@ -123,7 +121,7 @@ export default function Home() {
           <div className="absolute bottom-0 right-0 translate-x-1/4 translate-y-1/4 w-[400px] h-[400px] bg-secondary/10 rounded-full blur-[120px] pointer-events-none" />
         </section>
 
-        <section id="tools" className="py-20 bg-white/40 border-y border-white/20 backdrop-blur-sm relative z-10">
+        <section id="tools" className="py-20 bg-white border-y border-accent/5 relative z-10">
           <div className="container mx-auto px-6">
             <div className="max-w-7xl mx-auto space-y-20">
               {toolCategories.map((cat, idx) => (
@@ -167,21 +165,21 @@ export default function Home() {
                 { 
                   icon: FileUp, 
                   title: "Stage", 
-                  desc: "Select your assets securely. Local staging occurs instantly." 
+                  desc: "Select your assets securely. Local staging occurs instantly within your browser." 
                 },
                 { 
                   icon: Settings2, 
                   title: "Process", 
-                  desc: "Our engine reconstructs your document with industrial accuracy." 
+                  desc: "Our high-fidelity engine reconstructs your document with industrial accuracy." 
                 },
                 { 
                   icon: Download, 
                   title: "Deploy", 
-                  desc: "Save your optimized document instantly. Verified and ready." 
+                  desc: "Save your optimized document instantly. Verified, private, and ready for use." 
                 }
               ].map((step, idx) => (
                 <div key={step.title} className="space-y-6 text-center relative group">
-                  <div className="w-20 h-20 bg-secondary rounded-2xl flex items-center justify-center shadow-xl mx-auto transition-transform duration-500 group-hover:scale-110 group-hover:-rotate-6">
+                  <div className="w-20 h-20 bg-accent text-white rounded-2xl flex items-center justify-center shadow-xl mx-auto transition-transform duration-500 group-hover:scale-110 group-hover:-rotate-6">
                     <step.icon className="h-8 w-8 text-primary" />
                   </div>
                   <div className="space-y-3">
