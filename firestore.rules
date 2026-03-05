@@ -9,25 +9,6 @@ service cloud.firestore {
      * This ruleset implements a strict user-ownership model where users manage their own files and operations
      * within their own dedicated data trees. It utilizes path-based authorization to ensure that access is
      * granted only to the owner of the data or a verified administrator.
-     *
-     * DATA STRUCTURE:
-     * - /users/{userId}: Private user profile.
-     * - /roles_admin/{adminId}: Marker collection for administrative privileges.
-     * - /users/{userId}/files/{fileId}: User-specific file metadata.
-     * - /users/{userId}/operations/{operationId}: User-specific processing logs.
-     * - /conversion_presets/{presetId}: Publicly readable global configuration.
-     *
-     * KEY SECURITY DECISIONS:
-     * 1. Authorization Independence: Ownership is verified via the document path (userId), avoiding extra database lookups.
-     * 2. Administrative Access: A global isAdmin() check allows designated users (defined in /roles_admin) to
-     *    bypass ownership checks for dashboard and analytics purposes, as requested by 'office.contact.sufian@gmail.com'.
-     * 3. Relational Integrity: On creation of nested data, the system enforces that the internal 'userId' field
-     *    matches the path variable to ensure data consistency.
-     * 4. Structural Segregation: Public presets are stored separately from private user data to prevent accidental exposure.
-     *
-     * DENORMALIZATION FOR AUTHORIZATION:
-     * - The 'userId' is present both in the document path and as a field within File and Operation entities
-     *   to allow for efficient querying and path-consistency validation.
      */
 
     // --- Helper Functions ---
@@ -60,11 +41,7 @@ service cloud.firestore {
     // --- Collection Rules ---
 
     /**
-     * @description Rules for the User profile. Users can manage their own profile; admins can view all profiles.
      * @path /users/{userId}
-     * @allow get: if isOwnerOrAdmin(userId); (User viewing self or admin analytics)
-     * @deny list: if !isAdmin(); (Prevents users from enumerating other users)
-     * @principle Ownership and Self-Creation.
      */
     match /users/{userId} {
       allow get: if isOwnerOrAdmin(userId);
@@ -75,23 +52,19 @@ service cloud.firestore {
     }
 
     /**
-     * @description Administrative marker collection. Purely for authorization logic.
      * @path /roles_admin/{adminId}
-     * @allow get: if isAdmin(); (Admins checking their own or others' status)
-     * @deny create, update, delete: if true; (Management should happen via console or secure backend)
-     * @principle Restricted Global Roles.
+     * UPDATED: Allows the designated admin email to create their own marker.
+     * Allows self-retrieval to bootstrap admin status.
      */
     match /roles_admin/{adminId} {
-      allow get, list: if isAdmin();
-      allow create, update, delete: if false;
+      allow get: if isOwner(adminId) || isAdmin();
+      allow list: if isAdmin();
+      allow create: if isOwner(adminId) && request.auth.token.email == "office.contact.sufian@gmail.com";
+      allow update, delete: if isAdmin();
     }
 
     /**
-     * @description User-specific files. Access is restricted to the owner or admins.
      * @path /users/{userId}/files/{fileId}
-     * @allow create: if isOwner(userId) && request.resource.data.userId == userId; (Consistency check)
-     * @deny update: if request.resource.data.userId != resource.data.userId; (Immutable owner)
-     * @principle Path-based ownership with relational integrity.
      */
     match /users/{userId}/files/{fileId} {
       allow get, list: if isOwnerOrAdmin(userId);
@@ -101,11 +74,7 @@ service cloud.firestore {
     }
 
     /**
-     * @description User-specific operations/logs. Access is restricted to the owner or admins.
      * @path /users/{userId}/operations/{operationId}
-     * @allow list: if isOwnerOrAdmin(userId); (User viewing history or admin dashboard)
-     * @deny delete: if !isAdmin(); (Protecting audit trails for standard users)
-     * @principle Path-based ownership and audit integrity.
      */
     match /users/{userId}/operations/{operationId} {
       allow get, list: if isOwnerOrAdmin(userId);
@@ -115,11 +84,7 @@ service cloud.firestore {
     }
 
     /**
-     * @description Global conversion presets. Publicly readable, admin-only writes.
      * @path /conversion_presets/{presetId}
-     * @allow get, list: if true; (Publicly available configuration)
-     * @deny create, update, delete: if !isAdmin(); (Restricted to administrators)
-     * @principle Public Read with Owner-Only Writes (Admin).
      */
     match /conversion_presets/{presetId} {
       allow get, list: if true;

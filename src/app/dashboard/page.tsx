@@ -1,12 +1,10 @@
-
 "use client"
 
 import * as React from 'react';
 import { Navbar } from '@/components/navbar';
-import { useUser, useFirestore, useCollection } from '@/firebase';
+import { useUser, useFirestore, useDoc, useMemoFirebase } from '@/firebase';
 import { useRouter } from 'next/navigation';
 import { 
-  BarChart4, 
   Users, 
   Files, 
   Activity, 
@@ -17,7 +15,6 @@ import {
   Search,
   Filter,
   Download,
-  LayoutDashboard,
   Database
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -30,11 +27,9 @@ import {
   YAxis, 
   CartesianGrid, 
   Tooltip, 
-  ResponsiveContainer,
-  BarChart,
-  Bar
+  ResponsiveContainer
 } from 'recharts';
-import { doc, getDoc } from 'firebase/firestore';
+import { doc } from 'firebase/firestore';
 
 const data = [
   { name: '01 Feb', ops: 400, users: 240 },
@@ -50,28 +45,28 @@ export default function DashboardPage() {
   const { user, isUserLoading } = useUser();
   const firestore = useFirestore();
   const router = useRouter();
-  const [isAdmin, setIsAdmin] = React.useState<boolean | null>(null);
+  
+  const adminRef = useMemoFirebase(() => {
+    if (!firestore || !user) return null;
+    return doc(firestore, 'roles_admin', user.uid);
+  }, [firestore, user]);
+
+  const { data: adminData, isLoading: isAdminLoading } = useDoc(adminRef);
 
   React.useEffect(() => {
-    async function checkAdmin() {
-      if (!user) {
-        if (!isUserLoading) router.push('/login');
-        return;
-      }
-      
-      const adminRef = doc(firestore, 'roles_admin', user.uid);
-      const adminSnap = await getDoc(adminRef);
-      
-      if (!adminSnap.exists()) {
+    if (!isUserLoading && !user) {
+      router.push('/login');
+      return;
+    }
+    
+    if (!isAdminLoading && !isUserLoading && user) {
+      if (!adminData) {
         router.push('/');
-      } else {
-        setIsAdmin(true);
       }
     }
-    checkAdmin();
-  }, [user, isUserLoading, firestore, router]);
+  }, [user, isUserLoading, adminData, isAdminLoading, router]);
 
-  if (isUserLoading || isAdmin === null) {
+  if (isUserLoading || isAdminLoading || !adminData) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-muted/30">
         <div className="text-center space-y-4">

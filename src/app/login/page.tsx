@@ -1,4 +1,3 @@
-
 "use client"
 
 import * as React from 'react';
@@ -11,8 +10,17 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
-import { useAuth, useUser, useFirestore, initiateEmailSignIn, initiateEmailSignUp, initiateAnonymousSignIn } from '@/firebase';
-import { FileText, Loader2, ShieldCheck, Zap, User, Phone, Mail, Lock, KeyRound, Check, Globe, ChevronDown, Search } from 'lucide-react';
+import { 
+  useAuth, 
+  useUser, 
+  useFirestore, 
+  initiateEmailSignIn, 
+  initiateEmailSignUp, 
+  initiateAnonymousSignIn,
+  errorEmitter,
+  FirestorePermissionError
+} from '@/firebase';
+import { FileText, Loader2, ShieldCheck, Zap, User, Mail, Lock, KeyRound, Check, Globe, ChevronDown } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { countryCodes } from '@/lib/country-codes';
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
@@ -45,21 +53,31 @@ export default function LoginPage() {
 
   React.useEffect(() => {
     if (user && !isUserLoading) {
-      // Auto-elevate the specific admin email if it's logging in
       if (user.email === 'office.contact.sufian@gmail.com') {
         const adminRef = doc(firestore, 'roles_admin', user.uid);
-        setDoc(adminRef, {
+        const adminData = {
           id: user.uid,
           email: user.email,
           role: 'admin',
           creationDateTime: serverTimestamp()
-        }, { merge: true });
-        
-        toast({
-          title: "Admin Elevation Successful",
-          description: "Administrative intelligence protocols established.",
-        });
-        router.push('/dashboard');
+        };
+
+        setDoc(adminRef, adminData, { merge: true })
+          .then(() => {
+            toast({
+              title: "Admin Elevation Successful",
+              description: "Administrative intelligence protocols established.",
+            });
+            router.push('/dashboard');
+          })
+          .catch(async (err) => {
+            const permissionError = new FirestorePermissionError({
+              path: adminRef.path,
+              operation: 'write',
+              requestResourceData: adminData,
+            });
+            errorEmitter.emit('permission-error', permissionError);
+          });
       } else {
         router.push('/');
       }
@@ -274,7 +292,7 @@ export default function LoginPage() {
                     
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <Label htmlFor="reg-password" className="text-[10px) font-black uppercase tracking-widest text-accent/60 flex items-center gap-2">
+                        <Label htmlFor="reg-password" className="text-[10px] font-black uppercase tracking-widest text-accent/60 flex items-center gap-2">
                           <Lock className="h-3.5 w-3.5" /> Password
                         </Label>
                         <Input 
