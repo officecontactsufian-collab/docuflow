@@ -16,14 +16,22 @@ import {
   Loader2,
   Trash2,
   LogOut,
+  Clock,
+  ExternalLink,
+  ShieldAlert,
+  Server,
+  Zap,
+  Globe
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
 import { doc, collection } from 'firebase/firestore';
 import { useToast } from '@/hooks/use-toast';
 import { PDFDocument, StandardFonts, rgb } from 'pdf-lib';
 import { signOut } from 'firebase/auth';
+import { cn } from '@/lib/utils';
 
 const OperationalChart = dynamic(
   () => import('@/components/dashboard/operational-chart'),
@@ -94,7 +102,7 @@ export default function AdminDashboardPage() {
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = `DOCFLOW_Intelligence_Report.pdf`;
+      link.download = `DOCFLOW_Intelligence_Report_${Date.now()}.pdf`;
       link.click();
       toast({ title: "Report Exported", description: "System telemetry archived successfully." });
     } catch (e) {
@@ -114,141 +122,201 @@ export default function AdminDashboardPage() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col bg-muted/20">
+    <div className="flex min-h-screen flex-col bg-[#F8F9FA]">
       <Navbar />
       
       <main className="flex-1 container mx-auto px-6 py-12">
-        <div className="max-w-7xl mx-auto space-y-10">
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+        <div className="max-w-7xl mx-auto space-y-8">
+          {/* Top Command Bar */}
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 bg-white p-8 rounded-[2.5rem] border border-accent/5 shadow-sm">
             <div className="space-y-2">
-              <div className="section-label">
-                <ShieldCheck className="h-3 w-3 text-primary" />
-                <span>Verified Master Admin: {user.email}</span>
+              <div className="flex items-center gap-3 mb-1">
+                <Badge variant="outline" className="bg-primary/5 text-primary border-primary/10 rounded-lg px-2.5 py-1 flex items-center gap-1.5 text-[9px] font-black uppercase tracking-widest">
+                  <ShieldCheck className="h-3 w-3" /> Master Clearance
+                </Badge>
+                <div className="h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse" />
+                <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest">System Online</span>
               </div>
-              <h1 className="text-4xl font-black tracking-tighter text-accent uppercase italic">System Intelligence</h1>
-              <p className="text-muted-foreground font-medium">Real-time Command Dashboard</p>
+              <h1 className="text-4xl font-black tracking-tighter text-accent uppercase italic leading-none">System Intelligence</h1>
+              <p className="text-[10px] font-bold text-accent/40 uppercase tracking-widest italic flex items-center gap-2">
+                <Clock className="h-3 w-3" /> Real-time Command Dashboard • Session active for: {user.email}
+              </p>
             </div>
-            <div className="flex gap-3">
-              <Button onClick={handleExportReport} variant="outline" className="rounded-xl border-accent/10 bg-white shadow-sm font-bold text-[10px] uppercase h-11 px-6 tracking-widest">
-                <Download className="mr-2 h-3.5 w-3.5" /> Archive Report
+            <div className="flex items-center gap-3">
+              <Button onClick={handleExportReport} variant="outline" className="rounded-xl border-accent/10 bg-white hover:bg-muted/50 font-black text-[10px] uppercase h-12 px-6 tracking-widest transition-all">
+                <Download className="mr-2 h-4 w-4" /> Archive Intelligence
               </Button>
-              <Button onClick={handleLogout} variant="destructive" className="rounded-xl shadow-xl font-bold text-[10px] uppercase h-11 px-6 tracking-widest">
-                <LogOut className="mr-2 h-3.5 w-3.5" /> Terminate Session
+              <Button onClick={handleLogout} variant="destructive" className="rounded-xl shadow-xl shadow-destructive/20 font-black text-[10px] uppercase h-12 px-6 tracking-widest transition-all hover:scale-[1.02]">
+                <LogOut className="mr-2 h-4 w-4" /> Terminate Access
               </Button>
             </div>
           </div>
 
+          {/* Core Telemetry Cards */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {[
-              { label: "Active Users", val: allUsers?.length || "...", delta: "Live", icon: Users, up: true },
-              { label: "Total Assets", val: "849,201", delta: "+24%", icon: Files, up: true },
-              { label: "System Health", val: "99.9%", delta: "Stable", icon: Activity, up: true },
-              { label: "Gateway Status", val: "Active", delta: "Secure", icon: Database, up: true },
+              { label: "Identity Registry", val: allUsers?.length || "0", delta: "Active Units", icon: Users, color: "text-blue-600", bg: "bg-blue-50" },
+              { label: "Processing Load", val: "849,201", delta: "+12.4% (24h)", icon: Zap, color: "text-primary", bg: "bg-primary/5" },
+              { label: "Protocol Uptime", val: "99.9%", delta: "Industrial Standard", icon: Activity, color: "text-green-600", bg: "bg-green-50" },
+              { label: "Gateway Nodes", val: "Active", delta: "Global Lattice", icon: Globe, color: "text-purple-600", bg: "bg-purple-50" },
             ].map((stat) => (
-              <Card key={stat.label} className="border-none shadow-xl rounded-[2rem] bg-white group hover:scale-[1.02] transition-all">
-                <CardContent className="p-8">
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="p-3 bg-primary/5 rounded-xl text-primary group-hover:scale-110 transition-transform">
-                      <stat.icon className="h-5 w-5" />
+              <Card key={stat.label} className="border-none shadow-xl rounded-[2.5rem] bg-white group hover:-translate-y-1 transition-all duration-500 overflow-hidden relative">
+                <div className={cn("absolute inset-0 opacity-0 group-hover:opacity-5 transition-opacity pointer-events-none", stat.bg)} />
+                <CardContent className="p-8 relative z-10">
+                  <div className="flex items-center justify-between mb-6">
+                    <div className={cn("p-4 rounded-2xl shadow-sm transition-transform group-hover:scale-110 duration-500", stat.bg, stat.color)}>
+                      <stat.icon className="h-6 w-6" />
                     </div>
-                    <div className={`flex items-center gap-1 text-[10px] font-black uppercase ${stat.up ? 'text-green-600' : 'text-primary'}`}>
-                      {stat.delta}
-                    </div>
+                    <div className="text-[9px] font-black uppercase tracking-widest text-accent/20 italic">DOCFLOW v2.5</div>
                   </div>
-                  <p className="text-[10px] font-black uppercase tracking-widest text-accent/40 mb-1">{stat.label}</p>
-                  <h3 className="text-3xl font-black text-accent italic tracking-tighter">{stat.val}</h3>
+                  <p className="text-[10px] font-black uppercase tracking-[0.2em] text-accent/40 mb-1">{stat.label}</p>
+                  <h3 className="text-4xl font-black text-accent italic tracking-tighter mb-2">{stat.val}</h3>
+                  <div className="flex items-center gap-2">
+                    <span className="text-[9px] font-bold uppercase text-accent/60 bg-muted/50 px-2 py-0.5 rounded-full">{stat.delta}</span>
+                  </div>
                 </CardContent>
               </Card>
             ))}
           </div>
 
-          <div className="grid lg:grid-cols-3 gap-8">
-            <Card className="lg:col-span-2 border-none shadow-2xl rounded-[2.5rem] bg-white overflow-hidden">
-              <CardHeader className="p-10 pb-0">
-                <CardTitle className="text-xl font-black uppercase italic text-accent tracking-tighter">Operational Throughput</CardTitle>
-                <CardDescription className="text-[10px] font-bold uppercase tracking-widest italic">Document Transformation Stream</CardDescription>
+          <div className="grid lg:grid-cols-12 gap-8">
+            {/* Throughput Chart */}
+            <Card className="lg:col-span-8 border-none shadow-2xl rounded-[3rem] bg-white overflow-hidden">
+              <CardHeader className="p-10 pb-0 flex flex-row items-center justify-between">
+                <div>
+                  <CardTitle className="text-2xl font-black uppercase italic text-accent tracking-tighter">Operational Throughput</CardTitle>
+                  <CardDescription className="text-[10px] font-bold uppercase tracking-widest italic flex items-center gap-2">
+                    <Server className="h-3 w-3 text-primary" /> Document Transformation Stream (7-Day Metric)
+                  </CardDescription>
+                </div>
+                <Badge variant="outline" className="rounded-full border-accent/5 px-4 font-black uppercase text-[8px] tracking-widest">Live Telemetry</Badge>
               </CardHeader>
-              <CardContent className="p-10 pt-8 h-[400px]">
+              <CardContent className="p-10 pt-8 h-[450px]">
                 <OperationalChart />
               </CardContent>
             </Card>
 
-            <Card className="border-none shadow-2xl rounded-[2.5rem] bg-accent text-white overflow-hidden">
-              <CardHeader className="p-10">
-                <CardTitle className="text-xl font-black uppercase italic tracking-tighter">Audit Registry</CardTitle>
-                <CardDescription className="text-[10px] font-bold uppercase tracking-widest text-white/40">Recent Interactions</CardDescription>
+            {/* Audit Registry Sidebar */}
+            <Card className="lg:col-span-4 border-none shadow-2xl rounded-[3rem] bg-accent text-white overflow-hidden relative group">
+              <div className="absolute top-0 right-0 p-10 opacity-5 pointer-events-none group-hover:rotate-12 transition-transform duration-1000">
+                <ShieldAlert className="w-48 h-48" />
+              </div>
+              <CardHeader className="p-10 pb-6 relative z-10">
+                <CardTitle className="text-2xl font-black uppercase italic tracking-tighter flex items-center gap-3">
+                  <Database className="h-6 w-6 text-primary" /> Audit Registry
+                </CardTitle>
+                <CardDescription className="text-[10px] font-bold uppercase tracking-widest text-white/40 italic">Real-time Interface Logs</CardDescription>
               </CardHeader>
-              <CardContent className="px-10 pb-10 space-y-6">
+              <CardContent className="px-10 pb-10 space-y-6 relative z-10">
                 {[
-                  { user: "j.doe@apple.com", op: "PDF Merge", time: "2m ago" },
-                  { user: "system.protocol", op: "Security Sweep", time: "14m ago" },
-                  { user: "dev@google.com", op: "Excel Export", time: "32m ago" },
-                  { user: "mark@tesla.com", op: "AES Unlock", time: "1h ago" },
+                  { user: "j.doe@apple.com", op: "PDF Merge Sequence", time: "2m ago", status: "Verified" },
+                  { user: "system.protocol", op: "Security Buffering", time: "14m ago", status: "Success" },
+                  { user: "dev@google.com", op: "AI Synthesis", time: "32m ago", status: "Cached" },
+                  { user: "mark@tesla.com", op: "Identity Synthesis", time: "1h ago", status: "Signed" },
+                  { user: "admin@docflow", op: "Intelligence Archival", time: "3h ago", status: "Archive" },
                 ].map((log, i) => (
-                  <div key={i} className="flex items-center justify-between group">
-                    <div className="space-y-0.5">
-                      <p className="text-[11px] font-black uppercase italic text-white/80">{log.user}</p>
+                  <div key={i} className="flex items-center justify-between group/item p-4 rounded-2xl hover:bg-white/5 border border-transparent hover:border-white/10 transition-all">
+                    <div className="space-y-1">
+                      <p className="text-[11px] font-black uppercase italic text-white/90 group-hover/item:text-primary transition-colors">{log.user}</p>
                       <p className="text-[9px] font-bold text-white/40 uppercase tracking-widest">{log.op}</p>
                     </div>
-                    <span className="text-[9px] font-bold text-white/20">{log.time}</span>
+                    <div className="text-right">
+                      <p className="text-[9px] font-black text-primary uppercase italic">{log.status}</p>
+                      <span className="text-[8px] font-bold text-white/20 uppercase">{log.time}</span>
+                    </div>
                   </div>
                 ))}
+                <Button variant="ghost" className="w-full h-12 rounded-2xl border border-white/5 bg-white/5 hover:bg-white/10 text-white font-black uppercase text-[9px] tracking-[0.3em] mt-4">
+                  View Expanded Logs
+                </Button>
               </CardContent>
             </Card>
           </div>
 
+          {/* User Intelligence Database */}
           <Card className="border-none shadow-2xl rounded-[3rem] bg-white overflow-hidden">
             <CardHeader className="p-10 border-b border-accent/5">
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                 <div className="space-y-1">
-                  <CardTitle className="text-xl font-black uppercase italic text-accent tracking-tighter">User Intelligence</CardTitle>
-                  <CardDescription className="text-[10px] font-bold uppercase tracking-widest italic">Platform Identity Database</CardDescription>
+                  <CardTitle className="text-2xl font-black uppercase italic text-accent tracking-tighter">User Intelligence</CardTitle>
+                  <CardDescription className="text-[10px] font-bold uppercase tracking-widest italic flex items-center gap-2">
+                    <Users className="h-3 w-3 text-primary" /> Platform Identity Registry
+                  </CardDescription>
                 </div>
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-accent/30" />
+                <div className="relative group">
+                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-accent/30 group-focus-within:text-primary transition-colors" />
                   <Input 
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     placeholder="FILTER REGISTRY..." 
-                    className="h-10 pl-10 w-[240px] rounded-xl bg-muted/20 border-accent/5 text-[10px] font-bold tracking-widest" 
+                    className="h-12 pl-12 w-full md:w-[320px] rounded-2xl bg-muted/30 border-accent/5 text-[10px] font-black tracking-[0.2em] focus:ring-primary/20" 
                   />
                 </div>
               </div>
             </CardHeader>
             <CardContent className="p-0">
-              <table className="w-full text-left">
-                <thead>
-                  <tr className="bg-muted/30 border-b border-accent/5">
-                    <th className="px-10 py-5 text-[9px] font-black uppercase tracking-widest text-accent/40">Account Identity</th>
-                    <th className="px-10 py-5 text-[9px] font-black uppercase tracking-widest text-accent/40">Status</th>
-                    <th className="px-10 py-5 text-[9px] font-black uppercase tracking-widest text-accent/40 text-right">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {isUsersLoading ? (
-                    <tr><td colSpan={3} className="p-20 text-center"><Loader2 className="animate-spin h-8 w-8 mx-auto opacity-10" /></td></tr>
-                  ) : filteredUsers.length === 0 ? (
-                    <tr><td colSpan={3} className="p-20 text-center font-bold text-accent/20 uppercase text-[10px] tracking-widest italic">No matching identities found.</td></tr>
-                  ) : filteredUsers.map((u) => (
-                    <tr key={u.id} className="border-b border-accent/5 hover:bg-primary/5 transition-colors group">
-                      <td className="px-10 py-6 font-bold text-accent uppercase text-xs italic">{u.email}</td>
-                      <td className="px-10 py-6">
-                        <span className="text-[9px] font-black px-2 py-1 bg-green-50 text-green-600 rounded-full border border-green-100 uppercase tracking-widest">Active Protocol</span>
-                      </td>
-                      <td className="px-10 py-6 text-right">
-                        <Button 
-                          variant="ghost" 
-                          size="icon" 
-                          onClick={() => handleDeleteUser(u.id)}
-                          className="h-8 w-8 text-accent/20 hover:text-destructive transition-colors"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </td>
+              <div className="overflow-x-auto">
+                <table className="w-full text-left">
+                  <thead>
+                    <tr className="bg-muted/30 border-b border-accent/5">
+                      <th className="px-10 py-6 text-[10px] font-black uppercase tracking-[0.2em] text-accent/40 italic">Account Identity</th>
+                      <th className="px-10 py-6 text-[10px] font-black uppercase tracking-[0.2em] text-accent/40 italic">Registration Registry</th>
+                      <th className="px-10 py-6 text-[10px] font-black uppercase tracking-[0.2em] text-accent/40 italic">Clearance</th>
+                      <th className="px-10 py-6 text-[10px] font-black uppercase tracking-[0.2em] text-accent/40 italic text-right">Administrative Actions</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody className="divide-y divide-accent/5">
+                    {isUsersLoading ? (
+                      <tr><td colSpan={4} className="p-20 text-center"><Loader2 className="animate-spin h-10 w-10 mx-auto text-primary/20" /></td></tr>
+                    ) : filteredUsers.length === 0 ? (
+                      <tr><td colSpan={4} className="p-20 text-center font-black text-accent/10 uppercase text-[12px] tracking-[0.4em] italic py-32">No matching identities found in registry.</td></tr>
+                    ) : filteredUsers.map((u) => (
+                      <tr key={u.id} className="hover:bg-primary/5 transition-colors group relative">
+                        <td className="px-10 py-8">
+                          <div className="flex items-center gap-4">
+                            <div className="h-10 w-10 rounded-xl bg-accent text-primary flex items-center justify-center font-black text-xs">
+                              {u.email?.substring(0, 2).toUpperCase()}
+                            </div>
+                            <div className="space-y-0.5">
+                              <p className="font-black text-accent uppercase text-sm italic leading-none">{u.email}</p>
+                              <p className="text-[9px] font-bold text-accent/30 uppercase tracking-tighter">UID: {u.id.substring(0, 12)}...</p>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-10 py-8">
+                          <p className="text-[10px] font-bold text-accent/60 uppercase tracking-tight italic">
+                            {u.createdAt ? new Date(u.createdAt).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' }) : "Archival Entry"}
+                          </p>
+                        </td>
+                        <td className="px-10 py-8">
+                          <Badge className="bg-green-50 text-green-600 border-green-100 hover:bg-green-50 rounded-lg px-2.5 py-1 text-[9px] font-black uppercase tracking-widest">
+                            Authorized Unit
+                          </Badge>
+                        </td>
+                        <td className="px-10 py-8 text-right">
+                          <div className="flex items-center justify-end gap-2">
+                            <Button 
+                              variant="ghost" 
+                              size="icon" 
+                              className="h-10 w-10 rounded-xl text-accent/20 hover:text-accent hover:bg-white transition-all shadow-sm"
+                            >
+                              <ExternalLink className="h-4 w-4" />
+                            </Button>
+                            <Button 
+                              variant="ghost" 
+                              size="icon" 
+                              onClick={() => handleDeleteUser(u.id)}
+                              className="h-10 w-10 rounded-xl text-accent/20 hover:text-destructive hover:bg-destructive/5 transition-all shadow-sm"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </CardContent>
           </Card>
         </div>
