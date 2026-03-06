@@ -22,7 +22,9 @@ import {
   LogOut, 
   Layout, 
   Camera,
-  Menu
+  Menu,
+  BrainCircuit,
+  Sparkles
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -49,6 +51,13 @@ export function Navbar() {
 
   const categories = [
     {
+      label: "AI Studio",
+      items: [
+        { href: "/ai-studio", icon: BrainCircuit, title: "AI Tools Suite", desc: "Summarize, translate, rephrase" },
+        { href: "/ai-studio", icon: Sparkles, title: "Chat with PDF", desc: "Inquire about document info" },
+      ]
+    },
+    {
       label: "Modify PDF",
       items: [
         { href: "/crop", icon: Crop, title: "Crop PDF", desc: "Trim page margins" },
@@ -62,14 +71,6 @@ export function Navbar() {
         { href: "/merge", icon: Merge, title: "Merge PDF", desc: "Combine multiple PDFs" },
         { href: "/split", icon: Scissors, title: "Split PDF", desc: "Extract specific pages" },
         { href: "/numbers", icon: Hash, title: "Page Numbers", desc: "Add sequential counters" },
-      ]
-    },
-    {
-      label: "Convert & Export",
-      items: [
-        { href: "/convert?type=word-to-pdf", icon: FilePenLine, title: "To PDF", desc: "Word, Excel, JPG, PPT" },
-        { href: "/convert?type=pdf-to-word", icon: FileText, title: "From PDF", desc: "Word, Excel, PPT, PDF/A" },
-        { href: "/convert?type=pdf-to-pdfa", icon: ShieldCheck, title: "PDF/A", desc: "Archival conversion" },
       ]
     },
     {
@@ -100,7 +101,7 @@ export function Navbar() {
             <DropdownMenu>
               <DropdownMenuTrigger className="flex items-center gap-1.5 text-[9px] font-black uppercase tracking-widest text-accent hover:text-primary transition-all outline-none">
                 <LayoutDashboard className="h-3 w-3 text-primary" />
-                All PDF Tools <ChevronDown className="h-2.5 w-2.5 opacity-40" />
+                All Tools <ChevronDown className="h-2.5 w-2.5 opacity-40" />
               </DropdownMenuTrigger>
               <DropdownMenuContent align="start" className="w-[850px] p-5 rounded-2xl shadow-2xl border-white/20 grid grid-cols-4 gap-5 bg-white/95 backdrop-blur-xl mt-2">
                 {categories.map((cat) => (
@@ -128,14 +129,11 @@ export function Navbar() {
               </DropdownMenuContent>
             </DropdownMenu>
 
-            <Link href="/scan-to-pdf" className="flex items-center gap-1.5 text-[9px] font-black uppercase tracking-widest text-accent/80 hover:text-accent transition-all group">
-              <Camera className="h-3 w-3 text-primary/60 group-hover:text-primary transition-colors" /> Scan
+            <Link href="/ai-studio" className="flex items-center gap-1.5 text-[9px] font-black uppercase tracking-widest text-primary hover:text-primary/80 transition-all group">
+              <BrainCircuit className="h-3 w-3" /> AI Studio
             </Link>
             <Link href="/merge" className="flex items-center gap-1.5 text-[9px] font-black uppercase tracking-widest text-accent/80 hover:text-accent transition-all group">
               <Merge className="h-3 w-3 text-primary/60 group-hover:text-primary transition-colors" /> Merge
-            </Link>
-            <Link href="/split" className="flex items-center gap-1.5 text-[9px] font-black uppercase tracking-widest text-accent/80 hover:text-accent transition-all group">
-              <Scissors className="h-3 w-3 text-primary/60 group-hover:text-primary transition-colors" /> Split
             </Link>
             <Link href="/convert?type=word-to-pdf" className="flex items-center gap-1.5 text-[9px] font-black uppercase tracking-widest text-accent/80 hover:text-accent transition-all group">
               <FilePenLine className="h-3 w-3 text-primary/60 group-hover:text-primary transition-colors" /> Convert

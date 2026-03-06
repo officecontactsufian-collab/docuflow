@@ -36,7 +36,11 @@ import {
   Activity,
   MessageSquare,
   Scale,
-  Info
+  Info,
+  BrainCircuit,
+  Sparkles,
+  Mail,
+  Languages
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
@@ -50,12 +54,23 @@ export default function Home() {
 
   const toolCategories = [
     {
+      label: "AI Intelligence Suite",
+      description: "Generative protocols for structural content evolution.",
+      items: [
+        { title: "AI Studio", desc: "Full generative toolkit.", icon: BrainCircuit, href: "/ai-studio" },
+        { title: "AI Summarizer", desc: "Executive content extraction.", icon: Activity, href: "/ai-studio" },
+        { title: "Chat with PDF", desc: "Contextual asset interrogation.", icon: Sparkles, href: "/ai-studio" },
+        { title: "Email Architect", desc: "Structural email synthesis.", icon: Mail, href: "/ai-studio" },
+      ]
+    },
+    {
       label: "Modify & Capture",
       description: "Direct page and structural modifications.",
       items: [
         { title: "Scan to PDF", desc: "Direct camera to document stream.", icon: Camera, href: "/scan-to-pdf" },
         { title: "Crop PDF", desc: "Trim page margins with precision.", icon: Crop, href: "/crop" },
         { title: "Reorder & Rotate", desc: "Change page order and orientation.", icon: RotateCw, href: "/organize" },
+        { title: "Add Numbers", desc: "Sequential page counter placement.", icon: Hash, href: "/numbers" },
       ]
     },
     {
@@ -69,22 +84,12 @@ export default function Home() {
       ]
     },
     {
-      label: "Structure & Flow",
-      description: "Advanced page manipulation and optimization.",
-      items: [
-        { title: "Merge PDF", desc: "Combine multiple files into one.", icon: Merge, href: "/merge" },
-        { title: "Split PDF", desc: "Extract specific ranges or pages.", icon: Scissors, href: "/split" },
-        { title: "Compress PDF", desc: "Optimize file size for web delivery.", icon: Maximize, href: "/compress" },
-        { title: "Add Numbers", desc: "Sequential page counter placement.", icon: Hash, href: "/numbers" },
-      ]
-    },
-    {
       label: "Security & Trust",
       description: "Industrial grade metadata and access protection.",
       items: [
         { title: "Privacy Shield", desc: "Permanent metadata and tracking erasure.", icon: ShieldCheck, href: "/protect" },
         { title: "Unlock PDF", desc: "Recover and strip document restrictions.", icon: Unlock, href: "/protect?mode=unlock" },
-        { title: "Repair & Rebuild", desc: "Fix corrupted document structures.", icon: Wrench, href: "/repair" },
+        { title: "Digital Sign", desc: "Apply identity synthesis bars.", icon: Signature, href: "/sign" },
         { title: "Document Inspect", desc: "Deep metadata structural analysis.", icon: Search, href: "/analyze" },
       ]
     }
@@ -100,8 +105,8 @@ export default function Home() {
             <div className="max-w-4xl mx-auto space-y-10">
               <div className="text-center space-y-6 animate-in fade-in slide-in-from-top-8 duration-1000">
                 <div className="section-label mx-auto brand-glow">
-                  <ShieldCheck className="h-3 w-3 text-primary" />
-                  <span>Encrypted Open Workspace</span>
+                  <BrainCircuit className="h-3 w-3 text-primary" />
+                  <span>Generative Document Intelligence</span>
                 </div>
                 
                 <h1 className="text-4xl md:text-6xl font-black tracking-tighter text-accent leading-[1] italic uppercase text-gradient">
@@ -112,7 +117,7 @@ export default function Home() {
                 
                 <p className="text-lg md:text-xl text-accent/60 max-w-xl mx-auto leading-relaxed font-bold">
                   High-performance document intelligence for professionals. 
-                  Private, instant, and processed entirely locally.
+                  AI-powered, private, and processed entirely within secure tunnels.
                 </p>
 
                 <div className="flex items-center justify-center pt-4">
@@ -186,7 +191,7 @@ export default function Home() {
                   { 
                     icon: Settings2, 
                     title: "Process", 
-                    desc: "Our high-fidelity engine reconstructs your document architecture with industrial accuracy. Apply rotations, crops, signatures, or structural repairs locally.",
+                    desc: "Our high-fidelity engine reconstructs your document architecture with industrial accuracy. Apply rotations, crops, signatures, or AI analysis locally.",
                     tip: "256-bit AES memory hardening active."
                   },
                   { 
@@ -300,8 +305,7 @@ export default function Home() {
                    <ShieldCheck className="w-full h-full text-primary/20 group-hover:scale-110 transition-transform duration-[2000ms]" />
                    <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-accent/20 pointer-events-none" />
                    
-                   {/* Scanning visual effect */}
-                   <div className="absolute inset-x-0 h-1 bg-primary/20 blur-sm animate-[scan_4s_linear_infinite]" />
+                   <div className="absolute inset-x-0 h-1 bg-primary/20 blur-sm animate-scan" />
                 </div>
                 
                 <div className="absolute -bottom-10 -right-10 w-48 h-48 bg-primary/20 rounded-full blur-[80px] pointer-events-none" />
@@ -336,10 +340,10 @@ export default function Home() {
                 <div className="h-px w-8 bg-primary/30" />
               </div>
               <ul className="space-y-4 text-[11px] font-black uppercase tracking-[0.2em] italic">
-                <li><Link href="/convert" className="hover:text-primary transition-colors flex items-center gap-2 group"><div className="w-1 h-1 bg-primary/20 rounded-full group-hover:bg-primary" /> Asset Transformation</Link></li>
+                <li><Link href="/ai-studio" className="hover:text-primary transition-colors flex items-center gap-2 group text-primary"><div className="w-1 h-1 bg-primary/40 rounded-full group-hover:bg-primary" /> AI Intelligence Suite</Link></li>
                 <li><Link href="/merge" className="hover:text-primary transition-colors flex items-center gap-2 group"><div className="w-1 h-1 bg-primary/20 rounded-full group-hover:bg-primary" /> Structural Merge</Link></li>
+                <li><Link href="/convert" className="hover:text-primary transition-colors flex items-center gap-2 group"><div className="w-1 h-1 bg-primary/20 rounded-full group-hover:bg-primary" /> Asset Transformation</Link></li>
                 <li><Link href="/split" className="hover:text-primary transition-colors flex items-center gap-2 group"><div className="w-1 h-1 bg-primary/20 rounded-full group-hover:bg-primary" /> Range Extraction</Link></li>
-                <li><Link href="/compress" className="hover:text-primary transition-colors flex items-center gap-2 group"><div className="w-1 h-1 bg-primary/20 rounded-full group-hover:bg-primary" /> Stream Optimization</Link></li>
                 <li><Link href="/organize" className="hover:text-primary transition-colors flex items-center gap-2 group"><div className="w-1 h-1 bg-primary/20 rounded-full group-hover:bg-primary" /> Visual Mapping</Link></li>
               </ul>
             </div>
@@ -353,7 +357,6 @@ export default function Home() {
                 <li><Link href="/sign" className="hover:text-primary transition-colors flex items-center gap-2 group"><div className="w-1 h-1 bg-primary/20 rounded-full group-hover:bg-primary" /> Identity Synthesis</Link></li>
                 <li><Link href="/protect" className="hover:text-primary transition-colors flex items-center gap-2 group"><div className="w-1 h-1 bg-primary/20 rounded-full group-hover:bg-primary" /> Privacy Shield</Link></li>
                 <li><Link href="/protect?mode=unlock" className="hover:text-primary transition-colors flex items-center gap-2 group"><div className="w-1 h-1 bg-primary/20 rounded-full group-hover:bg-primary" /> Protocol Recovery</Link></li>
-                <li><Link href="/repair" className="hover:text-primary transition-colors flex items-center gap-2 group"><div className="w-1 h-1 bg-primary/20 rounded-full group-hover:bg-primary" /> Structural Repair</Link></li>
                 <li><Link href="/analyze" className="hover:text-primary transition-colors flex items-center gap-2 group"><div className="w-1 h-1 bg-primary/20 rounded-full group-hover:bg-primary" /> Deep Inspection</Link></li>
               </ul>
             </div>
