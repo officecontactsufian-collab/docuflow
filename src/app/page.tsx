@@ -1,3 +1,4 @@
+
 "use client"
 
 import * as React from 'react';
@@ -87,10 +88,10 @@ export default function Home() {
       label: "Security & Trust",
       description: "Industrial grade metadata and access protection.",
       items: [
+        { title: "Password Protect", desc: "Encrypt PDF with secure key.", icon: Lock, href: "/secure" },
         { title: "Privacy Shield", desc: "Permanent metadata and tracking erasure.", icon: ShieldCheck, href: "/protect" },
         { title: "Unlock PDF", desc: "Recover and strip document restrictions.", icon: Unlock, href: "/protect?mode=unlock" },
         { title: "Digital Sign", desc: "Apply identity synthesis bars.", icon: Signature, href: "/sign" },
-        { title: "Document Inspect", desc: "Deep metadata structural analysis.", icon: Search, href: "/analyze" },
       ]
     }
   ];
@@ -354,9 +355,9 @@ export default function Home() {
                 <div className="h-px w-8 bg-primary/30" />
               </div>
               <ul className="space-y-4 text-[11px] font-black uppercase tracking-[0.2em] italic">
+                <li><Link href="/secure" className="hover:text-primary transition-colors flex items-center gap-2 group"><div className="w-1 h-1 bg-primary/20 rounded-full group-hover:bg-primary" /> Password Protect</Link></li>
                 <li><Link href="/sign" className="hover:text-primary transition-colors flex items-center gap-2 group"><div className="w-1 h-1 bg-primary/20 rounded-full group-hover:bg-primary" /> Identity Synthesis</Link></li>
                 <li><Link href="/protect" className="hover:text-primary transition-colors flex items-center gap-2 group"><div className="w-1 h-1 bg-primary/20 rounded-full group-hover:bg-primary" /> Privacy Shield</Link></li>
-                <li><Link href="/protect?mode=unlock" className="hover:text-primary transition-colors flex items-center gap-2 group"><div className="w-1 h-1 bg-primary/20 rounded-full group-hover:bg-primary" /> Protocol Recovery</Link></li>
                 <li><Link href="/analyze" className="hover:text-primary transition-colors flex items-center gap-2 group"><div className="w-1 h-1 bg-primary/20 rounded-full group-hover:bg-primary" /> Deep Inspection</Link></li>
               </ul>
             </div>

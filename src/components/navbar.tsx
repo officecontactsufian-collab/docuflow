@@ -25,7 +25,8 @@ import {
   Camera,
   Menu,
   BrainCircuit,
-  Sparkles
+  Sparkles,
+  Lock
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -78,7 +79,7 @@ export function Navbar() {
       label: "Optimize & Secure",
       items: [
         { href: "/compress", icon: Maximize, title: "Compress PDF", desc: "Reduce file size" },
-        { href: "/repair", icon: Wrench, title: "Repair", desc: "Fix corrupted PDFs" },
+        { href: "/secure", icon: Lock, title: "Password Protect", desc: "Encrypt with key" },
         { href: "/protect", icon: ShieldCheck, title: "Privacy Shield", desc: "Hardened metadata" },
         { href: "/protect?mode=unlock", icon: Unlock, title: "Unlock", desc: "Remove restrictions" },
         { href: "/watermark", icon: Type, title: "Watermark", desc: "Add text overlays" },
