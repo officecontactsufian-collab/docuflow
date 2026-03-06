@@ -1,4 +1,3 @@
-
 "use client"
 
 import * as React from 'react';
@@ -11,13 +10,9 @@ import {
   Loader2, 
   CheckCircle2, 
   UserCheck, 
-  ImageIcon, 
-  FileText, 
   PenTool, 
   Type, 
-  Upload,
   Eraser,
-  LayoutGrid,
   Settings2,
   Layers,
   ChevronLeft,
@@ -81,7 +76,7 @@ export default function SignPage() {
       const buffer = await file.arrayBuffer();
       const pdf = await PDFDocument.load(buffer, { ignoreEncryption: true });
       setTotalPages(pdf.getPageCount());
-      setTargetPage(pdf.getPageCount()); // Default to last page
+      setTargetPage(1); // Default to first page for better visibility
       setPdfFile(file);
     } catch (e) {
       toast({ variant: "destructive", title: "Invalid PDF" });
@@ -249,7 +244,8 @@ export default function SignPage() {
                     </div>
                     
                     <div className="relative group">
-                      <PDFPreview file={pdfFile} className="h-[750px]" />
+                      {/* Document Preview with tunneling currentPage prop */}
+                      <PDFPreview file={pdfFile} className="h-[750px]" currentPage={targetPage} />
                       
                       {/* Interactive Target Overlay */}
                       <div className="absolute inset-0 top-[40px] bottom-0 left-0 right-0 z-10 grid grid-cols-3 grid-rows-3 p-12">

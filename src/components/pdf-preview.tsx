@@ -1,16 +1,17 @@
 "use client"
 
 import * as React from 'react';
-import { FileText, Eye, EyeOff, Maximize2 } from 'lucide-react';
+import { FileText, Eye, EyeOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 interface PDFPreviewProps {
   file: File | null;
   title?: string;
   className?: string;
+  currentPage?: number;
 }
 
-export function PDFPreview({ file, title = "Document Preview", className }: PDFPreviewProps) {
+export function PDFPreview({ file, title = "Document Preview", className, currentPage }: PDFPreviewProps) {
   const [url, setUrl] = React.useState<string | null>(null);
   const [showPreview, setShowPreview] = React.useState(true);
 
@@ -24,6 +25,9 @@ export function PDFPreview({ file, title = "Document Preview", className }: PDFP
   }, [file]);
 
   if (!file) return null;
+
+  // PDF syntax for iframe deep linking: #page=N
+  const iframeSrc = url ? `${url}#toolbar=0&navpanes=0&view=FitH${currentPage ? `&page=${currentPage}` : ''}` : '';
 
   return (
     <div className={`space-y-4 ${className}`}>
@@ -48,11 +52,11 @@ export function PDFPreview({ file, title = "Document Preview", className }: PDFP
       {showPreview && url ? (
         <div className="w-full aspect-[3/4] md:aspect-auto md:h-[700px] border-2 border-accent/5 rounded-[2.5rem] overflow-hidden bg-white shadow-2xl group relative transition-all">
           <iframe 
-            src={`${url}#toolbar=0&navpanes=0&view=FitH`} 
+            key={currentPage} // Force re-render on page change to ensure iframe updates location
+            src={iframeSrc} 
             className="w-full h-full border-none" 
             title="High-Fidelity PDF Preview" 
           />
-          {/* Subtle overlay to prevent frame capture issues during initial load */}
           <div className="absolute inset-0 pointer-events-none border-[1px] border-white/20 rounded-[2.5rem]" />
         </div>
       ) : showPreview && !url ? (
