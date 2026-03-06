@@ -3,11 +3,28 @@ service cloud.firestore {
   match /databases/{database}/documents {
 
     /**
-     * DOCFLOW Professional Security Rules
+     * PDF Spark Security Rules
      * 
-     * CORE PHILOSOPHY:
-     * This ruleset implements a strict User-Ownership model with an administrative 
-     * override for the Master Admin (office.contact.sufian@gmail.com).
+     * Core Philosophy: This ruleset enforces a strict user-ownership model where all user-generated 
+     * content (Files, Operations, UsageLogs) is strictly private. Authorization is derived from 
+     * the document's location within the hierarchy and verified against denormalized ownership fields.
+     * 
+     * Data Structure:
+     * - /subscriptions/{subscriptionId}: Global, read-only plan definitions.
+     * - /users/{userId}: Private user profiles.
+     * - /users/{userId}/files/{fileId}: Metadata for user-owned documents.
+     * - /users/{userId}/operations/{operationId}: Records of AI and PDF processing tasks.
+     * - /users/{userId}/usageLogs/{usageLogId}: Per-user audit trail for rate limiting.
+     * 
+     * Key Security Decisions:
+     * 1. Authorization Independence: Every user-scoped document contains a 'userId' field. Rules 
+     *    validate that this field matches both the URL path and the authenticated user's UID.
+     * 2. Read-Only Subscriptions: Subscription plans are managed via administrative processes; 
+     *    the client-side SDK is restricted to read-only access to prevent plan tampering.
+     * 3. Structural Segregation: By nesting all personal data under the /users/{userId} path, 
+     *    we ensure that 'list' operations are implicitly secured to only return the owner's data.
+     * 4. Prototyping Flexibility: These rules enforce 'who' can access the data and 'relational 
+     *    integrity' (correct owner IDs) but do not strictly validate the schema of content fields.
      */
 
     // --- Helper Functions ---
@@ -22,52 +39,79 @@ service cloud.firestore {
       return isSignedIn() && request.auth.uid == userId;
     }
 
-    /** @description Checks if the user is the owner and the document currently exists. */
+    /** @description Verifies ownership and ensures the document exists for state-changing operations. */
     function isExistingOwner(userId) {
       return resource != null && isOwner(userId);
-    }
-
-    /** @description Checks if the authenticated user has Master Admin clearance. */
-    function isMasterAdmin() {
-      return isSignedIn() && request.auth.token.email == 'office.contact.sufian@gmail.com';
     }
 
     // --- Collection Rules ---
 
     /**
-     * @description Rules for the UserProfile entity.
-     * Users manage their own profiles. Master Admin has global read/delete clearance.
+     * @description Controls access to global subscription plan definitions.
+     * @path /subscriptions/{subscriptionId}
+     * @allow (get) Authenticated user viewing available plans.
+     * @deny (create, update, delete) Any user attempting to modify plan details.
+     * @principle Read-only access for global configuration data.
      */
-    match /users/{userId} {
-      allow get, list: if isOwner(userId) || isMasterAdmin();
-      allow create: if (isOwner(userId) && request.resource.data.id == userId) || isMasterAdmin();
-      allow update: if (isExistingOwner(userId) && request.resource.data.id == resource.data.id) || isMasterAdmin();
-      allow delete: if isExistingOwner(userId) || isMasterAdmin();
-
-      /**
-       * @description Rules for File metadata.
-       */
-      match /files/{fileId} {
-        allow get, list: if isOwner(userId) || isMasterAdmin();
-        allow create: if (isOwner(userId) && request.resource.data.userId == userId) || isMasterAdmin();
-        allow update: if (isExistingOwner(userId) && request.resource.data.userId == resource.data.userId) || isMasterAdmin();
-        allow delete: if isExistingOwner(userId) || isMasterAdmin();
-      }
-
-      /**
-       * @description Rules for ProcessingJobs.
-       */
-      match /jobs/{jobId} {
-        allow get, list: if isOwner(userId) || isMasterAdmin();
-        allow create: if (isOwner(userId) && request.resource.data.userId == userId) || isMasterAdmin();
-        allow update: if (isExistingOwner(userId) && request.resource.data.userId == resource.data.userId) || isMasterAdmin();
-        allow delete: if isExistingOwner(userId) || isMasterAdmin();
-      }
+    match /subscriptions/{subscriptionId} {
+      allow get, list: if isSignedIn();
+      allow create, update, delete: if false;
     }
 
-    // Default deny for any paths not explicitly matched above.
-    match /{path=**} {
-      allow read, write: if false;
+    /**
+     * @description Secures the root user profile document.
+     * @path /users/{userId}
+     * @allow (create) User creating their own profile where document ID matches their UID.
+     * @deny (list) Attempting to browse or search the entire users collection.
+     * @principle Ownership-based access with self-creation rights.
+     */
+    match /users/{userId} {
+      allow get: if isOwner(userId);
+      allow list: if false; // Users cannot list other users
+      allow create: if isOwner(userId) && request.resource.data.id == userId;
+      allow update: if isExistingOwner(userId) && request.resource.data.id == resource.data.id;
+      allow delete: if false; // Profiles preserved for auditing/billing
+    }
+
+    /**
+     * @description Secures metadata for files uploaded or generated by the user.
+     * @path /users/{userId}/files/{fileId}
+     * @allow (create) Owner uploading a new file record with matching userId field.
+     * @deny (update) Attempting to change the 'userId' field (changing ownership).
+     * @principle Relational integrity and path-based ownership.
+     */
+    match /users/{userId}/files/{fileId} {
+      allow get, list: if isOwner(userId);
+      allow create: if isOwner(userId) && request.resource.data.userId == userId;
+      allow update: if isExistingOwner(userId) && request.resource.data.userId == resource.data.userId;
+      allow delete: if isExistingOwner(userId);
+    }
+
+    /**
+     * @description Secures records of AI tools and PDF operations.
+     * @path /users/{userId}/operations/{operationId}
+     * @allow (list) User viewing their own operation history.
+     * @deny (get) Unauthenticated user attempting to view operation results.
+     * @principle Authorization independence via denormalized userId.
+     */
+    match /users/{userId}/operations/{operationId} {
+      allow get, list: if isOwner(userId);
+      allow create: if isOwner(userId) && request.resource.data.userId == userId;
+      allow update: if isExistingOwner(userId) && request.resource.data.userId == resource.data.userId;
+      allow delete: if isExistingOwner(userId);
+    }
+
+    /**
+     * @description Secures logs used for tracking API usage and rate limiting.
+     * @path /users/{userId}/usageLogs/{usageLogId}
+     * @allow (create) Backend or client logging a tool usage event.
+     * @deny (update, delete) Any attempt to modify or erase usage history.
+     * @principle Immutable audit logs for security and billing.
+     */
+    match /users/{userId}/usageLogs/{usageLogId} {
+      allow get, list: if isOwner(userId);
+      allow create: if isOwner(userId) && request.resource.data.userId == userId;
+      allow update, delete: if false; // Usage logs are immutable for auditing
     }
   }
 }
