@@ -18,19 +18,15 @@ import {
 import { useRouter } from 'next/navigation';
 import { 
   Users, 
-  Files, 
   Activity, 
   ShieldCheck, 
   Search,
-  Download,
   Database,
   Loader2,
   Trash2,
   LogOut,
   Clock,
-  ExternalLink,
   ShieldAlert,
-  Server,
   Zap,
   Globe,
   Settings2,
@@ -47,7 +43,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Switch } from '@/components/ui/switch';
 import { doc, collection, serverTimestamp, query, orderBy, limit } from 'firebase/firestore';
 import { useToast } from '@/hooks/use-toast';
-import { PDFDocument, StandardFonts, rgb } from 'pdf-lib';
 import { signOut } from 'firebase/auth';
 import { cn } from '@/lib/utils';
 
@@ -227,67 +222,84 @@ export default function AdminDashboardPage() {
                 ))}
               </div>
 
-              <Card className="border-none shadow-2xl rounded-[3rem] bg-white overflow-hidden">
-                <CardHeader className="p-10 border-b border-accent/5">
-                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-                    <div className="space-y-1">
-                      <CardTitle className="text-2xl font-black uppercase italic text-accent tracking-tighter">Identity Lattice</CardTitle>
-                      <CardDescription className="text-[10px] font-bold uppercase tracking-widest italic">Platform Unit Registry</CardDescription>
-                    </div>
-                    <div className="relative group">
-                      <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-accent/30" />
-                      <Input 
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        placeholder="FILTER IDENTITIES..." 
-                        className="h-12 pl-12 w-full md:w-[320px] rounded-2xl bg-muted/30 border-accent/5 text-[10px] font-black tracking-[0.2em]" 
-                      />
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent className="p-0">
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-left">
-                      <thead className="bg-muted/30 border-b border-accent/5">
-                        <tr>
-                          <th className="px-10 py-6 text-[10px] font-black uppercase tracking-[0.2em] text-accent/40">Identity Handle</th>
-                          <th className="px-10 py-6 text-[10px] font-black uppercase tracking-[0.2em] text-accent/40">Synthesis Date</th>
-                          <th className="px-10 py-6 text-[10px] font-black uppercase tracking-[0.2em] text-accent/40">Status</th>
-                          <th className="px-10 py-6 text-[10px] font-black uppercase tracking-[0.2em] text-accent/40 text-right">Actions</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-accent/5">
-                        {isUsersLoading ? (
-                          <tr><td colSpan={4} className="p-20 text-center"><Loader2 className="animate-spin h-10 w-10 mx-auto text-primary/20" /></td></tr>
-                        ) : filteredUsers.map((u) => (
-                          <tr key={u.id} className="hover:bg-primary/5 transition-colors">
-                            <td className="px-10 py-8">
-                              <div className="flex items-center gap-4">
-                                <div className="h-10 w-10 rounded-xl bg-accent text-primary flex items-center justify-center font-black text-xs">
-                                  {u.email?.substring(0, 2).toUpperCase()}
-                                </div>
-                                <div className="space-y-0.5">
-                                  <p className="font-black text-accent uppercase text-sm italic leading-none">{u.email}</p>
-                                  <p className="text-[9px] font-bold text-accent/30 uppercase tracking-tighter">UID: {u.id.substring(0, 12)}</p>
-                                </div>
-                              </div>
-                            </td>
-                            <td className="px-10 py-8">
-                              <p className="text-[10px] font-bold text-accent/60 uppercase">{u.createdAt || "Archival Entry"}</p>
-                            </td>
-                            <td className="px-10 py-8"><Badge className="bg-green-50 text-green-600 rounded-lg px-2 text-[9px] uppercase">Active Unit</Badge></td>
-                            <td className="px-10 py-8 text-right">
-                              <Button variant="ghost" size="icon" onClick={() => handleDeleteUser(u.id)} className="h-10 w-10 rounded-xl text-accent/20 hover:text-destructive hover:bg-destructive/5 transition-all">
-                                <Trash2 className="h-4 w-4" />
-                              </Button>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </CardContent>
-              </Card>
+              <div className="grid lg:grid-cols-12 gap-8">
+                <div className="lg:col-span-8">
+                  <Card className="border-none shadow-2xl rounded-[3rem] bg-white overflow-hidden">
+                    <CardHeader className="p-10 border-b border-accent/5">
+                      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                        <div className="space-y-1">
+                          <CardTitle className="text-2xl font-black uppercase italic text-accent tracking-tighter">Identity Lattice</CardTitle>
+                          <CardDescription className="text-[10px] font-bold uppercase tracking-widest italic">Platform Unit Registry</CardDescription>
+                        </div>
+                        <div className="relative group">
+                          <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-accent/30" />
+                          <Input 
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            placeholder="FILTER IDENTITIES..." 
+                            className="h-12 pl-12 w-full md:w-[320px] rounded-2xl bg-muted/30 border-accent/5 text-[10px] font-black tracking-[0.2em]" 
+                          />
+                        </div>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="p-0">
+                      <div className="overflow-x-auto">
+                        <table className="w-full text-left">
+                          <thead className="bg-muted/30 border-b border-accent/5">
+                            <tr>
+                              <th className="px-10 py-6 text-[10px] font-black uppercase tracking-[0.2em] text-accent/40">Identity Handle</th>
+                              <th className="px-10 py-6 text-[10px] font-black uppercase tracking-[0.2em] text-accent/40">Synthesis Date</th>
+                              <th className="px-10 py-6 text-[10px] font-black uppercase tracking-[0.2em] text-accent/40">Status</th>
+                              <th className="px-10 py-6 text-[10px] font-black uppercase tracking-[0.2em] text-accent/40 text-right">Actions</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-accent/5">
+                            {isUsersLoading ? (
+                              <tr><td colSpan={4} className="p-20 text-center"><Loader2 className="animate-spin h-10 w-10 mx-auto text-primary/20" /></td></tr>
+                            ) : filteredUsers.length === 0 ? (
+                              <tr><td colSpan={4} className="p-20 text-center text-accent/20 font-black uppercase tracking-widest italic">No identities found in lattice.</td></tr>
+                            ) : filteredUsers.map((u) => (
+                              <tr key={u.id} className="hover:bg-primary/5 transition-colors">
+                                <td className="px-10 py-8">
+                                  <div className="flex items-center gap-4">
+                                    <div className="h-10 w-10 rounded-xl bg-accent text-primary flex items-center justify-center font-black text-xs">
+                                      {u.email?.substring(0, 2).toUpperCase()}
+                                    </div>
+                                    <div className="space-y-0.5">
+                                      <p className="font-black text-accent uppercase text-sm italic leading-none">{u.email}</p>
+                                      <p className="text-[9px] font-bold text-accent/30 uppercase tracking-tighter">UID: {u.id.substring(0, 12)}</p>
+                                    </div>
+                                  </div>
+                                </td>
+                                <td className="px-10 py-8">
+                                  <p className="text-[10px] font-bold text-accent/60 uppercase">{u.createdAt || "Archival Entry"}</p>
+                                </td>
+                                <td className="px-10 py-8"><Badge className="bg-green-50 text-green-600 rounded-lg px-2 text-[9px] uppercase">Active Unit</Badge></td>
+                                <td className="px-10 py-8 text-right">
+                                  <Button variant="ghost" size="icon" onClick={() => handleDeleteUser(u.id)} className="h-10 w-10 rounded-xl text-accent/20 hover:text-destructive hover:bg-destructive/5 transition-all">
+                                    <Trash2 className="h-4 w-4" />
+                                  </Button>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+                <div className="lg:col-span-4">
+                  <Card className="border-none shadow-2xl rounded-[3rem] bg-white overflow-hidden h-full">
+                    <CardHeader className="p-10 pb-4">
+                      <CardTitle className="text-xl font-black uppercase italic tracking-tighter text-accent">Operational Flow</CardTitle>
+                      <CardDescription className="text-[10px] font-bold uppercase tracking-widest">Temporal Throughput Analysis</CardDescription>
+                    </CardHeader>
+                    <CardContent className="p-10 h-[400px]">
+                      <OperationalChart />
+                    </CardContent>
+                  </Card>
+                </div>
+              </div>
             </TabsContent>
 
             <TabsContent value="audit" className="space-y-8">
@@ -393,7 +405,7 @@ export default function AdminDashboardPage() {
                        <div className="space-y-4">
                           <p className="text-[11px] font-bold text-accent/60 uppercase leading-relaxed italic">
                             System rules are enforced via Firestore Security Logic and local buffer encryption. 
-                            These toggles shift the operational parameters stored in the /system/config registry.
+                            These toggles shift the operational parameters stored in the /system registry.
                           </p>
                           <Button variant="outline" className="w-full h-14 rounded-2xl border-accent/10 font-black uppercase tracking-widest text-[10px]">
                             <ShieldX className="mr-2 h-4 w-4" /> Reset System Rules

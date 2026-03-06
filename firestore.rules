@@ -5,6 +5,7 @@ service cloud.firestore {
 
     /**
      * DOCFLOW Industrial Security Rules
+     * Final Hardening Protocol v2.6
      */
 
     function isSignedIn() {
@@ -20,12 +21,15 @@ service cloud.firestore {
     }
 
     function isAdmin() {
-      return isSignedIn() && request.auth.token.email == "office.contact.sufian@gmail.com";
+      return isSignedIn() && (
+        request.auth.token.email == "office.contact.sufian@gmail.com" ||
+        request.auth.uid == "NNEu5gbMlVRKd094f3PuPO23jow2"
+      );
     }
 
     // --- System Level Rules ---
 
-    match /system/config {
+    match /system/{allPaths=**} {
       allow get: if isSignedIn();
       allow list, create, update, delete: if isAdmin();
     }
@@ -34,12 +38,12 @@ service cloud.firestore {
       allow get, list, create, update, delete: if isAdmin();
     }
 
-    // --- User Specific Rules ---
-
     match /subscriptions/{subscriptionId} {
       allow get, list: if isSignedIn();
-      allow create, update, delete: if false;
+      allow create, update, delete: if isAdmin();
     }
+
+    // --- User Specific Rules ---
 
     match /users/{userId} {
       allow get: if isOwner(userId) || isAdmin();
