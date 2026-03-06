@@ -309,31 +309,63 @@ export default function Home() {
         </section>
       </main>
 
-      <footer className="bg-accent text-white py-20 border-t border-white/5">
+      <footer className="bg-accent text-white py-24 border-t border-white/5">
         <div className="container mx-auto px-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-16 mb-16">
-            <div className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-16 mb-20">
+            <div className="space-y-8 col-span-1 md:col-span-1">
               <div className="flex items-center gap-3">
-                <FileText className="h-8 w-8 text-primary" />
-                <span className="text-2xl font-black tracking-tighter uppercase italic">DOCFLOW</span>
+                <FileText className="h-10 w-10 text-primary brand-glow" />
+                <span className="text-3xl font-black tracking-tighter uppercase italic">DOCFLOW</span>
               </div>
-              <p className="text-[9px] leading-relaxed font-black opacity-50 uppercase tracking-[0.3em] max-w-[200px]">
-                The industrial standard for high-performance document intelligence.
+              <p className="text-[10px] leading-relaxed font-bold opacity-40 uppercase tracking-[0.2em] max-w-xs">
+                The industrial benchmark for local-first document intelligence. Engineered for high-fidelity assets and mission-critical privacy.
               </p>
+              <div className="flex gap-4">
+                 <div className="w-8 h-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center hover:bg-primary transition-colors cursor-pointer group">
+                    <Globe className="h-4 w-4 opacity-40 group-hover:opacity-100" />
+                 </div>
+              </div>
             </div>
-            <div className="space-y-6">
-              <h4 className="text-primary text-[9px] font-black uppercase tracking-[0.5em]">Protocols</h4>
-              <ul className="space-y-3 text-[10px] font-black uppercase tracking-[0.3em] opacity-60">
-                <li><Link href="/merge" className="hover:text-primary transition-colors">Merge Assets</Link></li>
-                <li><Link href="/compress" className="hover:text-primary transition-colors">Optimization</Link></li>
-                <li><Link href="/analyze" className="hover:text-primary transition-colors">Intelligence</Link></li>
+            
+            <div className="space-y-8">
+              <div className="space-y-2">
+                <h4 className="text-primary text-[10px] font-black uppercase tracking-[0.4em]">Core Protocols</h4>
+                <div className="h-px w-8 bg-primary/30" />
+              </div>
+              <ul className="space-y-4 text-[11px] font-black uppercase tracking-[0.2em] italic">
+                <li><Link href="/convert" className="hover:text-primary transition-colors flex items-center gap-2 group"><div className="w-1 h-1 bg-primary/20 rounded-full group-hover:bg-primary" /> Asset Transformation</Link></li>
+                <li><Link href="/merge" className="hover:text-primary transition-colors flex items-center gap-2 group"><div className="w-1 h-1 bg-primary/20 rounded-full group-hover:bg-primary" /> Structural Merge</Link></li>
+                <li><Link href="/split" className="hover:text-primary transition-colors flex items-center gap-2 group"><div className="w-1 h-1 bg-primary/20 rounded-full group-hover:bg-primary" /> Range Extraction</Link></li>
+                <li><Link href="/compress" className="hover:text-primary transition-colors flex items-center gap-2 group"><div className="w-1 h-1 bg-primary/20 rounded-full group-hover:bg-primary" /> Stream Optimization</Link></li>
+                <li><Link href="/organize" className="hover:text-primary transition-colors flex items-center gap-2 group"><div className="w-1 h-1 bg-primary/20 rounded-full group-hover:bg-primary" /> Visual Mapping</Link></li>
               </ul>
             </div>
-            <div className="space-y-6">
-              <h4 className="text-primary text-[9px] font-black uppercase tracking-[0.5em]">System Support</h4>
-              <ul className="space-y-3 text-[10px] font-black uppercase tracking-[0.3em] opacity-60">
-                <li><Link href="/security" className="hover:text-primary transition-colors">Security Standards</Link></li>
-                <li><Link href="/enterprise" className="hover:text-primary transition-colors">Enterprise Grade</Link></li>
+
+            <div className="space-y-8">
+              <div className="space-y-2">
+                <h4 className="text-primary text-[10px] font-black uppercase tracking-[0.4em]">Identity & Security</h4>
+                <div className="h-px w-8 bg-primary/30" />
+              </div>
+              <ul className="space-y-4 text-[11px] font-black uppercase tracking-[0.2em] italic">
+                <li><Link href="/sign" className="hover:text-primary transition-colors flex items-center gap-2 group"><div className="w-1 h-1 bg-primary/20 rounded-full group-hover:bg-primary" /> Identity Synthesis</Link></li>
+                <li><Link href="/protect" className="hover:text-primary transition-colors flex items-center gap-2 group"><div className="w-1 h-1 bg-primary/20 rounded-full group-hover:bg-primary" /> Privacy Shield</Link></li>
+                <li><Link href="/protect?mode=unlock" className="hover:text-primary transition-colors flex items-center gap-2 group"><div className="w-1 h-1 bg-primary/20 rounded-full group-hover:bg-primary" /> Protocol Recovery</Link></li>
+                <li><Link href="/repair" className="hover:text-primary transition-colors flex items-center gap-2 group"><div className="w-1 h-1 bg-primary/20 rounded-full group-hover:bg-primary" /> Structural Repair</Link></li>
+                <li><Link href="/analyze" className="hover:text-primary transition-colors flex items-center gap-2 group"><div className="w-1 h-1 bg-primary/20 rounded-full group-hover:bg-primary" /> Deep Inspection</Link></li>
+              </ul>
+            </div>
+
+            <div className="space-y-8">
+              <div className="space-y-2">
+                <h4 className="text-primary text-[10px] font-black uppercase tracking-[0.4em]">System Support</h4>
+                <div className="h-px w-8 bg-primary/30" />
+              </div>
+              <ul className="space-y-4 text-[11px] font-black uppercase tracking-[0.2em] italic">
+                <li><Link href="/enterprise" className="hover:text-primary transition-colors flex items-center gap-2 group"><div className="w-1 h-1 bg-primary/20 rounded-full group-hover:bg-primary" /> Enterprise Grade</Link></li>
+                <li><Link href="/security" className="hover:text-primary transition-colors flex items-center gap-2 group"><div className="w-1 h-1 bg-primary/20 rounded-full group-hover:bg-primary" /> Security Standards</Link></li>
+                <li><Link href="/pricing" className="hover:text-primary transition-colors flex items-center gap-2 group"><div className="w-1 h-1 bg-primary/20 rounded-full group-hover:bg-primary" /> Pricing Registry</Link></li>
+                <li><Link href="#" className="hover:text-primary transition-colors flex items-center gap-2 group"><div className="w-1 h-1 bg-primary/20 rounded-full group-hover:bg-primary" /> API Infrastructure</Link></li>
+                <li><Link href="#" className="hover:text-primary transition-colors flex items-center gap-2 group"><div className="w-1 h-1 bg-primary/20 rounded-full group-hover:bg-primary" /> Global Support</Link></li>
               </ul>
             </div>
           </div>
