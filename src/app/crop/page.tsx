@@ -1,3 +1,4 @@
+
 "use client"
 
 import * as React from 'react';
@@ -405,7 +406,7 @@ export default function CropPage() {
                           <div onMouseDown={onMouseDown('top-left')} className="absolute -top-3 -left-3 w-6 h-6 bg-white border-2 border-primary rounded-full cursor-nwse-resize shadow-lg hover:scale-125 transition-transform z-50" />
                           <div onMouseDown={onMouseDown('top-right')} className="absolute -top-3 -right-3 w-6 h-6 bg-white border-2 border-primary rounded-full cursor-nesw-resize shadow-lg hover:scale-125 transition-transform z-50" />
                           <div onMouseDown={onMouseDown('bottom-left')} className="absolute -bottom-3 -left-3 w-6 h-6 bg-white border-2 border-primary rounded-full cursor-nesw-resize shadow-lg hover:scale-125 transition-transform z-50" />
-                          <div onMouseDown={onMouseDown('bottom-right')} className="absolute -bottom-3 -right-3 w-6 h-6 bg-white border-2 border-primary rounded-full cursor-nwse-resize shadow-lg hover:scale-125 transition-transform z-50" />
+                          <div onMouseDown={onMouseDown('bottom-right')} className="absolute -bottom-3 -right-3 w-6 h-6 bg-white border-2 border-primary rounded-full cursor-nesw-resize shadow-lg hover:scale-125 transition-transform z-50" />
                           
                           <div onMouseDown={onMouseDown('top')} className="absolute -top-1 left-1/2 -translate-x-1/2 w-12 h-2 bg-primary rounded-full cursor-ns-resize hover:h-3 transition-all" />
                           <div onMouseDown={onMouseDown('bottom')} className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-12 h-2 bg-primary rounded-full cursor-ns-resize hover:h-3 transition-all" />

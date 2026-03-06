@@ -1,3 +1,4 @@
+
 "use client"
 
 import * as React from 'react';
@@ -137,7 +138,7 @@ export default function AIStudioPage() {
     setLogs(["PROTOCOL INITIALIZED: High-Fidelity AI Tunnel active."]);
 
     try {
-      let fileDataUri = undefined;
+      let fileDataUri: string | undefined = undefined;
       let finalInputText = inputText;
 
       if (selectedFile) {
@@ -145,9 +146,13 @@ export default function AIStudioPage() {
         const extension = selectedFile.name.split('.').pop()?.toLowerCase();
         
         if (extension === 'pdf') {
-          const buffer = await selectedFile.arrayBuffer();
-          const base64 = Buffer.from(buffer).toString('base64');
-          fileDataUri = `data:application/pdf;base64,${base64}`;
+          // Browser-safe data URI generation
+          fileDataUri = await new Promise<string>((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result as string);
+            reader.onerror = (e) => reject(e);
+            reader.readAsDataURL(selectedFile);
+          });
         } else if (extension === 'docx') {
           addLog("OOXML DECODING: Reconstructing text from DOCX container...");
           const arrayBuffer = await selectedFile.arrayBuffer();
