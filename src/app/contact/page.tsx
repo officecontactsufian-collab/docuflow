@@ -71,22 +71,35 @@ export default function ContactPage() {
                 </p>
               </div>
 
-              <div className="grid gap-4">
-                {[
-                  { label: "Primary Protocol", val: "office.contact.sufian@gmail.com", icon: Mail },
-                  { label: "Security Registry", val: "office.contact.sufian@gmail.com", icon: ShieldCheck },
-                  { label: "Administrative Gateway", val: "office.contact.sufian@gmail.com", icon: Zap },
-                ].map((item) => (
-                  <div key={item.label} className="p-6 bg-white rounded-3xl border border-accent/5 shadow-xl flex items-center gap-5 group hover:border-primary/20 transition-all">
-                    <div className="w-12 h-12 rounded-2xl bg-primary/5 text-primary flex items-center justify-center group-hover:scale-110 transition-transform">
-                      <item.icon className="h-5 w-5" />
-                    </div>
-                    <div className="space-y-0.5">
-                      <p className="text-[9px] font-black uppercase text-accent/40 tracking-widest">{item.label}</p>
-                      <p className="text-[10px] font-bold text-accent uppercase italic truncate max-w-[200px]">{item.val}</p>
-                    </div>
+              {/* Unified Endpoint Card */}
+              <div className="p-10 bg-white rounded-[3rem] border border-accent/5 shadow-2xl space-y-8 group hover:border-primary/20 transition-all">
+                <div className="flex items-center gap-6">
+                  <div className="w-16 h-16 rounded-[2rem] bg-primary/5 text-primary flex items-center justify-center group-hover:bg-primary group-hover:text-white transition-all shadow-lg shrink-0">
+                    <Mail className="h-8 w-8" />
                   </div>
-                ))}
+                  <div className="space-y-1 min-w-0">
+                    <h3 className="text-2xl font-black text-accent uppercase italic tracking-tighter leading-none">Master Endpoint</h3>
+                    <p className="text-lg font-bold text-primary truncate italic">office.contact.sufian@gmail.com</p>
+                  </div>
+                </div>
+                
+                <div className="h-px w-full bg-accent/5" />
+                
+                <div className="space-y-4">
+                  <p className="text-[9px] font-black uppercase tracking-[0.3em] text-accent/40">Authorized Protocol Scope</p>
+                  <div className="grid grid-cols-1 gap-3">
+                    {[
+                      { label: "Primary Protocol", icon: Mail },
+                      { label: "Security Registry", icon: ShieldCheck },
+                      { label: "Administrative Gateway", icon: Zap },
+                    ].map((scope) => (
+                      <div key={scope.label} className="flex items-center gap-3 text-[10px] font-bold uppercase tracking-widest text-accent/60">
+                        <scope.icon className="h-3 w-3 text-primary" />
+                        <span>{scope.label}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
               </div>
 
               <div className="p-8 bg-accent text-white rounded-[3rem] shadow-2xl relative overflow-hidden">
