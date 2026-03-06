@@ -172,17 +172,20 @@ export default function Home() {
                   { 
                     icon: FileUp, 
                     title: "Stage", 
-                    desc: "Select your assets securely. Local staging occurs instantly within your browser with zero latency." 
+                    desc: "Select your assets securely. Local staging occurs instantly within your browser with zero latency. No files are uploaded to our servers during this phase.",
+                    tip: "Accepts PDF, JPG, PNG, and DOCX."
                   },
                   { 
                     icon: Settings2, 
                     title: "Process", 
-                    desc: "Our high-fidelity engine reconstructs your document architecture with industrial accuracy." 
+                    desc: "Our high-fidelity engine reconstructs your document architecture with industrial accuracy. Apply rotations, crops, signatures, or structural repairs locally.",
+                    tip: "256-bit AES memory hardening active."
                   },
                   { 
                     icon: Download, 
                     title: "Deploy", 
-                    desc: "Save your optimized document instantly. Verified, private, and ready for professional deployment." 
+                    desc: "Save your optimized document instantly. Verified, private, and ready for professional deployment. All session data is auto-shredded upon completion.",
+                    tip: "Direct browser-to-disk transmission."
                   }
                 ].map((step, idx) => (
                   <div key={step.title} className="relative group">
@@ -194,6 +197,9 @@ export default function Home() {
                         <div className="text-[9px] font-black uppercase tracking-[0.3em] text-primary/60">Sequence 0{idx + 1}</div>
                         <h3 className="text-2xl font-black text-accent uppercase italic">{step.title}</h3>
                         <p className="text-accent/60 font-bold leading-relaxed text-sm">{step.desc}</p>
+                        <div className="pt-4 border-t border-accent/5 w-full">
+                           <p className="text-[8px] font-black uppercase text-accent/30 tracking-widest italic">{step.tip}</p>
+                        </div>
                       </div>
                     </div>
                     {idx < 2 && (
