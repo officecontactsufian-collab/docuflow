@@ -62,20 +62,20 @@ export default function ContactPage() {
               <div className="space-y-6">
                 <div className="section-label">
                   <Globe className="h-3 w-3 text-primary" />
-                  <span>Global Intelligence Support</span>
+                  <span>Verified Identity Support</span>
                 </div>
-                <h2 className="text-3xl font-black text-accent uppercase italic tracking-tighter">System Support Infrastructure.</h2>
+                <h2 className="text-3xl font-black text-accent uppercase italic tracking-tighter">Unified Protocol Tunnel.</h2>
                 <p className="text-accent/60 font-bold leading-relaxed">
-                  Our administrative teams monitor the DOCFLOW tunnel 24/7. Whether you require technical debugging, 
-                  volume licensing, or custom protocol development, we are ready to assist.
+                  The DOCFLOW administrative tunnel is active 24/7. All inquiries, from technical debugging to 
+                  enterprise volume licensing, are routed through our verified singular endpoint.
                 </p>
               </div>
 
               <div className="grid gap-4">
                 {[
-                  { label: "Direct Support", val: "support@docflow.pro", icon: Mail },
-                  { label: "Security Registry", val: "security@docflow.pro", icon: ShieldCheck },
-                  { label: "Enterprise Sales", val: "partners@docflow.pro", icon: Zap },
+                  { label: "Primary Protocol", val: "office.contact.sufian@gmail.com", icon: Mail },
+                  { label: "Security Registry", val: "office.contact.sufian@gmail.com", icon: ShieldCheck },
+                  { label: "Administrative Gateway", val: "office.contact.sufian@gmail.com", icon: Zap },
                 ].map((item) => (
                   <div key={item.label} className="p-6 bg-white rounded-3xl border border-accent/5 shadow-xl flex items-center gap-5 group hover:border-primary/20 transition-all">
                     <div className="w-12 h-12 rounded-2xl bg-primary/5 text-primary flex items-center justify-center group-hover:scale-110 transition-transform">
@@ -83,7 +83,7 @@ export default function ContactPage() {
                     </div>
                     <div className="space-y-0.5">
                       <p className="text-[9px] font-black uppercase text-accent/40 tracking-widest">{item.label}</p>
-                      <p className="text-xs font-bold text-accent uppercase italic">{item.val}</p>
+                      <p className="text-[10px] font-bold text-accent uppercase italic truncate max-w-[200px]">{item.val}</p>
                     </div>
                   </div>
                 ))}
@@ -91,9 +91,9 @@ export default function ContactPage() {
 
               <div className="p-8 bg-accent text-white rounded-[3rem] shadow-2xl relative overflow-hidden">
                  <div className="relative z-10 space-y-4">
-                    <h4 className="text-xl font-black uppercase italic italic tracking-tighter">Average Response: 14m</h4>
+                    <h4 className="text-xl font-black uppercase italic tracking-tighter">Direct Engagement</h4>
                     <p className="text-[10px] font-bold text-white/40 uppercase tracking-widest leading-relaxed">
-                      Our high-fidelity response protocol ensures that mission-critical inquiries are addressed with priority.
+                      Our high-fidelity response protocol ensures that mission-critical inquiries are addressed with priority via our master endpoint.
                     </p>
                  </div>
                  <div className="absolute -bottom-10 -right-10 w-32 h-32 bg-primary/20 rounded-full blur-3xl" />
@@ -117,7 +117,7 @@ export default function ContactPage() {
                         </div>
                         <div className="space-y-2">
                           <Label className="text-[10px] font-black uppercase tracking-widest text-accent/60">Communication Tunnel</Label>
-                          <Input required type="email" placeholder="EMAIL@PROTOCOL.PRO..." className="h-12 bg-muted/20 border-accent/10 rounded-xl font-bold text-accent" />
+                          <Input required type="email" placeholder="YOUR@EMAIL.PRO..." className="h-12 bg-muted/20 border-accent/10 rounded-xl font-bold text-accent" />
                         </div>
                       </div>
                       <div className="space-y-2">
