@@ -367,7 +367,6 @@ export default function Home() {
                 <li><Link href="/privacy" className="hover:text-primary transition-colors flex items-center gap-2 group"><div className="w-1 h-1 bg-primary/20 rounded-full group-hover:bg-primary" /> <ShieldCheck className="h-3 w-3" /> Privacy Shield</Link></li>
                 <li><Link href="/terms" className="hover:text-primary transition-colors flex items-center gap-2 group"><div className="w-1 h-1 bg-primary/20 rounded-full group-hover:bg-primary" /> <Scale className="h-3 w-3" /> Terms of Operation</Link></li>
                 <li><Link href="/enterprise" className="hover:text-primary transition-colors flex items-center gap-2 group"><div className="w-1 h-1 bg-primary/20 rounded-full group-hover:bg-primary" /> <Globe className="h-3 w-3" /> Enterprise Grade</Link></li>
-                <li><Link href="/admin-login" className="hover:text-primary transition-colors flex items-center gap-2 group"><div className="w-1 h-1 bg-primary/20 rounded-full group-hover:bg-primary" /> <Lock className="h-3 w-3" /> Admin Portal</Link></li>
               </ul>
             </div>
           </div>
