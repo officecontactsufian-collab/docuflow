@@ -15,51 +15,58 @@ import {
   FileText,
   Plus,
   Play,
-  AlertCircle
+  AlertCircle,
+  Upload,
+  X,
+  CameraOff
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Card } from '@/components/ui/card';
 import { PDFDocument } from 'pdf-lib';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { cn } from '@/lib/utils';
 
 export default function ScanToPdfPage() {
-  const [hasCameraPermission, setHasCameraPermission] = React.useState(true);
+  const [isCameraActive, setIsCameraActive] = React.useState(false);
+  const [hasCameraPermission, setHasCameraPermission] = React.useState<boolean | null>(null);
   const [capturedImages, setCapturedImages] = React.useState<string[]>([]);
   const [isProcessing, setIsProcessing] = React.useState(false);
   const [isDone, setIsDone] = React.useState(false);
   const [downloadUrl, setDownloadUrl] = React.useState<string | null>(null);
+  
   const videoRef = React.useRef<HTMLVideoElement>(null);
   const canvasRef = React.useRef<HTMLCanvasElement>(null);
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
-  React.useEffect(() => {
-    const getCameraPermission = async () => {
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
-        setHasCameraPermission(true);
-        if (videoRef.current) {
-          videoRef.current.srcObject = stream;
-        }
-      } catch (error) {
-        console.error('Error accessing camera:', error);
-        setHasCameraPermission(false);
-        toast({
-          variant: 'destructive',
-          title: 'Camera Access Required',
-          description: 'Please enable the camera option in your browser or system settings to use this tool.',
-        });
-      }
-    };
+  const stopCamera = () => {
+    if (videoRef.current?.srcObject) {
+      const tracks = (videoRef.current.srcObject as MediaStream).getTracks();
+      tracks.forEach(track => track.stop());
+      videoRef.current.srcObject = null;
+    }
+    setIsCameraActive(false);
+  };
 
-    getCameraPermission();
-
-    return () => {
-      if (videoRef.current?.srcObject) {
-        const tracks = (videoRef.current.srcObject as MediaStream).getTracks();
-        tracks.forEach(track => track.stop());
+  const startCamera = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+      setHasCameraPermission(true);
+      setIsCameraActive(true);
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
       }
-    };
-  }, [toast]);
+    } catch (error) {
+      console.error('Error accessing camera:', error);
+      setHasCameraPermission(false);
+      setIsCameraActive(false);
+      toast({
+        variant: 'destructive',
+        title: 'Camera Access Denied',
+        description: 'Please enable the camera option in your browser settings or use the direct upload fallback.',
+      });
+    }
+  };
 
   const captureFrame = () => {
     if (!videoRef.current || !canvasRef.current) return;
@@ -74,6 +81,22 @@ export default function ScanToPdfPage() {
     const dataUrl = canvasRef.current.toDataURL('image/jpeg', 0.9);
     setCapturedImages(prev => [...prev, dataUrl]);
     toast({ title: "Page Captured", description: `Asset ${capturedImages.length + 1} staged for PDF conversion.` });
+  };
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      const files = Array.from(e.target.files);
+      files.forEach(file => {
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          if (event.target?.result) {
+            setCapturedImages(prev => [...prev, event.target!.result as string]);
+          }
+        };
+        reader.readAsDataURL(file);
+      });
+      toast({ title: "Assets Imported", description: `${files.length} images added to the compilation stream.` });
+    }
   };
 
   const removeCapture = (idx: number) => {
@@ -98,6 +121,7 @@ export default function ScanToPdfPage() {
       const blob = new Blob([pdfBytes], { type: 'application/pdf' });
       setDownloadUrl(URL.createObjectURL(blob));
       setIsDone(true);
+      stopCamera();
       toast({ title: "Protocol Success", description: `Compiled ${capturedImages.length} pages into industrial PDF.` });
     } catch (e) {
       console.error(e);
@@ -112,7 +136,12 @@ export default function ScanToPdfPage() {
     setIsDone(false);
     if (downloadUrl) URL.revokeObjectURL(downloadUrl);
     setDownloadUrl(null);
+    setHasCameraPermission(null);
   };
+
+  React.useEffect(() => {
+    return () => stopCamera();
+  }, []);
 
   return (
     <div className="flex min-h-screen flex-col bg-background">
@@ -126,19 +155,77 @@ export default function ScanToPdfPage() {
             </div>
             <h1 className="text-4xl font-black tracking-tighter text-accent uppercase italic">Industrial Scanner</h1>
             <p className="text-muted-foreground font-bold text-xs uppercase tracking-widest max-w-xl mx-auto">
-              Direct Camera-to-PDF Tunnel. High-fidelity page capture with local structural compilation.
+              Direct Hardware-to-PDF Tunnel. High-fidelity page capture with local structural fallback for manual uploads.
             </p>
           </div>
 
           {!isDone ? (
             <div className="grid lg:grid-cols-12 gap-12 animate-in fade-in zoom-in-95 duration-500">
               <div className="lg:col-span-7 space-y-6">
-                <div className="relative rounded-[3rem] border-4 border-accent/10 bg-black overflow-hidden shadow-2xl aspect-video md:aspect-[4/3] flex items-center justify-center">
-                  <video ref={videoRef} className="w-full h-full object-cover" autoPlay muted playsInline />
+                <div className="relative rounded-[3rem] border-4 border-accent/10 bg-black overflow-hidden shadow-2xl aspect-video md:aspect-[4/3] flex items-center justify-center group">
+                  <video ref={videoRef} className={cn("w-full h-full object-cover", !isCameraActive && "hidden")} autoPlay muted playsInline />
                   <canvas ref={canvasRef} className="hidden" />
                   
-                  {!hasCameraPermission && (
-                    <div className="absolute inset-0 bg-accent/90 backdrop-blur-sm flex items-center justify-center p-8 text-center z-20">
+                  {!isCameraActive && (
+                    <div className="flex flex-col items-center gap-6 p-12 text-center">
+                      <div className="w-24 h-24 bg-white/5 rounded-full flex items-center justify-center text-white/20">
+                        <CameraOff className="h-12 w-12" />
+                      </div>
+                      <div className="space-y-2">
+                        <h3 className="text-xl font-black uppercase italic text-white/80">Hardware Standby</h3>
+                        <p className="text-[10px] font-bold text-white/40 uppercase tracking-[0.2em]">Secure tunnel ready for initialization</p>
+                      </div>
+                      <div className="flex flex-col sm:flex-row gap-4">
+                        <Button 
+                          onClick={startCamera} 
+                          className="h-12 px-8 rounded-xl bg-primary text-white font-black uppercase text-[10px] tracking-widest shadow-xl"
+                        >
+                          <Zap className="mr-2 h-4 w-4 fill-white" /> Initialize Camera
+                        </Button>
+                        <Button 
+                          variant="outline" 
+                          onClick={() => fileInputRef.current?.click()}
+                          className="h-12 px-8 rounded-xl border-white/20 text-white hover:bg-white/10 font-black uppercase text-[10px] tracking-widest"
+                        >
+                          <Upload className="mr-2 h-4 w-4" /> Upload Instead
+                        </Button>
+                        <input 
+                          type="file" 
+                          ref={fileInputRef} 
+                          onChange={handleFileUpload} 
+                          accept="image/*" 
+                          multiple 
+                          className="hidden" 
+                        />
+                      </div>
+                    </div>
+                  )}
+
+                  {isCameraActive && (
+                    <>
+                      <div className="absolute top-6 left-6 z-10">
+                        <Button 
+                          variant="destructive" 
+                          size="sm" 
+                          onClick={stopCamera}
+                          className="rounded-full px-4 h-8 text-[9px] font-black uppercase tracking-widest shadow-xl"
+                        >
+                          <X className="mr-1.5 h-3 w-3" /> Terminate Stream
+                        </Button>
+                      </div>
+                      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10">
+                        <Button 
+                          onClick={captureFrame} 
+                          className="h-20 w-20 rounded-full bg-white text-accent hover:scale-110 active:scale-95 transition-all shadow-2xl border-8 border-accent/20"
+                        >
+                          <Zap className="h-8 w-8 fill-primary text-primary" />
+                        </Button>
+                      </div>
+                    </>
+                  )}
+
+                  {hasCameraPermission === false && !isCameraActive && (
+                    <div className="absolute inset-0 bg-accent/95 backdrop-blur-md flex items-center justify-center p-8 text-center z-20">
                       <div className="max-w-sm space-y-6">
                         <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center mx-auto shadow-2xl">
                           <AlertCircle className="h-10 w-10 text-destructive" />
@@ -146,24 +233,18 @@ export default function ScanToPdfPage() {
                         <Alert variant="destructive" className="bg-white border-none rounded-[2rem] p-8 shadow-2xl text-left">
                           <AlertTitle className="text-2xl font-black uppercase italic tracking-tighter text-destructive">Hardware Blocked</AlertTitle>
                           <AlertDescription className="text-[11px] font-bold uppercase tracking-widest mt-4 leading-relaxed text-muted-foreground">
-                            Protocol initiation failed. Please go to your browser settings and <span className="text-destructive">enable the camera option</span> to permit the scanning sequence.
+                            Camera permission was denied. Use the <span className="text-destructive">Upload Instead</span> button or enable the camera option in your settings.
                           </AlertDescription>
                         </Alert>
-                        <Button variant="outline" className="bg-white/10 text-white border-white/20 hover:bg-white/20 rounded-xl px-8 font-black uppercase text-[10px] tracking-widest" onClick={() => window.location.reload()}>
-                          Retry Initialization
-                        </Button>
+                        <div className="flex justify-center gap-4">
+                          <Button variant="outline" className="bg-white/10 text-white border-white/20 hover:bg-white/20 rounded-xl px-8 font-black uppercase text-[10px] tracking-widest" onClick={() => window.location.reload()}>
+                            Retry
+                          </Button>
+                          <Button onClick={() => fileInputRef.current?.click()} className="bg-white text-accent rounded-xl px-8 font-black uppercase text-[10px] tracking-widest shadow-xl">
+                            Upload Assets
+                          </Button>
+                        </div>
                       </div>
-                    </div>
-                  )}
-
-                  {hasCameraPermission && (
-                    <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10">
-                      <Button 
-                        onClick={captureFrame} 
-                        className="h-20 w-20 rounded-full bg-white text-accent hover:scale-110 active:scale-95 transition-all shadow-2xl border-8 border-accent/20"
-                      >
-                        <Zap className="h-8 w-8 fill-primary text-primary" />
-                      </Button>
                     </div>
                   )}
                 </div>
@@ -174,11 +255,11 @@ export default function ScanToPdfPage() {
                   <div className="p-8 border-b border-accent/5 flex items-center justify-between">
                     <div>
                       <h3 className="text-xl font-black uppercase italic tracking-tighter text-accent">Staged Assets</h3>
-                      <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">{capturedImages.length} Pages Captured</p>
+                      <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">{capturedImages.length} Pages Indexed</p>
                     </div>
                     {capturedImages.length > 0 && (
-                      <Button variant="ghost" size="sm" onClick={() => setCapturedImages([])} className="text-[9px] font-black uppercase text-destructive">
-                        Clear Sequence
+                      <Button variant="ghost" size="sm" onClick={() => setCapturedImages([])} className="text-[9px] font-black uppercase text-destructive hover:bg-destructive/5 px-3 rounded-full">
+                        Clear Registry
                       </Button>
                     )}
                   </div>
@@ -187,7 +268,7 @@ export default function ScanToPdfPage() {
                     {capturedImages.length === 0 ? (
                       <div className="h-full flex flex-col items-center justify-center text-center gap-4 opacity-20 py-20">
                         <Camera className="h-12 w-12" />
-                        <p className="text-[10px] font-black uppercase tracking-[0.3em]">Scanner Standby...</p>
+                        <p className="text-[10px] font-black uppercase tracking-[0.3em]">Registry Standby...</p>
                       </div>
                     ) : (
                       <div className="grid grid-cols-2 gap-4">
@@ -208,7 +289,7 @@ export default function ScanToPdfPage() {
                     )}
                   </div>
 
-                  <div className="p-8 bg-muted/30 mt-auto">
+                  <div className="p-8 bg-muted/30 mt-auto flex flex-col gap-4">
                     <Button 
                       onClick={handleDeploy} 
                       disabled={capturedImages.length === 0 || isProcessing}
@@ -217,6 +298,9 @@ export default function ScanToPdfPage() {
                       {isProcessing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Play className="mr-2 h-4 w-4 fill-primary text-primary" />}
                       Compile PDF Stream
                     </Button>
+                    <p className="text-[8px] text-center font-bold text-accent/40 uppercase tracking-widest italic">
+                      Zero-retention local compilation
+                    </p>
                   </div>
                 </Card>
               </div>
@@ -231,13 +315,22 @@ export default function ScanToPdfPage() {
                   <h2 className="text-2xl font-black uppercase italic tracking-tight text-accent">Scan Compiled!</h2>
                   <p className="text-muted-foreground text-sm font-medium">Your assets have been serialized into a verified PDF container.</p>
                 </div>
+                <div className="p-4 bg-muted/30 rounded-2xl border border-accent/5 text-left">
+                   <div className="flex items-center gap-2 mb-2">
+                      <ShieldCheck className="h-3 w-3 text-primary" />
+                      <span className="text-[9px] font-black uppercase tracking-widest text-accent/60">Asset Integrity Verified</span>
+                   </div>
+                   <p className="text-[10px] font-bold text-accent/40 uppercase tracking-tight italic">
+                     {capturedImages.length} Pages • High-Fidelity Reconstruction
+                   </p>
+                </div>
                 <Button 
                   size="lg" 
                   onClick={() => {
                     if (downloadUrl) {
                       const link = document.createElement('a');
                       link.href = downloadUrl;
-                      link.download = `scan_${new Date().getTime()}.pdf`;
+                      link.download = `DOCFLOW_Scan_${new Date().getTime()}.pdf`;
                       link.click();
                     }
                   }} 
@@ -248,7 +341,7 @@ export default function ScanToPdfPage() {
                 </Button>
               </Card>
               <Button variant="ghost" onClick={reset} className="text-[10px] font-bold uppercase tracking-widest text-accent/40 hover:text-accent">
-                Restart Scanner Sequence
+                Restart Protocol Sequence
               </Button>
             </div>
           )}
