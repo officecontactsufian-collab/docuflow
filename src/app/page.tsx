@@ -24,7 +24,8 @@ import {
   FilePenLine,
   Camera,
   Presentation,
-  Search
+  Search,
+  Wrench
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
@@ -72,7 +73,7 @@ export default function Home() {
       items: [
         { title: "Privacy Shield", desc: "Permanent metadata and tracking erasure.", icon: ShieldCheck, href: "/protect" },
         { title: "Unlock PDF", desc: "Recover and strip document restrictions.", icon: Unlock, href: "/protect?mode=unlock" },
-        { title: "Digital Sign", desc: "Apply secure electronic signatures.", icon: Signature, href: "/sign" },
+        { title: "Repair & Rebuild", desc: "Fix corrupted document structures.", icon: Wrench, href: "/repair" },
         { title: "Document Inspect", desc: "Deep metadata structural analysis.", icon: Search, href: "/analyze" },
       ]
     }

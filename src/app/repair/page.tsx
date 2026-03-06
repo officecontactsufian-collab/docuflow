@@ -22,7 +22,10 @@ export default function RepairPage() {
 
     try {
       const arrayBuffer = await selectedFile.arrayBuffer();
+      // Load with ignoreEncryption for maximum recovery potential
       const pdfDoc = await PDFDocument.load(arrayBuffer, { ignoreEncryption: true });
+      
+      // Re-saving forces a complete rebuild of the XRef table and object stream
       const pdfBytes = await pdfDoc.save();
       
       const blob = new Blob([pdfBytes], { type: 'application/pdf' });
@@ -99,6 +102,13 @@ export default function RepairPage() {
                   Download Repaired PDF
                 </Button>
               </Card>
+              <Button variant="ghost" onClick={() => {
+                setIsDone(false);
+                setSelectedFile(null);
+                setDownloadUrl(null);
+              }} className="text-xs font-bold uppercase tracking-widest">
+                Repair another document
+              </Button>
             </div>
           )}
         </div>
