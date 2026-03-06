@@ -1,4 +1,3 @@
-
 'use server';
 
 import { runAIStudioProtocol, AIStudioInput, AIStudioOutput } from '@/ai/flows/ai-studio-flow';
@@ -11,8 +10,7 @@ import {
   where, 
   getDocs, 
   Timestamp, 
-  limit, 
-  orderBy 
+  limit 
 } from 'firebase/firestore';
 import { createHash } from 'crypto';
 
@@ -31,13 +29,12 @@ function generateRequestHash(input: AIStudioInput): string {
     text: input.text,
     userQuestion: input.userQuestion,
     targetLanguage: input.targetLanguage,
-    // Note: In high-fidelity caching, a file checksum would be used here.
-    // For now we use the raw metadata.
   });
   return createHash('sha256').update(data).digest('hex');
 }
 
 export async function executeAIStudioAction(input: AIStudioInput, userId?: string): Promise<AIStudioOutput> {
+  // Use isomorphic initialization to access Firestore on the server
   const { firestore } = initializeFirebase();
 
   if (!userId) {
@@ -52,36 +49,42 @@ export async function executeAIStudioAction(input: AIStudioInput, userId?: strin
   const logsRef = collection(firestore, 'users', userId, 'usageLogs');
   const rateLimitQuery = query(
     logsRef, 
-    where('requestTimestamp', '>=', todayTimestamp),
-    where('status', '==', 'SUCCESS')
+    where('requestTimestamp', '>=', todayTimestamp)
   );
   
   const usageSnapshot = await getDocs(rateLimitQuery);
-  if (usageSnapshot.size >= DAILY_FREE_LIMIT) {
+  const successCount = usageSnapshot.docs.filter(doc => doc.data().status === 'SUCCESS').length;
+
+  if (successCount >= DAILY_FREE_LIMIT) {
     throw new Error(`PROTOCOL THRESHOLD: Daily limit of ${DAILY_FREE_LIMIT} operations reached. Registry resets at midnight.`);
   }
 
   // 2. STATELESS CACHE LOOKUP
   const requestHash = generateRequestHash(input);
   const opsRef = collection(firestore, 'users', userId, 'operations');
+  
+  // Use a simple query to avoid indexing requirements for the prototype phase
   const cacheQuery = query(
     opsRef,
-    where('operationType', '==', `AI_${input.tool}`),
-    where('aiPrompt', '==', requestHash), // Using aiPrompt field to store the request hash
-    where('status', '==', 'COMPLETED'),
-    orderBy('createdAt', 'desc'),
+    where('aiPrompt', '==', requestHash),
     limit(1)
   );
 
   const cacheSnapshot = await getDocs(cacheQuery);
-  if (!cacheSnapshot.empty) {
-    const cachedDoc = cacheSnapshot.docs[0].data();
+  const validCache = cacheSnapshot.docs.find(doc => {
+    const data = doc.data();
+    return data.status === 'COMPLETED' && data.operationType === `AI_${input.tool}`;
+  });
+
+  if (validCache) {
+    const data = validCache.data();
     console.log(`CACHE HIT: Restoring session for hash ${requestHash}`);
-    return { result: cachedDoc.aiResult };
+    return { result: data.aiResult };
   }
 
   try {
     // 3. EXECUTE INDUSTRIAL AI SEQUENCE
+    // Gemini key is used server-side only via runAIStudioProtocol
     const response = await runAIStudioProtocol(input);
 
     // 4. ARCHIVE OPERATION (For Caching & Audit)
@@ -90,7 +93,7 @@ export async function executeAIStudioAction(input: AIStudioInput, userId?: strin
       operationType: `AI_${input.tool}`,
       status: 'COMPLETED',
       createdAt: serverTimestamp(),
-      aiPrompt: requestHash, // Store the deterministic hash
+      aiPrompt: requestHash, // Deterministic hash used as lookup key
       aiResult: response.result,
       inputFilesIds: input.fileDataUri ? ["STAGED_ASSET"] : []
     });
