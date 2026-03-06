@@ -57,6 +57,13 @@ const TOOLS: ToolConfig[] = [
   { id: 'CHAT', label: 'Doc Intelligence', description: 'Deep document interrogation.', icon: MessageSquare, color: 'text-primary', placeholder: 'ASK A QUESTION ABOUT THE DOC...', requiresFile: true },
 ];
 
+const LANGUAGES = [
+  "English", "French", "Spanish", "German", "Japanese", "Chinese", 
+  "Arabic", "Portuguese", "Russian", "Italian", "Korean", "Hindi", 
+  "Turkish", "Dutch", "Vietnamese", "Polish", "Thai", "Hebrew", 
+  "Greek", "Indonesian"
+];
+
 const DAILY_FREE_LIMIT = 10;
 
 export default function AIStudioPage() {
@@ -361,7 +368,7 @@ export default function AIStudioPage() {
                                   <SelectValue />
                                </SelectTrigger>
                                <SelectContent className="rounded-xl">
-                                  {["English", "French", "Spanish", "German", "Japanese", "Chinese"].map(l => (
+                                  {LANGUAGES.map(l => (
                                     <SelectItem key={l} value={l} className="font-bold text-[10px] uppercase">{l}</SelectItem>
                                   ))}
                                </SelectContent>
