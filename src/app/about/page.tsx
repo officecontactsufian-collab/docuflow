@@ -11,7 +11,10 @@ import {
   Layers, 
   Rocket, 
   History,
-  ArrowRight
+  ArrowRight,
+  Fingerprint,
+  HardDriveDownload,
+  Lock
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
@@ -25,7 +28,7 @@ export default function AboutPage() {
         {/* Hero Section */}
         <section className="premium-hero pt-20 pb-32 border-b border-accent/5 overflow-hidden relative">
           <div className="container mx-auto px-6 relative z-10">
-            <div className="max-w-4xl mx-auto space-y-8 text-center">
+            <div className="max-w-4xl mx-auto space-y-10 text-center">
               <div className="section-label mx-auto">
                 <Target className="h-3 w-3 text-primary" />
                 <span>Our Core Mission</span>
@@ -35,7 +38,7 @@ export default function AboutPage() {
                 <span className="not-italic text-primary">Document</span> <br />
                 Intelligence.
               </h1>
-              <p className="text-xl text-accent/60 leading-relaxed font-bold max-w-2xl mx-auto">
+              <p className="text-xl md:text-2xl text-accent/60 leading-relaxed font-bold max-w-2xl mx-auto">
                 DOCFLOW is an industrial-grade workspace engineered for the modern professional. 
                 We’ve replaced the traditional cloud-storage model with a stateless, local-first 
                 architecture designed for absolute privacy.
@@ -80,7 +83,7 @@ export default function AboutPage() {
           </div>
         </section>
 
-        {/* Vision Section */}
+        {/* The Stateless Bridge Section */}
         <section className="py-24 bg-accent text-white relative overflow-hidden">
           <div className="container mx-auto px-6 relative z-10">
             <div className="grid lg:grid-cols-2 gap-20 items-center max-w-6xl mx-auto">
@@ -96,41 +99,88 @@ export default function AboutPage() {
                     We set out to build a platform that serves as a bridge, not a vault.
                   </p>
                 </div>
-                <div className="p-8 bg-white/5 rounded-[3rem] border border-white/10 space-y-4">
-                   <p className="text-sm font-bold leading-relaxed italic opacity-80">
-                     "Our goal isn't to store the world's information—it's to provide the world with the most precise tools to manage their own information, privately and securely."
-                   </p>
-                   <div className="flex items-center gap-4">
-                      <div className="h-10 w-10 rounded-full bg-primary/20 flex items-center justify-center text-[10px] font-black italic border border-primary/20">DF</div>
-                      <div>
-                         <p className="text-[10px] font-black uppercase tracking-widest">Engineering Directorate</p>
-                         <p className="text-[8px] font-bold text-white/40 uppercase tracking-widest">DOCFLOW Professional</p>
-                      </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                   <div className="p-6 bg-white/5 rounded-3xl border border-white/10 space-y-3">
+                      <Lock className="h-5 w-5 text-primary" />
+                      <h4 className="font-black text-xs uppercase tracking-widest italic">Zero Retention</h4>
+                      <p className="text-[10px] font-bold text-white/40 leading-relaxed uppercase">Binary streams are purged immediately after execution.</p>
+                   </div>
+                   <div className="p-6 bg-white/5 rounded-3xl border border-white/10 space-y-3">
+                      <Fingerprint className="h-5 w-5 text-primary" />
+                      <h4 className="font-black text-xs uppercase tracking-widest italic">Identity First</h4>
+                      <p className="text-[10px] font-bold text-white/40 leading-relaxed uppercase">You maintain 100% ownership of your digital signature and assets.</p>
                    </div>
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-6">
-                 {[
-                   { label: "Global Reach", val: "140+ Countries", icon: Globe },
-                   { label: "Daily Ops", val: "850K+ Sequences", icon: Zap },
-                   { label: "Uptime", val: "99.99% Core", icon: Rocket },
-                   { label: "Security", val: "ISO-27001", icon: ShieldCheck },
-                 ].map((stat) => (
-                   <div key={stat.label} className="p-8 bg-white/5 rounded-[2.5rem] border border-white/5 space-y-2">
-                      <stat.icon className="h-5 w-5 text-primary mb-2" />
-                      <p className="text-2xl font-black italic tracking-tighter">{stat.val}</p>
-                      <p className="text-[9px] font-black uppercase text-white/20 tracking-widest">{stat.label}</p>
-                   </div>
-                 ))}
+              <div className="relative">
+                 <div className="aspect-square bg-white/5 rounded-[4rem] border border-white/10 flex flex-col items-center justify-center text-center p-12 space-y-6 backdrop-blur-3xl shadow-2xl group">
+                    <div className="w-24 h-24 rounded-full bg-primary/20 flex items-center justify-center animate-pulse">
+                       <Rocket className="h-10 w-10 text-primary" />
+                    </div>
+                    <div className="space-y-2">
+                       <p className="text-2xl font-black italic uppercase tracking-tighter">High-Fidelity Flow</p>
+                       <p className="text-xs font-bold text-white/40 uppercase tracking-[0.3em]">Operational Benchmark v2.5</p>
+                    </div>
+                    <div className="pt-6 border-t border-white/10 w-full grid grid-cols-2 gap-4">
+                       <div>
+                          <p className="text-2xl font-black italic tracking-tighter text-primary">99.9%</p>
+                          <p className="text-[8px] font-black uppercase text-white/20 tracking-widest">Core Uptime</p>
+                       </div>
+                       <div>
+                          <p className="text-2xl font-black italic tracking-tighter text-primary">850K+</p>
+                          <p className="text-[8px] font-black uppercase text-white/20 tracking-widest">Daily Ops</p>
+                       </div>
+                    </div>
+                 </div>
+                 <div className="absolute -top-10 -right-10 w-40 h-40 bg-primary/20 rounded-full blur-3xl pointer-events-none" />
               </div>
             </div>
           </div>
-          <div className="absolute -bottom-20 -right-20 w-96 h-96 bg-primary/10 rounded-full blur-[100px]" />
+        </section>
+
+        {/* Mission Deep Dive */}
+        <section className="py-24 bg-background">
+          <div className="container mx-auto px-6">
+            <div className="max-w-4xl mx-auto space-y-16">
+              <div className="text-center space-y-4">
+                <h2 className="text-3xl md:text-5xl font-black text-accent uppercase italic tracking-tighter">Engineering the Future.</h2>
+                <p className="text-accent/40 font-black uppercase text-[10px] tracking-[0.4em]">Beyond the Cloud Era</p>
+              </div>
+
+              <div className="grid md:grid-cols-2 gap-12">
+                <div className="space-y-6">
+                  <p className="text-lg font-bold text-accent/80 leading-relaxed italic">
+                    "Our goal isn't to store the world's information—it's to provide the world with the most precise tools to manage their own information, privately and securely."
+                  </p>
+                  <p className="text-sm font-medium text-accent/60 leading-relaxed">
+                    By leveraging WebAssembly and advanced client-side processing, we’ve shifted the heavy lifting of document manipulation from vulnerable cloud servers directly to the edge. This means your hardware is the only place where your sensitive data truly exists.
+                  </p>
+                </div>
+                <div className="space-y-8">
+                  {[
+                    { label: "Hardware Isolation", val: "Every session operates in a dedicated local sandbox.", icon: Cpu },
+                    { label: "Archival Standards", val: "All outputs meet ISO 32000-2 professional standards.", icon: Layers },
+                    { label: "Global Reach", val: "Deployed across 140+ countries with localized speeds.", icon: Globe },
+                  ].map((feat) => (
+                    <div key={feat.label} className="flex gap-4">
+                      <div className="h-10 w-10 shrink-0 rounded-xl bg-accent text-primary flex items-center justify-center shadow-lg">
+                        <feat.icon className="h-5 w-5" />
+                      </div>
+                      <div>
+                        <h4 className="font-black text-xs uppercase tracking-widest text-accent italic">{feat.label}</h4>
+                        <p className="text-[10px] font-bold text-accent/40 uppercase leading-relaxed tracking-tight">{feat.val}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
         </section>
 
         {/* CTA */}
-        <section className="py-24 bg-background">
+        <section className="py-24 bg-white border-t border-accent/5">
           <div className="container mx-auto px-6 text-center">
             <div className="max-w-2xl mx-auto space-y-10">
               <h2 className="text-3xl md:text-5xl font-black text-accent uppercase italic tracking-tighter">Ready to initialize?</h2>
