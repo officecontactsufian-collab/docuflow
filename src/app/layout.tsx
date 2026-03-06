@@ -2,6 +2,8 @@ import type {Metadata} from 'next';
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
 import { FirebaseClientProvider } from '@/firebase/client-provider';
+import { Suspense } from 'react';
+import { Loader2 } from 'lucide-react';
 
 export const metadata: Metadata = {
   title: 'DOCFLOW Professional - Advanced PDF Solutions',
@@ -22,7 +24,13 @@ export default function RootLayout({
       </head>
       <body className="font-body antialiased min-h-screen bg-background selection:bg-primary/20">
         <FirebaseClientProvider>
-          {children}
+          <Suspense fallback={
+            <div className="flex min-h-screen items-center justify-center bg-muted/30">
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            </div>
+          }>
+            {children}
+          </Suspense>
           <Toaster />
         </FirebaseClientProvider>
       </body>
