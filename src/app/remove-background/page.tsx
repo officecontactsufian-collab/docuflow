@@ -1,3 +1,4 @@
+
 "use client"
 
 import * as React from 'react';
@@ -25,6 +26,8 @@ import { useToast } from '@/hooks/use-toast';
 import { Card } from '@/components/ui/card';
 import { processBackgroundRemovalAction } from './actions';
 import { cn } from '@/lib/utils';
+import { useUser, useFirestore, addDocumentNonBlocking } from '@/firebase';
+import { collection, serverTimestamp } from 'firebase/firestore';
 
 interface StagedFile {
   id: string;
@@ -36,6 +39,8 @@ interface StagedFile {
 }
 
 export default function RemoveBackgroundPage() {
+  const { user } = useUser();
+  const firestore = useFirestore();
   const [stagedFiles, setStagedFiles] = React.useState<StagedFile[]>([]);
   const { toast } = useToast();
 
@@ -64,6 +69,22 @@ export default function RemoveBackgroundPage() {
         "Executing Edge-Normalization...",
         "Asset Sanitized & Reconstructed."
       ], resultUrl);
+
+      // Log usage if identified
+      if (user && firestore) {
+        const logsRef = collection(firestore, 'users', user.uid, 'usageLogs');
+        const globalLogsRef = collection(firestore, 'usageLogs');
+        const logEntry = {
+          userId: user.uid,
+          toolUsed: 'BG_REMOVAL',
+          requestTimestamp: serverTimestamp(),
+          status: 'SUCCESS',
+          costUnits: 1,
+          ipAddress: 'PROXIED_TUNNEL'
+        };
+        addDocumentNonBlocking(logsRef, logEntry);
+        addDocumentNonBlocking(globalLogsRef, logEntry);
+      }
       
       toast({
         title: "Isolation Complete",
@@ -72,9 +93,6 @@ export default function RemoveBackgroundPage() {
     } catch (e: any) {
       console.error(e);
       let errorMsg = "Industrial isolation sequence interrupted.";
-      if (e.message?.includes('Body exceeded')) {
-        errorMsg = "File size exceeds 100MB processing limits.";
-      }
       updateFileStatus(staged.id, 'failed', ["Sequence Failed.", errorMsg]);
       toast({
         variant: "destructive",

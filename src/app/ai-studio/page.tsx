@@ -208,6 +208,7 @@ export default function AIStudioPage() {
 
       // 3. ARCHIVE OPERATION & LOG USAGE (Non-blocking)
       const logsRef = collection(firestore, 'users', user.uid, 'usageLogs');
+      const globalLogsRef = collection(firestore, 'usageLogs');
       
       addDocumentNonBlocking(opsRef, {
         userId: user.uid,
@@ -219,14 +220,17 @@ export default function AIStudioPage() {
         inputFilesIds: fileDataUri ? ["STAGED_ASSET"] : []
       });
 
-      addDocumentNonBlocking(logsRef, {
+      const logData = {
         userId: user.uid,
         toolUsed: `AI_${activeTool}`,
         requestTimestamp: serverTimestamp(),
         status: 'SUCCESS',
         costUnits: 1,
         ipAddress: 'PROXIED_TUNNEL' 
-      });
+      };
+
+      addDocumentNonBlocking(logsRef, logData);
+      addDocumentNonBlocking(globalLogsRef, logData);
 
       toast({ title: "Sequence Success", description: "AI Transformation complete." });
     } catch (e: any) {
@@ -236,13 +240,16 @@ export default function AIStudioPage() {
       
       if (user && firestore) {
         const logsRef = collection(firestore, 'users', user.uid, 'usageLogs');
-        addDocumentNonBlocking(logsRef, {
+        const globalLogsRef = collection(firestore, 'usageLogs');
+        const errorLog = {
           userId: user.uid,
           toolUsed: `AI_${activeTool}`,
           requestTimestamp: serverTimestamp(),
           status: 'ERROR',
           costUnits: 0
-        });
+        };
+        addDocumentNonBlocking(logsRef, errorLog);
+        addDocumentNonBlocking(globalLogsRef, errorLog);
       }
     } finally {
       setIsProcessing(false);

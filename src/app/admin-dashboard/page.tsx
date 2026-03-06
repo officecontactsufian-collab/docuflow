@@ -41,7 +41,7 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Switch } from '@/components/ui/switch';
-import { doc, collection, serverTimestamp, query, orderBy, limit } from 'firebase/firestore';
+import { doc, collection, serverTimestamp, query, orderBy, limit, Timestamp } from 'firebase/firestore';
 import { useToast } from '@/hooks/use-toast';
 import { signOut } from 'firebase/auth';
 import { cn } from '@/lib/utils';
@@ -83,6 +83,7 @@ export default function AdminDashboardPage() {
   // Global Audit Registry
   const logsQuery = useMemoFirebase(() => {
     if (!firestore || !user || user.email !== MASTER_ADMIN_EMAIL) return null;
+    // Querying the global usageLogs collection
     return query(collection(firestore, 'usageLogs'), orderBy('requestTimestamp', 'desc'), limit(50));
   }, [firestore, user]);
   const { data: allLogs, isLoading: isLogsLoading } = useCollection(logsQuery);
@@ -272,7 +273,9 @@ export default function AdminDashboardPage() {
                                   </div>
                                 </td>
                                 <td className="px-10 py-8">
-                                  <p className="text-[10px] font-bold text-accent/60 uppercase">{u.createdAt || "Archival Entry"}</p>
+                                  <p className="text-[10px] font-bold text-accent/60 uppercase">
+                                    {u.createdAt instanceof Timestamp ? u.createdAt.toDate().toLocaleString() : u.createdAt || "Archival Entry"}
+                                  </p>
                                 </td>
                                 <td className="px-10 py-8"><Badge className="bg-green-50 text-green-600 rounded-lg px-2 text-[9px] uppercase">Active Unit</Badge></td>
                                 <td className="px-10 py-8 text-right">

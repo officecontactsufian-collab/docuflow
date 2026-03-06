@@ -5,7 +5,7 @@ service cloud.firestore {
 
     /**
      * DOCFLOW Industrial Security Rules
-     * Administrative Clearance Protocol v3.0
+     * Administrative Clearance Protocol v3.1
      */
 
     function isSignedIn() {
@@ -30,7 +30,9 @@ service cloud.firestore {
     }
 
     match /usageLogs/{logId} {
-      allow read, write: if isAdmin();
+      // Allow any user to log their activity, but only admin can manage the registry
+      allow create: if isSignedIn();
+      allow get, list, update, delete: if isAdmin();
     }
 
     match /subscriptions/{subscriptionId} {
