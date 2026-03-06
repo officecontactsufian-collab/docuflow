@@ -20,20 +20,33 @@ import {
   Settings2,
   Layers,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Target,
+  MousePointer2
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { PDFDocument } from 'pdf-lib';
 import { PDFPreview } from '@/components/pdf-preview';
 import { cn } from '@/lib/utils';
 
-type SignatureMode = 'draw' | 'type' | 'upload';
-type Position = "bottom-right" | "bottom-left" | "bottom-center" | "top-right" | "top-left" | "top-center" | "center";
+type SignatureMode = 'draw' | 'type';
+type Position = "top-left" | "top-center" | "top-right" | "middle-left" | "center" | "middle-right" | "bottom-left" | "bottom-center" | "bottom-right";
+
+const POSITION_MAP: { label: string; value: Position }[] = [
+  { label: "TL", value: "top-left" },
+  { label: "TC", value: "top-center" },
+  { label: "TR", value: "top-right" },
+  { label: "ML", value: "middle-left" },
+  { label: "C", value: "center" },
+  { label: "MR", value: "middle-right" },
+  { label: "BL", value: "bottom-left" },
+  { label: "BC", value: "bottom-center" },
+  { label: "BR", value: "bottom-right" },
+];
 
 export default function SignPage() {
   const [pdfFile, setPdfFile] = React.useState<File | null>(null);
@@ -73,7 +86,6 @@ export default function SignPage() {
     }
   };
 
-  // Canvas Drawing Logic
   const startDrawing = (e: React.MouseEvent | React.TouchEvent) => {
     setIsDrawing(true);
     draw(e);
@@ -99,7 +111,7 @@ export default function SignPage() {
 
     ctx.lineWidth = 2;
     ctx.lineCap = 'round';
-    ctx.strokeStyle = '#251F4A'; // Accent color
+    ctx.strokeStyle = '#251F4A';
 
     ctx.lineTo(x, y);
     ctx.stroke();
@@ -131,9 +143,6 @@ export default function SignPage() {
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       ctx.fillText(typedName || "Signature", canvas.width / 2, canvas.height / 2);
-    } else {
-      // Logic for upload already handled in previous iteration or could be unified
-      return null;
     }
 
     const blob = await new Promise<Blob>((resolve) => canvas.toBlob((b) => resolve(b!), 'image/png'));
@@ -146,7 +155,7 @@ export default function SignPage() {
 
     try {
       const sigBytes = await getSignatureImage();
-      if (!sigBytes) throw new Error("Signature asset generation failure.");
+      if (!sigBytes) throw new Error("Identity asset generation failure.");
 
       const pdfBytes = await pdfFile.arrayBuffer();
       const pdfDoc = await PDFDocument.load(pdfBytes, { ignoreEncryption: true });
@@ -166,12 +175,15 @@ export default function SignPage() {
       let y = mediaBox.y + margin;
 
       switch (position) {
-        case "bottom-left": x = mediaBox.x + margin; break;
-        case "bottom-center": x = mediaBox.x + (width / 2) - (sigWidth / 2); break;
         case "top-left": x = mediaBox.x + margin; y = mediaBox.y + height - sigHeight - margin; break;
         case "top-center": x = mediaBox.x + (width / 2) - (sigWidth / 2); y = mediaBox.y + height - sigHeight - margin; break;
         case "top-right": x = mediaBox.x + width - sigWidth - margin; y = mediaBox.y + height - sigHeight - margin; break;
+        case "middle-left": x = mediaBox.x + margin; y = mediaBox.y + (height / 2) - (sigHeight / 2); break;
         case "center": x = mediaBox.x + (width / 2) - (sigWidth / 2); y = mediaBox.y + (height / 2) - (sigHeight / 2); break;
+        case "middle-right": x = mediaBox.x + width - sigWidth - margin; y = mediaBox.y + (height / 2) - (sigHeight / 2); break;
+        case "bottom-left": x = mediaBox.x + margin; y = mediaBox.y + margin; break;
+        case "bottom-center": x = mediaBox.x + (width / 2) - (sigWidth / 2); y = mediaBox.y + margin; break;
+        case "bottom-right": x = mediaBox.x + width - sigWidth - margin; y = mediaBox.y + margin; break;
       }
 
       page.drawImage(sigImg, { x, y, width: sigWidth, height: sigHeight });
@@ -179,7 +191,7 @@ export default function SignPage() {
       const finalBytes = await pdfDoc.save();
       setDownloadUrl(URL.createObjectURL(new Blob([finalBytes], { type: 'application/pdf' })));
       setIsDone(true);
-      toast({ title: "Protocol Success", description: "Digital signature embedded successfully." });
+      toast({ title: "Protocol Success", description: "Identity permanently embedded." });
     } catch (error: any) {
       console.error(error);
       toast({ variant: "destructive", title: "Sequence Failed", description: error.message });
@@ -206,9 +218,9 @@ export default function SignPage() {
             <div className="inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-accent text-white shadow-xl mb-2">
               <Signature className="h-7 w-7" />
             </div>
-            <h1 className="text-4xl font-black tracking-tighter text-accent uppercase italic">Electronic Identity Engine</h1>
+            <h1 className="text-4xl font-black tracking-tighter text-accent uppercase italic">Identity Engine</h1>
             <p className="text-muted-foreground font-bold text-xs uppercase tracking-widest max-w-xl mx-auto">
-              Professional Digital Signatures. Create, synthesize, and precisely place your identity across industrial document streams.
+              Professional Document Execution. Synthesis and precision anchor controls for high-fidelity assets.
             </p>
           </div>
 
@@ -222,40 +234,41 @@ export default function SignPage() {
                 />
               ) : (
                 <div className="grid lg:grid-cols-12 gap-12">
-                  {/* Left: Preview */}
                   <div className="lg:col-span-7 space-y-6">
                     <div className="flex items-center justify-between px-2">
                       <h3 className="text-[10px] font-black uppercase tracking-widest text-accent/60 flex items-center gap-2">
-                        <LayoutGrid className="h-3.5 w-3.5" />
-                        Industrial Reference Asset
+                        <Target className="h-3.5 w-3.5 text-primary" />
+                        Industrial Reference Preview
                       </h3>
                       <span className="text-[10px] font-bold text-primary uppercase truncate max-w-[200px]">{pdfFile.name}</span>
                     </div>
-                    <PDFPreview file={pdfFile} className="h-[750px]" />
+                    <div className="relative group">
+                      <PDFPreview file={pdfFile} className="h-[750px]" />
+                      <div className="absolute inset-0 pointer-events-none border-4 border-transparent group-hover:border-primary/5 rounded-[2.5rem] transition-colors" />
+                    </div>
                   </div>
 
-                  {/* Right: Signature Creation & Placement */}
                   <div className="lg:col-span-5 space-y-6">
                     <Card className="border-none shadow-2xl rounded-[2.5rem] bg-white overflow-hidden">
                       <CardHeader className="p-8 pb-4">
                         <div className="flex items-center gap-3 mb-2">
                            <div className="p-2.5 bg-primary/5 rounded-xl text-primary">
-                              <PenTool className="h-5 w-5" />
+                              <Settings2 className="h-5 w-5" />
                            </div>
                            <div className="flex flex-col">
-                              <CardTitle className="text-xl font-black uppercase italic tracking-tighter text-accent">Identity Suite</CardTitle>
-                              <CardDescription className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Signature Creation & Staging</CardDescription>
+                              <CardTitle className="text-xl font-black uppercase italic tracking-tighter text-accent">Control Suite</CardTitle>
+                              <CardDescription className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Identity Synthesis & Anchoring</CardDescription>
                            </div>
                         </div>
                       </CardHeader>
-                      <CardContent className="p-8 pt-0 space-y-8">
+                      <CardContent className="p-8 pt-0 space-y-10">
                         <Tabs value={mode} onValueChange={(v: any) => setMode(v)} className="w-full">
                           <TabsList className="grid grid-cols-2 h-12 bg-muted/30 p-1 rounded-xl mb-6">
                             <TabsTrigger value="draw" className="rounded-lg font-black text-[9px] uppercase tracking-widest gap-2">
-                              <PenTool className="h-3 w-3" /> Draw
+                              <PenTool className="h-3 w-3" /> Draw Ink
                             </TabsTrigger>
                             <TabsTrigger value="type" className="rounded-lg font-black text-[9px] uppercase tracking-widest gap-2">
-                              <Type className="h-3 w-3" /> Type
+                              <Type className="h-3 w-3" /> Synthesize
                             </TabsTrigger>
                           </TabsList>
 
@@ -278,101 +291,105 @@ export default function SignPage() {
                                 variant="ghost" 
                                 size="icon" 
                                 onClick={clearCanvas}
-                                className="absolute bottom-2 right-2 h-8 w-8 bg-white/80 backdrop-blur shadow-sm rounded-lg text-destructive hover:bg-destructive hover:text-white transition-all"
+                                className="absolute bottom-2 right-2 h-8 w-8 bg-white/80 backdrop-blur shadow-sm rounded-lg text-destructive hover:bg-destructive transition-all"
                               >
                                 <Eraser className="h-4 w-4" />
                               </Button>
                             </div>
-                            <p className="text-[8px] font-black uppercase text-center text-accent/30 tracking-widest">Ink Surface: High-Fidelity Capture</p>
+                            <p className="text-[8px] font-black uppercase text-center text-accent/30 tracking-widest">Wet Ink Surface: Local Capture Active</p>
                           </TabsContent>
 
                           <TabsContent value="type" className="space-y-6">
                             <div className="space-y-4">
                               <div className="space-y-2">
-                                <Label className="text-[10px] font-black uppercase tracking-widest text-accent/60">Legal Name</Label>
+                                <Label className="text-[10px] font-black uppercase tracking-widest text-accent/60">Legal Entity Name</Label>
                                 <Input 
                                   value={typedName} 
                                   onChange={(e) => setTypedName(e.target.value)}
-                                  placeholder="Full Identity Name..." 
+                                  placeholder="IDENTIFY..." 
                                   className="h-12 bg-muted/20 border-accent/10 rounded-xl font-bold text-accent italic"
                                 />
                               </div>
-                              <div className="space-y-2">
-                                <Label className="text-[10px] font-black uppercase tracking-widest text-accent/60">Style Synthesis</Label>
-                                <div className="grid grid-cols-1 gap-2">
-                                  {fonts.map((f) => (
-                                    <button
-                                      key={f.value}
-                                      onClick={() => setSelectedFont(f.value)}
-                                      className={cn(
-                                        "p-4 rounded-xl border text-xl text-center transition-all",
-                                        selectedFont === f.value 
-                                          ? "border-primary bg-primary/5 ring-1 ring-primary shadow-lg" 
-                                          : "bg-white border-accent/5 hover:border-primary/20"
-                                      )}
-                                      style={{ fontFamily: f.value }}
-                                    >
-                                      {typedName || "Signature Style"}
-                                    </button>
-                                  ))}
-                                </div>
+                              <div className="grid grid-cols-1 gap-2">
+                                {fonts.map((f) => (
+                                  <button
+                                    key={f.value}
+                                    onClick={() => setSelectedFont(f.value)}
+                                    className={cn(
+                                      "p-4 rounded-xl border text-xl text-center transition-all",
+                                      selectedFont === f.value 
+                                        ? "border-primary bg-primary/5 ring-1 ring-primary shadow-lg" 
+                                        : "bg-white border-accent/5 hover:border-primary/20"
+                                    )}
+                                    style={{ fontFamily: f.value }}
+                                  >
+                                    {typedName || "Script Style"}
+                                  </button>
+                                ))}
                               </div>
                             </div>
                           </TabsContent>
                         </Tabs>
 
-                        <div className="space-y-6 pt-6 border-t border-accent/5">
-                           <div className="grid grid-cols-2 gap-4">
-                              <div className="space-y-2">
+                        <div className="space-y-8 pt-8 border-t border-accent/5">
+                           <div className="grid grid-cols-2 gap-8">
+                              <div className="space-y-4">
                                 <Label className="text-[10px] font-black uppercase tracking-widest text-accent/60 flex items-center gap-2">
-                                  <Layers className="h-3 w-3" /> Target Page
+                                  <Layers className="h-3 w-3" /> Page Target
                                 </Label>
                                 <div className="flex items-center gap-2">
                                    <Button 
                                     variant="outline" 
                                     size="icon" 
-                                    className="h-10 w-10 rounded-lg"
+                                    className="h-10 w-10 rounded-lg border-accent/10"
                                     onClick={() => setTargetPage(prev => Math.max(1, prev - 1))}
                                    >
                                       <ChevronLeft className="h-4 w-4" />
                                    </Button>
-                                   <div className="flex-1 h-10 bg-muted/20 rounded-lg flex items-center justify-center font-black text-xs text-accent">
+                                   <div className="flex-1 h-10 bg-muted/30 rounded-lg flex items-center justify-center font-black text-[10px] text-accent">
                                       {targetPage} / {totalPages}
                                    </div>
                                    <Button 
                                     variant="outline" 
                                     size="icon" 
-                                    className="h-10 w-10 rounded-lg"
+                                    className="h-10 w-10 rounded-lg border-accent/10"
                                     onClick={() => setTargetPage(prev => Math.min(totalPages, prev + 1))}
                                    >
                                       <ChevronRight className="h-4 w-4" />
                                    </Button>
                                 </div>
                               </div>
-                              <div className="space-y-2">
+
+                              <div className="space-y-4">
                                 <Label className="text-[10px] font-black uppercase tracking-widest text-accent/60 flex items-center gap-2">
-                                  <Settings2 className="h-3 w-3" /> Placement
+                                  <MousePointer2 className="h-3 w-3" /> Anchor Point
                                 </Label>
-                                <Select value={position} onValueChange={(v: any) => setPosition(v)}>
-                                  <SelectTrigger className="h-10 rounded-lg bg-white border-accent/10 font-bold uppercase text-[9px] tracking-widest">
-                                    <SelectValue />
-                                  </SelectTrigger>
-                                  <SelectContent className="rounded-xl border-accent/10">
-                                    {["top-left", "top-center", "top-right", "center", "bottom-left", "bottom-center", "bottom-right"].map(pos => (
-                                      <SelectItem key={pos} value={pos} className="text-[10px] font-bold uppercase">{pos.replace('-', ' ')}</SelectItem>
-                                    ))}
-                                  </SelectContent>
-                                </Select>
+                                <div className="grid grid-cols-3 gap-1 bg-muted/20 p-1 rounded-xl border border-accent/5">
+                                   {POSITION_MAP.map((pos) => (
+                                     <button
+                                      key={pos.value}
+                                      onClick={() => setPosition(pos.value)}
+                                      className={cn(
+                                        "h-8 rounded-lg text-[8px] font-black uppercase transition-all",
+                                        position === pos.value 
+                                          ? "bg-primary text-white shadow-lg" 
+                                          : "bg-white/50 text-accent/40 hover:bg-white"
+                                      )}
+                                     >
+                                       {pos.label}
+                                     </button>
+                                   ))}
+                                </div>
                               </div>
                            </div>
 
                            <Button 
                             onClick={handleDeploy} 
                             disabled={isProcessing || (mode === 'type' && !typedName)}
-                            className="w-full h-14 rounded-2xl bg-accent text-white font-black uppercase tracking-[0.2em] text-[11px] shadow-2xl shadow-accent/20"
+                            className="w-full h-16 rounded-2xl bg-accent text-white font-black uppercase tracking-[0.2em] text-[11px] shadow-2xl shadow-accent/20 hover:scale-[1.01] transition-transform"
                           >
                             {isProcessing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <UserCheck className="mr-2 h-4 w-4" />}
-                            Execute Signature
+                            Deploy Identity Anchor
                           </Button>
                         </div>
                       </CardContent>
@@ -388,8 +405,8 @@ export default function SignPage() {
                   <CheckCircle2 className="h-10 w-10" />
                 </div>
                 <div className="space-y-2">
-                  <h2 className="text-2xl font-black uppercase italic tracking-tight text-accent">Identity Embedded!</h2>
-                  <p className="text-muted-foreground text-sm font-medium">Your digital signature has been permanently synthesized into the asset.</p>
+                  <h2 className="text-2xl font-black uppercase italic tracking-tight text-accent">Anchor Complete!</h2>
+                  <p className="text-muted-foreground text-sm font-medium">Identity permanently embedded at specified coordinates.</p>
                 </div>
                 <Button 
                   size="lg" 
@@ -397,7 +414,7 @@ export default function SignPage() {
                     if (downloadUrl) {
                       const link = document.createElement('a');
                       link.href = downloadUrl;
-                      link.download = `signed_${pdfFile?.name || 'asset.pdf'}`;
+                      link.download = `executed_${pdfFile?.name || 'asset.pdf'}`;
                       document.body.appendChild(link);
                       link.click();
                       document.body.removeChild(link);
@@ -406,11 +423,11 @@ export default function SignPage() {
                   className="w-full h-14 rounded-2xl bg-accent hover:bg-accent/90 shadow-xl shadow-accent/20 text-[11px] font-black uppercase tracking-widest"
                 >
                   <Download className="mr-2 h-4 w-4" />
-                  Download Signed Asset
+                  Download Executed Asset
                 </Button>
               </Card>
               <Button variant="ghost" onClick={reset} className="text-[10px] font-bold uppercase tracking-widest text-accent/40 hover:text-accent">
-                Sign Another Asset
+                Execute New Sequence
               </Button>
             </div>
           )}
