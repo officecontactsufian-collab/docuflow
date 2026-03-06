@@ -35,7 +35,8 @@ import {
   Globe,
   Activity,
   MessageSquare,
-  Scale
+  Scale,
+  Info
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
@@ -363,10 +364,10 @@ export default function Home() {
                 <div className="h-px w-8 bg-primary/30" />
               </div>
               <ul className="space-y-4 text-[11px] font-black uppercase tracking-[0.2em] italic">
+                <li><Link href="/about" className="hover:text-primary transition-colors flex items-center gap-2 group"><div className="w-1 h-1 bg-primary/20 rounded-full group-hover:bg-primary" /> <Info className="h-3 w-3" /> About Mission</Link></li>
                 <li><Link href="/contact" className="hover:text-primary transition-colors flex items-center gap-2 group"><div className="w-1 h-1 bg-primary/20 rounded-full group-hover:bg-primary" /> <MessageSquare className="h-3 w-3" /> Contact Gateway</Link></li>
                 <li><Link href="/privacy" className="hover:text-primary transition-colors flex items-center gap-2 group"><div className="w-1 h-1 bg-primary/20 rounded-full group-hover:bg-primary" /> <ShieldCheck className="h-3 w-3" /> Privacy Shield</Link></li>
                 <li><Link href="/terms" className="hover:text-primary transition-colors flex items-center gap-2 group"><div className="w-1 h-1 bg-primary/20 rounded-full group-hover:bg-primary" /> <Scale className="h-3 w-3" /> Terms of Operation</Link></li>
-                <li><Link href="/enterprise" className="hover:text-primary transition-colors flex items-center gap-2 group"><div className="w-1 h-1 bg-primary/20 rounded-full group-hover:bg-primary" /> <Globe className="h-3 w-3" /> Enterprise Grade</Link></li>
               </ul>
             </div>
           </div>
