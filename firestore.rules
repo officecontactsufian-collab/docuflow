@@ -3,31 +3,11 @@ service cloud.firestore {
   match /databases/{database}/documents {
 
     /**
-     * PDF Spark Security Rules
+     * DOCFLOW Professional Security Rules
      * 
      * CORE PHILOSOPHY:
-     * This ruleset implements a strict User-Ownership model. To ensure high performance and 
-     * maximum security, the data is organized hierarchically where every user's data is 
-     * nested under their unique identifier.
-     * 
-     * DATA STRUCTURE:
-     * - /users/{userId}: The root profile for an individual user.
-     * - /users/{userId}/files/{fileId}: Metadata for files owned by that specific user.
-     * - /users/{userId}/jobs/{jobId}: Processing jobs (merges, splits, AI) initiated by that user.
-     * 
-     * KEY SECURITY DECISIONS:
-     * 1. Path-Based Authorization: The {userId} wildcard in the path is the primary source of 
-     *    truth for ownership.
-     * 2. Relational Integrity: On creation, we enforce that internal ownership fields (like 'userId' 
-     *    or 'id') match the path segment. On update, we enforce that these fields are immutable.
-     * 3. Structural Segregation: User data is entirely isolated. There are no public collections 
-     *    and no way for one user to list or access another user's documents.
-     * 4. Denormalization for Authorization: Ownership fields are stored inside documents to 
-     *    allow for efficient rules without needing cross-document get() calls.
-     * 
-     * PROTOTYPING MODE:
-     * Rules are strictly focused on WHO can access WHAT. Data shapes (schemas and types) are 
-     * not enforced here to allow for rapid frontend development and iteration.
+     * This ruleset implements a strict User-Ownership model with an administrative 
+     * override for the Master Admin (office.contact.sufian@gmail.com).
      */
 
     // --- Helper Functions ---
@@ -47,47 +27,41 @@ service cloud.firestore {
       return resource != null && isOwner(userId);
     }
 
+    /** @description Checks if the authenticated user has Master Admin clearance. */
+    function isMasterAdmin() {
+      return isSignedIn() && request.auth.token.email == 'office.contact.sufian@gmail.com';
+    }
+
     // --- Collection Rules ---
 
     /**
-     * @description Rules for the UserProfile entity. Users can only manage their own profile.
-     * @path /users/{userId}
-     * @allow (create) User 'abc' creates document '/users/abc' where data.id == 'abc'.
-     * @deny (create) User 'abc' attempts to create document '/users/xyz'.
-     * @principle Self-creation and strict ownership based on document ID.
+     * @description Rules for the UserProfile entity.
+     * Users manage their own profiles. Master Admin has global read/delete clearance.
      */
     match /users/{userId} {
-      allow get, list: if isOwner(userId);
-      allow create: if isOwner(userId) && request.resource.data.id == userId;
-      allow update: if isExistingOwner(userId) && request.resource.data.id == resource.data.id;
-      allow delete: if isExistingOwner(userId);
+      allow get, list: if isOwner(userId) || isMasterAdmin();
+      allow create: if (isOwner(userId) && request.resource.data.id == userId) || isMasterAdmin();
+      allow update: if (isExistingOwner(userId) && request.resource.data.id == resource.data.id) || isMasterAdmin();
+      allow delete: if isExistingOwner(userId) || isMasterAdmin();
 
       /**
-       * @description Rules for File metadata. Files are strictly private to the owner.
-       * @path /users/{userId}/files/{fileId}
-       * @allow (list) User 'abc' queries '/users/abc/files'.
-       * @deny (get) User 'abc' attempts to fetch '/users/def/files/file123'.
-       * @principle Path-based ownership with internal relational field validation.
+       * @description Rules for File metadata.
        */
       match /files/{fileId} {
-        allow get, list: if isOwner(userId);
-        allow create: if isOwner(userId) && request.resource.data.userId == userId;
-        allow update: if isExistingOwner(userId) && request.resource.data.userId == resource.data.userId;
-        allow delete: if isExistingOwner(userId);
+        allow get, list: if isOwner(userId) || isMasterAdmin();
+        allow create: if (isOwner(userId) && request.resource.data.userId == userId) || isMasterAdmin();
+        allow update: if (isExistingOwner(userId) && request.resource.data.userId == resource.data.userId) || isMasterAdmin();
+        allow delete: if isExistingOwner(userId) || isMasterAdmin();
       }
 
       /**
-       * @description Rules for ProcessingJobs. Jobs are strictly private to the initiator.
-       * @path /users/{userId}/jobs/{jobId}
-       * @allow (update) User 'abc' updates the status of their own job in '/users/abc/jobs/job1'.
-       * @deny (create) User 'abc' attempts to create a job under '/users/xyz/jobs/job2'.
-       * @principle Enforces that jobs cannot be transferred between users.
+       * @description Rules for ProcessingJobs.
        */
       match /jobs/{jobId} {
-        allow get, list: if isOwner(userId);
-        allow create: if isOwner(userId) && request.resource.data.userId == userId;
-        allow update: if isExistingOwner(userId) && request.resource.data.userId == resource.data.userId;
-        allow delete: if isExistingOwner(userId);
+        allow get, list: if isOwner(userId) || isMasterAdmin();
+        allow create: if (isOwner(userId) && request.resource.data.userId == userId) || isMasterAdmin();
+        allow update: if (isExistingOwner(userId) && request.resource.data.userId == resource.data.userId) || isMasterAdmin();
+        allow delete: if isExistingOwner(userId) || isMasterAdmin();
       }
     }
 
