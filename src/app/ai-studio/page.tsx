@@ -210,7 +210,7 @@ export default function AIStudioPage() {
                           <Label className="text-[10px] font-black uppercase tracking-widest text-accent/60">Interrogate Asset</Label>
                           <FileDropzone onFilesSelected={(f) => setSelectedFile(f[0])} maxFiles={1} accept=".pdf" className="border-accent/10" />
                           <div className="space-y-2">
-                            <Label className="text-[10px] font-black uppercase tracking-widest text-accent/60">Your Inquiry</ whitespaces>
+                            <Label className="text-[10px] font-black uppercase tracking-widest text-accent/60">Your Inquiry</Label>
                             <Input 
                               value={userQuestion} 
                               onChange={(e) => setUserQuestion(e.target.value)}
