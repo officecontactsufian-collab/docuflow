@@ -6,8 +6,54 @@ import { Suspense } from 'react';
 import { Loader2 } from 'lucide-react';
 
 export const metadata: Metadata = {
-  title: 'DOCFLOW Professional - Advanced PDF Solutions',
-  description: 'The ultimate professional document management platform with high-fidelity conversion, manipulation, and security tools.',
+  metadataBase: new URL('https://docflow.pro'),
+  title: {
+    default: 'DOCFLOW Professional - Industrial Document Intelligence',
+    template: '%s | DOCFLOW Professional'
+  },
+  description: 'High-performance, local-first document intelligence workspace. Securely merge, split, compress, and sign PDF documents with zero-retention architecture.',
+  keywords: ['PDF tools', 'Document Intelligence', 'Merge PDF', 'Split PDF', 'Digital Signature', 'Local-first PDF', 'Secure Document Processing', 'PDF Metadata Strip'],
+  authors: [{ name: 'DOCFLOW Protocols' }],
+  creator: 'DOCFLOW Professional',
+  publisher: 'DOCFLOW Professional',
+  formatDetection: {
+    email: false,
+    address: false,
+    telephone: false,
+  },
+  openGraph: {
+    type: 'website',
+    locale: 'en_US',
+    url: 'https://docflow.pro',
+    siteName: 'DOCFLOW Professional',
+    title: 'DOCFLOW Professional - Industrial Document Intelligence',
+    description: 'The industrial benchmark for local-first document manipulation. Secure, private, and instant.',
+    images: [
+      {
+        url: 'https://picsum.photos/seed/docflow-og/1200/630',
+        width: 1200,
+        height: 630,
+        alt: 'DOCFLOW Professional Interface',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'DOCFLOW Professional - Secure Document Intelligence',
+    description: 'High-fidelity document tools with zero cloud retention.',
+    images: ['https://picsum.photos/seed/docflow-og/1200/630'],
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
 };
 
 export default function RootLayout({
