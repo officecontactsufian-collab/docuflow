@@ -111,7 +111,7 @@ export function Navbar() {
                     </DropdownMenuLabel>
                     <div className="space-y-1">
                       {cat.items.map((item) => (
-                        <DropdownMenuItem key={item.href} asChild className="p-2 rounded-lg cursor-pointer hover:bg-primary/5 transition-all">
+                        <DropdownMenuItem key={item.title} asChild className="p-2 rounded-lg cursor-pointer hover:bg-primary/5 transition-all">
                           <Link href={item.href} className="flex items-center gap-3">
                             <div className="h-6 w-6 text-primary flex items-center justify-center bg-primary/5 rounded-md">
                               <item.icon className="h-3.5 w-3.5" />
