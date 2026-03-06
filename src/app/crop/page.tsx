@@ -51,7 +51,6 @@ export default function CropPage() {
   const [totalPages, setTotalPages] = React.useState(1);
   const [allCrops, setAllCrops] = React.useState<Record<number, CropSettings>>({});
 
-  // Individual handle states for real-time UI tracking
   const [cropTop, setCropTop] = React.useState(10);
   const [cropRight, setCropRight] = React.useState(10);
   const [cropBottom, setCropBottom] = React.useState(10);
@@ -139,9 +138,6 @@ export default function CropPage() {
 
   const applyCropToPage = (page: any, settings: CropSettings) => {
     const mediaBox = page.getMediaBox();
-    
-    // PDF coordinates: (0,0) is bottom-left. 
-    // UI: percentages from edges.
     const leftOffset = (settings.l / 100) * mediaBox.width;
     const rightOffset = (settings.r / 100) * mediaBox.width;
     const topOffset = (settings.t / 100) * mediaBox.height;
@@ -152,7 +148,6 @@ export default function CropPage() {
     const newWidth = mediaBox.width - leftOffset - rightOffset;
     const newHeight = mediaBox.height - topOffset - bottomOffset;
 
-    // Safety clamp: Ensure cropBox doesn't invert or exceed bounds
     page.setCropBox(
       Math.max(mediaBox.x, newX),
       Math.max(mediaBox.y, newY),
@@ -183,7 +178,6 @@ export default function CropPage() {
           resultPdf = sourcePdf;
           const pages = resultPdf.getPages();
           pages.forEach((page, i) => {
-            // Apply current UI crop to all if scope is 'all', or individual if modified
             const settings = cropScope === 'all' ? (allCrops[currentPage] || { t: 10, r: 10, b: 10, l: 10 }) : (allCrops[i] || { t: 10, r: 10, b: 10, l: 10 });
             applyCropToPage(page, settings);
           });
@@ -192,7 +186,6 @@ export default function CropPage() {
         const pdfBytes = await resultPdf.save();
         setDownloadUrl(URL.createObjectURL(new Blob([pdfBytes], { type: 'application/pdf' })));
       } else if (!isInputPdf) {
-        // Image Processing
         const img = new Image();
         const objectUrl = URL.createObjectURL(selectedFile);
         img.src = objectUrl;
@@ -228,8 +221,6 @@ export default function CropPage() {
           const blob = await new Promise<Blob>((res) => canvas.toBlob((b) => res(b!), mimeType, 0.95));
           setDownloadUrl(URL.createObjectURL(blob));
         }
-      } else {
-        throw new Error("Format Transformation Unsupported in Current Sequence.");
       }
 
       setIsDone(true);
@@ -367,7 +358,6 @@ export default function CropPage() {
                     </div>
                     
                     <div className="relative rounded-[3rem] border-4 border-accent/10 bg-white shadow-2xl overflow-hidden min-h-[700px] flex items-center justify-center p-8 select-none">
-                      {/* The reference content */}
                       <div ref={contentRef} className="relative inline-block">
                         {isImage ? (
                           <img 
@@ -381,7 +371,6 @@ export default function CropPage() {
                           </div>
                         )}
 
-                        {/* Visual mask */}
                         <div className="absolute inset-0 bg-black/40 pointer-events-none" style={{ 
                           clipPath: `polygon(
                             0% 0%, 100% 0%, 100% 100%, 0% 100%, 0% 0%,
@@ -393,7 +382,6 @@ export default function CropPage() {
                           )` 
                         }} />
 
-                        {/* Handle Overlay */}
                         <div 
                           className="absolute border-2 border-primary shadow-[0_0_0_9999px_rgba(0,0,0,0.1)] bg-primary/5"
                           style={{
@@ -406,7 +394,7 @@ export default function CropPage() {
                           <div onMouseDown={onMouseDown('top-left')} className="absolute -top-3 -left-3 w-6 h-6 bg-white border-2 border-primary rounded-full cursor-nwse-resize shadow-lg hover:scale-125 transition-transform z-50" />
                           <div onMouseDown={onMouseDown('top-right')} className="absolute -top-3 -right-3 w-6 h-6 bg-white border-2 border-primary rounded-full cursor-nesw-resize shadow-lg hover:scale-125 transition-transform z-50" />
                           <div onMouseDown={onMouseDown('bottom-left')} className="absolute -bottom-3 -left-3 w-6 h-6 bg-white border-2 border-primary rounded-full cursor-nesw-resize shadow-lg hover:scale-125 transition-transform z-50" />
-                          <div onMouseDown={onMouseDown('bottom-right')} className="absolute -bottom-3 -right-3 w-6 h-6 bg-white border-2 border-primary rounded-full cursor-nesw-resize shadow-lg hover:scale-125 transition-transform z-50" />
+                          <div onMouseDown={onMouseDown('bottom-right')} className="absolute -bottom-3 -right-3 w-6 h-6 bg-white border-2 border-primary rounded-full cursor-nwse-resize shadow-lg hover:scale-125 transition-transform z-50" />
                           
                           <div onMouseDown={onMouseDown('top')} className="absolute -top-1 left-1/2 -translate-x-1/2 w-12 h-2 bg-primary rounded-full cursor-ns-resize hover:h-3 transition-all" />
                           <div onMouseDown={onMouseDown('bottom')} className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-12 h-2 bg-primary rounded-full cursor-ns-resize hover:h-3 transition-all" />

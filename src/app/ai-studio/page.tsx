@@ -88,7 +88,7 @@ export default function AIStudioPage() {
 
   // Ensure user is signed in for rate limiting
   React.useEffect(() => {
-    if (!isUserLoading && !user) {
+    if (!isUserLoading && !user && auth) {
       signInAnonymously(auth).catch(console.error);
     }
   }, [user, isUserLoading, auth]);
@@ -96,17 +96,19 @@ export default function AIStudioPage() {
   // Track daily usage count
   React.useEffect(() => {
     if (user && firestore) {
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      const todayTimestamp = Timestamp.fromDate(today);
-      
-      const logsRef = collection(firestore, 'users', user.uid, 'usageLogs');
-      const q = query(logsRef, where('requestTimestamp', '>=', todayTimestamp));
-      
-      getDocs(q).then(snap => {
+      const fetchUsage = async () => {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const todayTimestamp = Timestamp.fromDate(today);
+        
+        const logsRef = collection(firestore, 'users', user.uid, 'usageLogs');
+        const q = query(logsRef, where('requestTimestamp', '>=', todayTimestamp));
+        
+        const snap = await getDocs(q);
         const count = snap.docs.filter(doc => doc.data().status === 'SUCCESS').length;
         setUsageCount(count);
-      }).catch(console.error);
+      };
+      fetchUsage().catch(console.error);
     }
   }, [user, firestore, isProcessing]);
 
@@ -146,7 +148,6 @@ export default function AIStudioPage() {
         const extension = selectedFile.name.split('.').pop()?.toLowerCase();
         
         if (extension === 'pdf') {
-          // Browser-safe data URI generation
           fileDataUri = await new Promise<string>((resolve, reject) => {
             const reader = new FileReader();
             reader.onload = () => resolve(reader.result as string);
@@ -192,7 +193,7 @@ export default function AIStudioPage() {
 
       // 2. INDUSTRIAL RATE LIMITING
       if (usageCount !== null && usageCount >= DAILY_FREE_LIMIT) {
-        throw new Error(`PROTOCOL THRESHOLD: Daily limit of ${DAILY_FREE_LIMIT} reached. Registry resets at midnight.`);
+        throw new Error(`PROTOCOL THRESHOLD: Daily limit reached. Registry resets at midnight.`);
       }
 
       addLog(`EXECUTING ${activeTool}: Tunnelling request to industrial AI engine...`);
@@ -273,7 +274,6 @@ export default function AIStudioPage() {
           </div>
 
           <div className="grid lg:grid-cols-12 gap-12">
-            {/* Tool Selection Sidebar */}
             <div className="lg:col-span-3 space-y-4">
               <div className="section-label mb-6">
                 <Hash className="h-3 w-3 text-primary" />
@@ -323,7 +323,6 @@ export default function AIStudioPage() {
               </div>
             </div>
 
-            {/* Input & Command Suite */}
             <div className="lg:col-span-9 space-y-8">
               {!result ? (
                 <Card className="border-none shadow-2xl rounded-[3rem] bg-white overflow-hidden animate-in fade-in zoom-in-95 duration-500">
@@ -339,7 +338,6 @@ export default function AIStudioPage() {
                     </div>
                   </CardHeader>
                   <CardContent className="p-10 space-y-8">
-                    {/* Dynamic Inputs based on Tool */}
                     <div className="space-y-6">
                       {activeTool === 'CHAT' ? (
                         <div className="space-y-4">
@@ -460,7 +458,6 @@ export default function AIStudioPage() {
                 </div>
               )}
 
-              {/* Execution Registry (Logs) */}
               {logs.length > 0 && (
                 <Card className="border-none shadow-xl rounded-[2.5rem] bg-accent text-white overflow-hidden">
                   <div className="p-6 border-b border-white/5 flex items-center gap-3">
@@ -480,7 +477,6 @@ export default function AIStudioPage() {
             </div>
           </div>
 
-          {/* Technology Stack Registry */}
           <div className="pt-16 border-t border-accent/5 flex flex-col md:flex-row items-center justify-center gap-12 opacity-30 grayscale hover:opacity-100 transition-all duration-1000">
              <div className="flex items-center gap-3 font-black uppercase tracking-[0.4em] text-[10px]">
                 <ShieldCheck className="h-4 w-4" /> 256-BIT ENCRYPTED
