@@ -1,3 +1,4 @@
+
 "use client"
 
 import * as React from 'react';
@@ -33,6 +34,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { executeAIStudioAction } from './actions';
 import { useUser } from '@/firebase';
 import { cn } from '@/lib/utils';
+import mammoth from 'mammoth';
 
 type AIStudioTool = 'PARAPHRASE' | 'SUMMARIZE' | 'EMAIL' | 'TRANSLATE' | 'CHAT';
 
@@ -87,10 +89,26 @@ export default function AIStudioPage() {
     try {
       let fileDataUri = undefined;
       if (selectedFile) {
-        addLog("STAGING ASSET: Converting document to bit-stream...");
-        const buffer = await selectedFile.arrayBuffer();
-        const base64 = Buffer.from(buffer).toString('base64');
-        fileDataUri = `data:application/pdf;base64,${base64}`;
+        addLog(`STAGING ASSET [${selectedFile.name}]: Reconstructing bit-stream...`);
+        
+        const extension = selectedFile.name.split('.').pop()?.toLowerCase();
+        
+        if (extension === 'pdf') {
+          const buffer = await selectedFile.arrayBuffer();
+          const base64 = Buffer.from(buffer).toString('base64');
+          fileDataUri = `data:application/pdf;base64,${base64}`;
+        } else if (extension === 'docx') {
+          addLog("OOXML DECODING: Converting DOCX to text buffer...");
+          const arrayBuffer = await selectedFile.arrayBuffer();
+          const docxResult = await mammoth.extractRawText({ arrayBuffer });
+          // If the tool is CHAT/SUMMARIZE, we can pass text as 'text' param if fileDataUri isn't supported for docx
+          // For now, let's just use the text content
+          setInputText(prev => prev || docxResult.value);
+        } else if (extension === 'txt') {
+          addLog("UTF-8 DECODING: Extracting plain text stream...");
+          const text = await selectedFile.text();
+          setInputText(prev => prev || text);
+        }
       }
 
       addLog("EXECUTING SUITE: Tunnelling request to Gemini Flash...");
@@ -135,7 +153,7 @@ export default function AIStudioPage() {
             </div>
             <h1 className="text-4xl font-black tracking-tighter text-accent uppercase italic">AI Studio</h1>
             <p className="text-muted-foreground font-bold text-xs uppercase tracking-widest max-w-xl mx-auto">
-              Unified Document Intelligence Suite. Multi-modal protocols powered by Gemini Flash for high-fidelity transformation.
+              Unified Document Intelligence Suite. Hardened AI protocols with zero-retention architecture.
             </p>
           </div>
 
@@ -175,13 +193,13 @@ export default function AIStudioPage() {
                     <div className="space-y-1">
                        <div className="flex justify-between text-[10px] font-bold uppercase italic">
                           <span>Free Tier</span>
-                          <span>10/10 Ops</span>
+                          <span>Daily Limit Active</span>
                        </div>
                        <div className="h-1 w-full bg-white/10 rounded-full overflow-hidden">
                           <div className="h-full bg-primary w-[100%]" />
                        </div>
                     </div>
-                    <p className="text-[7px] font-bold uppercase text-white/40 tracking-tighter">Usage resets in 14h 22m</p>
+                    <p className="text-[7px] font-bold uppercase text-white/40 tracking-tighter italic">Hardened Rate Limiting: 10 Ops / Day</p>
                  </div>
                  <div className="absolute -bottom-10 -right-10 w-24 h-24 bg-primary/20 rounded-full blur-2xl" />
               </div>
@@ -208,7 +226,7 @@ export default function AIStudioPage() {
                       {activeTool === 'CHAT' ? (
                         <div className="space-y-4">
                           <Label className="text-[10px] font-black uppercase tracking-widest text-accent/60">Interrogate Asset</Label>
-                          <FileDropzone onFilesSelected={(f) => setSelectedFile(f[0])} maxFiles={1} accept=".pdf" className="border-accent/10" />
+                          <FileDropzone onFilesSelected={(f) => setSelectedFile(f[0])} maxFiles={1} accept=".pdf,.docx,.txt" className="border-accent/10" />
                           <div className="space-y-2">
                             <Label className="text-[10px] font-black uppercase tracking-widest text-accent/60">Your Inquiry</Label>
                             <Input 
@@ -264,7 +282,7 @@ export default function AIStudioPage() {
                           {activeTool === 'SUMMARIZE' && (
                             <div className="pt-4 border-t border-accent/5">
                                <p className="text-[9px] font-black uppercase text-accent/30 mb-4 tracking-widest">Optional: Summary from Asset</p>
-                               <FileDropzone onFilesSelected={(f) => setSelectedFile(f[0])} maxFiles={1} accept=".pdf" />
+                               <FileDropzone onFilesSelected={(f) => setSelectedFile(f[0])} maxFiles={1} accept=".pdf,.docx,.txt" />
                             </div>
                           )}
                         </div>

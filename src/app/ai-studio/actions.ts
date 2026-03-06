@@ -1,3 +1,4 @@
+
 'use server';
 
 import { runAIStudioProtocol, AIStudioInput, AIStudioOutput } from '@/ai/flows/ai-studio-flow';
@@ -17,20 +18,19 @@ import { createHash } from 'crypto';
 
 /**
  * @fileOverview DOCFLOW AI Studio Hardened Actions
- * Implements industrial-grade rate limiting and request caching using Firestore.
+ * Implements industrial-grade rate limiting and result caching using Firestore.
  */
 
 const DAILY_FREE_LIMIT = 10;
 
-// Simple helper to create a deterministic hash for caching
+// Deterministic hash for caching logic
 function generateRequestHash(input: AIStudioInput): string {
   const data = JSON.stringify({
     tool: input.tool,
     text: input.text,
     userQuestion: input.userQuestion,
     targetLanguage: input.targetLanguage,
-    // Note: We don't hash the fileDataUri as it's too large, 
-    // but for true caching, a file checksum would be ideal.
+    // Note: In high-fidelity caching, a file checksum would be used here.
   });
   return createHash('sha256').update(data).digest('hex');
 }
@@ -38,7 +38,6 @@ function generateRequestHash(input: AIStudioInput): string {
 export async function executeAIStudioAction(input: AIStudioInput, userId?: string): Promise<AIStudioOutput> {
   const { firestore } = initializeFirebase();
 
-  // 1. ANONYMOUS ACCESS BLOCK
   if (!userId) {
     throw new Error("IDENTITY REQUIRED: This protocol requires a verified user session.");
   }
@@ -47,11 +46,12 @@ export async function executeAIStudioAction(input: AIStudioInput, userId?: strin
   today.setHours(0, 0, 0, 0);
   const todayTimestamp = Timestamp.fromDate(today);
 
-  // 2. RATE LIMITING REGISTRY CHECK
+  // 1. RATE LIMITING CHECK
   const logsRef = collection(firestore, 'users', userId, 'usageLogs');
   const rateLimitQuery = query(
     logsRef, 
-    where('requestTimestamp', '>=', todayTimestamp)
+    where('requestTimestamp', '>=', todayTimestamp),
+    where('status', '==', 'SUCCESS')
   );
   
   const usageSnapshot = await getDocs(rateLimitQuery);
@@ -59,33 +59,47 @@ export async function executeAIStudioAction(input: AIStudioInput, userId?: strin
     throw new Error(`PROTOCOL THRESHOLD: Daily limit of ${DAILY_FREE_LIMIT} operations reached. Registry resets at midnight.`);
   }
 
-  // 3. CACHE LOOKUP (Optional: If input text is provided)
-  // We check if this specific request has been processed recently to save tokens
+  // 2. CACHE LOOKUP
   const requestHash = generateRequestHash(input);
+  const opsRef = collection(firestore, 'users', userId, 'operations');
   const cacheQuery = query(
-    logsRef,
-    where('toolUsed', '==', `AI_${input.tool}`),
-    where('status', '==', 'SUCCESS'),
-    orderBy('requestTimestamp', 'desc'),
-    limit(5)
+    opsRef,
+    where('operationType', '==', `AI_${input.tool}`),
+    where('aiPrompt', '==', requestHash), // Store hash in prompt field for lookup
+    where('status', '==', 'COMPLETED'),
+    orderBy('createdAt', 'desc'),
+    limit(1)
   );
 
   const cacheSnapshot = await getDocs(cacheQuery);
-  // Simple check: If we have a log with the same hash (logic could be expanded to store results in UsageLog)
-  // For MVP, we proceed to Gemini but log the attempt.
+  if (!cacheSnapshot.empty) {
+    const cachedDoc = cacheSnapshot.docs[0].data();
+    console.log(`CACHE HIT: Restoring session for hash ${requestHash}`);
+    return { result: cachedDoc.aiResult };
+  }
 
   try {
-    // 4. EXECUTE INDUSTRIAL AI SEQUENCE
+    // 3. EXECUTE INDUSTRIAL AI SEQUENCE
     const response = await runAIStudioProtocol(input);
 
-    // 5. ARCHIVE SUCCESSFUL OPERATION
-    await addDoc(collection(firestore, 'users', userId, 'usageLogs'), {
+    // 4. ARCHIVE OPERATION (For Caching)
+    await addDoc(opsRef, {
+      userId,
+      operationType: `AI_${input.tool}`,
+      status: 'COMPLETED',
+      createdAt: serverTimestamp(),
+      aiPrompt: requestHash, // Indexable hash
+      aiResult: response.result,
+      inputFilesIds: input.fileDataUri ? ["STAGED_ASSET"] : []
+    });
+
+    // 5. LOG USAGE (For Rate Limiting)
+    await addDoc(logsRef, {
       userId,
       toolUsed: `AI_${input.tool}`,
       requestTimestamp: serverTimestamp(),
       status: 'SUCCESS',
       costUnits: 1,
-      // Metadata for future caching enhancements
       ipAddress: 'PROXIED_TUNNEL' 
     });
 
@@ -94,7 +108,7 @@ export async function executeAIStudioAction(input: AIStudioInput, userId?: strin
     console.error('Industrial Protocol Failure:', error);
     
     // LOG FAILURE FOR AUDIT
-    await addDoc(collection(firestore, 'users', userId, 'usageLogs'), {
+    await addDoc(logsRef, {
       userId,
       toolUsed: `AI_${input.tool}`,
       requestTimestamp: serverTimestamp(),

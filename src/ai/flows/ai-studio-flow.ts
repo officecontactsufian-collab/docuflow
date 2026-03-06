@@ -1,3 +1,4 @@
+
 'use server';
 /**
  * @fileOverview DOCFLOW AI Studio Unified Flow
@@ -15,7 +16,7 @@ import { z } from 'genkit';
 const AIStudioInputSchema = z.object({
   tool: z.enum(['PARAPHRASE', 'SUMMARIZE', 'EMAIL', 'TRANSLATE', 'CHAT']),
   text: z.string().optional().describe('Input text for rephrasing, translating, or summarizing.'),
-  fileDataUri: z.string().optional().describe("A document as a data URI. Expected format: 'data:application/pdf;base64,<encoded_data>'."),
+  fileDataUri: z.string().optional().describe("A document as a data URI. Supported: PDF, DOCX, TXT."),
   targetLanguage: z.string().optional().describe('Target language for translation.'),
   userQuestion: z.string().optional().describe('The user question for the Chat with Document tool.'),
 });
@@ -44,6 +45,7 @@ const aiStudioFlow = ai.defineFlow(
     let systemInstructions = '';
     let promptParts: any[] = [];
 
+    // Protocol Routing
     switch (tool) {
       case 'PARAPHRASE':
         systemInstructions = 'You are an industrial writing assistant. Rephrase the following text to make it more professional, concise, and impactful while strictly maintaining the original meaning. Use industrial and precise vocabulary.';
@@ -51,7 +53,12 @@ const aiStudioFlow = ai.defineFlow(
         break;
       case 'SUMMARIZE':
         systemInstructions = 'You are a high-fidelity summarizer. Provide a professional executive summary of the provided content. Use bullet points for key insights and a final "Strategic Conclusion" sentence.';
-        if (fileDataUri) promptParts.push({ media: { url: fileDataUri, contentType: 'application/pdf' } });
+        if (fileDataUri) {
+          const contentType = fileDataUri.split(';')[0].split(':')[1];
+          // PDF handled directly by Gemini, others might need text conversion if Gemini fails
+          // But for now, we assume PDF/Image capabilities of Gemini 1.5 Flash
+          promptParts.push({ media: { url: fileDataUri, contentType: contentType || 'application/pdf' } });
+        }
         if (text) promptParts.push({ text: `CONTENT STREAM: ${text}` });
         break;
       case 'EMAIL':
@@ -64,7 +71,10 @@ const aiStudioFlow = ai.defineFlow(
         break;
       case 'CHAT':
         systemInstructions = 'You are a document intelligence assistant. Answer user questions based EXCLUSIVELY on the provided document architecture. If the information is not present in the document stream, explicitly state that the source does not contain that specific data.';
-        if (fileDataUri) promptParts.push({ media: { url: fileDataUri, contentType: 'application/pdf' } });
+        if (fileDataUri) {
+          const contentType = fileDataUri.split(';')[0].split(':')[1];
+          promptParts.push({ media: { url: fileDataUri, contentType: contentType || 'application/pdf' } });
+        }
         promptParts.push({ text: `PROTOCOL INQUIRY: ${userQuestion}` });
         break;
     }
