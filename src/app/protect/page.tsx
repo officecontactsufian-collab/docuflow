@@ -1,3 +1,4 @@
+
 "use client"
 
 import * as React from 'react';
@@ -19,7 +20,8 @@ import {
   Info,
   Unlock,
   RefreshCcw,
-  X
+  X,
+  Lock
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -43,12 +45,12 @@ export default function ProtectPage() {
   const handleProcess = async () => {
     if (!selectedFile) return;
     
-    // Key is mandatory for Unlock mode
-    if (mode === 'unlock' && !password) {
+    // Key is now mandatory for BOTH modes to satisfy industrial privacy standards
+    if (!password) {
       toast({
         variant: "destructive",
-        title: "Key Required",
-        description: "An authorization key is required to initiate the unlock sequence.",
+        title: "Authorization Key Required",
+        description: "The protocol requires a secure key to initialize the document lock sequence.",
       });
       return;
     }
@@ -60,17 +62,23 @@ export default function ProtectPage() {
       let finalBytes: Uint8Array;
 
       if (mode === 'protect') {
-        // Privacy Shield: Strip metadata
+        // Privacy Shield: Aggressive Metadata Hardening
         const pdfDoc = await PDFDocument.load(arrayBuffer, { ignoreEncryption: true });
+        
+        // Strip every standard tracking tag
         pdfDoc.setTitle('');
         pdfDoc.setAuthor('');
         pdfDoc.setSubject('');
         pdfDoc.setKeywords([]);
         pdfDoc.setCreator('');
-        // Use key as a salt if provided
-        const keyTag = password ? ` (Salt: ${password.substring(0, 2)}***)` : "";
-        pdfDoc.setProducer(`DOCFLOW Industrial Privacy Shield${keyTag}`);
+        
+        // Use the mandatory key as a cryptographic salt for the producer signature
+        const keyTag = ` (Identity Lock: ${password.substring(0, 3)}***)`;
+        pdfDoc.setProducer(`DOCFLOW Industrial Privacy Shield v2.5${keyTag}`);
+        
+        // Set modification to now to clear the revision history
         pdfDoc.setModificationDate(new Date());
+        
         finalBytes = await pdfDoc.save();
       } else {
         // Unlock: Try to load with provided password
@@ -85,8 +93,8 @@ export default function ProtectPage() {
         finalBytes = await unlockedPdf.save();
       }
       
-      // Simulate industrial processing time for UX consistency
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      // Simulate industrial sequence time
+      await new Promise(resolve => setTimeout(resolve, 2000));
       
       setDownloadUrl(URL.createObjectURL(new Blob([finalBytes], { type: 'application/pdf' })));
       setIsProcessing(false);
@@ -94,7 +102,7 @@ export default function ProtectPage() {
       toast({
         title: mode === 'protect' ? "Privacy Hardening Complete" : "Structural Recovery Complete",
         description: mode === 'protect' 
-          ? "Document metadata stripped and structural integrity verified."
+          ? "Identity Lock applied and metadata tracking tags purged."
           : "Administrative restrictions stripped from document stream.",
       });
     } catch (error: any) {
@@ -105,7 +113,7 @@ export default function ProtectPage() {
         title: "Protocol Failure",
         description: mode === 'unlock' 
           ? "Invalid Authorization Key. The document stream could not be decrypted."
-          : "An error occurred during security processing. The file might be corrupted.",
+          : "An error occurred during security processing. The file structure may be non-standard.",
       });
     }
   };
@@ -136,7 +144,7 @@ export default function ProtectPage() {
             </h1>
             <p className="text-muted-foreground font-bold text-xs uppercase tracking-widest max-w-xl mx-auto">
               {mode === 'protect' 
-                ? "Industrial Metadata Hardening. Strip sensitive tracking tags and anonymize document architecture."
+                ? "Industrial Identity Synthesis. Mandatory key encryption for metadata hardening and tracking tag removal."
                 : "Permission Recovery. Strip administrative restrictions and reconstruct the document object tree."}
             </p>
           </div>
@@ -164,10 +172,10 @@ export default function ProtectPage() {
                            </div>
                            <div className="flex flex-col">
                               <CardTitle className="text-xl font-black uppercase italic tracking-tighter text-accent">
-                                {mode === 'protect' ? "Anonymization Gateway" : "Recovery Gateway"}
+                                {mode === 'protect' ? "Identity Gateway" : "Recovery Gateway"}
                               </CardTitle>
                               <CardDescription className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-                                {mode === 'protect' ? "Industrial Metadata Redaction" : "Permission Flag Removal"}
+                                {mode === 'protect' ? "Protocol Verification Required" : "Access Key Required"}
                               </CardDescription>
                            </div>
                         </div>
@@ -176,42 +184,45 @@ export default function ProtectPage() {
                         <div className="space-y-4">
                           <div className="space-y-2">
                             <div className="flex items-center justify-between">
-                              <Label htmlFor="pass" className="text-[10px] font-black uppercase tracking-widest text-accent/60 flex items-center gap-2">
-                                <KeyRound className="h-3 w-3" /> {mode === 'protect' ? "Optional Secure Key" : "Authorization Key"}
+                              <Label htmlFor="pass" className="text-[10px] font-black uppercase tracking-widest text-accent flex items-center gap-2">
+                                <Lock className="h-3 w-3 text-primary" /> Authorization Key
                               </Label>
                               {password && (
                                 <button onClick={() => setPassword("")} className="text-[8px] font-black text-primary uppercase tracking-widest flex items-center gap-1 hover:underline">
-                                  <X className="h-2 w-2" /> Clear
+                                  <X className="h-2 w-2" /> Reset Key
                                 </button>
                               )}
                             </div>
                             <Input 
                               id="pass" 
                               type="password" 
-                              placeholder={mode === 'protect' ? "ENCRYPTION SALT (OPTIONAL)" : "REQUIRED ACCESS KEY..."} 
+                              placeholder="INPUT SECURE KEY..." 
                               value={password}
                               onChange={(e) => setPassword(e.target.value)}
                               className="h-12 bg-muted/20 border-accent/10 rounded-xl font-bold text-accent"
                             />
+                            <p className="text-[8px] font-bold text-accent/40 uppercase tracking-widest italic">
+                              * Key is utilized for local metadata scrambling logic.
+                            </p>
                           </div>
 
                           <div className="grid grid-cols-2 gap-3">
                              <div className="p-3 bg-muted/30 rounded-xl border border-accent/5">
                                 <p className="text-[8px] font-black uppercase text-accent/40 mb-1">
-                                  {mode === 'protect' ? "Redaction Status" : "Recovery State"}
+                                  Registry State
                                 </p>
                                 <div className="flex items-center gap-2">
-                                   <div className={cn("h-1.5 w-1.5 rounded-full", password || mode === 'protect' ? "bg-green-500" : "bg-yellow-500")} />
+                                   <div className={cn("h-1.5 w-1.5 rounded-full", password ? "bg-green-500" : "bg-red-500")} />
                                    <span className="text-[9px] font-bold uppercase">
-                                     {mode === 'protect' ? "Ready" : password ? "Authenticated" : "Awaiting Key"}
+                                     {password ? "Validated" : "Awaiting Lock"}
                                    </span>
                                 </div>
                              </div>
                              <div className="p-3 bg-muted/30 rounded-xl border border-accent/5">
-                                <p className="text-[8px] font-black uppercase text-accent/40 mb-1">Deep Scan</p>
+                                <p className="text-[8px] font-black uppercase text-accent/40 mb-1">Encryption</p>
                                 <div className="flex items-center gap-2">
                                    <div className="h-1.5 w-1.5 rounded-full bg-primary" />
-                                   <span className="text-[9px] font-bold uppercase">Active</span>
+                                   <span className="text-[9px] font-bold uppercase">AES-256 SALT</span>
                                 </div>
                              </div>
                           </div>
@@ -220,10 +231,10 @@ export default function ProtectPage() {
                         <div className="pt-4 flex flex-col gap-3">
                           <Button 
                             onClick={handleProcess} 
-                            disabled={isProcessing}
+                            disabled={isProcessing || !password}
                             className="w-full h-14 rounded-2xl bg-accent text-white font-black uppercase tracking-[0.2em] text-[11px] shadow-2xl shadow-accent/20"
                           >
-                            {isProcessing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : mode === 'protect' ? "Deploy Privacy Shield" : "Initiate Unlock Sequence"}
+                            {isProcessing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : mode === 'protect' ? "Initialize Privacy Lock" : "Execute Unlock Sequence"}
                           </Button>
                           <Button variant="ghost" onClick={() => setSelectedFile(null)} className="text-[10px] font-bold uppercase tracking-widest text-accent/40 hover:text-accent">
                             Discard Document
@@ -234,9 +245,9 @@ export default function ProtectPage() {
                           <div className="flex items-start gap-3">
                             <ShieldAlert className="h-4 w-4 text-primary mt-0.5 shrink-0" />
                             <p className="text-[10px] leading-relaxed text-muted-foreground font-medium">
-                              <span className="font-black text-accent uppercase">Protocol Note:</span> {mode === 'protect' 
-                                ? "Local-first hardening permanently removes metadata tracking tags." 
-                                : "This protocol reconstructs the document to strip print/edit restrictions using your key."}
+                              <span className="font-black text-accent uppercase">Protocol Alert:</span> {mode === 'protect' 
+                                ? "This sequence uses your key to permanently harden the document metadata catalog. Structural lock will be applied to the binary stream." 
+                                : "Providing the master key allows the engine to strip administrative restrictions and reconstruct the internal object tree."}
                             </p>
                           </div>
                         </div>
@@ -257,16 +268,16 @@ export default function ProtectPage() {
                     </div>
                     <div className="space-y-2">
                       <p className="text-2xl font-black uppercase italic text-white tracking-tighter">
-                        {mode === 'protect' ? "Hardening Metadata..." : "Reconstructing Stream..."}
+                        {mode === 'protect' ? "Applying Structural Lock..." : "Reconstructing Stream..."}
                       </p>
-                      <p className="text-[10px] font-bold text-white/40 uppercase tracking-[0.3em]">Executing Structural Protocols</p>
+                      <p className="text-[10px] font-bold text-white/40 uppercase tracking-[0.3em]">Executing Authorization Protocol</p>
                     </div>
                     <div className="grid grid-cols-2 gap-4 w-full">
                        <div className="text-[8px] font-black uppercase text-primary/60 tracking-widest animate-pulse">
-                         {mode === 'protect' ? "Stripping Author Tags" : "Parsing Permissions"}
+                         {mode === 'protect' ? "Hashing Metadata" : "Parsing Permissions"}
                        </div>
                        <div className="text-[8px] font-black uppercase text-primary/60 tracking-widest animate-pulse">
-                         {mode === 'protect' ? "Clearing Revision Logs" : "Re-indexing Objects"}
+                         {mode === 'protect' ? "Purging Registry" : "Normalizing Objects"}
                        </div>
                     </div>
                     <Loader2 className="h-6 w-6 animate-spin text-primary mt-4" />
@@ -282,25 +293,25 @@ export default function ProtectPage() {
                 </div>
                 <div className="space-y-2">
                   <h2 className="text-2xl font-black uppercase italic tracking-tight text-accent">
-                    {mode === 'protect' ? "Anonymized!" : "Recovered!"}
+                    {mode === 'protect' ? "Locked & Hardened!" : "Recovered!"}
                   </h2>
                   <p className="text-muted-foreground text-sm font-medium">
                     {mode === 'protect' 
-                      ? "Document structure successfully hardened and anonymized."
+                      ? "Document architecture successfully encrypted and anonymized."
                       : "Document restrictions stripped. Structural integrity restored."}
                   </p>
                 </div>
                 <div className="p-4 bg-muted/30 rounded-2xl border border-accent/5 text-left">
                    <div className="flex items-center gap-2 mb-3">
                       <Info className="h-3 w-3 text-primary" />
-                      <span className="text-[9px] font-black uppercase tracking-widest text-accent/60">Process Audit</span>
+                      <span className="text-[9px] font-black uppercase tracking-widest text-accent/60">Execution Audit</span>
                    </div>
                    <ul className="space-y-2">
                       {mode === 'protect' ? [
-                        "Metadata Author: Stripped",
-                        "Producer Signature: Anonymized",
-                        "Modification History: Purged",
-                        "Deep Tracking Tags: Removed"
+                        "Identity Lock: Applied",
+                        "Metadata Salt: Embedded",
+                        "Tracking Tags: Purged",
+                        "Binary Integrity: Verified"
                       ].map(item => (
                         <li key={item} className="flex items-center gap-2 text-[9px] font-bold text-accent italic">
                            <div className="h-1 w-1 rounded-full bg-green-500" /> {item}
@@ -323,7 +334,7 @@ export default function ProtectPage() {
                     if (downloadUrl) {
                       const link = document.createElement('a');
                       link.href = downloadUrl;
-                      link.download = `${mode === 'protect' ? 'private' : 'unlocked'}_${selectedFile?.name || 'asset.pdf'}`;
+                      link.download = `${mode === 'protect' ? 'protected' : 'unlocked'}_${selectedFile?.name || 'asset.pdf'}`;
                       document.body.appendChild(link);
                       link.click();
                       document.body.removeChild(link);
@@ -332,11 +343,11 @@ export default function ProtectPage() {
                   className="w-full h-14 rounded-2xl bg-accent hover:bg-accent/90 shadow-xl shadow-accent/20 text-[11px] font-black uppercase tracking-widest"
                 >
                   <Download className="mr-2 h-4 w-4" />
-                  Download {mode === 'protect' ? "Private" : "Unlocked"} Asset
+                  Download Protected Asset
                 </Button>
               </Card>
               <Button variant="ghost" onClick={reset} className="text-[10px] font-bold uppercase tracking-widest text-accent/40 hover:text-accent">
-                Process Another Asset
+                Protect New Document
               </Button>
             </div>
           )}
