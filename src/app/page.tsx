@@ -1,3 +1,4 @@
+
 "use client"
 
 import * as React from 'react';
@@ -25,7 +26,9 @@ import {
   Camera,
   Presentation,
   Search,
-  Wrench
+  Wrench,
+  ArrowRight,
+  Play
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
@@ -152,44 +155,64 @@ export default function Home() {
           </div>
         </section>
 
-        <section className="py-20 bg-background relative overflow-hidden">
+        <section className="py-24 bg-background relative overflow-hidden">
           <div className="container mx-auto px-6">
-            <div className="text-center mb-20 space-3">
+            <div className="text-center mb-24 space-y-4">
               <div className="section-label mx-auto">
                 <Layers className="h-3 w-3 text-primary" />
-                <span>Operational Flow</span>
+                <span>Operational Excellence</span>
               </div>
-              <h2 className="text-4xl md:text-5xl font-black text-accent uppercase italic tracking-tighter">Pure Precision.</h2>
+              <h2 className="text-4xl md:text-6xl font-black text-accent uppercase italic tracking-tighter">Pure Precision.</h2>
+              <p className="text-accent/40 font-black uppercase text-[10px] tracking-[0.4em]">High-Fidelity Transformation Pipeline</p>
             </div>
             
-            <div className="grid md:grid-cols-3 gap-12 max-w-5xl mx-auto relative">
-              {[
-                { 
-                  icon: FileUp, 
-                  title: "Stage", 
-                  desc: "Select your assets securely. Local staging occurs instantly within your browser." 
-                },
-                { 
-                  icon: Settings2, 
-                  title: "Process", 
-                  desc: "Our high-fidelity engine reconstructs your document with industrial accuracy." 
-                },
-                { 
-                  icon: Download, 
-                  title: "Deploy", 
-                  desc: "Save your optimized document instantly. Verified, private, and ready for use." 
-                }
-              ].map((step, idx) => (
-                <div key={step.title} className="space-y-6 text-center relative group">
-                  <div className="w-20 h-20 bg-accent text-white rounded-2xl flex items-center justify-center shadow-xl mx-auto transition-transform duration-500 group-hover:scale-110 group-hover:-rotate-6">
-                    <step.icon className="h-8 w-8 text-primary" />
+            <div className="max-w-6xl mx-auto space-y-16">
+              <div className="grid md:grid-cols-3 gap-8 relative">
+                {[
+                  { 
+                    icon: FileUp, 
+                    title: "Stage", 
+                    desc: "Select your assets securely. Local staging occurs instantly within your browser with zero latency." 
+                  },
+                  { 
+                    icon: Settings2, 
+                    title: "Process", 
+                    desc: "Our high-fidelity engine reconstructs your document architecture with industrial accuracy." 
+                  },
+                  { 
+                    icon: Download, 
+                    title: "Deploy", 
+                    desc: "Save your optimized document instantly. Verified, private, and ready for professional deployment." 
+                  }
+                ].map((step, idx) => (
+                  <div key={step.title} className="relative group">
+                    <div className="p-10 rounded-[3rem] bg-white border border-accent/5 shadow-xl transition-all duration-500 group-hover:-translate-y-2 group-hover:shadow-2xl group-hover:border-primary/20 h-full flex flex-col items-center text-center space-y-6">
+                      <div className="w-20 h-20 bg-accent text-white rounded-[2rem] flex items-center justify-center shadow-xl transition-transform duration-500 group-hover:scale-110 group-hover:-rotate-6">
+                        <step.icon className="h-8 w-8 text-primary" />
+                      </div>
+                      <div className="space-y-3">
+                        <div className="text-[9px] font-black uppercase tracking-[0.3em] text-primary/60">Sequence 0{idx + 1}</div>
+                        <h3 className="text-2xl font-black text-accent uppercase italic">{step.title}</h3>
+                        <p className="text-accent/60 font-bold leading-relaxed text-sm">{step.desc}</p>
+                      </div>
+                    </div>
+                    {idx < 2 && (
+                      <div className="hidden lg:block absolute top-1/2 -right-4 -translate-y-1/2 z-10">
+                        <ArrowRight className="h-8 w-8 text-accent/10" />
+                      </div>
+                    )}
                   </div>
-                  <div className="space-y-3">
-                    <h3 className="text-2xl font-black text-accent uppercase italic">{idx + 1}. {step.title}</h3>
-                    <p className="text-accent/60 font-bold leading-relaxed text-sm">{step.desc}</p>
-                  </div>
-                </div>
-              ))}
+                ))}
+              </div>
+
+              <div className="flex justify-center animate-in fade-in slide-in-from-bottom-4 duration-1000">
+                <Button size="lg" className="h-16 px-12 rounded-[2rem] bg-accent text-white font-black uppercase tracking-[0.2em] text-[11px] shadow-2xl shadow-accent/20 hover:scale-105 transition-all group" asChild>
+                  <Link href="#tools">
+                    <Play className="mr-3 h-4 w-4 fill-primary text-primary group-hover:translate-x-1 transition-transform" />
+                    Initialize Protocol
+                  </Link>
+                </Button>
+              </div>
             </div>
           </div>
         </section>
