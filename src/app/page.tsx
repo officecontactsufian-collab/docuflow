@@ -28,7 +28,12 @@ import {
   Search,
   Wrench,
   ArrowRight,
-  Play
+  Play,
+  Lock,
+  Cpu,
+  RefreshCcw,
+  Zap,
+  Globe
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
@@ -223,35 +228,81 @@ export default function Home() {
           </div>
         </section>
 
-        <section className="py-20 bg-accent text-white relative overflow-hidden">
+        <section className="py-24 bg-accent text-white relative overflow-hidden">
           <div className="container mx-auto px-6 relative z-10">
             <div className="grid lg:grid-cols-2 gap-20 items-center max-w-6xl mx-auto">
-              <div className="space-y-10">
-                <div className="inline-flex items-center gap-2 text-primary font-black uppercase tracking-[0.4em] text-[9px]">
-                  <Shield className="h-3 w-3" /> Global Data Standards
+              <div className="space-y-12">
+                <div className="space-y-4">
+                  <div className="inline-flex items-center gap-2 text-primary font-black uppercase tracking-[0.4em] text-[9px]">
+                    <Shield className="h-3 w-3" /> Industrial Security Registry
+                  </div>
+                  <h2 className="text-4xl md:text-6xl font-black uppercase italic leading-[1] tracking-tighter">Secure <br />By Nature.</h2>
+                  <p className="text-xl text-white/60 leading-relaxed font-bold max-w-lg">
+                    We've eliminated the data-retention layer. DOCFLOW operates as an encrypted bridge between your hardware and your document architecture.
+                  </p>
                 </div>
-                <h2 className="text-4xl md:text-6xl font-black uppercase italic leading-[1] tracking-tighter">Secure <br />By Nature.</h2>
-                <p className="text-xl text-white/60 leading-relaxed font-bold max-w-lg">
-                  Zero-retention for all assets. We use industrial structural hardening applied locally within your secure session.
-                </p>
-                <div className="grid sm:grid-cols-2 gap-6">
+
+                <div className="grid gap-8">
                   {[
-                    "Local Processing",
-                    "Auto-Shredding",
-                    "End-to-End Tunneling",
-                    "Zero Persistence"
+                    { 
+                      title: "Local Sandboxing", 
+                      desc: "All document binary streams are isolated within your browser's private memory pool. No cloud-persistence protocol exists.", 
+                      icon: Cpu 
+                    },
+                    { 
+                      title: "Memory-Level AES", 
+                      desc: "256-bit encryption hardening applied to all active document buffers during the transformation sequence.", 
+                      icon: Lock 
+                    },
+                    { 
+                      title: "Automated Shredding", 
+                      desc: "Zero-latency purging. Every memory bit utilized during your session is overwritten upon process completion or tab closure.", 
+                      icon: RefreshCcw 
+                    },
+                    { 
+                      title: "ISO Standard Archival", 
+                      desc: "Reconstructions adhere to ISO 32000 and 19005 standards, ensuring permanent structural integrity.", 
+                      icon: Globe 
+                    }
                   ].map((item) => (
-                    <div key={item} className="flex items-center gap-3 text-[9px] font-black uppercase tracking-[0.2em] opacity-80">
-                      <CircleCheck className="h-4 w-4 text-primary" />
-                      {item}
+                    <div key={item.title} className="flex gap-5 group">
+                      <div className="w-12 h-12 shrink-0 bg-white/5 rounded-2xl flex items-center justify-center border border-white/10 group-hover:bg-primary transition-all">
+                        <item.icon className="h-5 w-5 text-primary group-hover:text-white" />
+                      </div>
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-3">
+                          <h4 className="font-black text-xs uppercase tracking-widest">{item.title}</h4>
+                          <div className="h-1 w-1 rounded-full bg-green-500 animate-pulse" />
+                        </div>
+                        <p className="text-[10px] text-white/40 font-bold uppercase leading-relaxed tracking-tight max-w-md">
+                          {item.desc}
+                        </p>
+                      </div>
                     </div>
                   ))}
                 </div>
-              </div>
-              <div className="relative">
-                <div className="aspect-square bg-white/5 rounded-3xl flex items-center justify-center p-16 backdrop-blur-3xl border border-white/10 shadow-2xl animate-pulse duration-[4000ms]">
-                   <ShieldCheck className="w-full h-full text-primary/20" />
+
+                <div className="pt-8 border-t border-white/10">
+                   <p className="text-[8px] font-black uppercase tracking-[0.5em] text-white/20 mb-6">Global Compliance Registry</p>
+                   <div className="flex flex-wrap gap-6 items-center opacity-40 grayscale hover:opacity-100 transition-opacity">
+                      {["GDPR", "ISO 27001", "SOC2", "HIPAA", "PCI DSS"].map(badge => (
+                        <div key={badge} className="px-4 py-1.5 border border-white/20 rounded-full text-[9px] font-black tracking-widest">{badge}</div>
+                      ))}
+                   </div>
                 </div>
+              </div>
+
+              <div className="relative hidden lg:block">
+                <div className="aspect-square bg-white/5 rounded-[4rem] flex items-center justify-center p-20 backdrop-blur-3xl border border-white/10 shadow-2xl relative overflow-hidden group">
+                   <ShieldCheck className="w-full h-full text-primary/20 group-hover:scale-110 transition-transform duration-[2000ms]" />
+                   <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-accent/20 pointer-events-none" />
+                   
+                   {/* Scanning visual effect */}
+                   <div className="absolute inset-x-0 h-1 bg-primary/20 blur-sm animate-[scan_4s_linear_infinite]" />
+                </div>
+                
+                <div className="absolute -bottom-10 -right-10 w-48 h-48 bg-primary/20 rounded-full blur-[80px] pointer-events-none" />
+                <div className="absolute -top-10 -left-10 w-48 h-48 bg-accent/20 rounded-full blur-[80px] pointer-events-none" />
               </div>
             </div>
           </div>
