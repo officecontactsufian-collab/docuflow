@@ -1,3 +1,4 @@
+
 "use client"
 
 import * as React from 'react';
@@ -22,7 +23,8 @@ import {
   ChevronLeft,
   ChevronRight,
   Target,
-  MousePointer2
+  MousePointer2,
+  Scan
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -238,12 +240,46 @@ export default function SignPage() {
                     <div className="flex items-center justify-between px-2">
                       <h3 className="text-[10px] font-black uppercase tracking-widest text-accent/60 flex items-center gap-2">
                         <Target className="h-3.5 w-3.5 text-primary" />
-                        Industrial Reference Preview
+                        Interactive Placement Preview
                       </h3>
-                      <span className="text-[10px] font-bold text-primary uppercase truncate max-w-[200px]">{pdfFile.name}</span>
+                      <div className="flex items-center gap-2 bg-primary/10 px-3 py-1 rounded-full">
+                         <MousePointer2 className="h-3 w-3 text-primary" />
+                         <span className="text-[9px] font-black text-primary uppercase">Click Preview to Place Bar</span>
+                      </div>
                     </div>
+                    
                     <div className="relative group">
                       <PDFPreview file={pdfFile} className="h-[750px]" />
+                      
+                      {/* Interactive Target Overlay */}
+                      <div className="absolute inset-0 top-[40px] bottom-0 left-0 right-0 z-10 grid grid-cols-3 grid-rows-3 p-12">
+                        {POSITION_MAP.map((pos) => (
+                          <div 
+                            key={pos.value}
+                            onClick={() => setPosition(pos.value)}
+                            className="relative cursor-crosshair group/zone flex items-center justify-center"
+                          >
+                            <div className={cn(
+                              "w-full h-full border border-transparent transition-all rounded-lg",
+                              position === pos.value ? "bg-primary/5 border-primary/20" : "hover:bg-accent/5"
+                            )} />
+                            
+                            {position === pos.value && (
+                              <div className="absolute pointer-events-none flex flex-col items-center gap-2 animate-in zoom-in-90 duration-300">
+                                 <div className="px-4 py-2 bg-accent text-white rounded-xl shadow-2xl border border-white/20 flex items-center gap-3">
+                                    <Scan className="h-4 w-4 text-primary" />
+                                    <div className="flex flex-col">
+                                       <span className="text-[8px] font-black uppercase tracking-widest">Signature Bar</span>
+                                       <span className="text-[7px] font-bold text-white/40 uppercase tracking-tighter">Anchor Active</span>
+                                    </div>
+                                 </div>
+                                 <div className="w-32 h-0.5 bg-primary/40 rounded-full" />
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                      
                       <div className="absolute inset-0 pointer-events-none border-4 border-transparent group-hover:border-primary/5 rounded-[2.5rem] transition-colors" />
                     </div>
                   </div>
@@ -362,7 +398,7 @@ export default function SignPage() {
 
                               <div className="space-y-4">
                                 <Label className="text-[10px] font-black uppercase tracking-widest text-accent/60 flex items-center gap-2">
-                                  <MousePointer2 className="h-3 w-3" /> Anchor Point
+                                  <MousePointer2 className="h-3 w-3" /> Registry Position
                                 </Label>
                                 <div className="grid grid-cols-3 gap-1 bg-muted/20 p-1 rounded-xl border border-accent/5">
                                    {POSITION_MAP.map((pos) => (
