@@ -1,4 +1,3 @@
-
 "use client"
 
 import * as React from 'react';
@@ -32,10 +31,11 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { executeAIStudioAction } from './actions';
-import { useUser, useAuth } from '@/firebase';
+import { useUser, useAuth, useFirestore, addDocumentNonBlocking } from '@/firebase';
 import { cn } from '@/lib/utils';
 import mammoth from 'mammoth';
 import { signInAnonymously } from 'firebase/auth';
+import { collection, query, where, getDocs, Timestamp, limit, serverTimestamp } from 'firebase/firestore';
 
 type AIStudioTool = 'PARAPHRASE' | 'SUMMARIZE' | 'EMAIL' | 'TRANSLATE' | 'CHAT';
 
@@ -57,9 +57,12 @@ const TOOLS: ToolConfig[] = [
   { id: 'CHAT', label: 'Doc Intelligence', description: 'Deep document interrogation.', icon: MessageSquare, color: 'text-primary', placeholder: 'ASK A QUESTION ABOUT THE DOC...', requiresFile: true },
 ];
 
+const DAILY_FREE_LIMIT = 10;
+
 export default function AIStudioPage() {
   const { user, isUserLoading } = useUser();
   const auth = useAuth();
+  const firestore = useFirestore();
   const { toast } = useToast();
   
   const [activeTool, setActiveTool] = React.useState<AIStudioTool>('PARAPHRASE');
@@ -71,6 +74,7 @@ export default function AIStudioPage() {
   const [isProcessing, setIsProcessing] = React.useState(false);
   const [result, setResult] = React.useState<string | null>(null);
   const [logs, setLogs] = React.useState<string[]>([]);
+  const [usageCount, setUsageCount] = React.useState<number | null>(null);
 
   const activeConfig = TOOLS.find(t => t.id === activeTool)!;
 
@@ -81,12 +85,37 @@ export default function AIStudioPage() {
     }
   }, [user, isUserLoading, auth]);
 
+  // Track daily usage count
+  React.useEffect(() => {
+    if (user && firestore) {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const todayTimestamp = Timestamp.fromDate(today);
+      
+      const logsRef = collection(firestore, 'users', user.uid, 'usageLogs');
+      const q = query(logsRef, where('requestTimestamp', '>=', todayTimestamp));
+      
+      getDocs(q).then(snap => {
+        const count = snap.docs.filter(doc => doc.data().status === 'SUCCESS').length;
+        setUsageCount(count);
+      }).catch(console.error);
+    }
+  }, [user, firestore, isProcessing]);
+
   const addLog = (msg: string) => {
     setLogs(prev => [...prev, `${new Date().toLocaleTimeString()} - ${msg}`]);
   };
 
+  // Simple hashing for caching logic
+  const generateRequestHash = async (data: any) => {
+    const msgBuffer = new TextEncoder().encode(JSON.stringify(data));
+    const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+  };
+
   const handleDeploy = async () => {
-    if (!user) {
+    if (!user || !firestore) {
       toast({ variant: "destructive", title: "Identity Required", description: "Initializing secure session..." });
       return;
     }
@@ -106,7 +135,6 @@ export default function AIStudioPage() {
 
       if (selectedFile) {
         addLog(`STAGING ASSET [${selectedFile.name}]: Reconstructing bit-stream...`);
-        
         const extension = selectedFile.name.split('.').pop()?.toLowerCase();
         
         if (extension === 'pdf') {
@@ -124,23 +152,85 @@ export default function AIStudioPage() {
         }
       }
 
+      const inputPayload = {
+        tool: activeTool,
+        text: finalInputText,
+        userQuestion,
+        targetLanguage,
+      };
+
+      // 1. STATELESS CACHE LOOKUP
+      const requestHash = await generateRequestHash(inputPayload);
+      const opsRef = collection(firestore, 'users', user.uid, 'operations');
+      const cacheQuery = query(opsRef, where('aiPrompt', '==', requestHash), limit(1));
+      const cacheSnapshot = await getDocs(cacheQuery);
+      
+      const validCache = cacheSnapshot.docs.find(doc => {
+        const data = doc.data();
+        return data.status === 'COMPLETED' && data.operationType === `AI_${activeTool}`;
+      });
+
+      if (validCache) {
+        addLog(`CACHE HIT: Restoring session for hash ${requestHash.substring(0, 8)}...`);
+        setResult(validCache.data().aiResult);
+        setIsProcessing(false);
+        toast({ title: "Sequence Restored", description: "Returning cached industrial synthesis." });
+        return;
+      }
+
+      // 2. INDUSTRIAL RATE LIMITING
+      if (usageCount !== null && usageCount >= DAILY_FREE_LIMIT) {
+        throw new Error(`PROTOCOL THRESHOLD: Daily limit of ${DAILY_FREE_LIMIT} reached. Registry resets at midnight.`);
+      }
+
       addLog(`EXECUTING ${activeTool}: Tunnelling request to industrial AI engine...`);
       
       const response = await executeAIStudioAction({
-        tool: activeTool,
-        text: finalInputText,
-        fileDataUri,
-        targetLanguage,
-        userQuestion,
-      }, user.uid);
+        ...inputPayload,
+        fileDataUri
+      });
 
       addLog("RECONSTRUCTION COMPLETE: Synthesizing result...");
       setResult(response.result);
+
+      // 3. ARCHIVE OPERATION & LOG USAGE (Non-blocking)
+      const logsRef = collection(firestore, 'users', user.uid, 'usageLogs');
+      
+      addDocumentNonBlocking(opsRef, {
+        userId: user.uid,
+        operationType: `AI_${activeTool}`,
+        status: 'COMPLETED',
+        createdAt: serverTimestamp(),
+        aiPrompt: requestHash,
+        aiResult: response.result,
+        inputFilesIds: fileDataUri ? ["STAGED_ASSET"] : []
+      });
+
+      addDocumentNonBlocking(logsRef, {
+        userId: user.uid,
+        toolUsed: `AI_${activeTool}`,
+        requestTimestamp: serverTimestamp(),
+        status: 'SUCCESS',
+        costUnits: 1,
+        ipAddress: 'PROXIED_TUNNEL' 
+      });
+
       toast({ title: "Sequence Success", description: "AI Transformation complete." });
     } catch (e: any) {
       console.error(e);
       addLog(`SEQUENCE ERROR: ${e.message}`);
       toast({ variant: "destructive", title: "Protocol Error", description: e.message });
+      
+      if (user && firestore) {
+        const logsRef = collection(firestore, 'users', user.uid, 'usageLogs');
+        addDocumentNonBlocking(logsRef, {
+          userId: user.uid,
+          toolUsed: `AI_${activeTool}`,
+          requestTimestamp: serverTimestamp(),
+          status: 'ERROR',
+          costUnits: 0
+        });
+      }
     } finally {
       setIsProcessing(false);
     }
@@ -205,14 +295,17 @@ export default function AIStudioPage() {
                     <p className="text-[9px] font-black uppercase tracking-widest text-primary">Identity Quota</p>
                     <div className="space-y-1">
                        <div className="flex justify-between text-[10px] font-bold uppercase italic">
-                          <span>Free Tier</span>
-                          <span>Daily Limit Active</span>
+                          <span>{usageCount !== null ? `${usageCount} / ${DAILY_FREE_LIMIT}` : "Loading..."}</span>
+                          <span>Daily Limit</span>
                        </div>
                        <div className="h-1 w-full bg-white/10 rounded-full overflow-hidden">
-                          <div className="h-full bg-primary w-[100%]" />
+                          <div 
+                            className="h-full bg-primary transition-all duration-1000" 
+                            style={{ width: `${Math.min(100, ((usageCount || 0) / DAILY_FREE_LIMIT) * 100)}%` }} 
+                          />
                        </div>
                     </div>
-                    <p className="text-[7px] font-bold uppercase text-white/40 tracking-tighter italic">Hardened Rate Limiting: 10 Ops / Day</p>
+                    <p className="text-[7px] font-bold uppercase text-white/40 tracking-tighter italic">Hardened Rate Limiting Active</p>
                  </div>
                  <div className="absolute -bottom-10 -right-10 w-24 h-24 bg-primary/20 rounded-full blur-2xl" />
               </div>
