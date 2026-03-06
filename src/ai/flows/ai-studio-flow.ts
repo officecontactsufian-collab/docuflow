@@ -46,36 +46,43 @@ const aiStudioFlow = ai.defineFlow(
 
     switch (tool) {
       case 'PARAPHRASE':
-        systemInstructions = 'You are an industrial writing assistant. Rephrase the following text to make it more professional, concise, and impactful while strictly maintaining the original meaning.';
-        promptParts.push({ text: `TEXT TO RE-ENGINEER: ${text}` });
+        systemInstructions = 'You are an industrial writing assistant. Rephrase the following text to make it more professional, concise, and impactful while strictly maintaining the original meaning. Use industrial and precise vocabulary.';
+        promptParts.push({ text: `PAYLOAD TO RE-ENGINEER: ${text}` });
         break;
       case 'SUMMARIZE':
-        systemInstructions = 'You are a high-fidelity summarizer. Provide a professional executive summary of the provided content. Use bullet points for key insights.';
+        systemInstructions = 'You are a high-fidelity summarizer. Provide a professional executive summary of the provided content. Use bullet points for key insights and a final "Strategic Conclusion" sentence.';
         if (fileDataUri) promptParts.push({ media: { url: fileDataUri, contentType: 'application/pdf' } });
-        if (text) promptParts.push({ text: `CONTENT: ${text}` });
+        if (text) promptParts.push({ text: `CONTENT STREAM: ${text}` });
         break;
       case 'EMAIL':
-        systemInstructions = 'You are an expert email architect. Draft a clear, professional, and effective email based on the user instructions. Maintain a tone suitable for corporate environments.';
-        promptParts.push({ text: `INSTRUCTIONS: ${text}` });
+        systemInstructions = 'You are an expert email architect. Draft a clear, professional, and effective email based on the user instructions. Maintain a tone suitable for corporate environments. Include a subject line and a structured body.';
+        promptParts.push({ text: `ARCHITECTURAL INSTRUCTIONS: ${text}` });
         break;
       case 'TRANSLATE':
-        systemInstructions = `You are an industrial-grade translator. Translate the following text into ${targetLanguage || 'English'}. Maintain the tone, technical accuracy, and context.`;
-        promptParts.push({ text: `SOURCE TEXT: ${text}` });
+        systemInstructions = `You are an industrial-grade translator. Translate the following text into ${targetLanguage || 'English'}. Maintain the exact technical context and professional tone.`;
+        promptParts.push({ text: `SOURCE PAYLOAD: ${text}` });
         break;
       case 'CHAT':
-        systemInstructions = 'You are a document intelligence assistant. Answer user questions based EXCLUSIVELY on the provided document. If the information is not present, state that the document does not contain that information.';
+        systemInstructions = 'You are a document intelligence assistant. Answer user questions based EXCLUSIVELY on the provided document architecture. If the information is not present in the document stream, explicitly state that the source does not contain that specific data.';
         if (fileDataUri) promptParts.push({ media: { url: fileDataUri, contentType: 'application/pdf' } });
-        promptParts.push({ text: `USER QUESTION: ${userQuestion}` });
+        promptParts.push({ text: `PROTOCOL INQUIRY: ${userQuestion}` });
         break;
     }
 
     const { text: result } = await ai.generate({
       system: systemInstructions,
       prompt: promptParts,
+      config: {
+        temperature: 0.2, // Lower temperature for industrial precision
+      }
     });
 
+    if (!result) {
+      throw new Error("STREAM SYNTHESIS FAILURE: The AI engine returned an empty buffer.");
+    }
+
     return {
-      result: result || 'IDENTITY ANALYSIS FAILURE: Response stream could not be established.',
+      result: result,
     };
   }
 );
