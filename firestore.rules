@@ -5,72 +5,62 @@ service cloud.firestore {
 
     /**
      * DOCFLOW Industrial Security Rules
-     * Final Hardening Protocol v2.6
+     * Administrative Clearance Protocol v3.0
      */
 
     function isSignedIn() {
       return request.auth != null;
     }
 
+    function isAdmin() {
+      return isSignedIn() && (
+        request.auth.uid == "NNEu5gbMlVRKd094f3PuPO23jow2" ||
+        request.auth.token.email == "office.contact.sufian@gmail.com"
+      );
+    }
+
     function isOwner(userId) {
       return isSignedIn() && request.auth.uid == userId;
     }
 
-    function isExistingOwner(userId) {
-      return resource != null && isOwner(userId);
-    }
-
-    function isAdmin() {
-      return isSignedIn() && (
-        request.auth.token.email == "office.contact.sufian@gmail.com" ||
-        request.auth.uid == "NNEu5gbMlVRKd094f3PuPO23jow2"
-      );
-    }
-
-    // --- System Level Rules ---
+    // --- Administrative & System Level Rules ---
 
     match /system/{allPaths=**} {
-      allow get: if isSignedIn();
-      allow list, create, update, delete: if isAdmin();
+      allow read, write: if isAdmin();
     }
 
     match /usageLogs/{logId} {
-      allow get, list, create, update, delete: if isAdmin();
+      allow read, write: if isAdmin();
     }
 
     match /subscriptions/{subscriptionId} {
-      allow get, list: if isSignedIn();
-      allow create, update, delete: if isAdmin();
+      allow read: if isSignedIn();
+      allow write: if isAdmin();
     }
 
-    // --- User Specific Rules ---
+    // --- User Identity Lattice Rules ---
 
     match /users/{userId} {
-      allow get: if isOwner(userId) || isAdmin();
-      allow list: if isAdmin();
+      // Admin can list all identities and manage any profile
+      allow get, list, write: if isAdmin();
+      
+      // Owners can manage their own profile
+      allow get: if isOwner(userId);
       allow create: if isOwner(userId) && request.resource.data.id == userId;
-      allow update: if (isExistingOwner(userId) && request.resource.data.id == resource.data.id) || isAdmin();
-      allow delete: if isAdmin(); 
-    }
+      allow update: if isOwner(userId) && request.resource.data.id == userId;
 
-    match /users/{userId}/files/{fileId} {
-      allow get, list: if isOwner(userId) || isAdmin();
-      allow create: if isOwner(userId) && request.resource.data.userId == userId;
-      allow update: if (isExistingOwner(userId) && request.resource.data.userId == userId) || isAdmin();
-      allow delete: if isExistingOwner(userId) || isAdmin();
-    }
+      // Deep Sub-Collection Protection
+      match /files/{fileId} {
+        allow read, write: if isOwner(userId) || isAdmin();
+      }
 
-    match /users/{userId}/operations/{operationId} {
-      allow get, list: if isOwner(userId) || isAdmin();
-      allow create: if isOwner(userId) && request.resource.data.userId == userId;
-      allow update: if (isExistingOwner(userId) && request.resource.data.userId == userId) || isAdmin();
-      allow delete: if isExistingOwner(userId) || isAdmin();
-    }
+      match /operations/{operationId} {
+        allow read, write: if isOwner(userId) || isAdmin();
+      }
 
-    match /users/{userId}/usageLogs/{usageLogId} {
-      allow get, list: if isOwner(userId) || isAdmin();
-      allow create: if isOwner(userId) && request.resource.data.userId == userId;
-      allow update, delete: if isAdmin();
+      match /usageLogs/{usageLogId} {
+        allow read, write: if isOwner(userId) || isAdmin();
+      }
     }
   }
 }

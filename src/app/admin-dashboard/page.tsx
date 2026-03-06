@@ -75,23 +75,23 @@ export default function AdminDashboardPage() {
 
   // Identities Registry
   const usersQuery = useMemoFirebase(() => {
-    if (!firestore || user?.email !== MASTER_ADMIN_EMAIL) return null;
+    if (!firestore || !user || user.email !== MASTER_ADMIN_EMAIL) return null;
     return collection(firestore, 'users');
   }, [firestore, user]);
   const { data: allUsers, isLoading: isUsersLoading } = useCollection(usersQuery);
 
   // Global Audit Registry
   const logsQuery = useMemoFirebase(() => {
-    if (!firestore || user?.email !== MASTER_ADMIN_EMAIL) return null;
+    if (!firestore || !user || user.email !== MASTER_ADMIN_EMAIL) return null;
     return query(collection(firestore, 'usageLogs'), orderBy('requestTimestamp', 'desc'), limit(50));
   }, [firestore, user]);
   const { data: allLogs, isLoading: isLogsLoading } = useCollection(logsQuery);
 
   // System Configuration
   const configRef = useMemoFirebase(() => {
-    if (!firestore) return null;
+    if (!firestore || !user || user.email !== MASTER_ADMIN_EMAIL) return null;
     return doc(firestore, 'system', 'config');
-  }, [firestore]);
+  }, [firestore, user]);
   const { data: sysConfig } = useDoc(configRef);
 
   const filteredUsers = React.useMemo(() => {
