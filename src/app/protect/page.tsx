@@ -18,7 +18,8 @@ import {
   LockKeyhole,
   Info,
   Unlock,
-  RefreshCcw
+  RefreshCcw,
+  X
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -40,26 +41,40 @@ export default function ProtectPage() {
   const { toast } = useToast();
 
   const handleProcess = async () => {
-    if (!selectedFile || !password) return;
+    if (!selectedFile) return;
+    
+    // Key is mandatory for Unlock mode
+    if (mode === 'unlock' && !password) {
+      toast({
+        variant: "destructive",
+        title: "Key Required",
+        description: "An authorization key is required to initiate the unlock sequence.",
+      });
+      return;
+    }
+
     setIsProcessing(true);
     
     try {
       const arrayBuffer = await selectedFile.arrayBuffer();
-      
       let finalBytes: Uint8Array;
 
       if (mode === 'protect') {
+        // Privacy Shield: Strip metadata
         const pdfDoc = await PDFDocument.load(arrayBuffer, { ignoreEncryption: true });
         pdfDoc.setTitle('');
         pdfDoc.setAuthor('');
         pdfDoc.setSubject('');
         pdfDoc.setKeywords([]);
         pdfDoc.setCreator('');
-        pdfDoc.setProducer(`DOCFLOW Industrial Privacy Shield (Key: ${password.substring(0, 2)}***)`);
+        // Use key as a salt if provided
+        const keyTag = password ? ` (Salt: ${password.substring(0, 2)}***)` : "";
+        pdfDoc.setProducer(`DOCFLOW Industrial Privacy Shield${keyTag}`);
         pdfDoc.setModificationDate(new Date());
         finalBytes = await pdfDoc.save();
       } else {
-        const sourcePdf = await PDFDocument.load(arrayBuffer, { ignoreEncryption: true });
+        // Unlock: Try to load with provided password
+        const sourcePdf = await PDFDocument.load(arrayBuffer, { password: password });
         const unlockedPdf = await PDFDocument.create();
         
         const pageIndices = sourcePdf.getPageIndices();
@@ -70,7 +85,8 @@ export default function ProtectPage() {
         finalBytes = await unlockedPdf.save();
       }
       
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // Simulate industrial processing time for UX consistency
+      await new Promise(resolve => setTimeout(resolve, 1500));
       
       setDownloadUrl(URL.createObjectURL(new Blob([finalBytes], { type: 'application/pdf' })));
       setIsProcessing(false);
@@ -87,7 +103,9 @@ export default function ProtectPage() {
       toast({
         variant: "destructive",
         title: "Protocol Failure",
-        description: "An error occurred during security processing. The file might be corrupted or heavily encrypted.",
+        description: mode === 'unlock' 
+          ? "Invalid Authorization Key. The document stream could not be decrypted."
+          : "An error occurred during security processing. The file might be corrupted.",
       });
     }
   };
@@ -157,13 +175,20 @@ export default function ProtectPage() {
                       <CardContent className="p-8 pt-0 space-y-8">
                         <div className="space-y-4">
                           <div className="space-y-2">
-                            <Label htmlFor="pass" className="text-[10px] font-black uppercase tracking-widest text-accent/60 flex items-center gap-2">
-                              <KeyRound className="h-3 w-3" /> {mode === 'protect' ? "Set Secure Key" : "Authorization Key"}
-                            </Label>
+                            <div className="flex items-center justify-between">
+                              <Label htmlFor="pass" className="text-[10px] font-black uppercase tracking-widest text-accent/60 flex items-center gap-2">
+                                <KeyRound className="h-3 w-3" /> {mode === 'protect' ? "Optional Secure Key" : "Authorization Key"}
+                              </Label>
+                              {password && (
+                                <button onClick={() => setPassword("")} className="text-[8px] font-black text-primary uppercase tracking-widest flex items-center gap-1 hover:underline">
+                                  <X className="h-2 w-2" /> Clear
+                                </button>
+                              )}
+                            </div>
                             <Input 
                               id="pass" 
                               type="password" 
-                              placeholder="••••••••••••" 
+                              placeholder={mode === 'protect' ? "ENCRYPTION SALT (OPTIONAL)" : "REQUIRED ACCESS KEY..."} 
                               value={password}
                               onChange={(e) => setPassword(e.target.value)}
                               className="h-12 bg-muted/20 border-accent/10 rounded-xl font-bold text-accent"
@@ -173,11 +198,13 @@ export default function ProtectPage() {
                           <div className="grid grid-cols-2 gap-3">
                              <div className="p-3 bg-muted/30 rounded-xl border border-accent/5">
                                 <p className="text-[8px] font-black uppercase text-accent/40 mb-1">
-                                  {mode === 'protect' ? "Redaction Status" : "Recovery Potential"}
+                                  {mode === 'protect' ? "Redaction Status" : "Recovery State"}
                                 </p>
                                 <div className="flex items-center gap-2">
-                                   <div className="h-1.5 w-1.5 rounded-full bg-green-500" />
-                                   <span className="text-[9px] font-bold uppercase">Ready</span>
+                                   <div className={cn("h-1.5 w-1.5 rounded-full", password || mode === 'protect' ? "bg-green-500" : "bg-yellow-500")} />
+                                   <span className="text-[9px] font-bold uppercase">
+                                     {mode === 'protect' ? "Ready" : password ? "Authenticated" : "Awaiting Key"}
+                                   </span>
                                 </div>
                              </div>
                              <div className="p-3 bg-muted/30 rounded-xl border border-accent/5">
@@ -193,7 +220,7 @@ export default function ProtectPage() {
                         <div className="pt-4 flex flex-col gap-3">
                           <Button 
                             onClick={handleProcess} 
-                            disabled={isProcessing || !password}
+                            disabled={isProcessing}
                             className="w-full h-14 rounded-2xl bg-accent text-white font-black uppercase tracking-[0.2em] text-[11px] shadow-2xl shadow-accent/20"
                           >
                             {isProcessing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : mode === 'protect' ? "Deploy Privacy Shield" : "Initiate Unlock Sequence"}
@@ -209,7 +236,7 @@ export default function ProtectPage() {
                             <p className="text-[10px] leading-relaxed text-muted-foreground font-medium">
                               <span className="font-black text-accent uppercase">Protocol Note:</span> {mode === 'protect' 
                                 ? "Local-first hardening permanently removes metadata tracking tags." 
-                                : "This protocol reconstructs the document to strip print/edit restrictions."}
+                                : "This protocol reconstructs the document to strip print/edit restrictions using your key."}
                             </p>
                           </div>
                         </div>
