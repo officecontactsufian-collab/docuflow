@@ -19,11 +19,12 @@ import { createHash } from 'crypto';
 /**
  * @fileOverview DOCFLOW AI Studio Hardened Actions
  * Implements industrial-grade rate limiting and result caching using Firestore.
+ * Ensures the API Key remains hidden on the server.
  */
 
 const DAILY_FREE_LIMIT = 10;
 
-// Deterministic hash for caching logic
+// Deterministic hash for caching logic based on all relevant input parameters
 function generateRequestHash(input: AIStudioInput): string {
   const data = JSON.stringify({
     tool: input.tool,
@@ -31,6 +32,7 @@ function generateRequestHash(input: AIStudioInput): string {
     userQuestion: input.userQuestion,
     targetLanguage: input.targetLanguage,
     // Note: In high-fidelity caching, a file checksum would be used here.
+    // For now we use the raw metadata.
   });
   return createHash('sha256').update(data).digest('hex');
 }
@@ -46,7 +48,7 @@ export async function executeAIStudioAction(input: AIStudioInput, userId?: strin
   today.setHours(0, 0, 0, 0);
   const todayTimestamp = Timestamp.fromDate(today);
 
-  // 1. RATE LIMITING CHECK
+  // 1. INDUSTRIAL RATE LIMITING CHECK
   const logsRef = collection(firestore, 'users', userId, 'usageLogs');
   const rateLimitQuery = query(
     logsRef, 
@@ -59,13 +61,13 @@ export async function executeAIStudioAction(input: AIStudioInput, userId?: strin
     throw new Error(`PROTOCOL THRESHOLD: Daily limit of ${DAILY_FREE_LIMIT} operations reached. Registry resets at midnight.`);
   }
 
-  // 2. CACHE LOOKUP
+  // 2. STATELESS CACHE LOOKUP
   const requestHash = generateRequestHash(input);
   const opsRef = collection(firestore, 'users', userId, 'operations');
   const cacheQuery = query(
     opsRef,
     where('operationType', '==', `AI_${input.tool}`),
-    where('aiPrompt', '==', requestHash), // Store hash in prompt field for lookup
+    where('aiPrompt', '==', requestHash), // Using aiPrompt field to store the request hash
     where('status', '==', 'COMPLETED'),
     orderBy('createdAt', 'desc'),
     limit(1)
@@ -82,13 +84,13 @@ export async function executeAIStudioAction(input: AIStudioInput, userId?: strin
     // 3. EXECUTE INDUSTRIAL AI SEQUENCE
     const response = await runAIStudioProtocol(input);
 
-    // 4. ARCHIVE OPERATION (For Caching)
+    // 4. ARCHIVE OPERATION (For Caching & Audit)
     await addDoc(opsRef, {
       userId,
       operationType: `AI_${input.tool}`,
       status: 'COMPLETED',
       createdAt: serverTimestamp(),
-      aiPrompt: requestHash, // Indexable hash
+      aiPrompt: requestHash, // Store the deterministic hash
       aiResult: response.result,
       inputFilesIds: input.fileDataUri ? ["STAGED_ASSET"] : []
     });
@@ -107,7 +109,7 @@ export async function executeAIStudioAction(input: AIStudioInput, userId?: strin
   } catch (error: any) {
     console.error('Industrial Protocol Failure:', error);
     
-    // LOG FAILURE FOR AUDIT
+    // LOG FAILURE FOR AUDIT REGISTRY
     await addDoc(logsRef, {
       userId,
       toolUsed: `AI_${input.tool}`,

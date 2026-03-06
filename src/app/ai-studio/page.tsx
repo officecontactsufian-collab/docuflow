@@ -32,9 +32,10 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { executeAIStudioAction } from './actions';
-import { useUser } from '@/firebase';
+import { useUser, useAuth } from '@/firebase';
 import { cn } from '@/lib/utils';
 import mammoth from 'mammoth';
+import { signInAnonymously } from 'firebase/auth';
 
 type AIStudioTool = 'PARAPHRASE' | 'SUMMARIZE' | 'EMAIL' | 'TRANSLATE' | 'CHAT';
 
@@ -57,7 +58,8 @@ const TOOLS: ToolConfig[] = [
 ];
 
 export default function AIStudioPage() {
-  const { user } = useUser();
+  const { user, isUserLoading } = useUser();
+  const auth = useAuth();
   const { toast } = useToast();
   
   const [activeTool, setActiveTool] = React.useState<AIStudioTool>('PARAPHRASE');
@@ -72,11 +74,23 @@ export default function AIStudioPage() {
 
   const activeConfig = TOOLS.find(t => t.id === activeTool)!;
 
+  // Ensure user is signed in for rate limiting
+  React.useEffect(() => {
+    if (!isUserLoading && !user) {
+      signInAnonymously(auth).catch(console.error);
+    }
+  }, [user, isUserLoading, auth]);
+
   const addLog = (msg: string) => {
     setLogs(prev => [...prev, `${new Date().toLocaleTimeString()} - ${msg}`]);
   };
 
   const handleDeploy = async () => {
+    if (!user) {
+      toast({ variant: "destructive", title: "Identity Required", description: "Initializing secure session..." });
+      return;
+    }
+
     if (activeConfig.requiresFile && !selectedFile) {
       toast({ variant: "destructive", title: "Asset Required", description: "This protocol requires a document reference." });
       return;
@@ -88,6 +102,8 @@ export default function AIStudioPage() {
 
     try {
       let fileDataUri = undefined;
+      let finalInputText = inputText;
+
       if (selectedFile) {
         addLog(`STAGING ASSET [${selectedFile.name}]: Reconstructing bit-stream...`);
         
@@ -98,28 +114,25 @@ export default function AIStudioPage() {
           const base64 = Buffer.from(buffer).toString('base64');
           fileDataUri = `data:application/pdf;base64,${base64}`;
         } else if (extension === 'docx') {
-          addLog("OOXML DECODING: Converting DOCX to text buffer...");
+          addLog("OOXML DECODING: Reconstructing text from DOCX container...");
           const arrayBuffer = await selectedFile.arrayBuffer();
           const docxResult = await mammoth.extractRawText({ arrayBuffer });
-          // If the tool is CHAT/SUMMARIZE, we can pass text as 'text' param if fileDataUri isn't supported for docx
-          // For now, let's just use the text content
-          setInputText(prev => prev || docxResult.value);
+          finalInputText = docxResult.value;
         } else if (extension === 'txt') {
           addLog("UTF-8 DECODING: Extracting plain text stream...");
-          const text = await selectedFile.text();
-          setInputText(prev => prev || text);
+          finalInputText = await selectedFile.text();
         }
       }
 
-      addLog("EXECUTING SUITE: Tunnelling request to Gemini Flash...");
+      addLog(`EXECUTING ${activeTool}: Tunnelling request to industrial AI engine...`);
       
       const response = await executeAIStudioAction({
         tool: activeTool,
-        text: inputText,
+        text: finalInputText,
         fileDataUri,
         targetLanguage,
         userQuestion,
-      }, user?.uid);
+      }, user.uid);
 
       addLog("RECONSTRUCTION COMPLETE: Synthesizing result...");
       setResult(response.result);
@@ -127,7 +140,7 @@ export default function AIStudioPage() {
     } catch (e: any) {
       console.error(e);
       addLog(`SEQUENCE ERROR: ${e.message}`);
-      toast({ variant: "destructive", title: "Identity Error", description: e.message });
+      toast({ variant: "destructive", title: "Protocol Error", description: e.message });
     } finally {
       setIsProcessing(false);
     }
@@ -279,9 +292,9 @@ export default function AIStudioPage() {
                               className="min-h-[250px] bg-muted/20 border-accent/10 rounded-3xl font-bold text-accent resize-none"
                             />
                           </div>
-                          {activeTool === 'SUMMARIZE' && (
+                          {(activeTool === 'SUMMARIZE' || activeTool === 'CHAT') && (
                             <div className="pt-4 border-t border-accent/5">
-                               <p className="text-[9px] font-black uppercase text-accent/30 mb-4 tracking-widest">Optional: Summary from Asset</p>
+                               <p className="text-[9px] font-black uppercase text-accent/30 mb-4 tracking-widest">Optional: Source from Asset</p>
                                <FileDropzone onFilesSelected={(f) => setSelectedFile(f[0])} maxFiles={1} accept=".pdf,.docx,.txt" />
                             </div>
                           )}

@@ -45,7 +45,7 @@ const aiStudioFlow = ai.defineFlow(
     let systemInstructions = '';
     let promptParts: any[] = [];
 
-    // Protocol Routing
+    // Protocol Routing & Prompt Engineering
     switch (tool) {
       case 'PARAPHRASE':
         systemInstructions = 'You are an industrial writing assistant. Rephrase the following text to make it more professional, concise, and impactful while strictly maintaining the original meaning. Use industrial and precise vocabulary.';
@@ -55,8 +55,6 @@ const aiStudioFlow = ai.defineFlow(
         systemInstructions = 'You are a high-fidelity summarizer. Provide a professional executive summary of the provided content. Use bullet points for key insights and a final "Strategic Conclusion" sentence.';
         if (fileDataUri) {
           const contentType = fileDataUri.split(';')[0].split(':')[1];
-          // PDF handled directly by Gemini, others might need text conversion if Gemini fails
-          // But for now, we assume PDF/Image capabilities of Gemini 1.5 Flash
           promptParts.push({ media: { url: fileDataUri, contentType: contentType || 'application/pdf' } });
         }
         if (text) promptParts.push({ text: `CONTENT STREAM: ${text}` });
@@ -83,7 +81,7 @@ const aiStudioFlow = ai.defineFlow(
       system: systemInstructions,
       prompt: promptParts,
       config: {
-        temperature: 0.2, // Lower temperature for industrial precision
+        temperature: 0.2, // Lower temperature for high-fidelity industrial precision
       }
     });
 
