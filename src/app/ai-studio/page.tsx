@@ -19,15 +19,23 @@ import {
   ShieldCheck,
   Cpu,
   BrainCircuit,
-  Hash,
   BookOpen,
   Briefcase,
   PenLine,
   FileBadge,
-  ChevronRight
+  ChevronRight,
+  Send,
+  User,
+  Bot,
+  Paperclip,
+  Trash2,
+  Settings2,
+  X,
+  FileText,
+  Copy
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -41,6 +49,15 @@ import { collection, query, where, getDocs, Timestamp, limit, serverTimestamp } 
 
 type AIStudioTool = 'PARAPHRASE' | 'SUMMARIZE' | 'EMAIL' | 'TRANSLATE' | 'CHAT' | 'GRAMMAR' | 'ESSAY' | 'RESUME' | 'COVER_LETTER';
 
+interface Message {
+  id: string;
+  role: 'user' | 'assistant';
+  content: string;
+  tool?: AIStudioTool;
+  timestamp: Date;
+  fileName?: string;
+}
+
 interface ToolConfig {
   id: AIStudioTool;
   label: string;
@@ -52,20 +69,15 @@ interface ToolConfig {
 }
 
 const TOOLS: ToolConfig[] = [
-  // Writing
-  { id: 'PARAPHRASE', label: 'Paraphraser', description: 'Professional text re-engineering.', icon: RefreshCcw, color: 'text-blue-600', placeholder: 'PASTE TEXT TO RE-ENGINEER...' },
-  { id: 'SUMMARIZE', label: 'Summarizer', description: 'Executive content distillation.', icon: Activity, color: 'text-orange-600', placeholder: 'PASTE CONTENT OR STAGE DOCUMENT...' },
-  { id: 'GRAMMAR', label: 'Grammar Checker', description: 'Industrial-grade proofing.', icon: CheckCircle2, color: 'text-green-600', placeholder: 'PASTE TEXT TO CHECK...' },
-  { id: 'ESSAY', label: 'Essay Writer', description: 'Structured academic synthesis.', icon: BookOpen, color: 'text-indigo-600', placeholder: 'DESCRIBE ESSAY TOPIC OR OUTLINE...' },
-  
-  // Career
-  { id: 'RESUME', label: 'Resume Builder', description: 'Profile engineering.', icon: Briefcase, color: 'text-emerald-600', placeholder: 'LIST EXPERIENCE AND SKILLS...' },
-  { id: 'COVER_LETTER', label: 'Cover Letter', description: 'Persuasive intro architect.', icon: FileBadge, color: 'text-cyan-600', placeholder: 'DESCRIBE JOB AND YOUR BACKGROUND...' },
-  { id: 'EMAIL', label: 'Email Architect', description: 'Structural email generation.', icon: Mail, color: 'text-purple-600', placeholder: 'DESCRIBE THE EMAIL CONTEXT...' },
-  
-  // Productivity
-  { id: 'TRANSLATE', label: 'Translator', description: 'Context-aware linguistic shift.', icon: Languages, color: 'text-green-600', placeholder: 'TEXT TO TRANSLATE...' },
-  { id: 'CHAT', label: 'Doc Intelligence', description: 'Deep document interrogation.', icon: MessageSquare, color: 'text-primary', placeholder: 'ASK A QUESTION ABOUT THE DOC...', requiresFile: true },
+  { id: 'PARAPHRASE', label: 'Paraphraser', description: 'Re-engineer text.', icon: RefreshCcw, color: 'text-blue-600', placeholder: 'Enter text to re-engineer...' },
+  { id: 'SUMMARIZE', label: 'Summarizer', description: 'Content distillation.', icon: Activity, color: 'text-orange-600', placeholder: 'Enter content or attach document...' },
+  { id: 'GRAMMAR', label: 'Grammar', description: 'Industrial proofing.', icon: CheckCircle2, color: 'text-green-600', placeholder: 'Enter text to check...' },
+  { id: 'ESSAY', label: 'Essay Writer', description: 'Academic synthesis.', icon: BookOpen, color: 'text-indigo-600', placeholder: 'Describe essay topic...' },
+  { id: 'RESUME', label: 'Resume', description: 'Profile engineering.', icon: Briefcase, color: 'text-emerald-600', placeholder: 'List experience and skills...' },
+  { id: 'COVER_LETTER', label: 'Cover Letter', description: 'Intro architect.', icon: FileBadge, color: 'text-cyan-600', placeholder: 'Describe job and background...' },
+  { id: 'EMAIL', label: 'Email', description: 'Corporate drafts.', icon: Mail, color: 'text-purple-600', placeholder: 'Describe email context...' },
+  { id: 'TRANSLATE', label: 'Translator', description: 'Linguistic shift.', icon: Languages, color: 'text-green-600', placeholder: 'Text to translate...' },
+  { id: 'CHAT', label: 'Doc Intel', description: 'Asset interrogation.', icon: MessageSquare, color: 'text-primary', placeholder: 'Ask about the document...', requiresFile: true },
 ];
 
 const CATEGORIES = [
@@ -74,12 +86,7 @@ const CATEGORIES = [
   { id: 'productivity', label: 'Productivity', tools: ['TRANSLATE', 'CHAT'], icon: Zap },
 ];
 
-const LANGUAGES = [
-  "English", "French", "Spanish", "German", "Japanese", "Chinese", 
-  "Arabic", "Portuguese", "Russian", "Italian", "Korean", "Hindi", 
-  "Turkish", "Dutch", "Vietnamese", "Polish", "Thai", "Hebrew", 
-  "Greek", "Indonesian"
-];
+const LANGUAGES = ["English", "French", "Spanish", "German", "Japanese", "Chinese", "Arabic", "Portuguese", "Russian", "Italian"];
 
 const DAILY_FREE_LIMIT = 10;
 
@@ -91,15 +98,13 @@ export default function AIStudioPage() {
   
   const [activeTool, setActiveTool] = React.useState<AIStudioTool>('PARAPHRASE');
   const [inputText, setInputText] = React.useState('');
-  const [userQuestion, setUserQuestion] = React.useState('');
   const [targetLanguage, setTargetLanguage] = React.useState('English');
   const [selectedFile, setSelectedFile] = React.useState<File | null>(null);
-  
+  const [messages, setMessages] = React.useState<Message[]>([]);
   const [isProcessing, setIsProcessing] = React.useState(false);
-  const [result, setResult] = React.useState<string | null>(null);
-  const [logs, setLogs] = React.useState<string[]>([]);
   const [usageCount, setUsageCount] = React.useState<number | null>(null);
-
+  
+  const chatEndRef = React.useRef<HTMLDivElement>(null);
   const activeConfig = TOOLS.find(t => t.id === activeTool)!;
 
   React.useEffect(() => {
@@ -109,79 +114,76 @@ export default function AIStudioPage() {
   }, [user, isUserLoading, auth]);
 
   React.useEffect(() => {
+    chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages, isProcessing]);
+
+  React.useEffect(() => {
     if (user && firestore) {
       const fetchUsage = async () => {
         const today = new Date();
         today.setHours(0, 0, 0, 0);
-        const todayTimestamp = Timestamp.fromDate(today);
-        
-        const logsRef = collection(firestore, 'users', user.uid, 'usageLogs');
-        const q = query(logsRef, where('requestTimestamp', '>=', todayTimestamp));
-        
+        const q = query(
+          collection(firestore, 'users', user.uid, 'usageLogs'),
+          where('requestTimestamp', '>=', Timestamp.fromDate(today))
+        );
         const snap = await getDocs(q);
-        const count = snap.docs.filter(doc => doc.data().status === 'SUCCESS').length;
-        setUsageCount(count);
+        setUsageCount(snap.docs.filter(doc => doc.data().status === 'SUCCESS').length);
       };
       fetchUsage().catch(console.error);
     }
   }, [user, firestore, isProcessing]);
 
-  const addLog = (msg: string) => {
-    setLogs(prev => [...prev, `${new Date().toLocaleTimeString()} - ${msg}`]);
-  };
-
   const generateRequestHash = async (data: any) => {
     const msgBuffer = new TextEncoder().encode(JSON.stringify(data));
     const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
-    const hashArray = Array.from(new Uint8Array(hashBuffer));
-    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    return Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, '0')).join('');
   };
 
   const handleDeploy = async () => {
-    if (!user || !firestore) {
-      toast({ variant: "destructive", title: "Identity Required", description: "Initializing secure session..." });
-      return;
-    }
-
+    if (!user || !firestore) return;
+    if (!inputText.trim() && !selectedFile) return;
     if (activeConfig.requiresFile && !selectedFile) {
       toast({ variant: "destructive", title: "Asset Required", description: "This protocol requires a document reference." });
       return;
     }
 
+    const userMsg: Message = {
+      id: Math.random().toString(36).substring(7),
+      role: 'user',
+      content: inputText,
+      tool: activeTool,
+      timestamp: new Date(),
+      fileName: selectedFile?.name
+    };
+
+    setMessages(prev => [...prev, userMsg]);
     setIsProcessing(true);
-    setResult(null);
-    setLogs(["PROTOCOL INITIALIZED: High-Fidelity AI Tunnel active."]);
+    setInputText('');
 
     try {
       let fileDataUri: string | undefined = undefined;
       let finalInputText = inputText;
 
       if (selectedFile) {
-        addLog(`STAGING ASSET [${selectedFile.name}]: Reconstructing bit-stream...`);
-        const extension = selectedFile.name.split('.').pop()?.toLowerCase();
-        
-        if (extension === 'pdf') {
-          fileDataUri = await new Promise<string>((resolve, reject) => {
+        const ext = selectedFile.name.split('.').pop()?.toLowerCase();
+        if (ext === 'pdf') {
+          fileDataUri = await new Promise((resolve) => {
             const reader = new FileReader();
             reader.onload = () => resolve(reader.result as string);
-            reader.onerror = (e) => reject(e);
             reader.readAsDataURL(selectedFile);
           });
-        } else if (extension === 'docx') {
-          addLog("OOXML DECODING: Reconstructing text from DOCX container...");
-          const arrayBuffer = await selectedFile.arrayBuffer();
-          const docxResult = await mammoth.extractRawText({ arrayBuffer });
-          finalInputText = docxResult.value;
-        } else if (extension === 'txt') {
-          addLog("UTF-8 DECODING: Extracting plain text stream...");
-          finalInputText = await selectedFile.text();
+        } else if (ext === 'docx') {
+          const res = await mammoth.extractRawText({ arrayBuffer: await selectedFile.arrayBuffer() });
+          finalInputText = `${inputText}\n\n[DOCUMENT CONTENT]:\n${res.value}`;
+        } else if (ext === 'txt') {
+          finalInputText = `${inputText}\n\n[DOCUMENT CONTENT]:\n${await selectedFile.text()}`;
         }
       }
 
       const inputPayload = {
         tool: activeTool,
         text: finalInputText,
-        userQuestion,
+        userQuestion: activeTool === 'CHAT' ? inputText : undefined,
         targetLanguage,
       };
 
@@ -190,334 +192,274 @@ export default function AIStudioPage() {
       const cacheQuery = query(opsRef, where('aiPrompt', '==', requestHash), limit(1));
       const cacheSnapshot = await getDocs(cacheQuery);
       
-      const validCache = cacheSnapshot.docs.find(doc => {
-        const data = doc.data();
-        return data.status === 'COMPLETED' && data.operationType === `AI_${activeTool}`;
-      });
+      let result = '';
+      const validCache = cacheSnapshot.docs.find(doc => doc.data().status === 'COMPLETED');
 
       if (validCache) {
-        addLog(`CACHE HIT: Restoring session for hash ${requestHash.substring(0, 8)}...`);
-        setResult(validCache.data().aiResult);
-        setIsProcessing(false);
-        toast({ title: "Sequence Restored", description: "Returning cached industrial synthesis." });
-        return;
-      }
+        result = validCache.data().aiResult;
+      } else {
+        if (usageCount !== null && usageCount >= DAILY_FREE_LIMIT) {
+          throw new Error(`Daily limit reached (${DAILY_FREE_LIMIT}). Registry resets at midnight.`);
+        }
+        const response = await executeAIStudioAction({ ...inputPayload, fileDataUri });
+        result = response.result;
 
-      if (usageCount !== null && usageCount >= DAILY_FREE_LIMIT) {
-        throw new Error(`PROTOCOL THRESHOLD: Daily limit reached. Registry resets at midnight.`);
-      }
-
-      addLog(`EXECUTING ${activeTool}: Tunnelling request to industrial AI engine...`);
-      
-      const response = await executeAIStudioAction({
-        ...inputPayload,
-        fileDataUri
-      });
-
-      addLog("RECONSTRUCTION COMPLETE: Synthesizing result...");
-      setResult(response.result);
-
-      const userLogsRef = collection(firestore, 'users', user.uid, 'usageLogs');
-      const globalLogsRef = collection(firestore, 'usageLogs');
-      
-      addDocumentNonBlocking(opsRef, {
-        userId: user.uid,
-        operationType: `AI_${activeTool}`,
-        status: 'COMPLETED',
-        createdAt: serverTimestamp(),
-        aiPrompt: requestHash,
-        aiResult: response.result,
-        inputFilesIds: fileDataUri ? ["STAGED_ASSET"] : []
-      });
-
-      const logData = {
-        userId: user.uid,
-        toolUsed: `AI_${activeTool}`,
-        requestTimestamp: serverTimestamp(),
-        status: 'SUCCESS',
-        costUnits: 1,
-        ipAddress: 'PROXIED_TUNNEL' 
-      };
-
-      addDocumentNonBlocking(userLogsRef, logData);
-      addDocumentNonBlocking(globalLogsRef, logData);
-
-      toast({ title: "Sequence Success", description: "AI Transformation complete." });
-    } catch (e: any) {
-      console.error(e);
-      addLog(`SEQUENCE ERROR: ${e.message}`);
-      toast({ variant: "destructive", title: "Protocol Error", description: e.message });
-      
-      if (user && firestore) {
-        const userLogsRef = collection(firestore, 'users', user.uid, 'usageLogs');
-        const globalLogsRef = collection(firestore, 'usageLogs');
-        const errorLog = {
+        addDocumentNonBlocking(opsRef, {
           userId: user.uid,
-          toolUsed: `AI_${activeTool}`,
-          requestTimestamp: serverTimestamp(),
-          status: 'ERROR',
-          costUnits: 0
-        };
-        addDocumentNonBlocking(userLogsRef, errorLog);
-        addDocumentNonBlocking(globalLogsRef, errorLog);
+          operationType: `AI_${activeTool}`,
+          status: 'COMPLETED',
+          createdAt: serverTimestamp(),
+          aiPrompt: requestHash,
+          aiResult: result,
+          inputFilesIds: fileDataUri ? ["STAGED_ASSET"] : []
+        });
+
+        const logData = { userId: user.uid, toolUsed: `AI_${activeTool}`, requestTimestamp: serverTimestamp(), status: 'SUCCESS', costUnits: 1 };
+        addDocumentNonBlocking(collection(firestore, 'users', user.uid, 'usageLogs'), logData);
+        addDocumentNonBlocking(collection(firestore, 'usageLogs'), logData);
       }
+
+      const assistantMsg: Message = {
+        id: Math.random().toString(36).substring(7),
+        role: 'assistant',
+        content: result,
+        tool: activeTool,
+        timestamp: new Date()
+      };
+      setMessages(prev => [...prev, assistantMsg]);
+      setSelectedFile(null);
+    } catch (e: any) {
+      toast({ variant: "destructive", title: "Protocol Error", description: e.message });
+      setMessages(prev => [...prev, { id: Date.now().toString(), role: 'assistant', content: `ERROR: ${e.message}`, timestamp: new Date() }]);
     } finally {
       setIsProcessing(false);
     }
   };
 
-  const reset = () => {
-    setResult(null);
-    setInputText('');
-    setUserQuestion('');
-    setSelectedFile(null);
-    setLogs([]);
+  const copyToClipboard = (content: string) => {
+    navigator.clipboard.writeText(content);
+    toast({ title: "Copied", description: "Content moved to local clipboard buffer." });
   };
 
   return (
-    <div className="flex min-h-screen flex-col bg-muted/20">
+    <div className="flex h-screen flex-col bg-[#F9FAFB]">
       <Navbar />
       
-      <main className="flex-1 container mx-auto px-6 py-12">
-        <div className="max-w-7xl mx-auto space-y-12">
-          <div className="text-center space-y-4">
-            <div className="inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-accent text-white shadow-xl mb-2">
-              <BrainCircuit className="h-7 w-7 text-primary" />
+      <main className="flex-1 flex overflow-hidden">
+        {/* Sidebar: Specialized Agents */}
+        <aside className="w-72 border-r border-accent/5 bg-white hidden lg:flex flex-col">
+          <div className="p-6 border-b border-accent/5">
+            <h2 className="text-[10px] font-black uppercase tracking-[0.2em] text-accent/40 mb-4">Protocol Selection</h2>
+            <div className="p-4 bg-accent text-white rounded-2xl shadow-xl relative overflow-hidden">
+               <div className="relative z-10">
+                  <p className="text-[9px] font-black uppercase text-primary mb-1">Identity Quota</p>
+                  <div className="flex justify-between text-[10px] font-bold italic mb-1">
+                    <span>{usageCount ?? 0} / {DAILY_FREE_LIMIT}</span>
+                  </div>
+                  <div className="h-1 w-full bg-white/10 rounded-full overflow-hidden">
+                    <div className="h-full bg-primary transition-all" style={{ width: `${((usageCount || 0) / DAILY_FREE_LIMIT) * 100}%` }} />
+                  </div>
+               </div>
+               <div className="absolute -bottom-4 -right-4 w-16 h-16 bg-primary/20 rounded-full blur-xl" />
             </div>
-            <h1 className="text-4xl font-black tracking-tighter text-accent uppercase italic">AI Studio Workspace</h1>
-            <p className="text-muted-foreground font-bold text-xs uppercase tracking-widest max-w-xl mx-auto">
-              Industrial Document Intelligence. Deploy specialized generative protocols with zero-retention architecture.
-            </p>
           </div>
 
-          <div className="grid lg:grid-cols-12 gap-12">
-            {/* Sidebar Tools Navigation */}
-            <div className="lg:col-span-3 space-y-8">
-              <div className="space-y-6">
-                {CATEGORIES.map((cat) => (
-                  <div key={cat.id} className="space-y-3">
-                    <div className="flex items-center gap-2 px-2">
-                      <cat.icon className="h-3 w-3 text-primary" />
-                      <span className="text-[10px] font-black uppercase tracking-widest text-accent/40">{cat.label}</span>
-                    </div>
-                    <div className="grid gap-2">
-                      {cat.tools.map((toolId) => {
-                        const tool = TOOLS.find(t => t.id === toolId)!;
-                        return (
-                          <button
-                            key={tool.id}
-                            onClick={() => { setActiveTool(tool.id); setResult(null); }}
-                            className={cn(
-                              "flex items-center gap-3 p-3 rounded-xl border transition-all text-left group",
-                              activeTool === tool.id 
-                                ? "bg-white border-primary ring-1 ring-primary shadow-lg" 
-                                : "bg-white/50 border-accent/5 hover:border-primary/40 hover:bg-white"
-                            )}
-                          >
-                            <div className={cn("p-2 rounded-lg bg-muted/50 group-hover:scale-110 transition-transform", tool.color)}>
-                              <tool.icon className="h-4 w-4" />
+          <div className="flex-1 overflow-y-auto custom-scrollbar p-4 space-y-6">
+            {CATEGORIES.map((cat) => (
+              <div key={cat.id} className="space-y-2">
+                <div className="flex items-center gap-2 px-2 text-[9px] font-black uppercase tracking-widest text-accent/30">
+                  <cat.icon className="h-3 w-3" /> {cat.label}
+                </div>
+                <div className="grid gap-1">
+                  {cat.tools.map((toolId) => {
+                    const tool = TOOLS.find(t => t.id === toolId)!;
+                    const isActive = activeTool === tool.id;
+                    return (
+                      <button
+                        key={tool.id}
+                        onClick={() => setActiveTool(tool.id)}
+                        className={cn(
+                          "flex items-center gap-3 p-2.5 rounded-xl transition-all text-left group",
+                          isActive ? "bg-accent text-white shadow-lg" : "hover:bg-muted/50 text-accent/60"
+                        )}
+                      >
+                        <div className={cn("p-1.5 rounded-lg", isActive ? "bg-white/10" : "bg-muted/50", !isActive && tool.color)}>
+                          <tool.icon className="h-3.5 w-3.5" />
+                        </div>
+                        <div className="min-w-0">
+                          <p className="text-[10px] font-black uppercase italic leading-none">{tool.label}</p>
+                        </div>
+                        {isActive && <ChevronRight className="ml-auto h-3 w-3 text-primary animate-pulse" />}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
+          </div>
+          
+          <div className="p-4 border-t border-accent/5">
+             <Button variant="ghost" onClick={() => setMessages([])} className="w-full justify-start text-[9px] font-black uppercase tracking-widest text-accent/40 hover:text-destructive">
+                <Trash2 className="mr-2 h-3.5 w-3.5" /> Clear Session
+             </Button>
+          </div>
+        </aside>
+
+        {/* Main Chat Area */}
+        <section className="flex-1 flex flex-col relative bg-white lg:bg-transparent">
+          {messages.length === 0 ? (
+            <div className="flex-1 flex flex-col items-center justify-center p-6 text-center space-y-8 max-w-2xl mx-auto">
+              <div className="w-20 h-20 bg-accent text-white rounded-[2.5rem] flex items-center justify-center shadow-2xl brand-glow animate-in zoom-in duration-700">
+                <BrainCircuit className="h-10 w-10 text-primary" />
+              </div>
+              <div className="space-y-3">
+                <h1 className="text-4xl font-black tracking-tighter text-accent uppercase italic">DOCFLOW Intelligence</h1>
+                <p className="text-accent/40 font-bold uppercase tracking-widest text-xs leading-relaxed">
+                  Industrial-grade generative protocols for mission-critical documents. 
+                  Zero-retention architecture active.
+                </p>
+              </div>
+              <div className="grid grid-cols-2 gap-4 w-full">
+                 {['PARAPHRASE', 'SUMMARIZE', 'CHAT', 'ESSAY'].map(tid => {
+                   const t = TOOLS.find(x => x.id === tid)!;
+                   return (
+                     <button key={tid} onClick={() => setActiveTool(tid as any)} className="p-4 rounded-2xl border border-accent/5 bg-white shadow-sm hover:border-primary/40 hover:shadow-xl transition-all text-left group">
+                        <t.icon className={cn("h-5 w-5 mb-2", t.color)} />
+                        <p className="text-[10px] font-black uppercase italic text-accent">{t.label}</p>
+                        <p className="text-[8px] font-bold text-accent/30 uppercase">{t.description}</p>
+                     </button>
+                   );
+                 })}
+              </div>
+            </div>
+          ) : (
+            <div className="flex-1 overflow-y-auto custom-scrollbar p-6 space-y-10">
+              <div className="max-w-4xl mx-auto space-y-10 pb-32">
+                {messages.map((msg) => (
+                  <div key={msg.id} className={cn("flex gap-6 animate-in fade-in slide-in-from-bottom-2 duration-500", msg.role === 'user' ? "justify-end" : "justify-start")}>
+                    <div className={cn("flex max-w-[85%] gap-4", msg.role === 'user' && "flex-row-reverse")}>
+                      <div className={cn("h-10 w-10 shrink-0 rounded-xl flex items-center justify-center shadow-lg", msg.role === 'user' ? "bg-accent text-primary" : "bg-primary text-white")}>
+                        {msg.role === 'user' ? <User className="h-5 w-5" /> : <Bot className="h-5 w-5" />}
+                      </div>
+                      <div className="space-y-3">
+                        <div className={cn(
+                          "p-6 rounded-[2rem] shadow-sm text-sm font-medium leading-relaxed",
+                          msg.role === 'user' ? "bg-accent text-white rounded-tr-none" : "bg-white border border-accent/5 text-accent/80 rounded-tl-none"
+                        )}>
+                          {msg.fileName && (
+                            <div className="mb-4 flex items-center gap-2 p-2 bg-white/10 rounded-lg border border-white/10">
+                               <FileText className="h-3 w-3" />
+                               <span className="text-[10px] font-black uppercase italic">{msg.fileName}</span>
                             </div>
-                            <div className="min-w-0">
-                              <p className="text-[10px] font-black uppercase italic text-accent leading-none mb-1">{tool.label}</p>
-                              <p className="text-[7px] font-bold text-accent/30 uppercase truncate">{tool.description}</p>
-                            </div>
-                            {activeTool === tool.id && <ChevronRight className="ml-auto h-3 w-3 text-primary animate-pulse" />}
-                          </button>
-                        );
-                      })}
+                          )}
+                          <div className="whitespace-pre-wrap">{msg.content}</div>
+                        </div>
+                        <div className={cn("flex items-center gap-3 px-2", msg.role === 'user' && "flex-row-reverse")}>
+                           <span className="text-[8px] font-black uppercase text-accent/20 tracking-widest">{msg.timestamp.toLocaleTimeString()}</span>
+                           {msg.role === 'assistant' && (
+                             <button onClick={() => copyToClipboard(msg.content)} className="p-1 hover:text-primary transition-colors">
+                               <Copy className="h-3 w-3" />
+                             </button>
+                           )}
+                        </div>
+                      </div>
                     </div>
                   </div>
                 ))}
-              </div>
-
-              <div className="p-6 bg-accent text-white rounded-[2rem] shadow-2xl relative overflow-hidden">
-                 <div className="relative z-10 space-y-3">
-                    <p className="text-[9px] font-black uppercase tracking-widest text-primary">Identity Quota</p>
-                    <div className="space-y-1">
-                       <div className="flex justify-between text-[10px] font-bold uppercase italic">
-                          <span>{usageCount !== null ? `${usageCount} / ${DAILY_FREE_LIMIT}` : "Loading..."}</span>
-                          <span>Daily Limit</span>
-                       </div>
-                       <div className="h-1 w-full bg-white/10 rounded-full overflow-hidden">
-                          <div 
-                            className="h-full bg-primary transition-all duration-1000" 
-                            style={{ width: `${Math.min(100, ((usageCount || 0) / DAILY_FREE_LIMIT) * 100)}%` }} 
-                          />
-                       </div>
+                {isProcessing && (
+                  <div className="flex gap-6 animate-in fade-in duration-300">
+                    <div className="h-10 w-10 rounded-xl bg-primary text-white flex items-center justify-center shadow-lg animate-pulse">
+                      <Loader2 className="h-5 w-5 animate-spin" />
                     </div>
-                    <p className="text-[7px] font-bold uppercase text-white/40 tracking-tighter italic">Hardened Rate Limiting Active</p>
-                 </div>
-                 <div className="absolute -bottom-10 -right-10 w-24 h-24 bg-primary/20 rounded-full blur-2xl" />
+                    <div className="p-6 bg-white border border-accent/5 rounded-[2rem] rounded-tl-none shadow-sm flex items-center gap-3">
+                       <div className="flex gap-1">
+                          <div className="w-1.5 h-1.5 bg-primary/40 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                          <div className="w-1.5 h-1.5 bg-primary/40 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                          <div className="w-1.5 h-1.5 bg-primary/40 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                       </div>
+                       <span className="text-[10px] font-black uppercase tracking-widest text-accent/20 italic">Executing Protocol...</span>
+                    </div>
+                  </div>
+                )}
+                <div ref={chatEndRef} />
               </div>
             </div>
+          )}
 
-            {/* Main Execution Area */}
-            <div className="lg:col-span-9 space-y-8">
-              {!result ? (
-                <Card className="border-none shadow-2xl rounded-[3rem] bg-white overflow-hidden animate-in fade-in zoom-in-95 duration-500">
-                  <CardHeader className="p-10 pb-4 border-b border-accent/5">
-                    <div className="flex items-center gap-4">
-                       <div className={cn("p-4 rounded-2xl bg-muted/30", activeConfig.color)}>
-                          <activeConfig.icon className="h-8 w-8" />
-                       </div>
-                       <div>
-                          <CardTitle className="text-2xl font-black uppercase italic tracking-tighter text-accent">{activeConfig.label}</CardTitle>
-                          <CardDescription className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">{activeConfig.description}</CardDescription>
-                       </div>
+          {/* Bottom Chat Bar */}
+          <div className="absolute bottom-0 inset-x-0 p-6 bg-gradient-to-t from-[#F9FAFB] via-[#F9FAFB] to-transparent">
+            <div className="max-w-4xl mx-auto">
+              <div className="relative bg-white rounded-[2.5rem] shadow-2xl border border-accent/10 p-2 focus-within:ring-2 ring-primary/20 transition-all">
+                <div className="flex flex-col gap-2">
+                  {selectedFile && (
+                    <div className="flex items-center gap-2 p-2 bg-muted/30 rounded-2xl border border-accent/5 animate-in slide-in-from-bottom-2">
+                       <div className="p-2 bg-white rounded-lg text-primary shadow-sm"><FileText className="h-4 w-4" /></div>
+                       <span className="text-[10px] font-black uppercase text-accent truncate max-w-[200px]">{selectedFile.name}</span>
+                       <button onClick={() => setSelectedFile(null)} className="ml-auto p-1.5 hover:bg-destructive/10 rounded-full text-destructive transition-colors">
+                          <X className="h-3 w-3" />
+                       </button>
                     </div>
-                  </CardHeader>
-                  <CardContent className="p-10 space-y-8">
-                    <div className="space-y-6">
-                      {activeTool === 'CHAT' ? (
-                        <div className="space-y-4">
-                          <Label className="text-[10px] font-black uppercase tracking-widest text-accent/60">Interrogate Asset</Label>
-                          <FileDropzone onFilesSelected={(f) => setSelectedFile(f[0])} maxFiles={1} accept=".pdf,.docx,.txt" className="border-accent/10" />
-                          <div className="space-y-2">
-                            <Label className="text-[10px] font-black uppercase tracking-widest text-accent/60">Your Inquiry</Label>
-                            <Input 
-                              value={userQuestion} 
-                              onChange={(e) => setUserQuestion(e.target.value)}
-                              placeholder="ASK ABOUT THE DOCUMENT ARCHITECTURE..." 
-                              className="h-12 bg-muted/20 border-accent/10 rounded-xl font-bold italic"
-                            />
-                          </div>
-                        </div>
-                      ) : activeTool === 'TRANSLATE' ? (
-                        <div className="grid md:grid-cols-2 gap-8">
-                          <div className="space-y-4">
-                            <Label className="text-[10px] font-black uppercase tracking-widest text-accent/60">Source Payload</Label>
-                            <Textarea 
-                              value={inputText}
-                              onChange={(e) => setInputText(e.target.value)}
-                              placeholder={activeConfig.placeholder}
-                              className="min-h-[200px] bg-muted/20 border-accent/10 rounded-2xl font-bold text-accent"
-                            />
-                          </div>
-                          <div className="space-y-4">
-                            <Label className="text-[10px] font-black uppercase tracking-widest text-accent/60">Linguistic Protocol</Label>
-                            <Select value={targetLanguage} onValueChange={setTargetLanguage}>
-                               <SelectTrigger className="h-12 rounded-xl bg-white border-accent/10 font-black uppercase text-[10px] tracking-widest">
-                                  <SelectValue />
-                               </SelectTrigger>
-                               <SelectContent className="rounded-xl">
-                                  {LANGUAGES.map(l => (
-                                    <SelectItem key={l} value={l} className="font-bold text-[10px] uppercase">{l}</SelectItem>
-                                  ))}
-                               </SelectContent>
-                            </Select>
-                            <div className="p-6 bg-primary/5 rounded-[2.5rem] border border-primary/10 flex items-start gap-4">
-                               <Languages className="h-6 w-6 text-primary shrink-0" />
-                               <p className="text-[9px] font-bold text-muted-foreground leading-relaxed uppercase tracking-tighter italic">
-                                 AI Transformation maintains structural syntax and professional tone during linguistic shift.
-                               </p>
-                            </div>
-                          </div>
-                        </div>
-                      ) : (
-                        <div className="space-y-6">
-                          <div className="space-y-2">
-                            <Label className="text-[10px] font-black uppercase tracking-widest text-accent/60">Input Data Stream</Label>
-                            <Textarea 
-                              value={inputText}
-                              onChange={(e) => setInputText(e.target.value)}
-                              placeholder={activeConfig.placeholder}
-                              className="min-h-[250px] bg-muted/20 border-accent/10 rounded-3xl font-bold text-accent resize-none"
-                            />
-                          </div>
-                          {(activeTool === 'SUMMARIZE' || activeTool === 'CHAT') && (
-                            <div className="pt-4 border-t border-accent/5">
-                               <p className="text-[9px] font-black uppercase text-accent/30 mb-4 tracking-widest">Optional: Source from Asset</p>
-                               <FileDropzone onFilesSelected={(f) => setSelectedFile(f[0])} maxFiles={1} accept=".pdf,.docx,.txt" />
-                            </div>
-                          )}
-                        </div>
+                  )}
+                  
+                  <div className="flex items-end gap-2">
+                    <button 
+                      onClick={() => document.getElementById('file-trigger')?.click()}
+                      className="p-3 mb-1 rounded-2xl hover:bg-muted transition-colors text-accent/40 hover:text-primary group"
+                    >
+                      <Paperclip className="h-5 w-5" />
+                      <input id="file-trigger" type="file" className="hidden" onChange={(e) => setSelectedFile(e.target.files?.[0] || null)} />
+                    </button>
+                    
+                    <Textarea 
+                      value={inputText}
+                      onChange={(e) => setInputText(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' && !e.shiftKey) {
+                          e.preventDefault();
+                          handleDeploy();
+                        }
+                      }}
+                      placeholder={activeConfig.placeholder}
+                      className="min-h-[56px] max-h-40 border-none shadow-none focus-visible:ring-0 bg-transparent resize-none py-4 font-medium text-accent scrollbar-hide"
+                    />
+
+                    <div className="flex items-center gap-2 mb-1 mr-1">
+                      {activeTool === 'TRANSLATE' && (
+                        <Select value={targetLanguage} onValueChange={setTargetLanguage}>
+                          <SelectTrigger className="h-10 w-28 rounded-xl border-accent/5 bg-muted/20 text-[9px] font-black uppercase tracking-widest">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent className="rounded-xl">
+                            {LANGUAGES.map(l => <SelectItem key={l} value={l} className="text-[9px] font-black uppercase">{l}</SelectItem>)}
+                          </SelectContent>
+                        </Select>
                       )}
-                    </div>
-
-                    <div className="pt-6 border-t border-accent/5 flex flex-col sm:flex-row items-center justify-between gap-6">
-                       <div className="flex items-center gap-3">
-                          <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
-                          <span className="text-[9px] font-black uppercase tracking-[0.2em] text-accent/40 italic">Industrial AI Tunnel Verified</span>
-                       </div>
-                       <Button 
-                        size="lg" 
+                      <Button 
                         onClick={handleDeploy} 
-                        disabled={isProcessing || (!inputText && !selectedFile)}
-                        className="w-full sm:w-auto h-16 px-12 rounded-2xl bg-accent text-white font-black uppercase tracking-[0.2em] text-[11px] shadow-2xl shadow-accent/20"
-                       >
-                        {isProcessing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Zap className="mr-2 h-4 w-4 fill-primary text-primary" />}
-                        Deploy {activeConfig.label}
-                       </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              ) : (
-                <div className="space-y-8 animate-in fade-in slide-in-from-bottom-8 duration-700">
-                  <Card className="border-none shadow-2xl rounded-[3rem] bg-white overflow-hidden">
-                    <CardHeader className="p-10 border-b border-accent/5 flex flex-row items-center justify-between">
-                      <div>
-                        <CardTitle className="text-xl font-black uppercase italic tracking-tighter text-accent">Protocol Output</CardTitle>
-                        <CardDescription className="text-[10px] font-bold uppercase tracking-widest text-primary italic">Transformation Success</CardDescription>
-                      </div>
-                      <Button variant="ghost" onClick={reset} className="text-[9px] font-black uppercase tracking-widest text-accent/40 hover:text-accent">
-                        Initialize New Sequence
+                        disabled={isProcessing || (!inputText.trim() && !selectedFile)}
+                        className="h-12 w-12 rounded-2xl bg-accent text-white shadow-xl shadow-accent/20 hover:scale-105 active:scale-95 transition-all"
+                      >
+                        {isProcessing ? <Loader2 className="h-5 w-5 animate-spin" /> : <Send className="h-5 w-5 fill-primary text-primary" />}
                       </Button>
-                    </CardHeader>
-                    <CardContent className="p-10">
-                      <div className="p-8 bg-muted/10 rounded-[2.5rem] border border-accent/5 text-sm font-medium leading-relaxed italic text-accent/80 whitespace-pre-wrap">
-                        {result}
-                      </div>
-                      <div className="mt-8 flex justify-center">
-                        <Button 
-                          onClick={() => {
-                            const blob = new Blob([result!], { type: 'text/plain' });
-                            const url = URL.createObjectURL(blob);
-                            const link = document.createElement('a');
-                            link.href = url;
-                            link.download = `DOCFLOW_AI_${activeTool}_${new Date().getTime()}.txt`;
-                            link.click();
-                          }}
-                          className="h-14 px-10 rounded-xl bg-accent text-white font-black uppercase text-[10px] tracking-widest shadow-xl"
-                        >
-                          <Download className="mr-2 h-4 w-4" /> Export Result as TXT
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
+                    </div>
+                  </div>
                 </div>
-              )}
-
-              {logs.length > 0 && (
-                <Card className="border-none shadow-xl rounded-[2.5rem] bg-accent text-white overflow-hidden">
-                  <div className="p-6 border-b border-white/5 flex items-center gap-3">
-                    <Server className="h-4 w-4 text-primary" />
-                    <span className="text-[10px] font-black uppercase tracking-widest italic">Industrial Sequence Log</span>
-                  </div>
-                  <div className="p-6 space-y-2 max-h-[150px] overflow-y-auto custom-scrollbar bg-black/5">
-                    {logs.map((log, i) => (
-                      <div key={i} className="text-[9px] font-bold uppercase text-white/40 flex items-center gap-3">
-                        <ArrowRight className="h-2.5 w-2.5 text-primary" /> {log}
-                      </div>
-                    ))}
-                    {isProcessing && <Loader2 className="h-3 w-3 animate-spin text-primary mt-2" />}
-                  </div>
-                </Card>
-              )}
+              </div>
+              
+              <div className="flex items-center justify-center gap-8 mt-4 opacity-20 grayscale hover:opacity-100 transition-opacity duration-700">
+                 <div className="flex items-center gap-2 text-[8px] font-black uppercase tracking-[0.3em] italic">
+                    <ShieldCheck className="h-3 w-3" /> Secure Tunnel
+                 </div>
+                 <div className="flex items-center gap-2 text-[8px] font-black uppercase tracking-[0.3em] italic text-primary">
+                    <Activity className="h-3 w-3" /> Active Protocol: {activeConfig.label}
+                 </div>
+                 <div className="flex items-center gap-2 text-[8px] font-black uppercase tracking-[0.3em] italic">
+                    <Cpu className="h-3 w-3" /> Local Buffer
+                 </div>
+              </div>
             </div>
           </div>
-
-          <div className="pt-16 border-t border-accent/5 flex flex-col md:flex-row items-center justify-center gap-12 opacity-30 grayscale hover:opacity-100 transition-all duration-1000">
-             <div className="flex items-center gap-3 font-black uppercase tracking-[0.4em] text-[10px]">
-                <ShieldCheck className="h-4 w-4" /> 256-BIT ENCRYPTED
-             </div>
-             <div className="flex items-center gap-3 font-black uppercase tracking-[0.4em] text-[10px]">
-                <Cpu className="h-4 w-4" /> LOCAL-FIRST BUFFER
-             </div>
-             <div className="flex items-center gap-3 font-black uppercase tracking-[0.4em] text-[10px]">
-                <BrainCircuit className="h-4 w-4" /> GEMINI FLASH 1.5
-             </div>
-          </div>
-        </div>
+        </section>
       </main>
     </div>
   );
