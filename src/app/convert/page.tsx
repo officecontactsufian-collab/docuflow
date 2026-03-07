@@ -86,15 +86,21 @@ function wrapText(text: string, maxWidth: number, font: PDFFont, fontSize: numbe
   return allLines;
 }
 
-export default function ConvertPage() {
+function ConvertContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const [currentType, setCurrentType] = React.useState<ConversionType | null>((searchParams.get('type') as ConversionType) || null);
+  const [currentType, setCurrentType] = React.useState<ConversionType | null>(null);
   const [selectedFile, setSelectedFile] = React.useState<File | null>(null);
   const [isProcessing, setIsProcessing] = React.useState(false);
   const [isDone, setIsDone] = React.useState(false);
   const [downloadUrl, setDownloadUrl] = React.useState<string | null>(null);
   const { toast } = useToast();
+
+  // Sync state with search params
+  React.useEffect(() => {
+    const type = searchParams.get('type') as ConversionType;
+    if (type) setCurrentType(type);
+  }, [searchParams]);
 
   const activeConfig = TOOLS.find(t => t.id === currentType);
 
@@ -350,6 +356,7 @@ export default function ConvertPage() {
               </div>
 
               <FileDropzone 
+                key={currentType} // Change key to reset dropzone state on type switch
                 onFilesSelected={(files) => setSelectedFile(files[0] || null)} 
                 maxFiles={1} 
                 accept={activeConfig?.accept}
@@ -440,5 +447,17 @@ export default function ConvertPage() {
         </section>
       </main>
     </div>
+  );
+}
+
+export default function ConvertPage() {
+  return (
+    <React.Suspense fallback={
+      <div className="flex min-h-screen items-center justify-center bg-muted/30">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    }>
+      <ConvertContent />
+    </React.Suspense>
   );
 }

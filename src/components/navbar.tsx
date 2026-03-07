@@ -40,7 +40,8 @@ import {
   Table,
   Presentation,
   Eraser,
-  Wrench
+  Wrench,
+  FileUp
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -67,7 +68,7 @@ export function Navbar() {
 
   const categories = [
     {
-      label: "AI Writing Tools",
+      label: "AI Writing Suite",
       items: [
         { href: "/ai-studio", icon: RefreshCcw, title: "Paraphraser", desc: "Re-engineer text" },
         { href: "/ai-studio", icon: Activity, title: "Summarizer", desc: "Executive summary" },
@@ -76,7 +77,7 @@ export function Navbar() {
       ]
     },
     {
-      label: "AI Career Tools",
+      label: "AI Career Suite",
       items: [
         { href: "/ai-studio", icon: Briefcase, title: "Resume Builder", desc: "Profile engineering" },
         { href: "/ai-studio", icon: FileBadge, title: "Cover Letter", desc: "Intro architect" },
@@ -94,12 +95,30 @@ export function Navbar() {
       ]
     },
     {
-      label: "Layout & Transformation",
+      label: "Layout & Capture",
       items: [
-        { href: "/convert", icon: ArrowRightLeft, title: "Convert Engine", desc: "Format inversion" },
-        { href: "/organize", icon: RotateCw, title: "Visual Organizer", desc: "Reorder & Rotate" },
         { href: "/crop", icon: Crop, title: "Precision Crop", desc: "Trim page margins" },
+        { href: "/organize", icon: RotateCw, title: "Visual Organizer", desc: "Reorder & Rotate" },
+        { href: "/numbers", icon: Hash, title: "Add Numbers", desc: "Sequential counters" },
         { href: "/merge", icon: Merge, title: "Merge PDF", desc: "Combine assets" },
+      ]
+    },
+    {
+      label: "Convert & Export",
+      items: [
+        { href: "/convert", icon: ArrowRightLeft, title: "Convert Hub", desc: "Format inversion" },
+        { href: "/convert?type=pdf-to-word", icon: FileText, title: "PDF to Word", desc: "Recover text" },
+        { href: "/convert?type=word-to-pdf", icon: FilePenLine, title: "Word to PDF", desc: "Standardize DOCX" },
+        { href: "/convert?type=pdf-to-excel", icon: Table, title: "PDF to Excel", desc: "Table recovery" },
+      ]
+    },
+    {
+      label: "Security & Shield",
+      items: [
+        { href: "/secure", icon: Lock, title: "Protect PDF", desc: "Secure encryption" },
+        { href: "/protect", icon: ShieldCheck, title: "Privacy Shield", desc: "Metadata purge" },
+        { href: "/protect?mode=unlock", icon: Unlock, title: "Unlock PDF", desc: "Strip restrictions" },
+        { href: "/sanitize", icon: Eraser, title: "Sanitize Asset", desc: "Deep cleaning" },
       ]
     }
   ];
@@ -121,22 +140,22 @@ export function Navbar() {
                 <LayoutDashboard className="h-3 w-3 text-primary" />
                 All Protocols <ChevronDown className="h-2.5 w-2.5 opacity-40" />
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="w-[850px] p-5 rounded-2xl shadow-2xl border-white/20 grid grid-cols-4 gap-5 bg-white/95 backdrop-blur-xl mt-2">
+              <DropdownMenuContent align="start" className="w-[1000px] p-6 rounded-2xl shadow-2xl border-white/20 grid grid-cols-3 gap-8 bg-white/95 backdrop-blur-xl mt-2">
                 {categories.map((cat) => (
-                  <div key={cat.label} className="space-y-3">
-                    <DropdownMenuLabel className="px-0 text-[8px] font-black uppercase tracking-widest text-primary/40">
+                  <div key={cat.label} className="space-y-4">
+                    <DropdownMenuLabel className="px-0 text-[9px] font-black uppercase tracking-[0.3em] text-primary/40">
                       {cat.label}
                     </DropdownMenuLabel>
-                    <div className="space-y-1">
+                    <div className="grid gap-1">
                       {cat.items.map((item) => (
-                        <DropdownMenuItem key={item.title} asChild className="p-2 rounded-lg cursor-pointer hover:bg-primary/5 transition-all">
+                        <DropdownMenuItem key={item.title} asChild className="p-2 rounded-xl cursor-pointer hover:bg-primary/5 transition-all">
                           <Link href={item.href} className="flex items-center gap-3">
-                            <div className="h-6 w-6 text-primary flex items-center justify-center bg-primary/5 rounded-md">
-                              <item.icon className="h-3.5 w-3.5" />
+                            <div className="h-8 w-8 text-primary flex items-center justify-center bg-primary/5 rounded-lg shrink-0">
+                              <item.icon className="h-4 w-4" />
                             </div> 
-                            <div className="flex flex-col">
-                              <span className="font-bold text-[9px] uppercase tracking-wider text-accent">{item.title}</span>
-                              <span className="text-[7px] text-muted-foreground font-medium">{item.desc}</span>
+                            <div className="flex flex-col min-w-0">
+                              <span className="font-black text-[10px] uppercase tracking-wider text-accent truncate">{item.title}</span>
+                              <span className="text-[8px] text-muted-foreground font-bold uppercase truncate">{item.desc}</span>
                             </div>
                           </Link>
                         </DropdownMenuItem>
@@ -161,6 +180,7 @@ export function Navbar() {
 
         <div className="flex items-center gap-4">
           <div className="hidden sm:flex items-center gap-6 mr-2">
+            <Link href="/pricing" className="text-[9px] font-black uppercase tracking-widest text-accent/60 hover:text-primary transition-all">Pricing</Link>
             <Link href="/analyze" className="flex items-center gap-1.5 text-[9px] font-black uppercase tracking-widest text-accent/80 hover:text-accent transition-all">
               <Search className="h-3 w-3 text-primary" /> Inspect
             </Link>

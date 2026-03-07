@@ -80,7 +80,7 @@ export default function Home() {
       ]
     },
     {
-      label: "AI Productivity Tools",
+      label: "AI Productivity Suite",
       description: "Industrial efficiency and document interrogation.",
       items: [
         { title: "Translator", desc: "Linguistic shift.", icon: Languages, href: "/ai-studio" },
@@ -103,7 +103,7 @@ export default function Home() {
       label: "Convert & Export",
       description: "Lossless transformation between formats.",
       items: [
-        { title: "Convert Engine", desc: "Transformation Hub.", icon: ArrowRightLeft, href: "/convert" },
+        { title: "Convert Hub", desc: "Transformation Hub.", icon: ArrowRightLeft, href: "/convert" },
         { title: "PDF to Word", desc: "DOCX export.", icon: FileText, href: "/convert?type=pdf-to-word" },
         { title: "Word to PDF", desc: "Standardize DOCX.", icon: FilePenLine, href: "/convert?type=word-to-pdf" },
         { title: "PDF to Excel", desc: "Table recovery.", icon: Table, href: "/convert?type=pdf-to-excel" },
