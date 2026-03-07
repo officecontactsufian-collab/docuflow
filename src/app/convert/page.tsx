@@ -1,3 +1,4 @@
+
 "use client"
 
 import * as React from 'react';
@@ -26,9 +27,7 @@ import {
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { PDFDocument, StandardFonts, rgb, PDFFont } from 'pdf-lib';
-import mammoth from 'mammoth';
-import * as XLSX from 'xlsx';
+import { executeConversionAction } from './actions';
 import { cn } from '@/lib/utils';
 
 type ConversionType = 
@@ -62,29 +61,6 @@ const CATEGORIES = [
   { id: 'from-pdf', label: 'Asset Reconstruction', items: ['pdf-to-word', 'pdf-to-excel', 'pdf-to-jpg', 'pdf-to-ppt', 'pdf-to-pdfa'] },
 ];
 
-function sanitizeText(text: string) {
-  return text.replace(/[^\x00-\x7F]/g, "");
-}
-
-function wrapText(text: string, maxWidth: number, font: PDFFont, fontSize: number) {
-  const paragraphs = text.split('\n');
-  const allLines: string[] = [];
-  for (const para of paragraphs) {
-    if (!para.trim()) { allLines.push(""); continue; }
-    const words = para.split(/\s+/);
-    let currentLine = '';
-    for (const word of words) {
-      const sanitizedWord = sanitizeText(word);
-      const testLine = currentLine ? `${currentLine} ${sanitizedWord}` : sanitizedWord;
-      const width = font.widthOfTextAtSize(testLine, fontSize);
-      if (width <= maxWidth) { currentLine = testLine; } 
-      else { allLines.push(currentLine); currentLine = sanitizedWord; }
-    }
-    allLines.push(currentLine);
-  }
-  return allLines;
-}
-
 function ConvertContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -113,105 +89,18 @@ function ConvertContent() {
     setIsProcessing(true);
     
     try {
-      if (currentType === 'jpg-to-pdf') {
-        const pdfDoc = await PDFDocument.create();
-        const imageBytes = await selectedFile.arrayBuffer();
-        let image;
-        const fileNameLower = selectedFile.name.toLowerCase();
-        if (fileNameLower.endsWith('.png') || selectedFile.type === 'image/png') { image = await pdfDoc.embedPng(imageBytes); } 
-        else { image = await pdfDoc.embedJpg(imageBytes); }
-        const page = pdfDoc.addPage([image.width, image.height]);
-        page.drawImage(image, { x: 0, y: 0, width: image.width, height: image.height });
-        const pdfBytes = await pdfDoc.save();
-        setDownloadUrl(URL.createObjectURL(new Blob([pdfBytes], { type: 'application/pdf' })));
-      } else if (currentType === 'excel-to-pdf') {
-        const pdfDoc = await PDFDocument.create();
-        const boldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
-        const regularFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
-        const arrayBuffer = await selectedFile.arrayBuffer();
-        const workbook = XLSX.read(arrayBuffer, { type: 'array' });
-        const firstSheetName = workbook.SheetNames[0];
-        const worksheet = workbook.Sheets[firstSheetName];
-        const data = XLSX.utils.sheet_to_json(worksheet, { header: 1 }) as any[][];
-        const pageWidth = 595; const pageHeight = 842; const margin = 50; const usableWidth = pageWidth - margin * 2;
-        const colCount = Math.max(1, data[0]?.length || 1); const colWidth = usableWidth / colCount; const rowHeight = 15;
-        let page = pdfDoc.addPage([pageWidth, pageHeight]); let y = pageHeight - margin;
-        page.drawText(sanitizeText(`Asset Data Export: ${selectedFile.name}`), { x: margin, y, size: 12, font: boldFont, color: rgb(0.1, 0.1, 0.1) });
-        y -= 40;
-        data.forEach((row, rowIdx) => {
-          if (y < margin + rowHeight) { page = pdfDoc.addPage([pageWidth, pageHeight]); y = pageHeight - margin; }
-          row.forEach((cell, colIdx) => {
-            const cellText = sanitizeText(String(cell === null || cell === undefined ? "" : cell));
-            const truncatedText = cellText.length > 30 ? cellText.substring(0, 27) + "..." : cellText;
-            page.drawText(truncatedText, { x: margin + (colIdx * colWidth), y, size: 8, font: rowIdx === 0 ? boldFont : regularFont });
-          });
-          y -= rowHeight;
-        });
-        const pdfBytes = await pdfDoc.save();
-        setDownloadUrl(URL.createObjectURL(new Blob([pdfBytes], { type: 'application/pdf' })));
-      } else if (currentType === 'word-to-pdf') {
-        const pdfDoc = await PDFDocument.create();
-        const regularFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
-        const arrayBuffer = await selectedFile.arrayBuffer();
-        const result = await mammoth.extractRawText({ arrayBuffer });
-        const textContent = result.value || "Source content could not be processed.";
-        const margin = 50; const fontSize = 11; const lineHeight = 14; const pageWidth = 595; const pageHeight = 842;
-        const usableWidth = pageWidth - margin * 2; const maxLinesPerPage = Math.floor((pageHeight - margin * 2) / lineHeight);
-        const wrappedLines = wrapText(textContent, usableWidth, regularFont, fontSize);
-        let currentPage = pdfDoc.addPage([pageWidth, pageHeight]); let currentY = pageHeight - margin; let lineCount = 0;
-        for (const line of wrappedLines) {
-          if (lineCount >= maxLinesPerPage) { currentPage = pdfDoc.addPage([pageWidth, pageHeight]); currentY = pageHeight - margin; lineCount = 0; }
-          const sanitizedLine = sanitizeText(line);
-          if (sanitizedLine.trim() || line === "") { currentPage.drawText(sanitizedLine, { x: margin, y: currentY, size: fontSize, font: regularFont }); }
-          currentY -= lineHeight; lineCount++;
-        }
-        const pdfBytes = await pdfDoc.save();
-        setDownloadUrl(URL.createObjectURL(new Blob([pdfBytes], { type: 'application/pdf' })));
-      } else if (currentType === 'html-to-pdf') {
-        const arrayBuffer = await selectedFile.arrayBuffer();
-        const decoder = new TextDecoder();
-        const htmlText = decoder.decode(arrayBuffer);
-        const strippedText = htmlText.replace(/<[^>]*>?/gm, '');
-        const pdfDoc = await PDFDocument.create();
-        const regularFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
-        const margin = 50; const fontSize = 10; const lineHeight = 12; const pageWidth = 595; const pageHeight = 842;
-        const usableWidth = pageWidth - margin * 2; const maxLinesPerPage = Math.floor((pageHeight - margin * 2) / lineHeight);
-        const wrappedLines = wrapText(strippedText, usableWidth, regularFont, fontSize);
-        let currentPage = pdfDoc.addPage([pageWidth, pageHeight]); let currentY = pageHeight - margin; let lineCount = 0;
-        for (const line of wrappedLines) {
-          if (lineCount >= maxLinesPerPage) { currentPage = pdfDoc.addPage([pageWidth, pageHeight]); currentY = pageHeight - margin; lineCount = 0; }
-          const sanitizedLine = sanitizeText(line);
-          if (sanitizedLine.trim() || line === "") { currentPage.drawText(sanitizedLine, { x: margin, y: currentY, size: fontSize, font: regularFont }); }
-          currentY -= lineHeight; lineCount++;
-        }
-        const pdfBytes = await pdfDoc.save();
-        setDownloadUrl(URL.createObjectURL(new Blob([pdfBytes], { type: 'application/pdf' })));
-      } else if (currentType === 'pdf-to-word') {
-        // High-Fidelity Text Recovery Sequence
-        const arrayBuffer = await selectedFile.arrayBuffer();
-        const pdfDoc = await PDFDocument.load(arrayBuffer, { ignoreEncryption: true });
-        const metadata = {
-          title: pdfDoc.getTitle(),
-          author: pdfDoc.getAuthor(),
-          pages: pdfDoc.getPageCount(),
-        };
-        
-        const content = `DOCFLOW INDUSTRIAL TEXT RECOVERY\n` +
-          `----------------------------------\n` +
-          `SOURCE ASSET: ${selectedFile.name}\n` +
-          `METADATA TITLE: ${metadata.title || 'N/A'}\n` +
-          `METADATA AUTHOR: ${metadata.author || 'N/A'}\n` +
-          `PAGE COUNT: ${metadata.pages}\n\n` +
-          `[RECONSTRUCTION LOG]: Document object tree successfully scanned. Content stream isolated for editable recovery.\n\n` +
-          `Note: This asset has been reconstructed into a high-fidelity text-stream compatible with all professional Word processing environments.`;
-          
-        setDownloadUrl(URL.createObjectURL(new Blob([content], { type: 'text/rtf' })));
-      } else {
-        // Fallback for other reconstruction modes
-        const content = `DOCFLOW Transformation Log\n---------------------------\nSource: ${selectedFile.name}\nProtocol: ${currentType.toUpperCase()}\nStatus: RECONSTRUCTED\nDate: ${new Date().toLocaleString()}`;
-        setDownloadUrl(URL.createObjectURL(new Blob([content], { type: 'text/plain' })));
-      }
-
+      const reader = new FileReader();
+      const base64Promise = new Promise<string>((resolve) => {
+        reader.onload = () => resolve(reader.result as string);
+        reader.readAsDataURL(selectedFile);
+      });
+      
+      const base64Data = await base64Promise;
+      
+      // CALL INDUSTRIAL BACKEND ACTION
+      const { resultBase64 } = await executeConversionAction(base64Data, currentType, selectedFile.name);
+      
+      setDownloadUrl(resultBase64);
       setIsProcessing(false);
       setIsDone(true);
       toast({ title: "Protocol Success", description: `Your ${activeConfig?.label} asset has been transformed.` });
@@ -225,10 +114,10 @@ function ConvertContent() {
   const getOutputExtension = () => {
     if (!currentType) return '.out';
     if (currentType.endsWith('-to-pdf')) return '.pdf';
-    if (currentType === 'pdf-to-word') return '.rtf';
+    if (currentType === 'pdf-to-word') return '.docx';
     if (currentType === 'pdf-to-jpg') return '.jpg';
     if (currentType === 'pdf-to-excel') return '.csv';
-    if (currentType === 'pdf-to-ppt') return '.txt';
+    if (currentType === 'pdf-to-ppt') return '.pptx';
     if (currentType === 'pdf-to-pdfa') return '.pdf';
     return '.out';
   };
@@ -236,7 +125,7 @@ function ConvertContent() {
   const reset = () => {
     setIsDone(false);
     setSelectedFile(null);
-    if (downloadUrl) { URL.revokeObjectURL(downloadUrl); setDownloadUrl(null); }
+    setDownloadUrl(null);
   };
 
   const switchProtocol = (type: ConversionType) => {
@@ -262,12 +151,12 @@ function ConvertContent() {
                     <Cpu className="h-3 w-3 text-primary/40" />
                   </div>
                   <div className="flex items-end gap-1 mb-2">
-                    <span className="text-2xl font-black italic">100%</span>
-                    <span className="text-[10px] font-bold text-white/40 mb-1">LOCAL LOAD</span>
+                    <span className="text-2xl font-black italic">UNLIMITED</span>
                   </div>
                   <div className="h-1.5 w-full bg-white/10 rounded-full overflow-hidden">
                     <div className="h-full bg-primary w-full animate-pulse" />
                   </div>
+                  <p className="mt-2 text-[8px] font-bold text-white/40 uppercase tracking-widest">Professional Backend Active</p>
                </div>
                <div className="absolute -bottom-4 -right-4 w-20 h-20 bg-primary/20 rounded-full blur-2xl" />
             </div>
@@ -316,9 +205,9 @@ function ConvertContent() {
         </aside>
 
         {/* Main Content Area */}
-        <section className="flex-1 flex flex-col relative bg-white lg:bg-transparent">
+        <section className="flex-1 flex flex-col relative bg-white lg:bg-transparent overflow-y-auto">
           {!currentType ? (
-            <div className="flex-1 flex flex-col items-center justify-center p-8 text-center space-y-12 max-w-4xl mx-auto overflow-y-auto">
+            <div className="flex-1 flex flex-col items-center justify-center p-8 text-center space-y-12 max-w-4xl mx-auto py-20">
               <div className="relative">
                 <div className="absolute inset-0 animate-ping rounded-full bg-primary/10" />
                 <div className="w-24 h-24 bg-accent text-white rounded-[2.5rem] flex items-center justify-center shadow-2xl relative z-10">
@@ -369,7 +258,7 @@ function ConvertContent() {
               </div>
             </div>
           ) : !isDone ? (
-            <div className="flex-1 flex flex-col items-center justify-center p-8 space-y-12 animate-in fade-in zoom-in-95 duration-500 max-w-4xl mx-auto w-full">
+            <div className="flex-1 flex flex-col items-center justify-center p-8 space-y-12 animate-in fade-in zoom-in-95 duration-500 max-w-4xl mx-auto w-full py-20">
               <div className="text-center space-y-4">
                 <div className={cn("inline-flex h-16 w-16 items-center justify-center rounded-[1.5rem] bg-white shadow-2xl border border-accent/5 mb-2", activeConfig?.color)}>
                   {activeConfig && <activeConfig.icon className="h-8 w-8" />}
@@ -425,7 +314,7 @@ function ConvertContent() {
               )}
             </div>
           ) : (
-            <div className="flex-1 flex flex-col items-center justify-center p-8 animate-in slide-in-from-bottom-8 duration-700 max-w-md mx-auto">
+            <div className="flex-1 flex flex-col items-center justify-center p-8 animate-in slide-in-from-bottom-8 duration-700 max-w-md mx-auto py-20">
               <Card className="border-none shadow-2xl rounded-[3rem] bg-white overflow-hidden w-full text-center">
                 <CardHeader className="pt-12 pb-6">
                   <div className="w-20 h-20 bg-green-50 text-green-600 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-inner">
@@ -477,7 +366,10 @@ export default function ConvertPage() {
   return (
     <React.Suspense fallback={
       <div className="flex min-h-screen items-center justify-center bg-muted/30">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="h-12 w-12 animate-spin text-primary" />
+          <p className="text-[10px] font-black uppercase tracking-widest text-accent/40">Initializing Engine Registry...</p>
+        </div>
       </div>
     }>
       <ConvertContent />
