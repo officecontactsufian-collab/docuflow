@@ -118,7 +118,7 @@ export function Navbar() {
         { href: "/secure", icon: Lock, title: "Protect PDF", desc: "Secure encryption" },
         { href: "/protect", icon: ShieldCheck, title: "Privacy Shield", desc: "Metadata purge" },
         { href: "/protect?mode=unlock", icon: Unlock, title: "Unlock PDF", desc: "Strip restrictions" },
-        { href: "/sanitize", icon: Eraser, title: "Sanitize Asset", desc: "Deep cleaning" },
+        { href: "/sanitize", icon: Eraser, title: "Deep cleaning" },
       ]
     }
   ];

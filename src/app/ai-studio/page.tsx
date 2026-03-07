@@ -87,8 +87,6 @@ const CATEGORIES = [
 
 const LANGUAGES = ["English", "French", "Spanish", "German", "Japanese", "Chinese", "Arabic", "Portuguese", "Russian", "Italian"];
 
-const DAILY_FREE_LIMIT = 100;
-
 export default function AIStudioPage() {
   const { user, isUserLoading } = useUser();
   const auth = useAuth();
@@ -197,9 +195,7 @@ export default function AIStudioPage() {
       if (validCache) {
         result = validCache.data().aiResult;
       } else {
-        if (usageCount !== null && usageCount >= DAILY_FREE_LIMIT) {
-          throw new Error(`Daily limit reached (${DAILY_FREE_LIMIT}). Registry resets at midnight.`);
-        }
+        // FREE UNLIMITED ACCESS
         const response = await executeAIStudioAction({ ...inputPayload, fileDataUri });
         result = response.result;
 
@@ -254,16 +250,16 @@ export default function AIStudioPage() {
             <div className="p-5 bg-accent text-white rounded-[2rem] shadow-2xl relative overflow-hidden group">
                <div className="relative z-10">
                   <div className="flex items-center justify-between mb-2">
-                    <p className="text-[9px] font-black uppercase text-primary">Identity Quota</p>
-                    <Clock className="h-3 w-3 text-primary/40" />
+                    <p className="text-[9px] font-black uppercase text-primary">Identity Access</p>
+                    <ShieldCheck className="h-3 w-3 text-primary" />
                   </div>
                   <div className="flex items-end gap-1 mb-2">
-                    <span className="text-2xl font-black italic">{usageCount ?? 0}</span>
-                    <span className="text-[10px] font-bold text-white/40 mb-1">/ {DAILY_FREE_LIMIT} OPS</span>
+                    <span className="text-2xl font-black italic">PRO FREE</span>
                   </div>
                   <div className="h-1.5 w-full bg-white/10 rounded-full overflow-hidden">
-                    <div className="h-full bg-primary transition-all duration-1000 ease-out" style={{ width: `${((usageCount || 0) / DAILY_FREE_LIMIT) * 100}%` }} />
+                    <div className="h-full bg-primary w-full" />
                   </div>
+                  <p className="mt-2 text-[8px] font-bold text-white/40 uppercase tracking-widest">Unlimited Professional Access</p>
                </div>
                <div className="absolute -bottom-4 -right-4 w-20 h-20 bg-primary/20 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700" />
             </div>

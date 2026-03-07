@@ -104,7 +104,7 @@ export default function Home() {
       description: "Lossless transformation between formats.",
       items: [
         { title: "Convert Hub", desc: "Transformation Hub.", icon: ArrowRightLeft, href: "/convert" },
-        { title: "PDF to Word", desc: "DOCX export.", icon: FileText, href: "/convert?type=pdf-to-word" },
+        { title: "PDF to Word", desc: "Text recovery.", icon: FileText, href: "/convert?type=pdf-to-word" },
         { title: "Word to PDF", desc: "Standardize DOCX.", icon: FilePenLine, href: "/convert?type=word-to-pdf" },
         { title: "PDF to Excel", desc: "Table recovery.", icon: Table, href: "/convert?type=pdf-to-excel" },
       ]

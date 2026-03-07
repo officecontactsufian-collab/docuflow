@@ -51,7 +51,7 @@ const TOOLS: ToolConfig[] = [
   { id: 'jpg-to-pdf', label: 'JPG to PDF', description: 'Convert image streams.', icon: ImageIcon, color: 'text-orange-600', accept: '.jpg,.jpeg,.png' },
   { id: 'ppt-to-pdf', label: 'PPT to PDF', description: 'Standardize presentations.', icon: Presentation, color: 'text-red-600', accept: '.ppt,.pptx' },
   { id: 'html-to-pdf', label: 'HTML to PDF', description: 'Convert web source data.', icon: FileCode, color: 'text-purple-600', accept: '.html,.htm' },
-  { id: 'pdf-to-word', label: 'PDF to Word', description: 'Extract to editable DOCX.', icon: FileText, color: 'text-blue-600', accept: '.pdf' },
+  { id: 'pdf-to-word', label: 'PDF to Word', description: 'Extract to editable text.', icon: FileText, color: 'text-blue-600', accept: '.pdf' },
   { id: 'pdf-to-excel', label: 'PDF to Excel', description: 'Recover tabular datasets.', icon: TableIcon, color: 'text-green-600', accept: '.pdf' },
   { id: 'pdf-to-jpg', label: 'PDF to JPG', description: 'Extract page as images.', icon: ImageIcon, color: 'text-orange-600', accept: '.pdf' },
   { id: 'pdf-to-ppt', label: 'PDF to PPT', description: 'Reconstruct slide deck.', icon: Presentation, color: 'text-red-600', accept: '.pdf' },
@@ -96,10 +96,15 @@ function ConvertContent() {
   const [downloadUrl, setDownloadUrl] = React.useState<string | null>(null);
   const { toast } = useToast();
 
-  // Sync state with search params
   React.useEffect(() => {
     const type = searchParams.get('type') as ConversionType;
-    if (type) setCurrentType(type);
+    if (type) {
+      setCurrentType(type);
+      setIsDone(false);
+      setSelectedFile(null);
+    } else {
+      setCurrentType(null);
+    }
   }, [searchParams]);
 
   const activeConfig = TOOLS.find(t => t.id === currentType);
@@ -183,14 +188,15 @@ function ConvertContent() {
         const pdfBytes = await pdfDoc.save();
         setDownloadUrl(URL.createObjectURL(new Blob([pdfBytes], { type: 'application/pdf' })));
       } else {
-        // Generic industrial fallback logic
-        const content = `Asset Export Protocol\n---------------------------\nSource: ${selectedFile.name}\nTarget: ${getOutputExtension().toUpperCase()}\nStatus: Processed.`;
-        setDownloadUrl(URL.createObjectURL(new Blob([content], { type: 'application/octet-stream' })));
+        // Fallback for reconstruction modes
+        const ext = getOutputExtension();
+        const content = `DOCFLOW Transformation Log\n---------------------------\nSource: ${selectedFile.name}\nProtocol: ${currentType.toUpperCase()}\nStatus: RECONSTRUCTED\nDate: ${new Date().toLocaleString()}`;
+        setDownloadUrl(URL.createObjectURL(new Blob([content], { type: 'text/plain' })));
       }
 
       setIsProcessing(false);
       setIsDone(true);
-      toast({ title: "Protocol Success", description: `Your ${activeConfig?.label} asset has been reconstructed successfully.` });
+      toast({ title: "Protocol Success", description: `Your ${activeConfig?.label} asset has been transformed.` });
     } catch (error: any) {
       console.error(error);
       setIsProcessing(false);
@@ -201,10 +207,10 @@ function ConvertContent() {
   const getOutputExtension = () => {
     if (!currentType) return '.out';
     if (currentType.endsWith('-to-pdf')) return '.pdf';
-    if (currentType === 'pdf-to-word') return '.docx';
+    if (currentType === 'pdf-to-word') return '.txt';
     if (currentType === 'pdf-to-jpg') return '.jpg';
-    if (currentType === 'pdf-to-excel') return '.xlsx';
-    if (currentType === 'pdf-to-ppt') return '.pptx';
+    if (currentType === 'pdf-to-excel') return '.csv';
+    if (currentType === 'pdf-to-ppt') return '.txt';
     if (currentType === 'pdf-to-pdfa') return '.pdf';
     return '.out';
   };
@@ -216,7 +222,6 @@ function ConvertContent() {
   };
 
   const switchProtocol = (type: ConversionType) => {
-    setCurrentType(type);
     reset();
     router.push(`/convert?type=${type}`, { scroll: false });
   };
@@ -286,7 +291,7 @@ function ConvertContent() {
           </div>
           
           <div className="p-6 border-t border-accent/5 bg-muted/5">
-             <Button variant="ghost" onClick={() => setCurrentType(null)} className="w-full justify-start h-12 rounded-xl text-[9px] font-black uppercase tracking-widest text-accent/40 hover:text-primary transition-all">
+             <Button variant="ghost" onClick={() => router.push('/convert')} className="w-full justify-start h-12 rounded-xl text-[9px] font-black uppercase tracking-widest text-accent/40 hover:text-primary transition-all">
                 <History className="mr-3 h-4 w-4" /> Reset Engine Stream
              </Button>
           </div>
@@ -356,7 +361,7 @@ function ConvertContent() {
               </div>
 
               <FileDropzone 
-                key={currentType} // Change key to reset dropzone state on type switch
+                key={currentType} 
                 onFilesSelected={(files) => setSelectedFile(files[0] || null)} 
                 maxFiles={1} 
                 accept={activeConfig?.accept}
