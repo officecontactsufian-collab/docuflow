@@ -99,7 +99,6 @@ export default function AIStudioPage() {
   const [selectedFile, setSelectedFile] = React.useState<File | null>(null);
   const [messages, setMessages] = React.useState<Message[]>([]);
   const [isProcessing, setIsProcessing] = React.useState(false);
-  const [usageCount, setUsageCount] = React.useState<number | null>(null);
   
   const chatEndRef = React.useRef<HTMLDivElement>(null);
   const activeConfig = TOOLS.find(t => t.id === activeTool)!;
@@ -113,22 +112,6 @@ export default function AIStudioPage() {
   React.useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isProcessing]);
-
-  React.useEffect(() => {
-    if (user && firestore) {
-      const fetchUsage = async () => {
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        const q = query(
-          collection(firestore, 'users', user.uid, 'usageLogs'),
-          where('requestTimestamp', '>=', Timestamp.fromDate(today))
-        );
-        const snap = await getDocs(q);
-        setUsageCount(snap.docs.filter(doc => doc.data().status === 'SUCCESS').length);
-      };
-      fetchUsage().catch(console.error);
-    }
-  }, [user, firestore, isProcessing]);
 
   const generateRequestHash = async (data: any) => {
     const msgBuffer = new TextEncoder().encode(JSON.stringify(data));
@@ -195,7 +178,7 @@ export default function AIStudioPage() {
       if (validCache) {
         result = validCache.data().aiResult;
       } else {
-        // FREE UNLIMITED ACCESS
+        // FREE UNLIMITED ACCESS - NO DAILY LIMIT
         const response = await executeAIStudioAction({ ...inputPayload, fileDataUri });
         result = response.result;
 

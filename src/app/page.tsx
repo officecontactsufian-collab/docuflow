@@ -20,7 +20,6 @@ import {
   Crop,
   FilePenLine,
   Camera,
-  Presentation,
   Search,
   ArrowRight,
   Play,

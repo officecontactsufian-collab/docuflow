@@ -6,13 +6,10 @@ import {
   FileText, 
   ChevronDown, 
   Merge, 
-  Scissors, 
   RotateCw, 
-  Maximize, 
   LayoutDashboard, 
   ShieldCheck, 
   Unlock, 
-  Type, 
   Signature, 
   Hash, 
   Crop, 
@@ -34,14 +31,13 @@ import {
   RefreshCcw,
   FileBadge,
   ArrowRightLeft,
-  Settings2,
-  Zap,
   Image as ImageIcon,
   Table,
   Presentation,
   Eraser,
   Wrench,
-  FileUp
+  FileUp,
+  Scissors
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
