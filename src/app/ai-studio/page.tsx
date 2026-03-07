@@ -23,7 +23,9 @@ import {
   ShieldCheck,
   Cpu,
   BrainCircuit,
-  Hash
+  Hash,
+  BookOpen,
+  Briefcase
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -38,7 +40,7 @@ import mammoth from 'mammoth';
 import { signInAnonymously } from 'firebase/auth';
 import { collection, query, where, getDocs, Timestamp, limit, serverTimestamp } from 'firebase/firestore';
 
-type AIStudioTool = 'PARAPHRASE' | 'SUMMARIZE' | 'EMAIL' | 'TRANSLATE' | 'CHAT';
+type AIStudioTool = 'PARAPHRASE' | 'SUMMARIZE' | 'EMAIL' | 'TRANSLATE' | 'CHAT' | 'GRAMMAR' | 'ESSAY' | 'RESUME';
 
 interface ToolConfig {
   id: AIStudioTool;
@@ -52,6 +54,9 @@ interface ToolConfig {
 
 const TOOLS: ToolConfig[] = [
   { id: 'PARAPHRASE', label: 'Paraphraser', description: 'Professional text re-engineering.', icon: RefreshCcw, color: 'text-blue-600', placeholder: 'PASTE TEXT TO RE-ENGINEER...' },
+  { id: 'GRAMMAR', label: 'Grammar Checker', description: 'Industrial-grade proofing.', icon: CheckCircle2, color: 'text-green-600', placeholder: 'PASTE TEXT TO CHECK...' },
+  { id: 'ESSAY', label: 'Essay Writer', description: 'Structured academic synthesis.', icon: BookOpen, color: 'text-indigo-600', placeholder: 'DESCRIBE ESSAY TOPIC OR OUTLINE...' },
+  { id: 'RESUME', label: 'Resume Builder', description: 'Profile engineering.', icon: Briefcase, color: 'text-emerald-600', placeholder: 'LIST EXPERIENCE AND SKILLS...' },
   { id: 'SUMMARIZE', label: 'Summarizer', description: 'Executive content distillation.', icon: Activity, color: 'text-orange-600', placeholder: 'PASTE CONTENT OR STAGE DOCUMENT...' },
   { id: 'EMAIL', label: 'Email Architect', description: 'Structural email generation.', icon: Mail, color: 'text-purple-600', placeholder: 'DESCRIBE THE EMAIL CONTEXT...' },
   { id: 'TRANSLATE', label: 'Translator', description: 'Context-aware linguistic shift.', icon: Languages, color: 'text-green-600', placeholder: 'TEXT TO TRANSLATE...' },

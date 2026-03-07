@@ -2,19 +2,22 @@
 'use server';
 /**
  * @fileOverview DOCFLOW AI Studio Unified Flow
- * Provides a single entry point for five specialized AI protocols:
+ * Provides a single entry point for specialized AI protocols:
  * - PARAPHRASE: Professional text re-engineering.
  * - SUMMARIZE: High-fidelity content distillation.
  * - EMAIL: Structural email architecture.
  * - TRANSLATE: Context-aware linguistic transformation.
  * - CHAT: Deep document interrogation.
+ * - GRAMMAR: Industrial-grade proofing and stylistic refinement.
+ * - ESSAY: Structured academic and professional draft synthesis.
+ * - RESUME: High-impact professional profile engineering.
  */
 
 import { ai } from '@/ai/genkit';
 import { z } from 'genkit';
 
 const AIStudioInputSchema = z.object({
-  tool: z.enum(['PARAPHRASE', 'SUMMARIZE', 'EMAIL', 'TRANSLATE', 'CHAT']),
+  tool: z.enum(['PARAPHRASE', 'SUMMARIZE', 'EMAIL', 'TRANSLATE', 'CHAT', 'GRAMMAR', 'ESSAY', 'RESUME']),
   text: z.string().optional().describe('Input text for rephrasing, translating, or summarizing.'),
   fileDataUri: z.string().optional().describe("A document as a data URI. Supported: PDF, DOCX, TXT."),
   targetLanguage: z.string().optional().describe('Target language for translation.'),
@@ -74,6 +77,18 @@ const aiStudioFlow = ai.defineFlow(
           promptParts.push({ media: { url: fileDataUri, contentType: contentType || 'application/pdf' } });
         }
         promptParts.push({ text: `PROTOCOL INQUIRY: ${userQuestion}` });
+        break;
+      case 'GRAMMAR':
+        systemInstructions = 'You are a professional editor and linguist. Review the provided text for grammatical errors, spelling mistakes, and stylistic inconsistencies. Provide a corrected version that maintains the original intent but adheres to high-level professional standards. If no errors are found, suggest subtle stylistic improvements.';
+        promptParts.push({ text: `TEXT TO PROOFREAD: ${text}` });
+        break;
+      case 'ESSAY':
+        systemInstructions = 'You are an expert essayist and academic writer. Draft a comprehensive, well-structured essay based on the provided topic, outline, or prompt. Use an academic tone, provide logical transitions, and ensure clear thematic development with supported arguments.';
+        promptParts.push({ text: `ESSAY ARCHITECTURE PROMPT: ${text}` });
+        break;
+      case 'RESUME':
+        systemInstructions = 'You are a high-level career consultant. Based on the provided raw experience, skills, and background, generate a high-impact, industrial-grade resume. Focus on quantifiable achievements, strategic keywords, and structural clarity suitable for modern corporate recruitment and ATS optimization.';
+        promptParts.push({ text: `EXPERIENCE PAYLOAD: ${text}` });
         break;
     }
 

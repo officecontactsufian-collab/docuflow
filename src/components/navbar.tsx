@@ -26,7 +26,14 @@ import {
   Menu,
   BrainCircuit,
   Sparkles,
-  Lock
+  Lock,
+  CheckCircle2,
+  BookOpen,
+  Briefcase,
+  Mail,
+  Languages,
+  MessageSquare,
+  RefreshCcw
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -55,8 +62,14 @@ export function Navbar() {
     {
       label: "AI Studio",
       items: [
-        { href: "/ai-studio", icon: BrainCircuit, title: "AI Tools Suite", desc: "Summarize, translate, rephrase" },
-        { href: "/ai-studio", icon: Sparkles, title: "Chat with PDF", desc: "Inquire about document info" },
+        { href: "/ai-studio", icon: RefreshCcw, title: "Paraphraser", desc: "Re-engineer text" },
+        { href: "/ai-studio", icon: CheckCircle2, title: "Grammar Check", desc: "Industrial proofing" },
+        { href: "/ai-studio", icon: BookOpen, title: "Essay Writer", desc: "Structured drafts" },
+        { href: "/ai-studio", icon: Briefcase, title: "Resume Builder", desc: "Profile engineering" },
+        { href: "/ai-studio", icon: Activity, title: "Summarizer", desc: "Executive summary" },
+        { href: "/ai-studio", icon: Mail, title: "Email Architect", desc: "Corporate drafts" },
+        { href: "/ai-studio", icon: Languages, title: "Translator", desc: "Linguistic shift" },
+        { href: "/ai-studio", icon: MessageSquare, title: "Doc Intel", desc: "Asset chat" },
       ]
     },
     {

@@ -41,7 +41,10 @@ import {
   BrainCircuit,
   Sparkles,
   Mail,
-  Languages
+  Languages,
+  CheckCircle2,
+  BookOpen,
+  Briefcase
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
@@ -58,40 +61,42 @@ export default function Home() {
       label: "AI Intelligence Suite",
       description: "Generative protocols for structural content evolution.",
       items: [
-        { title: "AI Studio", desc: "Full generative toolkit.", icon: BrainCircuit, href: "/ai-studio" },
-        { title: "AI Summarizer", desc: "Executive content extraction.", icon: Activity, href: "/ai-studio" },
-        { title: "Chat with PDF", desc: "Contextual asset interrogation.", icon: Sparkles, href: "/ai-studio" },
-        { title: "Email Architect", desc: "Structural email synthesis.", icon: Mail, href: "/ai-studio" },
+        { title: "Paraphraser", desc: "Re-engineer text.", icon: RefreshCcw, href: "/ai-studio" },
+        { title: "Grammar Check", desc: "Industrial proofing.", icon: CheckCircle2, href: "/ai-studio" },
+        { title: "Essay Writer", desc: "Structured drafts.", icon: BookOpen, href: "/ai-studio" },
+        { title: "Resume Builder", desc: "Profile engineering.", icon: Briefcase, href: "/ai-studio" },
+        { title: "AI Summarizer", desc: "Executive distillation.", icon: Activity, href: "/ai-studio" },
+        { title: "Email Architect", desc: "Structural synthesis.", icon: Mail, href: "/ai-studio" },
       ]
     },
     {
       label: "Modify & Capture",
       description: "Direct page and structural modifications.",
       items: [
-        { title: "Scan to PDF", desc: "Direct camera to document stream.", icon: Camera, href: "/scan-to-pdf" },
-        { title: "Crop PDF", desc: "Trim page margins with precision.", icon: Crop, href: "/crop" },
-        { title: "Reorder & Rotate", desc: "Change page order and orientation.", icon: RotateCw, href: "/organize" },
-        { title: "Add Numbers", desc: "Sequential page counter placement.", icon: Hash, href: "/numbers" },
+        { title: "Scan to PDF", desc: "Direct camera capture.", icon: Camera, href: "/scan-to-pdf" },
+        { title: "Crop PDF", desc: "Trim page margins.", icon: Crop, href: "/crop" },
+        { title: "Reorder & Rotate", desc: "Change page structure.", icon: RotateCw, href: "/organize" },
+        { title: "Add Numbers", desc: "Sequential counters.", icon: Hash, href: "/numbers" },
       ]
     },
     {
       label: "Convert & Export",
-      description: "Lossless transformation between industrial formats.",
+      description: "Lossless transformation between formats.",
       items: [
-        { title: "PDF to Word", desc: "Convert to editable DOCX documents.", icon: FileText, href: "/convert?type=pdf-to-word" },
-        { title: "PDF to PowerPoint", desc: "Export slides for professional use.", icon: Presentation, href: "/convert?type=pdf-to-ppt" },
-        { title: "Word to PDF", desc: "Standardize any Word document to PDF.", icon: FilePenLine, href: "/convert?type=word-to-pdf" },
-        { title: "PPT to PDF", desc: "Industrial presentation conversion.", icon: FileUp, href: "/convert?type=ppt-to-pdf" },
+        { title: "PDF to Word", desc: "Editable DOCX export.", icon: FileText, href: "/convert?type=pdf-to-word" },
+        { title: "PDF to PowerPoint", desc: "Professional slides.", icon: Presentation, href: "/convert?type=pdf-to-ppt" },
+        { title: "Word to PDF", desc: "Standardize Word.", icon: FilePenLine, href: "/convert?type=word-to-pdf" },
+        { title: "PPT to PDF", desc: "Presentation conversion.", icon: FileUp, href: "/convert?type=ppt-to-pdf" },
       ]
     },
     {
       label: "Security & Trust",
-      description: "Industrial grade metadata and access protection.",
+      description: "Industrial grade metadata protection.",
       items: [
-        { title: "Password Protect", desc: "Encrypt PDF with secure key.", icon: Lock, href: "/secure" },
-        { title: "Privacy Shield", desc: "Permanent metadata and tracking erasure.", icon: ShieldCheck, href: "/protect" },
-        { title: "Unlock PDF", desc: "Recover and strip document restrictions.", icon: Unlock, href: "/protect?mode=unlock" },
-        { title: "Digital Sign", desc: "Apply identity synthesis bars.", icon: Signature, href: "/sign" },
+        { title: "Password Protect", desc: "Encrypt PDF with key.", icon: Lock, href: "/secure" },
+        { title: "Privacy Shield", desc: "Metadata erasure.", icon: ShieldCheck, href: "/protect" },
+        { title: "Unlock PDF", desc: "Strip restrictions.", icon: Unlock, href: "/protect?mode=unlock" },
+        { title: "Digital Sign", desc: "Apply identity anchors.", icon: Signature, href: "/sign" },
       ]
     }
   ];
@@ -270,7 +275,7 @@ export default function Home() {
                     },
                     { 
                       title: "ISO Standard Archival", 
-                      desc: "Reconstructions adhere to ISO 32000 and 19005 standards, ensuring permanent structural integrity.", 
+                      desc: "Reconstructions adhere to ISO 32000 and 19005 standards, ensuring structural integrity without tracking meta-data.", 
                       icon: Globe 
                     }
                   ].map((item) => (
