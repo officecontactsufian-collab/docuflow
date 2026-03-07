@@ -1,21 +1,18 @@
+
 "use client"
 
 import * as React from 'react';
 import { Navbar } from '@/components/navbar';
-import { FileDropzone } from '@/components/file-dropzone';
 import { Button } from '@/components/ui/button';
 import { 
   Loader2, 
-  Download, 
   CheckCircle2, 
   Activity,
   Zap,
-  Server,
   MessageSquare,
   Languages,
   Mail,
   RefreshCcw,
-  ArrowRight,
   ShieldCheck,
   Cpu,
   BrainCircuit,
@@ -29,15 +26,16 @@ import {
   Bot,
   Paperclip,
   Trash2,
-  Settings2,
   X,
   FileText,
-  Copy
+  Copy,
+  LayoutDashboard,
+  Clock,
+  Sparkles
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { executeAIStudioAction } from './actions';
@@ -69,7 +67,7 @@ interface ToolConfig {
 }
 
 const TOOLS: ToolConfig[] = [
-  { id: 'PARAPHRASE', label: 'Paraphraser', description: 'Re-engineer text.', icon: RefreshCcw, color: 'text-blue-600', placeholder: 'Enter text to re-engineer...' },
+  { id: 'PARAPHRASE', label: 'Paraphraser', description: 'Re-engineer text structure.', icon: RefreshCcw, color: 'text-blue-600', placeholder: 'Enter text to re-engineer...' },
   { id: 'SUMMARIZE', label: 'Summarizer', description: 'Content distillation.', icon: Activity, color: 'text-orange-600', placeholder: 'Enter content or attach document...' },
   { id: 'GRAMMAR', label: 'Grammar', description: 'Industrial proofing.', icon: CheckCircle2, color: 'text-green-600', placeholder: 'Enter text to check...' },
   { id: 'ESSAY', label: 'Essay Writer', description: 'Academic synthesis.', icon: BookOpen, color: 'text-indigo-600', placeholder: 'Describe essay topic...' },
@@ -247,27 +245,33 @@ export default function AIStudioPage() {
       
       <main className="flex-1 flex overflow-hidden">
         {/* Sidebar: Specialized Agents */}
-        <aside className="w-72 border-r border-accent/5 bg-white hidden lg:flex flex-col">
+        <aside className="w-80 border-r border-accent/5 bg-white hidden lg:flex flex-col">
           <div className="p-6 border-b border-accent/5">
-            <h2 className="text-[10px] font-black uppercase tracking-[0.2em] text-accent/40 mb-4">Protocol Selection</h2>
-            <div className="p-4 bg-accent text-white rounded-2xl shadow-xl relative overflow-hidden">
+            <h2 className="text-[10px] font-black uppercase tracking-[0.2em] text-accent/40 mb-4 flex items-center gap-2">
+              <LayoutDashboard className="h-3 w-3" /> Protocol Registry
+            </h2>
+            <div className="p-5 bg-accent text-white rounded-[2rem] shadow-2xl relative overflow-hidden group">
                <div className="relative z-10">
-                  <p className="text-[9px] font-black uppercase text-primary mb-1">Identity Quota</p>
-                  <div className="flex justify-between text-[10px] font-bold italic mb-1">
-                    <span>{usageCount ?? 0} / {DAILY_FREE_LIMIT}</span>
+                  <div className="flex items-center justify-between mb-2">
+                    <p className="text-[9px] font-black uppercase text-primary">Identity Quota</p>
+                    <Clock className="h-3 w-3 text-primary/40" />
                   </div>
-                  <div className="h-1 w-full bg-white/10 rounded-full overflow-hidden">
-                    <div className="h-full bg-primary transition-all" style={{ width: `${((usageCount || 0) / DAILY_FREE_LIMIT) * 100}%` }} />
+                  <div className="flex items-end gap-1 mb-2">
+                    <span className="text-2xl font-black italic">{usageCount ?? 0}</span>
+                    <span className="text-[10px] font-bold text-white/40 mb-1">/ {DAILY_FREE_LIMIT} OPS</span>
+                  </div>
+                  <div className="h-1.5 w-full bg-white/10 rounded-full overflow-hidden">
+                    <div className="h-full bg-primary transition-all duration-1000 ease-out" style={{ width: `${((usageCount || 0) / DAILY_FREE_LIMIT) * 100}%` }} />
                   </div>
                </div>
-               <div className="absolute -bottom-4 -right-4 w-16 h-16 bg-primary/20 rounded-full blur-xl" />
+               <div className="absolute -bottom-4 -right-4 w-20 h-20 bg-primary/20 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700" />
             </div>
           </div>
 
-          <div className="flex-1 overflow-y-auto custom-scrollbar p-4 space-y-6">
+          <div className="flex-1 overflow-y-auto custom-scrollbar p-4 space-y-8">
             {CATEGORIES.map((cat) => (
-              <div key={cat.id} className="space-y-2">
-                <div className="flex items-center gap-2 px-2 text-[9px] font-black uppercase tracking-widest text-accent/30">
+              <div key={cat.id} className="space-y-3">
+                <div className="flex items-center gap-2 px-3 text-[9px] font-black uppercase tracking-[0.3em] text-accent/30">
                   <cat.icon className="h-3 w-3" /> {cat.label}
                 </div>
                 <div className="grid gap-1">
@@ -279,17 +283,18 @@ export default function AIStudioPage() {
                         key={tool.id}
                         onClick={() => setActiveTool(tool.id)}
                         className={cn(
-                          "flex items-center gap-3 p-2.5 rounded-xl transition-all text-left group",
-                          isActive ? "bg-accent text-white shadow-lg" : "hover:bg-muted/50 text-accent/60"
+                          "flex items-center gap-4 p-3 rounded-2xl transition-all text-left group",
+                          isActive ? "bg-accent text-white shadow-xl translate-x-1" : "hover:bg-muted/50 text-accent/60"
                         )}
                       >
-                        <div className={cn("p-1.5 rounded-lg", isActive ? "bg-white/10" : "bg-muted/50", !isActive && tool.color)}>
-                          <tool.icon className="h-3.5 w-3.5" />
+                        <div className={cn("p-2 rounded-xl shadow-sm transition-transform group-hover:scale-110", isActive ? "bg-white/10" : "bg-white border border-accent/5", !isActive && tool.color)}>
+                          <tool.icon className="h-4 w-4" />
                         </div>
                         <div className="min-w-0">
-                          <p className="text-[10px] font-black uppercase italic leading-none">{tool.label}</p>
+                          <p className="text-[11px] font-black uppercase italic leading-none mb-1">{tool.label}</p>
+                          <p className={cn("text-[8px] font-bold uppercase truncate", isActive ? "text-white/40" : "text-accent/20")}>{tool.description}</p>
                         </div>
-                        {isActive && <ChevronRight className="ml-auto h-3 w-3 text-primary animate-pulse" />}
+                        {isActive && <div className="ml-auto h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />}
                       </button>
                     );
                   })}
@@ -298,9 +303,9 @@ export default function AIStudioPage() {
             ))}
           </div>
           
-          <div className="p-4 border-t border-accent/5">
-             <Button variant="ghost" onClick={() => setMessages([])} className="w-full justify-start text-[9px] font-black uppercase tracking-widest text-accent/40 hover:text-destructive">
-                <Trash2 className="mr-2 h-3.5 w-3.5" /> Clear Session
+          <div className="p-6 border-t border-accent/5 bg-muted/5">
+             <Button variant="ghost" onClick={() => setMessages([])} className="w-full justify-start h-12 rounded-xl text-[9px] font-black uppercase tracking-widest text-accent/40 hover:text-destructive hover:bg-destructive/5 transition-all">
+                <Trash2 className="mr-3 h-4 w-4" /> Purge Session Stream
              </Button>
           </div>
         </aside>
@@ -308,58 +313,86 @@ export default function AIStudioPage() {
         {/* Main Chat Area */}
         <section className="flex-1 flex flex-col relative bg-white lg:bg-transparent">
           {messages.length === 0 ? (
-            <div className="flex-1 flex flex-col items-center justify-center p-6 text-center space-y-8 max-w-2xl mx-auto">
-              <div className="w-20 h-20 bg-accent text-white rounded-[2.5rem] flex items-center justify-center shadow-2xl brand-glow animate-in zoom-in duration-700">
-                <BrainCircuit className="h-10 w-10 text-primary" />
+            <div className="flex-1 flex flex-col items-center justify-center p-8 text-center space-y-12 max-w-3xl mx-auto">
+              <div className="relative">
+                <div className="absolute inset-0 animate-ping rounded-full bg-primary/10" />
+                <div className="w-24 h-24 bg-accent text-white rounded-[2.5rem] flex items-center justify-center shadow-2xl brand-glow relative z-10">
+                  <BrainCircuit className="h-12 w-12 text-primary" />
+                </div>
               </div>
-              <div className="space-y-3">
-                <h1 className="text-4xl font-black tracking-tighter text-accent uppercase italic">DOCFLOW Intelligence</h1>
-                <p className="text-accent/40 font-bold uppercase tracking-widest text-xs leading-relaxed">
-                  Industrial-grade generative protocols for mission-critical documents. 
-                  Zero-retention architecture active.
+              
+              <div className="space-y-4">
+                <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/5 text-primary border border-primary/10 text-[10px] font-black uppercase tracking-[0.3em]">
+                  <Sparkles className="h-3 w-3" /> Industrial Intelligence Active
+                </div>
+                <h1 className="text-5xl font-black tracking-tighter text-accent uppercase italic leading-[0.9]">
+                  Protocol <br />
+                  <span className="not-italic text-primary">Synthesis.</span>
+                </h1>
+                <p className="text-accent/40 font-bold uppercase tracking-widest text-xs leading-relaxed max-w-lg mx-auto">
+                  Initialize a mission-critical generative sequence. Our zero-retention architecture ensures that every binary bit remains private.
                 </p>
               </div>
-              <div className="grid grid-cols-2 gap-4 w-full">
-                 {['PARAPHRASE', 'SUMMARIZE', 'CHAT', 'ESSAY'].map(tid => {
+
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 w-full">
+                 {['PARAPHRASE', 'SUMMARIZE', 'RESUME', 'ESSAY'].map(tid => {
                    const t = TOOLS.find(x => x.id === tid)!;
                    return (
-                     <button key={tid} onClick={() => setActiveTool(tid as any)} className="p-4 rounded-2xl border border-accent/5 bg-white shadow-sm hover:border-primary/40 hover:shadow-xl transition-all text-left group">
-                        <t.icon className={cn("h-5 w-5 mb-2", t.color)} />
-                        <p className="text-[10px] font-black uppercase italic text-accent">{t.label}</p>
-                        <p className="text-[8px] font-bold text-accent/30 uppercase">{t.description}</p>
+                     <button key={tid} onClick={() => setActiveTool(tid as any)} className="p-6 rounded-[2rem] border border-accent/5 bg-white shadow-sm hover:border-primary/40 hover:shadow-2xl transition-all text-left group">
+                        <div className={cn("p-3 rounded-2xl w-fit mb-4 group-hover:scale-110 transition-transform", t.color, "bg-muted/30")}>
+                          <t.icon className="h-5 w-5" />
+                        </div>
+                        <p className="text-[11px] font-black uppercase italic text-accent mb-1">{t.label}</p>
+                        <p className="text-[8px] font-bold text-accent/30 uppercase tracking-tight">{t.description}</p>
                      </button>
                    );
                  })}
               </div>
             </div>
           ) : (
-            <div className="flex-1 overflow-y-auto custom-scrollbar p-6 space-y-10">
-              <div className="max-w-4xl mx-auto space-y-10 pb-32">
+            <div className="flex-1 overflow-y-auto custom-scrollbar p-8 space-y-12">
+              <div className="max-w-4xl mx-auto space-y-12 pb-40">
                 {messages.map((msg) => (
-                  <div key={msg.id} className={cn("flex gap-6 animate-in fade-in slide-in-from-bottom-2 duration-500", msg.role === 'user' ? "justify-end" : "justify-start")}>
-                    <div className={cn("flex max-w-[85%] gap-4", msg.role === 'user' && "flex-row-reverse")}>
-                      <div className={cn("h-10 w-10 shrink-0 rounded-xl flex items-center justify-center shadow-lg", msg.role === 'user' ? "bg-accent text-primary" : "bg-primary text-white")}>
-                        {msg.role === 'user' ? <User className="h-5 w-5" /> : <Bot className="h-5 w-5" />}
+                  <div key={msg.id} className={cn("flex gap-8 animate-in fade-in slide-in-from-bottom-4 duration-700", msg.role === 'user' ? "justify-end" : "justify-start")}>
+                    <div className={cn("flex max-w-[90%] gap-6", msg.role === 'user' && "flex-row-reverse")}>
+                      <div className={cn(
+                        "h-12 w-12 shrink-0 rounded-2xl flex items-center justify-center shadow-xl border border-white/10 transition-transform hover:scale-110",
+                        msg.role === 'user' ? "bg-accent text-primary" : "bg-primary text-white"
+                      )}>
+                        {msg.role === 'user' ? <User className="h-6 w-6" /> : <Bot className="h-6 w-6" />}
                       </div>
-                      <div className="space-y-3">
+                      <div className="space-y-4 flex-1 min-w-0">
                         <div className={cn(
-                          "p-6 rounded-[2rem] shadow-sm text-sm font-medium leading-relaxed",
-                          msg.role === 'user' ? "bg-accent text-white rounded-tr-none" : "bg-white border border-accent/5 text-accent/80 rounded-tl-none"
+                          "p-8 rounded-[2.5rem] shadow-2xl text-sm font-medium leading-relaxed border transition-all",
+                          msg.role === 'user' 
+                            ? "bg-accent text-white border-white/5 rounded-tr-none" 
+                            : "bg-white border-accent/5 text-accent/80 rounded-tl-none"
                         )}>
                           {msg.fileName && (
-                            <div className="mb-4 flex items-center gap-2 p-2 bg-white/10 rounded-lg border border-white/10">
-                               <FileText className="h-3 w-3" />
-                               <span className="text-[10px] font-black uppercase italic">{msg.fileName}</span>
+                            <div className="mb-6 flex items-center gap-3 p-3 bg-black/10 rounded-2xl border border-white/10 backdrop-blur-sm">
+                               <div className="p-2 bg-white/10 rounded-lg"><FileText className="h-4 w-4" /></div>
+                               <div className="flex flex-col">
+                                  <span className="text-[10px] font-black uppercase italic">{msg.fileName}</span>
+                                  <span className="text-[8px] font-bold opacity-40 uppercase">CONTEXTUAL ASSET</span>
+                               </div>
                             </div>
                           )}
-                          <div className="whitespace-pre-wrap">{msg.content}</div>
+                          <div className="whitespace-pre-wrap selection:bg-primary/30">{msg.content}</div>
                         </div>
-                        <div className={cn("flex items-center gap-3 px-2", msg.role === 'user' && "flex-row-reverse")}>
-                           <span className="text-[8px] font-black uppercase text-accent/20 tracking-widest">{msg.timestamp.toLocaleTimeString()}</span>
+                        <div className={cn("flex items-center gap-4 px-4", msg.role === 'user' && "flex-row-reverse")}>
+                           <div className="flex items-center gap-2 text-[9px] font-black uppercase text-accent/20 tracking-widest italic">
+                              <Clock className="h-3 w-3" /> {msg.timestamp.toLocaleTimeString()}
+                           </div>
                            {msg.role === 'assistant' && (
-                             <button onClick={() => copyToClipboard(msg.content)} className="p-1 hover:text-primary transition-colors">
-                               <Copy className="h-3 w-3" />
-                             </button>
+                             <div className="flex gap-2">
+                               <button 
+                                onClick={() => copyToClipboard(msg.content)} 
+                                className="p-2 rounded-xl bg-muted/30 text-accent/20 hover:text-primary hover:bg-primary/5 transition-all"
+                                title="Copy to Local Buffer"
+                               >
+                                 <Copy className="h-3.5 w-3.5" />
+                               </button>
+                             </div>
                            )}
                         </div>
                       </div>
@@ -367,17 +400,25 @@ export default function AIStudioPage() {
                   </div>
                 ))}
                 {isProcessing && (
-                  <div className="flex gap-6 animate-in fade-in duration-300">
-                    <div className="h-10 w-10 rounded-xl bg-primary text-white flex items-center justify-center shadow-lg animate-pulse">
-                      <Loader2 className="h-5 w-5 animate-spin" />
+                  <div className="flex gap-8 animate-in fade-in duration-500">
+                    <div className="h-12 w-12 rounded-2xl bg-primary text-white flex items-center justify-center shadow-xl animate-pulse">
+                      <Loader2 className="h-6 w-6 animate-spin" />
                     </div>
-                    <div className="p-6 bg-white border border-accent/5 rounded-[2rem] rounded-tl-none shadow-sm flex items-center gap-3">
-                       <div className="flex gap-1">
-                          <div className="w-1.5 h-1.5 bg-primary/40 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                          <div className="w-1.5 h-1.5 bg-primary/40 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                          <div className="w-1.5 h-1.5 bg-primary/40 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                    <div className="p-8 bg-white border border-accent/5 rounded-[2.5rem] rounded-tl-none shadow-2xl flex flex-col gap-4 min-w-[300px]">
+                       <div className="flex items-center gap-4">
+                          <div className="flex gap-1.5">
+                            <div className="w-2 h-2 bg-primary/40 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                            <div className="w-2 h-2 bg-primary/40 rounded-full animate-bounce" style={{ animationDelay: '200ms' }} />
+                            <div className="w-2 h-2 bg-primary/40 rounded-full animate-bounce" style={{ animationDelay: '400ms' }} />
+                          </div>
+                          <span className="text-[11px] font-black uppercase tracking-[0.2em] text-accent/20 italic">Executing Protocol...</span>
                        </div>
-                       <span className="text-[10px] font-black uppercase tracking-widest text-accent/20 italic">Executing Protocol...</span>
+                       <div className="space-y-2">
+                          <div className="h-1 w-full bg-muted/30 rounded-full overflow-hidden">
+                             <div className="h-full bg-primary/20 animate-infinite-scroll w-1/3" />
+                          </div>
+                          <p className="text-[8px] font-bold text-accent/10 uppercase tracking-widest">Structural Stream Analysis v2.5</p>
+                       </div>
                     </div>
                   </div>
                 )}
@@ -387,26 +428,33 @@ export default function AIStudioPage() {
           )}
 
           {/* Bottom Chat Bar */}
-          <div className="absolute bottom-0 inset-x-0 p-6 bg-gradient-to-t from-[#F9FAFB] via-[#F9FAFB] to-transparent">
+          <div className="absolute bottom-0 inset-x-0 p-8 bg-gradient-to-t from-[#F9FAFB] via-[#F9FAFB] to-transparent">
             <div className="max-w-4xl mx-auto">
-              <div className="relative bg-white rounded-[2.5rem] shadow-2xl border border-accent/10 p-2 focus-within:ring-2 ring-primary/20 transition-all">
-                <div className="flex flex-col gap-2">
+              <div className="relative bg-white rounded-[3rem] shadow-[0_32px_64px_-12px_rgba(0,0,0,0.1)] border border-accent/10 p-3 focus-within:ring-4 ring-primary/10 transition-all duration-500">
+                <div className="flex flex-col gap-3">
                   {selectedFile && (
-                    <div className="flex items-center gap-2 p-2 bg-muted/30 rounded-2xl border border-accent/5 animate-in slide-in-from-bottom-2">
-                       <div className="p-2 bg-white rounded-lg text-primary shadow-sm"><FileText className="h-4 w-4" /></div>
-                       <span className="text-[10px] font-black uppercase text-accent truncate max-w-[200px]">{selectedFile.name}</span>
-                       <button onClick={() => setSelectedFile(null)} className="ml-auto p-1.5 hover:bg-destructive/10 rounded-full text-destructive transition-colors">
-                          <X className="h-3 w-3" />
+                    <div className="flex items-center gap-3 p-3 bg-muted/30 rounded-[1.5rem] border border-accent/5 animate-in slide-in-from-bottom-2 duration-500 mx-2 mt-1">
+                       <div className="p-2.5 bg-white rounded-xl text-primary shadow-lg border border-accent/5">
+                          <FileText className="h-5 w-5" />
+                       </div>
+                       <div className="flex-1 min-w-0">
+                          <p className="text-[10px] font-black uppercase text-accent truncate">{selectedFile.name}</p>
+                          <p className="text-[8px] font-bold text-accent/30 uppercase tracking-widest">ASSET STAGED • {(selectedFile.size / 1024).toFixed(0)} KB</p>
+                       </div>
+                       <button onClick={() => setSelectedFile(null)} className="p-2 hover:bg-destructive/10 rounded-xl text-destructive transition-all">
+                          <X className="h-4 w-4" />
                        </button>
                     </div>
                   )}
                   
-                  <div className="flex items-end gap-2">
+                  <div className="flex items-end gap-3 px-2 pb-1">
                     <button 
                       onClick={() => document.getElementById('file-trigger')?.click()}
-                      className="p-3 mb-1 rounded-2xl hover:bg-muted transition-colors text-accent/40 hover:text-primary group"
+                      className="p-4 rounded-2xl hover:bg-muted/50 transition-all text-accent/40 hover:text-primary group relative overflow-hidden"
+                      title="Attach Protocol Asset"
                     >
-                      <Paperclip className="h-5 w-5" />
+                      <Paperclip className="h-6 w-6 relative z-10" />
+                      <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity" />
                       <input id="file-trigger" type="file" className="hidden" onChange={(e) => setSelectedFile(e.target.files?.[0] || null)} />
                     </button>
                     
@@ -420,41 +468,50 @@ export default function AIStudioPage() {
                         }
                       }}
                       placeholder={activeConfig.placeholder}
-                      className="min-h-[56px] max-h-40 border-none shadow-none focus-visible:ring-0 bg-transparent resize-none py-4 font-medium text-accent scrollbar-hide"
+                      className="min-h-[64px] max-h-60 border-none shadow-none focus-visible:ring-0 bg-transparent resize-none py-5 font-medium text-accent scrollbar-hide text-base"
                     />
 
-                    <div className="flex items-center gap-2 mb-1 mr-1">
+                    <div className="flex items-center gap-3 mb-1.5 mr-1">
                       {activeTool === 'TRANSLATE' && (
                         <Select value={targetLanguage} onValueChange={setTargetLanguage}>
-                          <SelectTrigger className="h-10 w-28 rounded-xl border-accent/5 bg-muted/20 text-[9px] font-black uppercase tracking-widest">
+                          <SelectTrigger className="h-12 w-36 rounded-2xl border-accent/5 bg-muted/20 text-[10px] font-black uppercase tracking-[0.2em] shadow-inner">
                             <SelectValue />
                           </SelectTrigger>
-                          <SelectContent className="rounded-xl">
-                            {LANGUAGES.map(l => <SelectItem key={l} value={l} className="text-[9px] font-black uppercase">{l}</SelectItem>)}
+                          <SelectContent className="rounded-2xl border-accent/10 shadow-2xl">
+                            {LANGUAGES.map(l => (
+                              <SelectItem key={l} value={l} className="text-[10px] font-black uppercase tracking-widest py-3">
+                                {l}
+                              </SelectItem>
+                            ))}
                           </SelectContent>
                         </Select>
                       )}
                       <Button 
                         onClick={handleDeploy} 
                         disabled={isProcessing || (!inputText.trim() && !selectedFile)}
-                        className="h-12 w-12 rounded-2xl bg-accent text-white shadow-xl shadow-accent/20 hover:scale-105 active:scale-95 transition-all"
+                        className="h-14 w-14 rounded-2xl bg-accent text-white shadow-2xl shadow-accent/30 hover:scale-105 active:scale-95 transition-all group overflow-hidden relative"
                       >
-                        {isProcessing ? <Loader2 className="h-5 w-5 animate-spin" /> : <Send className="h-5 w-5 fill-primary text-primary" />}
+                        {isProcessing ? (
+                          <Loader2 className="h-6 w-6 animate-spin relative z-10" />
+                        ) : (
+                          <Send className="h-6 w-6 fill-primary text-primary relative z-10 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
+                        )}
+                        <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                       </Button>
                     </div>
                   </div>
                 </div>
               </div>
               
-              <div className="flex items-center justify-center gap-8 mt-4 opacity-20 grayscale hover:opacity-100 transition-opacity duration-700">
-                 <div className="flex items-center gap-2 text-[8px] font-black uppercase tracking-[0.3em] italic">
-                    <ShieldCheck className="h-3 w-3" /> Secure Tunnel
+              <div className="flex items-center justify-center gap-12 mt-6 opacity-30 grayscale hover:opacity-100 transition-all duration-1000 cursor-default">
+                 <div className="flex items-center gap-3 text-[9px] font-black uppercase tracking-[0.4em] italic transition-colors hover:text-primary">
+                    <ShieldCheck className="h-3.5 w-3.5" /> Secure Tunnel
                  </div>
-                 <div className="flex items-center gap-2 text-[8px] font-black uppercase tracking-[0.3em] italic text-primary">
-                    <Activity className="h-3 w-3" /> Active Protocol: {activeConfig.label}
+                 <div className="flex items-center gap-3 text-[9px] font-black uppercase tracking-[0.4em] italic text-primary">
+                    <Activity className="h-3.5 w-3.5 animate-pulse" /> Active: {activeConfig.label}
                  </div>
-                 <div className="flex items-center gap-2 text-[8px] font-black uppercase tracking-[0.3em] italic">
-                    <Cpu className="h-3 w-3" /> Local Buffer
+                 <div className="flex items-center gap-3 text-[9px] font-black uppercase tracking-[0.4em] italic transition-colors hover:text-primary">
+                    <Cpu className="h-3.5 w-3.5" /> Local Synthesis
                  </div>
               </div>
             </div>
