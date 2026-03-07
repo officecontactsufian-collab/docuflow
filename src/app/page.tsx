@@ -1,3 +1,4 @@
+
 "use client"
 
 import * as React from 'react';
@@ -310,7 +311,7 @@ export default function Home() {
 
               <div className="relative hidden lg:block">
                 <div className="aspect-square bg-white/5 rounded-[4rem] flex items-center justify-center p-20 backdrop-blur-3xl border border-white/10 shadow-2xl relative overflow-hidden group">
-                   <ShieldCheck className="w-full h-full text-primary/20 group-hover:scale-110 transition-transform duration-[2000ms]" />
+                   <ShieldCheck className="w-full h-full text-primary/20 group-hover:scale-110 transition-transform duration-700" />
                    <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-accent/20 pointer-events-none" />
                    <div className="absolute inset-x-0 h-1 bg-primary/20 blur-sm animate-scan" />
                 </div>
