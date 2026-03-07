@@ -28,6 +28,7 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { executeConversionAction } from './actions';
+import { PDFPreview } from '@/components/pdf-preview';
 import { cn } from '@/lib/utils';
 
 type ConversionType = 
@@ -258,7 +259,7 @@ function ConvertContent() {
               </div>
             </div>
           ) : !isDone ? (
-            <div className="flex-1 flex flex-col items-center justify-center p-8 space-y-12 animate-in fade-in zoom-in-95 duration-500 max-w-4xl mx-auto w-full py-20">
+            <div className="flex-1 flex flex-col items-center justify-center p-8 space-y-12 animate-in fade-in zoom-in-95 duration-500 max-w-6xl mx-auto w-full py-20">
               <div className="text-center space-y-4">
                 <div className={cn("inline-flex h-16 w-16 items-center justify-center rounded-[1.5rem] bg-white shadow-2xl border border-accent/5 mb-2", activeConfig?.color)}>
                   {activeConfig && <activeConfig.icon className="h-8 w-8" />}
@@ -267,48 +268,59 @@ function ConvertContent() {
                 <p className="text-accent/40 font-bold uppercase tracking-widest text-[10px]">Staging Environment Active • High-Fidelity Capture</p>
               </div>
 
-              <FileDropzone 
-                key={currentType} 
-                onFilesSelected={(files) => setSelectedFile(files[0] || null)} 
-                maxFiles={1} 
-                accept={activeConfig?.accept}
-                isLoading={isProcessing} 
-                className="w-full"
-              />
-              
-              {selectedFile && !isProcessing && (
-                <div className="flex flex-col items-center gap-6 w-full max-w-md animate-in slide-in-from-bottom-4">
-                  <div className="flex items-center gap-4 p-5 bg-white border border-accent/10 rounded-[1.5rem] shadow-2xl w-full">
-                    <div className={cn("p-3 rounded-xl bg-muted/30 shrink-0", activeConfig?.color)}>
-                       {activeConfig && <activeConfig.icon className="h-6 w-6" />}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-xs font-black uppercase italic truncate text-accent">{selectedFile.name}</p>
-                      <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest">{(selectedFile.size / 1024 / 1024).toFixed(2)} MB • VERIFIED SOURCE</p>
-                    </div>
+              {!selectedFile ? (
+                <FileDropzone 
+                  key={currentType} 
+                  onFilesSelected={(files) => setSelectedFile(files[0] || null)} 
+                  maxFiles={1} 
+                  accept={activeConfig?.accept}
+                  isLoading={isProcessing} 
+                  className="w-full"
+                />
+              ) : (
+                <div className="grid lg:grid-cols-12 gap-12 w-full">
+                  <div className="lg:col-span-7">
+                    <PDFPreview file={selectedFile} title="Source Asset Verification" />
                   </div>
-                  
-                  <Button 
-                    size="lg" 
-                    onClick={handleConvert}
-                    className="w-full h-16 rounded-2xl bg-accent text-white font-black uppercase tracking-widest text-[11px] shadow-2xl shadow-accent/20 hover:scale-[1.02] active:scale-[0.98] transition-all"
-                  >
-                    Deploy Transformation Stream
-                  </Button>
+                  <div className="lg:col-span-5 space-y-6">
+                    <div className="flex items-center gap-4 p-5 bg-white border border-accent/10 rounded-[1.5rem] shadow-2xl w-full">
+                      <div className={cn("p-3 rounded-xl bg-muted/30 shrink-0", activeConfig?.color)}>
+                         {activeConfig && <activeConfig.icon className="h-6 w-6" />}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs font-black uppercase italic truncate text-accent">{selectedFile.name}</p>
+                        <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest">{(selectedFile.size / 1024 / 1024).toFixed(2)} MB • VERIFIED SOURCE</p>
+                      </div>
+                    </div>
+                    
+                    <Button 
+                      size="lg" 
+                      onClick={handleConvert}
+                      disabled={isProcessing}
+                      className="w-full h-16 rounded-2xl bg-accent text-white font-black uppercase tracking-widest text-[11px] shadow-2xl shadow-accent/20 hover:scale-[1.02] active:scale-[0.98] transition-all"
+                    >
+                      {isProcessing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : "Deploy Transformation Stream"}
+                    </Button>
+                    <Button variant="ghost" onClick={() => setSelectedFile(null)} className="w-full text-[10px] font-bold uppercase tracking-widest text-accent/40 hover:text-accent">
+                      Change Source Document
+                    </Button>
+                  </div>
                 </div>
               )}
 
               {isProcessing && (
-                <div className="flex flex-col items-center justify-center py-12 space-y-8">
-                  <div className="relative">
-                    <RefreshCcw className="h-24 w-24 text-primary animate-spin opacity-10" />
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <Loader2 className="h-10 w-10 text-primary animate-spin" />
+                <div className="fixed inset-0 z-50 bg-accent/90 backdrop-blur-xl flex items-center justify-center animate-in fade-in">
+                  <div className="flex flex-col items-center justify-center space-y-8 max-w-sm text-center">
+                    <div className="relative">
+                      <RefreshCcw className="h-24 w-24 text-primary animate-spin opacity-10" />
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <Loader2 className="h-10 w-10 text-primary animate-spin" />
+                      </div>
                     </div>
-                  </div>
-                  <div className="text-center space-y-2">
-                    <p className="text-xl font-black uppercase italic text-accent">Executing Inversion...</p>
-                    <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] animate-pulse">Structural Reconstruction Protocol Active</p>
+                    <div className="space-y-2">
+                      <p className="text-xl font-black uppercase italic text-white">Executing Inversion...</p>
+                      <p className="text-[10px] font-bold text-white/40 uppercase tracking-[0.2em] animate-pulse">Structural Reconstruction Protocol Active</p>
+                    </div>
                   </div>
                 </div>
               )}
