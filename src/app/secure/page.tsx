@@ -13,11 +13,10 @@ import {
   ShieldCheck, 
   KeyRound, 
   AlertCircle,
-  ArrowRight,
   RefreshCcw,
-  FileText,
+  Fingerprint,
   X,
-  Fingerprint
+  ShieldAlert
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -39,8 +38,8 @@ export default function SecurePage() {
     if (!selectedFile || !password) {
       toast({
         variant: "destructive",
-        title: "Validation Error",
-        description: "Protocol requires both a document asset and an authorization key.",
+        title: "Authorization Key Required",
+        description: "The protocol requires a secure key to initialize the hardening sequence.",
       });
       return;
     }
@@ -48,25 +47,27 @@ export default function SecurePage() {
     setIsProcessing(true);
     try {
       const reader = new FileReader();
-      const base64Promise = new Promise<string>((resolve) => {
+      const base64Promise = new Promise<string>((resolve, reject) => {
         reader.onload = () => resolve(reader.result as string);
+        reader.onerror = (e) => reject(e);
         reader.readAsDataURL(selectedFile);
       });
       
       const base64Data = await base64Promise;
+      // High-Fidelity Hardening Tunnel
       const resultUrl = await encryptPdfAction(base64Data, password);
       
       setDownloadUrl(resultUrl);
       setIsDone(true);
       toast({
         title: "Hardening Complete",
-        description: "The document has been structuraly hardened and anonymized.",
+        description: "Document architecture structurally hardened and metadata purged.",
       });
     } catch (e: any) {
       toast({
         variant: "destructive",
         title: "Protocol Error",
-        description: e.message || "The hardening sequence failed to initialize.",
+        description: e.message || "The industrial hardening sequence failed to initialize.",
       });
     } finally {
       setIsProcessing(false);
@@ -93,7 +94,7 @@ export default function SecurePage() {
             </div>
             <h1 className="text-4xl font-black tracking-tighter text-accent uppercase italic">Industrial Hardening</h1>
             <p className="text-muted-foreground font-bold text-xs uppercase tracking-widest max-w-xl mx-auto">
-              Structural Metadata Anonymization. Reconstruct document containers and strip tracking tags using an identity salt.
+              Structural Metadata Anonymization. Mandatory key encryption for high-fidelity document protection and tracking tag removal.
             </p>
           </div>
 
@@ -108,7 +109,7 @@ export default function SecurePage() {
               ) : (
                 <div className="grid lg:grid-cols-12 gap-12">
                   <div className="lg:col-span-7 space-y-6">
-                    <PDFPreview file={selectedFile} title="Staged Asset Protocol" className="h-[600px]" />
+                    <PDFPreview file={selectedFile} title="Security Reference Asset" className="h-[650px]" />
                   </div>
 
                   <div className="lg:col-span-5 space-y-6">
@@ -119,32 +120,34 @@ export default function SecurePage() {
                               <KeyRound className="h-5 w-5" />
                            </div>
                            <div className="flex flex-col">
-                              <CardTitle className="text-xl font-black uppercase italic tracking-tighter text-accent">Hardening Registry</CardTitle>
-                              <CardDescription className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Identity & Salt Parameters</CardDescription>
+                              <CardTitle className="text-xl font-black uppercase italic tracking-tighter text-accent">Security Gateway</CardTitle>
+                              <CardDescription className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Authorization & Identity Salt</CardDescription>
                            </div>
                         </div>
                       </CardHeader>
                       <CardContent className="p-8 pt-0 space-y-8">
                         <div className="space-y-4">
                           <div className="space-y-2">
-                            <Label htmlFor="pass" className="text-[10px] font-black uppercase tracking-widest text-accent/60">Authorization Key</Label>
+                            <Label htmlFor="pass" className="text-[10px] font-black uppercase tracking-widest text-accent flex items-center gap-2">
+                              <Lock className="h-3 w-3 text-primary" /> Authorization Key
+                            </Label>
                             <Input 
                               id="pass" 
                               type="password" 
-                              placeholder="SET IDENTITY KEY..." 
+                              placeholder="SET SECURE KEY..." 
                               value={password}
                               onChange={(e) => setPassword(e.target.value)}
                               className="h-12 bg-muted/20 border-accent/10 rounded-xl font-bold text-accent"
                             />
                             <p className="text-[8px] font-bold text-accent/40 uppercase tracking-widest italic">
-                              * Key is used as a deterministic salt for structural anonymization.
+                              * This key is used as a deterministic salt for structural metadata scrambling.
                             </p>
                           </div>
 
-                          <div className="p-4 bg-primary/5 rounded-2xl border border-primary/10 flex items-start gap-3">
-                            <AlertCircle className="h-4 w-4 text-primary mt-0.5 shrink-0" />
+                          <div className="p-5 bg-primary/5 rounded-[2rem] border border-primary/10 flex items-start gap-4">
+                            <ShieldAlert className="h-5 w-5 text-primary mt-0.5 shrink-0" />
                             <p className="text-[10px] leading-relaxed text-muted-foreground font-medium uppercase tracking-tight">
-                              DOCFLOW executes hardening via structural rebuilding. The process strips all hidden tracking metadata from the asset registry.
+                              <span className="font-black text-accent italic">Industrial Protocol:</span> Hardening rebuilds the document object tree and permanently purges tracking tags from the asset registry.
                             </p>
                           </div>
                         </div>
@@ -153,7 +156,7 @@ export default function SecurePage() {
                           <Button 
                             onClick={handleEncrypt} 
                             disabled={isProcessing || !password}
-                            className="w-full h-14 rounded-2xl bg-accent text-white font-black uppercase tracking-[0.2em] text-[11px] shadow-2xl shadow-accent/20"
+                            className="w-full h-16 rounded-2xl bg-accent text-white font-black uppercase tracking-[0.2em] text-[11px] shadow-2xl shadow-accent/20 transition-all hover:scale-[1.01] active:scale-[0.99]"
                           >
                             {isProcessing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : "Deploy Hardening"}
                           </Button>
@@ -169,7 +172,7 @@ export default function SecurePage() {
 
               {isProcessing && (
                 <div className="fixed inset-0 z-50 bg-accent/90 backdrop-blur-xl flex items-center justify-center animate-in fade-in">
-                  <div className="flex flex-col items-center gap-8 text-center">
+                  <div className="flex flex-col items-center gap-8 text-center max-w-sm">
                     <div className="relative">
                        <div className="absolute inset-0 animate-ping rounded-full bg-primary/20" />
                        <div className="h-24 w-24 bg-white rounded-[2rem] flex items-center justify-center shadow-2xl relative z-10">
@@ -177,8 +180,8 @@ export default function SecurePage() {
                        </div>
                     </div>
                     <div className="space-y-2">
-                      <p className="text-2xl font-black uppercase italic text-white tracking-tighter">Executing Hardening Sequence...</p>
-                      <p className="text-[10px] font-bold text-white/40 uppercase tracking-[0.3em]">Reconstructing Structural Object Tree</p>
+                      <p className="text-2xl font-black uppercase italic text-white tracking-tighter">Executing Hardening...</p>
+                      <p className="text-[10px] font-bold text-white/40 uppercase tracking-[0.3em]">Scrambling Registry & Rebuilding Tree</p>
                     </div>
                     <Loader2 className="h-6 w-6 animate-spin text-primary mt-4" />
                   </div>
@@ -193,7 +196,7 @@ export default function SecurePage() {
                 </div>
                 <div className="space-y-2">
                   <h2 className="text-2xl font-black uppercase italic tracking-tight text-accent">Asset Hardened!</h2>
-                  <p className="text-muted-foreground text-sm font-medium">Document architecture successfully anonymized and reconstructed.</p>
+                  <p className="text-muted-foreground text-sm font-medium">Structure reconstructed and metadata registries purged.</p>
                 </div>
                 <div className="p-4 bg-muted/30 rounded-2xl border border-accent/5 text-left">
                    <div className="flex items-center gap-2 mb-2">

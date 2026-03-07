@@ -86,14 +86,12 @@ export default function AIStudioPage() {
 
   const activeConfig = TOOLS.find(t => t.id === activeTool)!;
 
-  // Ensure user is signed in for rate limiting
   React.useEffect(() => {
     if (!isUserLoading && !user && auth) {
       signInAnonymously(auth).catch(console.error);
     }
   }, [user, isUserLoading, auth]);
 
-  // Track daily usage count
   React.useEffect(() => {
     if (user && firestore) {
       const fetchUsage = async () => {
@@ -116,7 +114,6 @@ export default function AIStudioPage() {
     setLogs(prev => [...prev, `${new Date().toLocaleTimeString()} - ${msg}`]);
   };
 
-  // Simple hashing for caching logic
   const generateRequestHash = async (data: any) => {
     const msgBuffer = new TextEncoder().encode(JSON.stringify(data));
     const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
@@ -172,7 +169,6 @@ export default function AIStudioPage() {
         targetLanguage,
       };
 
-      // 1. STATELESS CACHE LOOKUP
       const requestHash = await generateRequestHash(inputPayload);
       const opsRef = collection(firestore, 'users', user.uid, 'operations');
       const cacheQuery = query(opsRef, where('aiPrompt', '==', requestHash), limit(1));
@@ -191,7 +187,6 @@ export default function AIStudioPage() {
         return;
       }
 
-      // 2. INDUSTRIAL RATE LIMITING
       if (usageCount !== null && usageCount >= DAILY_FREE_LIMIT) {
         throw new Error(`PROTOCOL THRESHOLD: Daily limit reached. Registry resets at midnight.`);
       }
@@ -206,8 +201,7 @@ export default function AIStudioPage() {
       addLog("RECONSTRUCTION COMPLETE: Synthesizing result...");
       setResult(response.result);
 
-      // 3. ARCHIVE OPERATION & LOG USAGE (Non-blocking)
-      const logsRef = collection(firestore, 'users', user.uid, 'usageLogs');
+      const userLogsRef = collection(firestore, 'users', user.uid, 'usageLogs');
       const globalLogsRef = collection(firestore, 'usageLogs');
       
       addDocumentNonBlocking(opsRef, {
@@ -229,7 +223,7 @@ export default function AIStudioPage() {
         ipAddress: 'PROXIED_TUNNEL' 
       };
 
-      addDocumentNonBlocking(logsRef, logData);
+      addDocumentNonBlocking(userLogsRef, logData);
       addDocumentNonBlocking(globalLogsRef, logData);
 
       toast({ title: "Sequence Success", description: "AI Transformation complete." });
@@ -239,7 +233,7 @@ export default function AIStudioPage() {
       toast({ variant: "destructive", title: "Protocol Error", description: e.message });
       
       if (user && firestore) {
-        const logsRef = collection(firestore, 'users', user.uid, 'usageLogs');
+        const userLogsRef = collection(firestore, 'users', user.uid, 'usageLogs');
         const globalLogsRef = collection(firestore, 'usageLogs');
         const errorLog = {
           userId: user.uid,
@@ -248,7 +242,7 @@ export default function AIStudioPage() {
           status: 'ERROR',
           costUnits: 0
         };
-        addDocumentNonBlocking(logsRef, errorLog);
+        addDocumentNonBlocking(userLogsRef, errorLog);
         addDocumentNonBlocking(globalLogsRef, errorLog);
       }
     } finally {

@@ -5,7 +5,8 @@ service cloud.firestore {
 
     /**
      * DOCFLOW Industrial Security Rules
-     * Administrative Clearance Protocol v3.1
+     * Administrative Clearance Protocol v3.2
+     * Hardened for Master Admin UID: NNEu5gbMlVRKd094f3PuPO23jow2
      */
 
     function isSignedIn() {
@@ -30,8 +31,9 @@ service cloud.firestore {
     }
 
     match /usageLogs/{logId} {
-      // Allow any user to log their activity, but only admin can manage the registry
+      // Allow any user to log their activity to the global registry
       allow create: if isSignedIn();
+      // Only Admin can view or manage the global audit sequence
       allow get, list, update, delete: if isAdmin();
     }
 
@@ -43,15 +45,15 @@ service cloud.firestore {
     // --- User Identity Lattice Rules ---
 
     match /users/{userId} {
-      // Admin can list all identities and manage any profile
+      // Master Admin has absolute clearance over the identity registry
       allow get, list, write: if isAdmin();
       
-      // Owners can manage their own profile
+      // Standard owners manage their own profiles
       allow get: if isOwner(userId);
       allow create: if isOwner(userId) && request.resource.data.id == userId;
       allow update: if isOwner(userId) && request.resource.data.id == userId;
 
-      // Deep Sub-Collection Protection
+      // Recursive Sub-Collection Protection
       match /files/{fileId} {
         allow read, write: if isOwner(userId) || isAdmin();
       }

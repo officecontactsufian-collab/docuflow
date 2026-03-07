@@ -55,6 +55,7 @@ const OperationalChart = dynamic(
 );
 
 const MASTER_ADMIN_EMAIL = 'office.contact.sufian@gmail.com';
+const MASTER_ADMIN_UID = 'NNEu5gbMlVRKd094f3PuPO23jow2';
 
 export default function AdminDashboardPage() {
   const { user, isUserLoading } = useUser();
@@ -67,7 +68,7 @@ export default function AdminDashboardPage() {
 
   React.useEffect(() => {
     if (!isUserLoading) {
-      if (!user || user.email !== MASTER_ADMIN_EMAIL) {
+      if (!user || (user.email !== MASTER_ADMIN_EMAIL && user.uid !== MASTER_ADMIN_UID)) {
         router.push('/');
       }
     }
@@ -75,22 +76,21 @@ export default function AdminDashboardPage() {
 
   // Identities Registry
   const usersQuery = useMemoFirebase(() => {
-    if (!firestore || !user || user.email !== MASTER_ADMIN_EMAIL) return null;
+    if (!firestore || !user) return null;
     return collection(firestore, 'users');
   }, [firestore, user]);
   const { data: allUsers, isLoading: isUsersLoading } = useCollection(usersQuery);
 
   // Global Audit Registry
   const logsQuery = useMemoFirebase(() => {
-    if (!firestore || !user || user.email !== MASTER_ADMIN_EMAIL) return null;
-    // Querying the global usageLogs collection
+    if (!firestore || !user) return null;
     return query(collection(firestore, 'usageLogs'), orderBy('requestTimestamp', 'desc'), limit(50));
   }, [firestore, user]);
   const { data: allLogs, isLoading: isLogsLoading } = useCollection(logsQuery);
 
   // System Configuration
   const configRef = useMemoFirebase(() => {
-    if (!firestore || !user || user.email !== MASTER_ADMIN_EMAIL) return null;
+    if (!firestore || !user) return null;
     return doc(firestore, 'system', 'config');
   }, [firestore, user]);
   const { data: sysConfig } = useDoc(configRef);
@@ -144,7 +144,7 @@ export default function AdminDashboardPage() {
     toast({ title: "Protocol Shifted", description: `System parameter [${key}] updated successfully.` });
   };
 
-  if (isUserLoading || !user || user.email !== MASTER_ADMIN_EMAIL) {
+  if (isUserLoading || !user || (user.email !== MASTER_ADMIN_EMAIL && user.uid !== MASTER_ADMIN_UID)) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-muted/30">
         <div className="flex flex-col items-center gap-4">
@@ -264,10 +264,10 @@ export default function AdminDashboardPage() {
                                 <td className="px-10 py-8">
                                   <div className="flex items-center gap-4">
                                     <div className="h-10 w-10 rounded-xl bg-accent text-primary flex items-center justify-center font-black text-xs">
-                                      {u.email?.substring(0, 2).toUpperCase()}
+                                      {u.email?.substring(0, 2).toUpperCase() || "??"}
                                     </div>
                                     <div className="space-y-0.5">
-                                      <p className="font-black text-accent uppercase text-sm italic leading-none">{u.email}</p>
+                                      <p className="font-black text-accent uppercase text-sm italic leading-none">{u.email || "Anonymous Stream"}</p>
                                       <p className="text-[9px] font-bold text-accent/30 uppercase tracking-tighter">UID: {u.id.substring(0, 12)}</p>
                                     </div>
                                   </div>
@@ -333,7 +333,9 @@ export default function AdminDashboardPage() {
                         ) : allLogs?.map((log) => (
                           <tr key={log.id} className="hover:bg-muted/30 transition-colors">
                             <td className="px-10 py-6">
-                              <p className="text-[10px] font-bold text-accent italic">{log.requestTimestamp?.toDate().toLocaleString() || "Syncing..."}</p>
+                              <p className="text-[10px] font-bold text-accent italic">
+                                {log.requestTimestamp instanceof Timestamp ? log.requestTimestamp.toDate().toLocaleString() : log.requestTimestamp || "Syncing..."}
+                              </p>
                             </td>
                             <td className="px-10 py-6">
                               <Badge variant="outline" className="border-accent/10 text-accent font-black text-[8px] uppercase px-2">{log.toolUsed}</Badge>
