@@ -1,4 +1,3 @@
-
 "use client"
 
 import * as React from 'react';
@@ -6,13 +5,9 @@ import { Navbar } from '@/components/navbar';
 import { ToolCard } from '@/components/tool-card';
 import { 
   Merge, 
-  Scissors, 
-  FileText, 
-  Maximize, 
   RotateCw, 
   ShieldCheck, 
   Shield,
-  CircleCheck,
   FileUp,
   Settings2,
   Download,
@@ -26,7 +21,6 @@ import {
   Camera,
   Presentation,
   Search,
-  Wrench,
   ArrowRight,
   Play,
   Lock,
@@ -39,12 +33,13 @@ import {
   Scale,
   Info,
   BrainCircuit,
-  Sparkles,
   Mail,
   Languages,
   CheckCircle2,
   BookOpen,
-  Briefcase
+  Briefcase,
+  FileBadge,
+  FileText
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
@@ -58,15 +53,23 @@ export default function Home() {
 
   const toolCategories = [
     {
-      label: "AI Intelligence Suite",
+      label: "AI Writing Suite",
       description: "Generative protocols for structural content evolution.",
       items: [
         { title: "Paraphraser", desc: "Re-engineer text.", icon: RefreshCcw, href: "/ai-studio" },
+        { title: "AI Summarizer", desc: "Executive distillation.", icon: Activity, href: "/ai-studio" },
         { title: "Grammar Check", desc: "Industrial proofing.", icon: CheckCircle2, href: "/ai-studio" },
         { title: "Essay Writer", desc: "Structured drafts.", icon: BookOpen, href: "/ai-studio" },
+      ]
+    },
+    {
+      label: "Professional Identity",
+      description: "AI-powered protocols for career advancement.",
+      items: [
         { title: "Resume Builder", desc: "Profile engineering.", icon: Briefcase, href: "/ai-studio" },
-        { title: "AI Summarizer", desc: "Executive distillation.", icon: Activity, href: "/ai-studio" },
+        { title: "Cover Letter", desc: "Intro architect.", icon: FileBadge, href: "/ai-studio" },
         { title: "Email Architect", desc: "Structural synthesis.", icon: Mail, href: "/ai-studio" },
+        { title: "Digital Sign", desc: "Apply identity anchors.", icon: Signature, href: "/sign" },
       ]
     },
     {
@@ -96,7 +99,7 @@ export default function Home() {
         { title: "Password Protect", desc: "Encrypt PDF with key.", icon: Lock, href: "/secure" },
         { title: "Privacy Shield", desc: "Metadata erasure.", icon: ShieldCheck, href: "/protect" },
         { title: "Unlock PDF", desc: "Strip restrictions.", icon: Unlock, href: "/protect?mode=unlock" },
-        { title: "Digital Sign", desc: "Apply identity anchors.", icon: Signature, href: "/sign" },
+        { title: "Translator", desc: "Linguistic shift.", icon: Languages, href: "/ai-studio" },
       ]
     }
   ];
@@ -164,7 +167,7 @@ export default function Home() {
                   </div>
                   
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                    {toolCategories[idx].items.map((tool) => (
+                    {cat.items.map((tool) => (
                       <ToolCard key={tool.title} title={tool.title} description={tool.desc} icon={tool.icon} href={tool.href} />
                     ))}
                   </div>

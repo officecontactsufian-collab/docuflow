@@ -1,4 +1,3 @@
-
 "use client"
 
 import * as React from 'react';
@@ -6,15 +5,12 @@ import { Navbar } from '@/components/navbar';
 import { FileDropzone } from '@/components/file-dropzone';
 import { Button } from '@/components/ui/button';
 import { 
-  Sparkles, 
   Loader2, 
   Download, 
   CheckCircle2, 
   Activity,
   Zap,
-  Trash2,
   Server,
-  FileText,
   MessageSquare,
   Languages,
   Mail,
@@ -25,7 +21,10 @@ import {
   BrainCircuit,
   Hash,
   BookOpen,
-  Briefcase
+  Briefcase,
+  PenLine,
+  FileBadge,
+  ChevronRight
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -40,7 +39,7 @@ import mammoth from 'mammoth';
 import { signInAnonymously } from 'firebase/auth';
 import { collection, query, where, getDocs, Timestamp, limit, serverTimestamp } from 'firebase/firestore';
 
-type AIStudioTool = 'PARAPHRASE' | 'SUMMARIZE' | 'EMAIL' | 'TRANSLATE' | 'CHAT' | 'GRAMMAR' | 'ESSAY' | 'RESUME';
+type AIStudioTool = 'PARAPHRASE' | 'SUMMARIZE' | 'EMAIL' | 'TRANSLATE' | 'CHAT' | 'GRAMMAR' | 'ESSAY' | 'RESUME' | 'COVER_LETTER';
 
 interface ToolConfig {
   id: AIStudioTool;
@@ -53,14 +52,26 @@ interface ToolConfig {
 }
 
 const TOOLS: ToolConfig[] = [
+  // Writing
   { id: 'PARAPHRASE', label: 'Paraphraser', description: 'Professional text re-engineering.', icon: RefreshCcw, color: 'text-blue-600', placeholder: 'PASTE TEXT TO RE-ENGINEER...' },
+  { id: 'SUMMARIZE', label: 'Summarizer', description: 'Executive content distillation.', icon: Activity, color: 'text-orange-600', placeholder: 'PASTE CONTENT OR STAGE DOCUMENT...' },
   { id: 'GRAMMAR', label: 'Grammar Checker', description: 'Industrial-grade proofing.', icon: CheckCircle2, color: 'text-green-600', placeholder: 'PASTE TEXT TO CHECK...' },
   { id: 'ESSAY', label: 'Essay Writer', description: 'Structured academic synthesis.', icon: BookOpen, color: 'text-indigo-600', placeholder: 'DESCRIBE ESSAY TOPIC OR OUTLINE...' },
+  
+  // Career
   { id: 'RESUME', label: 'Resume Builder', description: 'Profile engineering.', icon: Briefcase, color: 'text-emerald-600', placeholder: 'LIST EXPERIENCE AND SKILLS...' },
-  { id: 'SUMMARIZE', label: 'Summarizer', description: 'Executive content distillation.', icon: Activity, color: 'text-orange-600', placeholder: 'PASTE CONTENT OR STAGE DOCUMENT...' },
+  { id: 'COVER_LETTER', label: 'Cover Letter', description: 'Persuasive intro architect.', icon: FileBadge, color: 'text-cyan-600', placeholder: 'DESCRIBE JOB AND YOUR BACKGROUND...' },
   { id: 'EMAIL', label: 'Email Architect', description: 'Structural email generation.', icon: Mail, color: 'text-purple-600', placeholder: 'DESCRIBE THE EMAIL CONTEXT...' },
+  
+  // Productivity
   { id: 'TRANSLATE', label: 'Translator', description: 'Context-aware linguistic shift.', icon: Languages, color: 'text-green-600', placeholder: 'TEXT TO TRANSLATE...' },
   { id: 'CHAT', label: 'Doc Intelligence', description: 'Deep document interrogation.', icon: MessageSquare, color: 'text-primary', placeholder: 'ASK A QUESTION ABOUT THE DOC...', requiresFile: true },
+];
+
+const CATEGORIES = [
+  { id: 'writing', label: 'Writing Suite', tools: ['PARAPHRASE', 'SUMMARIZE', 'GRAMMAR', 'ESSAY'], icon: PenLine },
+  { id: 'career', label: 'Identity Tools', tools: ['RESUME', 'COVER_LETTER', 'EMAIL'], icon: Briefcase },
+  { id: 'productivity', label: 'Productivity', tools: ['TRANSLATE', 'CHAT'], icon: Zap },
 ];
 
 const LANGUAGES = [
@@ -273,42 +284,53 @@ export default function AIStudioPage() {
             <div className="inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-accent text-white shadow-xl mb-2">
               <BrainCircuit className="h-7 w-7 text-primary" />
             </div>
-            <h1 className="text-4xl font-black tracking-tighter text-accent uppercase italic">AI Studio</h1>
+            <h1 className="text-4xl font-black tracking-tighter text-accent uppercase italic">AI Studio Workspace</h1>
             <p className="text-muted-foreground font-bold text-xs uppercase tracking-widest max-w-xl mx-auto">
-              Unified Document Intelligence Suite. Hardened AI protocols with zero-retention architecture.
+              Industrial Document Intelligence. Deploy specialized generative protocols with zero-retention architecture.
             </p>
           </div>
 
           <div className="grid lg:grid-cols-12 gap-12">
-            <div className="lg:col-span-3 space-y-4">
-              <div className="section-label mb-6">
-                <Hash className="h-3 w-3 text-primary" />
-                <span>Protocol Registry</span>
-              </div>
-              <div className="grid gap-3">
-                {TOOLS.map((tool) => (
-                  <button
-                    key={tool.id}
-                    onClick={() => { setActiveTool(tool.id); setResult(null); }}
-                    className={cn(
-                      "flex items-center gap-4 p-4 rounded-2xl border transition-all text-left group",
-                      activeTool === tool.id 
-                        ? "bg-white border-primary ring-1 ring-primary shadow-xl" 
-                        : "bg-white/50 border-accent/5 hover:border-primary/40 hover:bg-white"
-                    )}
-                  >
-                    <div className={cn("p-2.5 rounded-xl bg-muted/50 group-hover:scale-110 transition-transform", tool.color)}>
-                      <tool.icon className="h-5 w-5" />
+            {/* Sidebar Tools Navigation */}
+            <div className="lg:col-span-3 space-y-8">
+              <div className="space-y-6">
+                {CATEGORIES.map((cat) => (
+                  <div key={cat.id} className="space-y-3">
+                    <div className="flex items-center gap-2 px-2">
+                      <cat.icon className="h-3 w-3 text-primary" />
+                      <span className="text-[10px] font-black uppercase tracking-widest text-accent/40">{cat.label}</span>
                     </div>
-                    <div className="min-w-0">
-                      <p className="text-[10px] font-black uppercase italic text-accent">{tool.label}</p>
-                      <p className="text-[8px] font-bold text-accent/40 uppercase truncate">{tool.description}</p>
+                    <div className="grid gap-2">
+                      {cat.tools.map((toolId) => {
+                        const tool = TOOLS.find(t => t.id === toolId)!;
+                        return (
+                          <button
+                            key={tool.id}
+                            onClick={() => { setActiveTool(tool.id); setResult(null); }}
+                            className={cn(
+                              "flex items-center gap-3 p-3 rounded-xl border transition-all text-left group",
+                              activeTool === tool.id 
+                                ? "bg-white border-primary ring-1 ring-primary shadow-lg" 
+                                : "bg-white/50 border-accent/5 hover:border-primary/40 hover:bg-white"
+                            )}
+                          >
+                            <div className={cn("p-2 rounded-lg bg-muted/50 group-hover:scale-110 transition-transform", tool.color)}>
+                              <tool.icon className="h-4 w-4" />
+                            </div>
+                            <div className="min-w-0">
+                              <p className="text-[10px] font-black uppercase italic text-accent leading-none mb-1">{tool.label}</p>
+                              <p className="text-[7px] font-bold text-accent/30 uppercase truncate">{tool.description}</p>
+                            </div>
+                            {activeTool === tool.id && <ChevronRight className="ml-auto h-3 w-3 text-primary animate-pulse" />}
+                          </button>
+                        );
+                      })}
                     </div>
-                  </button>
+                  </div>
                 ))}
               </div>
 
-              <div className="p-6 bg-accent text-white rounded-[2rem] shadow-2xl mt-8 relative overflow-hidden">
+              <div className="p-6 bg-accent text-white rounded-[2rem] shadow-2xl relative overflow-hidden">
                  <div className="relative z-10 space-y-3">
                     <p className="text-[9px] font-black uppercase tracking-widest text-primary">Identity Quota</p>
                     <div className="space-y-1">
@@ -329,6 +351,7 @@ export default function AIStudioPage() {
               </div>
             </div>
 
+            {/* Main Execution Area */}
             <div className="lg:col-span-9 space-y-8">
               {!result ? (
                 <Card className="border-none shadow-2xl rounded-[3rem] bg-white overflow-hidden animate-in fade-in zoom-in-95 duration-500">

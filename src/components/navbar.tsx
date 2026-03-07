@@ -1,4 +1,3 @@
-
 "use client"
 
 import Link from 'next/link';
@@ -11,7 +10,6 @@ import {
   Maximize, 
   LayoutDashboard, 
   ShieldCheck, 
-  Wrench, 
   Unlock, 
   Type, 
   Signature, 
@@ -25,7 +23,6 @@ import {
   Camera,
   Menu,
   BrainCircuit,
-  Sparkles,
   Lock,
   CheckCircle2,
   BookOpen,
@@ -33,7 +30,10 @@ import {
   Mail,
   Languages,
   MessageSquare,
-  RefreshCcw
+  RefreshCcw,
+  FileBadge,
+  PenLine,
+  Zap
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -60,32 +60,30 @@ export function Navbar() {
 
   const categories = [
     {
-      label: "AI Studio",
+      label: "AI Writing Suite",
       items: [
         { href: "/ai-studio", icon: RefreshCcw, title: "Paraphraser", desc: "Re-engineer text" },
+        { href: "/ai-studio", icon: Activity, title: "Summarizer", desc: "Executive summary" },
         { href: "/ai-studio", icon: CheckCircle2, title: "Grammar Check", desc: "Industrial proofing" },
         { href: "/ai-studio", icon: BookOpen, title: "Essay Writer", desc: "Structured drafts" },
-        { href: "/ai-studio", icon: Briefcase, title: "Resume Builder", desc: "Profile engineering" },
-        { href: "/ai-studio", icon: Activity, title: "Summarizer", desc: "Executive summary" },
-        { href: "/ai-studio", icon: Mail, title: "Email Architect", desc: "Corporate drafts" },
-        { href: "/ai-studio", icon: Languages, title: "Translator", desc: "Linguistic shift" },
-        { href: "/ai-studio", icon: MessageSquare, title: "Doc Intel", desc: "Asset chat" },
       ]
     },
     {
-      label: "Modify PDF",
+      label: "Professional Identity",
+      items: [
+        { href: "/ai-studio", icon: Briefcase, title: "Resume Builder", desc: "Profile engineering" },
+        { href: "/ai-studio", icon: FileBadge, title: "Cover Letter", desc: "Intro architect" },
+        { href: "/ai-studio", icon: Mail, title: "Email Architect", desc: "Corporate drafts" },
+        { href: "/sign", icon: Signature, title: "Digital Sign", desc: "Apply signatures" },
+      ]
+    },
+    {
+      label: "Layout & Format",
       items: [
         { href: "/crop", icon: Crop, title: "Crop PDF", desc: "Trim page margins" },
-        { href: "/organize", icon: RotateCw, title: "Reorder and rotate", desc: "Change page structure" },
-      ]
-    },
-    {
-      label: "Capture & Format",
-      items: [
-        { href: "/scan-to-pdf", icon: Camera, title: "Scan to PDF", desc: "Direct camera capture" },
+        { href: "/organize", icon: RotateCw, title: "Reorder & Rotate", desc: "Change structure" },
+        { href: "/scan-to-pdf", icon: Camera, title: "Scan to PDF", desc: "Camera capture" },
         { href: "/merge", icon: Merge, title: "Merge PDF", desc: "Combine multiple PDFs" },
-        { href: "/split", icon: Scissors, title: "Split PDF", desc: "Extract specific pages" },
-        { href: "/numbers", icon: Hash, title: "Page Numbers", desc: "Add sequential counters" },
       ]
     },
     {
@@ -95,8 +93,6 @@ export function Navbar() {
         { href: "/secure", icon: Lock, title: "Password Protect", desc: "Encrypt with key" },
         { href: "/protect", icon: ShieldCheck, title: "Privacy Shield", desc: "Hardened metadata" },
         { href: "/protect?mode=unlock", icon: Unlock, title: "Unlock", desc: "Remove restrictions" },
-        { href: "/watermark", icon: Type, title: "Watermark", desc: "Add text overlays" },
-        { href: "/sign", icon: Signature, title: "Digital Sign", desc: "Apply signatures" },
       ]
     }
   ];
