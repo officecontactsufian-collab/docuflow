@@ -36,7 +36,11 @@ import {
   ArrowRightLeft,
   Settings2,
   Zap,
-  Image as ImageIcon
+  Image as ImageIcon,
+  Table,
+  Presentation,
+  Eraser,
+  Wrench
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -63,7 +67,7 @@ export function Navbar() {
 
   const categories = [
     {
-      label: "AI Intelligence",
+      label: "AI Writing Tools",
       items: [
         { href: "/ai-studio", icon: RefreshCcw, title: "Paraphraser", desc: "Re-engineer text" },
         { href: "/ai-studio", icon: Activity, title: "Summarizer", desc: "Executive summary" },
@@ -72,7 +76,7 @@ export function Navbar() {
       ]
     },
     {
-      label: "Professional Identity",
+      label: "AI Career Tools",
       items: [
         { href: "/ai-studio", icon: Briefcase, title: "Resume Builder", desc: "Profile engineering" },
         { href: "/ai-studio", icon: FileBadge, title: "Cover Letter", desc: "Intro architect" },
@@ -81,21 +85,21 @@ export function Navbar() {
       ]
     },
     {
-      label: "Transformation Hub",
+      label: "AI Productivity",
       items: [
-        { href: "/convert", icon: ArrowRightLeft, title: "Convert Engine", desc: "Cross-format inversion" },
-        { href: "/convert?type=word-to-pdf", icon: FilePenLine, title: "Word to PDF", desc: "Standardize DOCX" },
-        { href: "/convert?type=pdf-to-word", icon: FileText, title: "PDF to Word", desc: "Recover editable text" },
-        { href: "/convert?type=pdf-to-jpg", icon: ImageIcon, title: "PDF to JPG", desc: "Export page streams" },
+        { href: "/ai-studio", icon: Languages, title: "Translator", desc: "Linguistic shift" },
+        { href: "/ai-studio", icon: MessageSquare, title: "Doc Intel", desc: "Asset interrogation" },
+        { href: "/scan-to-pdf", icon: Camera, title: "Scan to PDF", desc: "Direct capture" },
+        { href: "/analyze", icon: Search, title: "Deep Inspect", desc: "Metadata analysis" },
       ]
     },
     {
-      label: "Layout & Security",
+      label: "Layout & Transformation",
       items: [
+        { href: "/convert", icon: ArrowRightLeft, title: "Convert Engine", desc: "Format inversion" },
         { href: "/organize", icon: RotateCw, title: "Visual Organizer", desc: "Reorder & Rotate" },
         { href: "/crop", icon: Crop, title: "Precision Crop", desc: "Trim page margins" },
-        { href: "/secure", icon: Lock, title: "Secure Lock", desc: "Identity hardening" },
-        { href: "/protect", icon: ShieldCheck, title: "Privacy Shield", desc: "Metadata erasure" },
+        { href: "/merge", icon: Merge, title: "Merge PDF", desc: "Combine assets" },
       ]
     }
   ];
@@ -120,7 +124,7 @@ export function Navbar() {
               <DropdownMenuContent align="start" className="w-[850px] p-5 rounded-2xl shadow-2xl border-white/20 grid grid-cols-4 gap-5 bg-white/95 backdrop-blur-xl mt-2">
                 {categories.map((cat) => (
                   <div key={cat.label} className="space-y-3">
-                    <DropdownMenuLabel className="px-0 text-[8px] font-black uppercase tracking-[0.2em] text-primary/40">
+                    <DropdownMenuLabel className="px-0 text-[8px] font-black uppercase tracking-widest text-primary/40">
                       {cat.label}
                     </DropdownMenuLabel>
                     <div className="space-y-1">

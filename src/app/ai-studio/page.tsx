@@ -31,7 +31,8 @@ import {
   Copy,
   LayoutDashboard,
   Clock,
-  Sparkles
+  Sparkles,
+  Image as ImageIcon
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Card } from '@/components/ui/card';
@@ -86,7 +87,7 @@ const CATEGORIES = [
 
 const LANGUAGES = ["English", "French", "Spanish", "German", "Japanese", "Chinese", "Arabic", "Portuguese", "Russian", "Italian"];
 
-const DAILY_FREE_LIMIT = 10;
+const DAILY_FREE_LIMIT = 100;
 
 export default function AIStudioPage() {
   const { user, isUserLoading } = useUser();

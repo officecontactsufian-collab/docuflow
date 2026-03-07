@@ -43,7 +43,10 @@ import {
   FileText,
   ArrowRightLeft,
   Image as ImageIcon,
-  Scissors
+  Scissors,
+  Eraser,
+  Table,
+  Wrench
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
@@ -57,7 +60,7 @@ export default function Home() {
 
   const toolCategories = [
     {
-      label: "AI Intelligence Suite",
+      label: "AI Writing Suite",
       description: "Generative protocols for structural content evolution.",
       items: [
         { title: "Paraphraser", desc: "Re-engineer text.", icon: RefreshCcw, href: "/ai-studio" },
@@ -67,17 +70,7 @@ export default function Home() {
       ]
     },
     {
-      label: "Transformation Hub",
-      description: "Lossless conversion between industrial formats.",
-      items: [
-        { title: "Transformation Engine", desc: "Category Gateway.", icon: ArrowRightLeft, href: "/convert" },
-        { title: "PDF to Word", desc: "Editable DOCX export.", icon: FileText, href: "/convert?type=pdf-to-word" },
-        { title: "Word to PDF", desc: "Standardize Word.", icon: FilePenLine, href: "/convert?type=word-to-pdf" },
-        { title: "PDF to Excel", desc: "Table reconstruction.", icon: FileText, href: "/convert?type=pdf-to-excel" },
-      ]
-    },
-    {
-      label: "Professional Identity",
+      label: "AI Career Suite",
       description: "AI-powered protocols for career advancement.",
       items: [
         { title: "Resume Builder", desc: "Profile engineering.", icon: Briefcase, href: "/ai-studio" },
@@ -87,23 +80,43 @@ export default function Home() {
       ]
     },
     {
+      label: "AI Productivity Tools",
+      description: "Industrial efficiency and document interrogation.",
+      items: [
+        { title: "Translator", desc: "Linguistic shift.", icon: Languages, href: "/ai-studio" },
+        { title: "Doc Intelligence", desc: "Asset interrogation.", icon: MessageSquare, href: "/ai-studio" },
+        { title: "Scan to PDF", desc: "Direct camera capture.", icon: Camera, href: "/scan-to-pdf" },
+        { title: "Deep Inspect", desc: "Metadata analysis.", icon: Search, href: "/analyze" },
+      ]
+    },
+    {
       label: "Modify & Capture",
       description: "Direct page and structural modifications.",
       items: [
-        { title: "Scan to PDF", desc: "Direct camera capture.", icon: Camera, href: "/scan-to-pdf" },
         { title: "Crop PDF", desc: "Trim page margins.", icon: Crop, href: "/crop" },
         { title: "Visual Organizer", desc: "Reorder & Rotate.", icon: RotateCw, href: "/organize" },
         { title: "Add Numbers", desc: "Sequential counters.", icon: Hash, href: "/numbers" },
+        { title: "Merge PDF", desc: "Combine assets.", icon: Merge, href: "/merge" },
+      ]
+    },
+    {
+      label: "Convert & Export",
+      description: "Lossless transformation between formats.",
+      items: [
+        { title: "Convert Engine", desc: "Transformation Hub.", icon: ArrowRightLeft, href: "/convert" },
+        { title: "PDF to Word", desc: "DOCX export.", icon: FileText, href: "/convert?type=pdf-to-word" },
+        { title: "Word to PDF", desc: "Standardize DOCX.", icon: FilePenLine, href: "/convert?type=word-to-pdf" },
+        { title: "PDF to Excel", desc: "Table recovery.", icon: Table, href: "/convert?type=pdf-to-excel" },
       ]
     },
     {
       label: "Security & Trust",
-      description: "Industrial grade metadata protection.",
+      description: "Industrial grade data protection.",
       items: [
-        { title: "Password Protect", desc: "Encrypt PDF with key.", icon: Lock, href: "/secure" },
+        { title: "Password Protect", desc: "Encrypt PDF.", icon: Lock, href: "/secure" },
         { title: "Privacy Shield", desc: "Metadata erasure.", icon: ShieldCheck, href: "/protect" },
         { title: "Unlock PDF", desc: "Strip restrictions.", icon: Unlock, href: "/protect?mode=unlock" },
-        { title: "Translator", desc: "Linguistic shift.", icon: Languages, href: "/ai-studio" },
+        { title: "Sanitize Asset", desc: "Deep cleaning.", icon: Eraser, href: "/sanitize" },
       ]
     }
   ];
@@ -220,7 +233,7 @@ export default function Home() {
                         <step.icon className="h-8 w-8 text-primary" />
                       </div>
                       <div className="space-y-3">
-                        <div className="text-[9px] font-black uppercase tracking-[0.3em] text-primary/60">Sequence 0{idx + 1}</div>
+                        <div className="text-[9px] font-black uppercase tracking-widest text-primary/60">Sequence 0{idx + 1}</div>
                         <h3 className="text-2xl font-black text-accent uppercase italic">{step.title}</h3>
                         <p className="text-accent/60 font-bold leading-relaxed text-sm">{step.desc}</p>
                         <div className="pt-4 border-t border-accent/5 w-full">
@@ -319,7 +332,7 @@ export default function Home() {
                 <FileText className="h-10 w-10 text-primary brand-glow" />
                 <span className="text-3xl font-black tracking-tighter uppercase italic">DOCFLOW</span>
               </div>
-              <p className="text-[10px] leading-relaxed font-bold opacity-40 uppercase tracking-[0.2em] max-w-xs">
+              <p className="text-[10px] leading-relaxed font-bold opacity-40 uppercase tracking-widest max-w-xs">
                 The industrial benchmark for local-first document intelligence. Engineered for high-fidelity assets and mission-critical privacy.
               </p>
             </div>
@@ -329,7 +342,7 @@ export default function Home() {
                 <h4 className="text-primary text-[10px] font-black uppercase tracking-[0.4em]">Core Protocols</h4>
                 <div className="h-px w-8 bg-primary/30" />
               </div>
-              <ul className="space-y-4 text-[11px] font-black uppercase tracking-[0.2em] italic">
+              <ul className="space-y-4 text-[11px] font-black uppercase tracking-widest italic">
                 <li><Link href="/ai-studio" className="hover:text-primary transition-colors flex items-center gap-2 group text-primary"><div className="w-1 h-1 bg-primary/40 rounded-full group-hover:bg-primary" /> AI Intelligence Suite</Link></li>
                 <li><Link href="/merge" className="hover:text-primary transition-colors flex items-center gap-2 group"><div className="w-1 h-1 bg-primary/20 rounded-full group-hover:bg-primary" /> Structural Merge</Link></li>
                 <li><Link href="/convert" className="hover:text-primary transition-colors flex items-center gap-2 group"><div className="w-1 h-1 bg-primary/20 rounded-full group-hover:bg-primary" /> Asset Transformation</Link></li>
@@ -343,7 +356,7 @@ export default function Home() {
                 <h4 className="text-primary text-[10px] font-black uppercase tracking-[0.4em]">Identity & Security</h4>
                 <div className="h-px w-8 bg-primary/30" />
               </div>
-              <ul className="space-y-4 text-[11px] font-black uppercase tracking-[0.2em] italic">
+              <ul className="space-y-4 text-[11px] font-black uppercase tracking-widest italic">
                 <li><Link href="/secure" className="hover:text-primary transition-colors flex items-center gap-2 group"><div className="w-1 h-1 bg-primary/20 rounded-full group-hover:bg-primary" /> Password Protect</Link></li>
                 <li><Link href="/sign" className="hover:text-primary transition-colors flex items-center gap-2 group"><div className="w-1 h-1 bg-primary/20 rounded-full group-hover:bg-primary" /> Identity Synthesis</Link></li>
                 <li><Link href="/protect" className="hover:text-primary transition-colors flex items-center gap-2 group"><div className="w-1 h-1 bg-primary/20 rounded-full group-hover:bg-primary" /> Privacy Shield</Link></li>
@@ -356,7 +369,7 @@ export default function Home() {
                 <h4 className="text-primary text-[10px] font-black uppercase tracking-[0.4em]">System Support</h4>
                 <div className="h-px w-8 bg-primary/30" />
               </div>
-              <ul className="space-y-4 text-[11px] font-black uppercase tracking-[0.2em] italic">
+              <ul className="space-y-4 text-[11px] font-black uppercase tracking-widest italic">
                 <li><Link href="/about" className="hover:text-primary transition-colors flex items-center gap-2 group"><div className="w-1 h-1 bg-primary/20 rounded-full group-hover:bg-primary" /> About Mission</Link></li>
                 <li><Link href="/contact" className="hover:text-primary transition-colors flex items-center gap-2 group"><div className="w-1 h-1 bg-primary/20 rounded-full group-hover:bg-primary" /> Contact Gateway</Link></li>
                 <li><Link href="/privacy" className="hover:text-primary transition-colors flex items-center gap-2 group"><div className="w-1 h-1 bg-primary/20 rounded-full group-hover:bg-primary" /> Privacy Shield</Link></li>
