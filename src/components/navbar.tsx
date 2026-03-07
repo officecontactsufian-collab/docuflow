@@ -35,7 +35,8 @@ import {
   FileBadge,
   ArrowRightLeft,
   Settings2,
-  Zap
+  Zap,
+  Image as ImageIcon
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {

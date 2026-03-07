@@ -41,7 +41,9 @@ import {
   Briefcase,
   FileBadge,
   FileText,
-  ArrowRightLeft
+  ArrowRightLeft,
+  Image as ImageIcon,
+  Scissors
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
