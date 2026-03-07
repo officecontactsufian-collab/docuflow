@@ -32,10 +32,25 @@ export function FileDropzone({ onFilesSelected, accept = ".pdf", maxFiles = 10, 
     e.preventDefault();
     setIsDragging(false);
     const files = Array.from(e.dataTransfer.files);
+    
+    // Industrial grade file filtering
     const acceptedFiles = files.filter(file => {
-      if (accept === "*") return true;
+      if (!accept || accept === "*") return true;
+      const fileName = file.name.toLowerCase();
       const exts = accept.split(',').map(s => s.trim().toLowerCase());
-      return exts.some(ext => file.name.toLowerCase().endsWith(ext) || file.type.includes(ext.replace('.', '')));
+      
+      return exts.some(ext => {
+        // Match extension (e.g., .pdf)
+        if (fileName.endsWith(ext)) return true;
+        // Match broad categories
+        const type = file.type.toLowerCase();
+        if (ext.includes('pdf') && type.includes('pdf')) return true;
+        if ((ext.includes('jpg') || ext.includes('jpeg')) && type.includes('jpeg')) return true;
+        if (ext.includes('png') && type.includes('png')) return true;
+        if ((ext.includes('doc') || ext.includes('docx')) && (type.includes('word') || type.includes('officedocument'))) return true;
+        if ((ext.includes('xls') || ext.includes('xlsx')) && (type.includes('excel') || type.includes('spreadsheet'))) return true;
+        return false;
+      });
     });
 
     if (acceptedFiles.length > 0) {

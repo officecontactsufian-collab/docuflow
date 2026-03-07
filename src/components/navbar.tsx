@@ -1,4 +1,3 @@
-
 "use client"
 
 import Link from 'next/link';
@@ -85,7 +84,7 @@ export function Navbar() {
       label: "AI Productivity",
       items: [
         { href: "/ai-studio", icon: Languages, title: "Translator", desc: "Linguistic shift" },
-        { href: "/ai-studio", icon: MessageSquare, title: "Doc Intel", desc: "Asset interrogation" },
+        { href: "/ai-studio", icon: MessageSquare, title: "Doc Intel", desc: "Asset chat" },
         { href: "/scan-to-pdf", icon: Camera, title: "Scan to PDF", desc: "Direct capture" },
         { href: "/analyze", icon: Search, title: "Deep Inspect", desc: "Metadata analysis" },
       ]
