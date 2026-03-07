@@ -1,3 +1,4 @@
+
 "use client"
 
 import * as React from 'react';
@@ -39,7 +40,8 @@ import {
   BookOpen,
   Briefcase,
   FileBadge,
-  FileText
+  FileText,
+  ArrowRightLeft
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
@@ -53,13 +55,23 @@ export default function Home() {
 
   const toolCategories = [
     {
-      label: "AI Writing Suite",
+      label: "AI Intelligence Suite",
       description: "Generative protocols for structural content evolution.",
       items: [
         { title: "Paraphraser", desc: "Re-engineer text.", icon: RefreshCcw, href: "/ai-studio" },
         { title: "AI Summarizer", desc: "Executive distillation.", icon: Activity, href: "/ai-studio" },
         { title: "Grammar Check", desc: "Industrial proofing.", icon: CheckCircle2, href: "/ai-studio" },
         { title: "Essay Writer", desc: "Structured drafts.", icon: BookOpen, href: "/ai-studio" },
+      ]
+    },
+    {
+      label: "Transformation Hub",
+      description: "Lossless conversion between industrial formats.",
+      items: [
+        { title: "Transformation Engine", desc: "Category Gateway.", icon: ArrowRightLeft, href: "/convert" },
+        { title: "PDF to Word", desc: "Editable DOCX export.", icon: FileText, href: "/convert?type=pdf-to-word" },
+        { title: "Word to PDF", desc: "Standardize Word.", icon: FilePenLine, href: "/convert?type=word-to-pdf" },
+        { title: "PDF to Excel", desc: "Table reconstruction.", icon: FileText, href: "/convert?type=pdf-to-excel" },
       ]
     },
     {
@@ -78,18 +90,8 @@ export default function Home() {
       items: [
         { title: "Scan to PDF", desc: "Direct camera capture.", icon: Camera, href: "/scan-to-pdf" },
         { title: "Crop PDF", desc: "Trim page margins.", icon: Crop, href: "/crop" },
-        { title: "Reorder & Rotate", desc: "Change page structure.", icon: RotateCw, href: "/organize" },
+        { title: "Visual Organizer", desc: "Reorder & Rotate.", icon: RotateCw, href: "/organize" },
         { title: "Add Numbers", desc: "Sequential counters.", icon: Hash, href: "/numbers" },
-      ]
-    },
-    {
-      label: "Convert & Export",
-      description: "Lossless transformation between formats.",
-      items: [
-        { title: "PDF to Word", desc: "Editable DOCX export.", icon: FileText, href: "/convert?type=pdf-to-word" },
-        { title: "PDF to PowerPoint", desc: "Professional slides.", icon: Presentation, href: "/convert?type=pdf-to-ppt" },
-        { title: "Word to PDF", desc: "Standardize Word.", icon: FilePenLine, href: "/convert?type=word-to-pdf" },
-        { title: "PPT to PDF", desc: "Presentation conversion.", icon: FileUp, href: "/convert?type=ppt-to-pdf" },
       ]
     },
     {
@@ -261,26 +263,10 @@ export default function Home() {
 
                 <div className="grid gap-8">
                   {[
-                    { 
-                      title: "Local Sandboxing", 
-                      desc: "All document binary streams are isolated within your browser's private memory pool. No cloud-persistence protocol exists.", 
-                      icon: Cpu 
-                    },
-                    { 
-                      title: "Memory-Level AES", 
-                      desc: "256-bit encryption hardening applied to all active document buffers during the transformation sequence.", 
-                      icon: Lock 
-                    },
-                    { 
-                      title: "Automated Shredding", 
-                      desc: "Zero-latency purging. Every memory bit utilized during your session is overwritten upon process completion or tab closure.", 
-                      icon: RefreshCcw 
-                    },
-                    { 
-                      title: "ISO Standard Archival", 
-                      desc: "Reconstructions adhere to ISO 32000 and 19005 standards, ensuring structural integrity without tracking meta-data.", 
-                      icon: Globe 
-                    }
+                    { title: "Local Sandboxing", desc: "All document binary streams are isolated within your browser's private memory pool. No cloud-persistence protocol exists.", icon: Cpu },
+                    { title: "Memory-Level AES", desc: "256-bit encryption hardening applied to all active document buffers during the transformation sequence.", icon: Lock },
+                    { title: "Automated Shredding", desc: "Zero-latency purging. Every memory bit utilized during your session is overwritten upon process completion or tab closure.", icon: RefreshCcw },
+                    { title: "ISO Standard Archival", desc: "Reconstructions adhere to ISO 32000 and 19005 standards, ensuring structural integrity without tracking meta-data.", icon: Globe }
                   ].map((item) => (
                     <div key={item.title} className="flex gap-5 group">
                       <div className="w-12 h-12 shrink-0 bg-white/5 rounded-2xl flex items-center justify-center border border-white/10 group-hover:bg-primary transition-all">
@@ -313,10 +299,8 @@ export default function Home() {
                 <div className="aspect-square bg-white/5 rounded-[4rem] flex items-center justify-center p-20 backdrop-blur-3xl border border-white/10 shadow-2xl relative overflow-hidden group">
                    <ShieldCheck className="w-full h-full text-primary/20 group-hover:scale-110 transition-transform duration-[2000ms]" />
                    <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-accent/20 pointer-events-none" />
-                   
                    <div className="absolute inset-x-0 h-1 bg-primary/20 blur-sm animate-scan" />
                 </div>
-                
                 <div className="absolute -bottom-10 -right-10 w-48 h-48 bg-primary/20 rounded-full blur-[80px] pointer-events-none" />
                 <div className="absolute -top-10 -left-10 w-48 h-48 bg-accent/20 rounded-full blur-[80px] pointer-events-none" />
               </div>
@@ -336,11 +320,6 @@ export default function Home() {
               <p className="text-[10px] leading-relaxed font-bold opacity-40 uppercase tracking-[0.2em] max-w-xs">
                 The industrial benchmark for local-first document intelligence. Engineered for high-fidelity assets and mission-critical privacy.
               </p>
-              <div className="flex gap-4">
-                 <div className="w-8 h-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center hover:bg-primary transition-colors cursor-pointer group">
-                    <Globe className="h-4 w-4 opacity-40 group-hover:opacity-100" />
-                 </div>
-              </div>
             </div>
             
             <div className="space-y-8">
@@ -376,10 +355,10 @@ export default function Home() {
                 <div className="h-px w-8 bg-primary/30" />
               </div>
               <ul className="space-y-4 text-[11px] font-black uppercase tracking-[0.2em] italic">
-                <li><Link href="/about" className="hover:text-primary transition-colors flex items-center gap-2 group"><div className="w-1 h-1 bg-primary/20 rounded-full group-hover:bg-primary" /> <Info className="h-3 w-3" /> About Mission</Link></li>
-                <li><Link href="/contact" className="hover:text-primary transition-colors flex items-center gap-2 group"><div className="w-1 h-1 bg-primary/20 rounded-full group-hover:bg-primary" /> <MessageSquare className="h-3 w-3" /> Contact Gateway</Link></li>
-                <li><Link href="/privacy" className="hover:text-primary transition-colors flex items-center gap-2 group"><div className="w-1 h-1 bg-primary/20 rounded-full group-hover:bg-primary" /> <ShieldCheck className="h-3 w-3" /> Privacy Shield</Link></li>
-                <li><Link href="/terms" className="hover:text-primary transition-colors flex items-center gap-2 group"><div className="w-1 h-1 bg-primary/20 rounded-full group-hover:bg-primary" /> <Scale className="h-3 w-3" /> Terms of Operation</Link></li>
+                <li><Link href="/about" className="hover:text-primary transition-colors flex items-center gap-2 group"><div className="w-1 h-1 bg-primary/20 rounded-full group-hover:bg-primary" /> About Mission</Link></li>
+                <li><Link href="/contact" className="hover:text-primary transition-colors flex items-center gap-2 group"><div className="w-1 h-1 bg-primary/20 rounded-full group-hover:bg-primary" /> Contact Gateway</Link></li>
+                <li><Link href="/privacy" className="hover:text-primary transition-colors flex items-center gap-2 group"><div className="w-1 h-1 bg-primary/20 rounded-full group-hover:bg-primary" /> Privacy Shield</Link></li>
+                <li><Link href="/terms" className="hover:text-primary transition-colors flex items-center gap-2 group"><div className="w-1 h-1 bg-primary/20 rounded-full group-hover:bg-primary" /> Terms of Operation</Link></li>
               </ul>
             </div>
           </div>

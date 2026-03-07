@@ -1,3 +1,4 @@
+
 "use client"
 
 import Link from 'next/link';
@@ -32,7 +33,8 @@ import {
   MessageSquare,
   RefreshCcw,
   FileBadge,
-  PenLine,
+  ArrowRightLeft,
+  Settings2,
   Zap
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -60,7 +62,7 @@ export function Navbar() {
 
   const categories = [
     {
-      label: "AI Writing Suite",
+      label: "AI Intelligence",
       items: [
         { href: "/ai-studio", icon: RefreshCcw, title: "Paraphraser", desc: "Re-engineer text" },
         { href: "/ai-studio", icon: Activity, title: "Summarizer", desc: "Executive summary" },
@@ -78,21 +80,21 @@ export function Navbar() {
       ]
     },
     {
-      label: "Layout & Format",
+      label: "Transformation Hub",
       items: [
-        { href: "/crop", icon: Crop, title: "Crop PDF", desc: "Trim page margins" },
-        { href: "/organize", icon: RotateCw, title: "Reorder & Rotate", desc: "Change structure" },
-        { href: "/scan-to-pdf", icon: Camera, title: "Scan to PDF", desc: "Camera capture" },
-        { href: "/merge", icon: Merge, title: "Merge PDF", desc: "Combine multiple PDFs" },
+        { href: "/convert", icon: ArrowRightLeft, title: "Convert Engine", desc: "Cross-format inversion" },
+        { href: "/convert?type=word-to-pdf", icon: FilePenLine, title: "Word to PDF", desc: "Standardize DOCX" },
+        { href: "/convert?type=pdf-to-word", icon: FileText, title: "PDF to Word", desc: "Recover editable text" },
+        { href: "/convert?type=pdf-to-jpg", icon: ImageIcon, title: "PDF to JPG", desc: "Export page streams" },
       ]
     },
     {
-      label: "Optimize & Secure",
+      label: "Layout & Security",
       items: [
-        { href: "/compress", icon: Maximize, title: "Compress PDF", desc: "Reduce file size" },
-        { href: "/secure", icon: Lock, title: "Password Protect", desc: "Encrypt with key" },
-        { href: "/protect", icon: ShieldCheck, title: "Privacy Shield", desc: "Hardened metadata" },
-        { href: "/protect?mode=unlock", icon: Unlock, title: "Unlock", desc: "Remove restrictions" },
+        { href: "/organize", icon: RotateCw, title: "Visual Organizer", desc: "Reorder & Rotate" },
+        { href: "/crop", icon: Crop, title: "Precision Crop", desc: "Trim page margins" },
+        { href: "/secure", icon: Lock, title: "Secure Lock", desc: "Identity hardening" },
+        { href: "/protect", icon: ShieldCheck, title: "Privacy Shield", desc: "Metadata erasure" },
       ]
     }
   ];
@@ -112,7 +114,7 @@ export function Navbar() {
             <DropdownMenu>
               <DropdownMenuTrigger className="flex items-center gap-1.5 text-[9px] font-black uppercase tracking-widest text-accent hover:text-primary transition-all outline-none">
                 <LayoutDashboard className="h-3 w-3 text-primary" />
-                All Tools <ChevronDown className="h-2.5 w-2.5 opacity-40" />
+                All Protocols <ChevronDown className="h-2.5 w-2.5 opacity-40" />
               </DropdownMenuTrigger>
               <DropdownMenuContent align="start" className="w-[850px] p-5 rounded-2xl shadow-2xl border-white/20 grid grid-cols-4 gap-5 bg-white/95 backdrop-blur-xl mt-2">
                 {categories.map((cat) => (
@@ -143,11 +145,11 @@ export function Navbar() {
             <Link href="/ai-studio" className="flex items-center gap-1.5 text-[9px] font-black uppercase tracking-widest text-primary hover:text-primary/80 transition-all group">
               <BrainCircuit className="h-3 w-3" /> AI Studio
             </Link>
+            <Link href="/convert" className="flex items-center gap-1.5 text-[9px] font-black uppercase tracking-widest text-accent/80 hover:text-accent transition-all group">
+              <ArrowRightLeft className="h-3 w-3 text-primary/60 group-hover:text-primary transition-colors" /> Convert
+            </Link>
             <Link href="/merge" className="flex items-center gap-1.5 text-[9px] font-black uppercase tracking-widest text-accent/80 hover:text-accent transition-all group">
               <Merge className="h-3 w-3 text-primary/60 group-hover:text-primary transition-colors" /> Merge
-            </Link>
-            <Link href="/convert?type=word-to-pdf" className="flex items-center gap-1.5 text-[9px] font-black uppercase tracking-widest text-accent/80 hover:text-accent transition-all group">
-              <FilePenLine className="h-3 w-3 text-primary/60 group-hover:text-primary transition-colors" /> Convert
             </Link>
           </div>
         </div>
