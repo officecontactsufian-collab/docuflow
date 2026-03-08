@@ -23,13 +23,19 @@ import {
   LayoutGrid,
   Zap,
   Cpu,
-  History
+  History,
+  ChevronLeft,
+  ChevronRight,
+  Layers,
+  Settings2
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { executeConversionAction } from './actions';
 import { PDFPreview } from '@/components/pdf-preview';
 import { cn } from '@/lib/utils';
+import { PDFDocument } from 'pdf-lib';
+import { Label } from '@/components/ui/label';
 
 type ConversionType = 
   | 'word-to-pdf' | 'jpg-to-pdf' | 'excel-to-pdf' | 'ppt-to-pdf' | 'html-to-pdf'
@@ -70,6 +76,8 @@ function ConvertContent() {
   const [isProcessing, setIsProcessing] = React.useState(false);
   const [isDone, setIsDone] = React.useState(false);
   const [downloadUrl, setDownloadUrl] = React.useState<string | null>(null);
+  const [targetPage, setTargetPage] = React.useState(1);
+  const [totalPages, setTotalPages] = React.useState(1);
   const { toast } = useToast();
 
   React.useEffect(() => {
@@ -78,12 +86,33 @@ function ConvertContent() {
       setCurrentType(type);
       setIsDone(false);
       setSelectedFile(null);
+      setTargetPage(1);
+      setTotalPages(1);
     } else {
       setCurrentType(null);
     }
   }, [searchParams]);
 
   const activeConfig = TOOLS.find(t => t.id === currentType);
+
+  const handleFileSelected = async (files: File[]) => {
+    const file = files[0] || null;
+    if (!file) return;
+
+    if (file.type === 'application/pdf' && currentType === 'pdf-to-jpg') {
+      try {
+        const buffer = await file.arrayBuffer();
+        const pdf = await PDFDocument.load(buffer, { ignoreEncryption: true });
+        setTotalPages(pdf.getPageCount());
+      } catch (e) {
+        console.error(e);
+      }
+    }
+    
+    setSelectedFile(file);
+    setIsDone(false);
+    setDownloadUrl(null);
+  };
 
   const handleConvert = async () => {
     if (!selectedFile || !currentType) return;
@@ -98,8 +127,8 @@ function ConvertContent() {
       
       const base64Data = await base64Promise;
       
-      // CALL INDUSTRIAL BACKEND ACTION
-      const { resultBase64 } = await executeConversionAction(base64Data, currentType, selectedFile.name);
+      // CALL INDUSTRIAL BACKEND ACTION with targetPage parameter
+      const { resultBase64 } = await executeConversionAction(base64Data, currentType, selectedFile.name, targetPage);
       
       setDownloadUrl(resultBase64);
       setIsProcessing(false);
@@ -127,6 +156,8 @@ function ConvertContent() {
     setIsDone(false);
     setSelectedFile(null);
     setDownloadUrl(null);
+    setTargetPage(1);
+    setTotalPages(1);
   };
 
   const switchProtocol = (type: ConversionType) => {
@@ -271,7 +302,7 @@ function ConvertContent() {
               {!selectedFile ? (
                 <FileDropzone 
                   key={currentType} 
-                  onFilesSelected={(files) => setSelectedFile(files[0] || null)} 
+                  onFilesSelected={handleFileSelected} 
                   maxFiles={1} 
                   accept={activeConfig?.accept}
                   isLoading={isProcessing} 
@@ -280,7 +311,7 @@ function ConvertContent() {
               ) : (
                 <div className="grid lg:grid-cols-12 gap-12 w-full">
                   <div className="lg:col-span-7">
-                    <PDFPreview file={selectedFile} title="Source Asset Verification" />
+                    <PDFPreview file={selectedFile} title="Source Asset Verification" currentPage={currentType === 'pdf-to-jpg' ? targetPage : undefined} />
                   </div>
                   <div className="lg:col-span-5 space-y-6">
                     <div className="flex items-center gap-4 p-5 bg-white border border-accent/10 rounded-[1.5rem] shadow-2xl w-full">
@@ -292,6 +323,44 @@ function ConvertContent() {
                         <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest">{(selectedFile.size / 1024 / 1024).toFixed(2)} MB • VERIFIED SOURCE</p>
                       </div>
                     </div>
+
+                    {currentType === 'pdf-to-jpg' && (
+                      <Card className="border-none shadow-2xl rounded-[1.5rem] bg-white overflow-hidden">
+                        <CardHeader className="p-6 pb-2">
+                          <div className="flex items-center gap-2">
+                            <Settings2 className="h-4 w-4 text-primary" />
+                            <CardTitle className="text-xs font-black uppercase italic tracking-widest text-accent">Protocol Scope</CardTitle>
+                          </div>
+                        </CardHeader>
+                        <CardContent className="p-6 pt-2 space-y-4">
+                          <Label className="text-[9px] font-black uppercase text-accent/40 tracking-[0.2em]">Target Page Segment</Label>
+                          <div className="flex items-center gap-3">
+                            <Button 
+                              variant="outline" 
+                              size="icon" 
+                              className="h-10 w-10 rounded-xl"
+                              onClick={() => setTargetPage(prev => Math.max(1, prev - 1))}
+                              disabled={targetPage <= 1}
+                            >
+                              <ChevronLeft className="h-4 w-4" />
+                            </Button>
+                            <div className="flex-1 h-10 bg-muted/30 rounded-xl flex items-center justify-center font-black text-xs text-accent">
+                              {targetPage} / {totalPages}
+                            </div>
+                            <Button 
+                              variant="outline" 
+                              size="icon" 
+                              className="h-10 w-10 rounded-xl"
+                              onClick={() => setTargetPage(prev => Math.min(totalPages, prev + 1))}
+                              disabled={targetPage >= totalPages}
+                            >
+                              <ChevronRight className="h-4 w-4" />
+                            </Button>
+                          </div>
+                          <p className="text-[8px] font-bold text-accent/30 uppercase text-center italic">Only the selected page will be rasterized.</p>
+                        </CardContent>
+                      </Card>
+                    )}
                     
                     <Button 
                       size="lg" 
@@ -343,7 +412,7 @@ function ConvertContent() {
                       {activeConfig && <activeConfig.icon className="h-5 w-5" />}
                     </div>
                     <span className="text-[10px] font-bold truncate flex-1 uppercase text-accent/60 italic">
-                      {selectedFile?.name.split('.')[0]}{getOutputExtension()}
+                      {selectedFile?.name.split('.')[0]}{currentType === 'pdf-to-jpg' ? `_page_${targetPage}` : ''}{getOutputExtension()}
                     </span>
                   </div>
                   <Button 
@@ -352,7 +421,7 @@ function ConvertContent() {
                       if (downloadUrl) {
                         const link = document.createElement('a');
                         link.href = downloadUrl;
-                        link.download = `${selectedFile?.name.split('.')[0]}${getOutputExtension()}`;
+                        link.download = `${selectedFile?.name.split('.')[0]}${currentType === 'pdf-to-jpg' ? `_page_${targetPage}` : ''}${getOutputExtension()}`;
                         link.click();
                       }
                     }} 

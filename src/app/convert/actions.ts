@@ -15,7 +15,6 @@ import PptxGenJS from 'pptxgenjs';
  * @fileOverview DOCFLOW Industrial Transformation Actions
  * Executes high-fidelity document reconstruction on the backend.
  * Uses in-memory processing with zero-retention architecture.
- * Fixed Jimp font loading for serverless environments.
  */
 
 type ConversionType = 
@@ -29,7 +28,12 @@ function sanitizeText(text: string) {
   return text.replace(/[^\x00-\x7F]/g, "").replace(/\r/g, "");
 }
 
-export async function executeConversionAction(base64Data: string, type: ConversionType, fileName: string): Promise<{ resultBase64: string; mimeType: string }> {
+export async function executeConversionAction(
+  base64Data: string, 
+  type: ConversionType, 
+  fileName: string,
+  pageNumber: number = 1
+): Promise<{ resultBase64: string; mimeType: string }> {
   try {
     const buffer = Buffer.from(base64Data.split(',')[1] || base64Data, 'base64');
     let resultBuffer: Buffer;
@@ -103,36 +107,37 @@ export async function executeConversionAction(base64Data: string, type: Conversi
       case 'pdf-to-jpg': {
         const pdfDoc = await PDFDocument.load(buffer, { ignoreEncryption: true });
         const pages = pdfDoc.getPages();
+        const targetPageIndex = Math.min(Math.max(0, pageNumber - 1), pages.length - 1);
+        const page = pages[targetPageIndex];
+        
         let extractedImageBuffer: Buffer | null = null;
 
-        for (const page of pages) {
-          const resources = (page as any).node.get(PDFName.of('Resources'));
-          if (resources instanceof PDFDict) {
-            const xObjects = resources.get(PDFName.of('XObject'));
-            if (xObjects instanceof PDFDict) {
-              const names = xObjects.keys();
-              for (const name of names) {
-                const obj = xObjects.get(name);
-                if (obj instanceof PDFRawStream) {
-                  const subtype = (obj as any).get(PDFName.of('Subtype'));
-                  if (subtype === PDFName.of('Image')) {
-                    extractedImageBuffer = Buffer.from(obj.contents);
-                    break;
-                  }
+        // Attempt image extraction from specific page
+        const resources = (page as any).node.get(PDFName.of('Resources'));
+        if (resources instanceof PDFDict) {
+          const xObjects = resources.get(PDFName.of('XObject'));
+          if (xObjects instanceof PDFDict) {
+            const names = xObjects.keys();
+            for (const name of names) {
+              const obj = xObjects.get(name);
+              if (obj instanceof PDFRawStream) {
+                const subtype = (obj as any).get(PDFName.of('Subtype'));
+                if (subtype === PDFName.of('Image')) {
+                  extractedImageBuffer = Buffer.from(obj.contents);
+                  break;
                 }
               }
             }
           }
-          if (extractedImageBuffer) break;
         }
 
         if (extractedImageBuffer) {
           resultBuffer = extractedImageBuffer;
           mimeType = 'image/jpeg';
         } else {
+          // Rasterization Fallback
           const data = await pdfParse(buffer);
           const image = new Jimp(1200, 1600, 0xFFFFFFFF);
-          // FIXED: Load font from URL to avoid local ENOENT issues in Next.js environment
           const font = await Jimp.loadFont(JIMP_FONT_URL);
           const text = sanitizeText(data.text).substring(0, 5000);
           image.print(font, 80, 80, text, 1040);
