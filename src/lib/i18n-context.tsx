@@ -32,7 +32,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     if (saved && translations[saved]) {
       setLocale(saved);
     } else {
-      const browserLang = navigator.language.split('-')[0] as Locale;
+      const browserLang = typeof navigator !== 'undefined' ? navigator.language.split('-')[0] as Locale : 'en';
       if (translations[browserLang]) setLocale(browserLang);
     }
     setIsHydrated(true);
@@ -69,7 +69,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
 
   return (
     <LanguageContext.Provider value={{ locale, setLocale, t, isHydrated }}>
-      <div suppressHydrationWarning>{children}</div>
+      <div suppressHydrationWarning>{isHydrated ? children : <div className="opacity-0">{children}</div>}</div>
     </LanguageContext.Provider>
   );
 }
