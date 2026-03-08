@@ -33,10 +33,8 @@ import {
   ArrowRightLeft,
   Image as ImageIcon,
   Table,
-  Presentation,
   Eraser,
   Wrench,
-  FileUp,
   Scissors
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -51,11 +49,14 @@ import * as React from 'react';
 import { useUser, useAuth } from '@/firebase';
 import { signOut } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
+import { useTranslation } from '@/lib/i18n-context';
+import { LanguageSwitcher } from './language-switcher';
 
 export function Navbar() {
   const { user } = useUser();
   const auth = useAuth();
   const router = useRouter();
+  const { t, isHydrated } = useTranslation();
 
   const handleLogout = async () => {
     await signOut(auth);
@@ -64,57 +65,57 @@ export function Navbar() {
 
   const categories = [
     {
-      label: "AI Writing Suite",
+      label: t('nav.ai_writing'),
       items: [
-        { href: "/ai-studio", icon: RefreshCcw, title: "Paraphraser", desc: "Re-engineer text" },
-        { href: "/ai-studio", icon: Activity, title: "Summarizer", desc: "Executive summary" },
-        { href: "/ai-studio", icon: CheckCircle2, title: "Grammar Check", desc: "Industrial proofing" },
-        { href: "/ai-studio", icon: BookOpen, title: "Essay Writer", desc: "Structured drafts" },
+        { href: "/ai-studio", icon: RefreshCcw, title: t('tools.paraphraser.title'), desc: t('tools.paraphraser.desc') },
+        { href: "/ai-studio", icon: Activity, title: t('tools.summarizer.title'), desc: t('tools.summarizer.desc') },
+        { href: "/ai-studio", icon: CheckCircle2, title: t('tools.grammar.title'), desc: t('tools.grammar.desc') },
+        { href: "/ai-studio", icon: BookOpen, title: t('tools.essay.title'), desc: t('tools.essay.desc') },
       ]
     },
     {
-      label: "AI Career Suite",
+      label: t('nav.ai_career'),
       items: [
-        { href: "/ai-studio", icon: Briefcase, title: "Resume Builder", desc: "Profile engineering" },
-        { href: "/ai-studio", icon: FileBadge, title: "Cover Letter", desc: "Intro architect" },
-        { href: "/ai-studio", icon: Mail, title: "Email Architect", desc: "Corporate drafts" },
-        { href: "/sign", icon: Signature, title: "Digital Sign", desc: "Apply signatures" },
+        { href: "/ai-studio", icon: Briefcase, title: t('tools.resume.title'), desc: t('tools.resume.desc') },
+        { href: "/ai-studio", icon: FileBadge, title: t('tools.cover_letter.title'), desc: t('tools.cover_letter.desc') },
+        { href: "/ai-studio", icon: Mail, title: t('tools.email.title'), desc: t('tools.email.desc') },
+        { href: "/sign", icon: Signature, title: t('tools.sign.title'), desc: t('tools.sign.desc') },
       ]
     },
     {
-      label: "AI Productivity",
+      label: t('nav.ai_productivity'),
       items: [
-        { href: "/ai-studio", icon: Languages, title: "Translator", desc: "Linguistic shift" },
-        { href: "/ai-studio", icon: MessageSquare, title: "Doc Intel", desc: "Asset chat" },
-        { href: "/scan-to-pdf", icon: Camera, title: "Scan to PDF", desc: "Direct capture" },
-        { href: "/analyze", icon: Search, title: "Deep Inspect", desc: "Metadata analysis" },
+        { href: "/ai-studio", icon: Languages, title: t('tools.translator.title'), desc: t('tools.translator.desc') },
+        { href: "/ai-studio", icon: MessageSquare, title: t('tools.doc_intel.title'), desc: t('tools.doc_intel.desc') },
+        { href: "/scan-to-pdf", icon: Camera, title: t('tools.scan.title'), desc: t('tools.scan.desc') },
+        { href: "/analyze", icon: Search, title: t('tools.inspect.title'), desc: t('tools.inspect.desc') },
       ]
     },
     {
-      label: "Layout & Capture",
+      label: t('nav.layout'),
       items: [
-        { href: "/crop", icon: Crop, title: "Precision Crop", desc: "Trim page margins" },
-        { href: "/organize", icon: RotateCw, title: "Visual Organizer", desc: "Reorder & Rotate" },
-        { href: "/numbers", icon: Hash, title: "Add Numbers", desc: "Sequential counters" },
-        { href: "/merge", icon: Merge, title: "Merge PDF", desc: "Combine assets" },
+        { href: "/crop", icon: Crop, title: t('tools.crop.title'), desc: t('tools.crop.desc') },
+        { href: "/organize", icon: RotateCw, title: t('tools.organize.title'), desc: t('tools.organize.desc') },
+        { href: "/numbers", icon: Hash, title: t('tools.numbers.title'), desc: t('tools.numbers.desc') },
+        { href: "/merge", icon: Merge, title: t('tools.merge.title'), desc: t('tools.merge.desc') },
       ]
     },
     {
-      label: "Convert & Export",
+      label: t('nav.convert'),
       items: [
-        { href: "/convert", icon: ArrowRightLeft, title: "Convert Hub", desc: "Format inversion" },
-        { href: "/convert?type=pdf-to-word", icon: FileText, title: "PDF to Word", desc: "Recover text" },
-        { href: "/convert?type=word-to-pdf", icon: FilePenLine, title: "Word to PDF", desc: "Standardize DOCX" },
-        { href: "/convert?type=pdf-to-excel", icon: Table, title: "PDF to Excel", desc: "Table recovery" },
+        { href: "/convert", icon: ArrowRightLeft, title: t('tools.convert_hub.title'), desc: t('tools.convert_hub.desc') },
+        { href: "/convert?type=pdf-to-word", icon: FileText, title: t('tools.pdf_to_word.title'), desc: t('tools.pdf_to_word.desc') },
+        { href: "/convert?type=word-to-pdf", icon: FilePenLine, title: t('tools.word_to_pdf.title'), desc: t('tools.word_to_pdf.desc') },
+        { href: "/convert?type=pdf-to-excel", icon: Table, title: t('tools.pdf_to_excel.title'), desc: t('tools.pdf_to_excel.desc') },
       ]
     },
     {
-      label: "Security & Shield",
+      label: t('nav.security'),
       items: [
-        { href: "/secure", icon: Lock, title: "Protect PDF", desc: "Secure encryption" },
-        { href: "/protect", icon: ShieldCheck, title: "Privacy Shield", desc: "Metadata purge" },
-        { href: "/protect?mode=unlock", icon: Unlock, title: "Unlock PDF", desc: "Strip restrictions" },
-        { href: "/sanitize", icon: Eraser, title: "Deep cleaning" },
+        { href: "/secure", icon: Lock, title: t('tools.protect.title'), desc: t('tools.protect.desc') },
+        { href: "/protect", icon: ShieldCheck, title: t('tools.privacy.title'), desc: t('tools.privacy.desc') },
+        { href: "/protect?mode=unlock", icon: Unlock, title: t('tools.unlock.title'), desc: t('tools.unlock.desc') },
+        { href: "/sanitize", icon: Eraser, title: t('tools.sanitize.title'), desc: t('tools.sanitize.desc') },
       ]
     }
   ];
@@ -134,7 +135,8 @@ export function Navbar() {
             <DropdownMenu>
               <DropdownMenuTrigger className="flex items-center gap-1.5 text-[9px] font-black uppercase tracking-widest text-accent hover:text-primary transition-all outline-none">
                 <LayoutDashboard className="h-3 w-3 text-primary" />
-                All Protocols <ChevronDown className="h-2.5 w-2.5 opacity-40" />
+                <span suppressHydrationWarning>{isHydrated ? t('common.all_protocols') : 'All Protocols'}</span> 
+                <ChevronDown className="h-2.5 w-2.5 opacity-40" />
               </DropdownMenuTrigger>
               <DropdownMenuContent align="start" className="w-[1000px] p-6 rounded-2xl shadow-2xl border-white/20 grid grid-cols-3 gap-8 bg-white/95 backdrop-blur-xl mt-2">
                 {categories.map((cat) => (
@@ -163,24 +165,26 @@ export function Navbar() {
             </DropdownMenu>
 
             <Link href="/ai-studio" className="flex items-center gap-1.5 text-[9px] font-black uppercase tracking-widest text-primary hover:text-primary/80 transition-all group">
-              <BrainCircuit className="h-3 w-3" /> AI Studio
+              <BrainCircuit className="h-3 w-3" /> {isHydrated ? t('nav.ai_studio') : 'AI Studio'}
             </Link>
             <Link href="/convert" className="flex items-center gap-1.5 text-[9px] font-black uppercase tracking-widest text-accent/80 hover:text-accent transition-all group">
-              <ArrowRightLeft className="h-3 w-3 text-primary/60 group-hover:text-primary transition-colors" /> Convert
+              <ArrowRightLeft className="h-3 w-3 text-primary/60 group-hover:text-primary transition-colors" /> {isHydrated ? t('nav.convert') : 'Convert'}
             </Link>
             <Link href="/merge" className="flex items-center gap-1.5 text-[9px] font-black uppercase tracking-widest text-accent/80 hover:text-accent transition-all group">
-              <Merge className="h-3 w-3 text-primary/60 group-hover:text-primary transition-colors" /> Merge
+              <Merge className="h-3 w-3 text-primary/60 group-hover:text-primary transition-colors" /> {isHydrated ? t('nav.merge') : 'Merge'}
             </Link>
           </div>
         </div>
 
         <div className="flex items-center gap-4">
           <div className="hidden sm:flex items-center gap-6 mr-2">
-            <Link href="/pricing" className="text-[9px] font-black uppercase tracking-widest text-accent/60 hover:text-primary transition-all">Pricing</Link>
+            <Link href="/pricing" className="text-[9px] font-black uppercase tracking-widest text-accent/60 hover:text-primary transition-all">{isHydrated ? t('common.pricing') : 'Pricing'}</Link>
             <Link href="/analyze" className="flex items-center gap-1.5 text-[9px] font-black uppercase tracking-widest text-accent/80 hover:text-accent transition-all">
-              <Search className="h-3 w-3 text-primary" /> Inspect
+              <Search className="h-3 w-3 text-primary" /> {isHydrated ? t('common.inspect') : 'Inspect'}
             </Link>
           </div>
+          
+          <LanguageSwitcher />
           
           {user?.email === 'office.contact.sufian@gmail.com' && (
             <DropdownMenu>
