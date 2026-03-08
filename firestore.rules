@@ -1,93 +1,46 @@
+
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    /**
-     * PDF Spark Security Rules
-     *
-     * Core Philosophy:
-     * This ruleset implements a strict User-Ownership model for private data and a Structural 
-     * Segregation model for public sharing. Private documents and AI-generated results are 
-     * nested under unique user paths, ensuring that only the authenticated owner can access 
-     * their personal data. Publicly shared results are moved to a dedicated top-level 
-     * collection, allowing for high-performance public read access without exposing 
-     * sensitive user directories.
-     *
-     * Data Structure:
-     * - /users/{userId}/documents/{documentId}: Private PDF metadata owned by the user.
-     * - /users/{userId}/documents/{documentId}/aiResults/{aiResultId}: Private analysis results.
-     * - /public_ai_results/{shareSlug}: Publicly accessible copies of AI results for sharing.
-     *
-     * Key Security Decisions:
-     * - Path-Based Authorization: User data access is primarily determined by the {userId} in the path.
-     * - Structural Segregation: Public and private data are kept in separate collections to 
-     *   prevent accidental data leakage and simplify list operations.
-     * - Denormalization for Authorization: Public results include an 'isPubliclyShareable' flag 
-     *   directly on the document to allow for independent, efficient public reads.
-     * - Relational Integrity: Rules enforce that internal document references (like documentId) 
-     *   match the hierarchical path during creation.
-     */
-
-    // --- Global Helper Functions ---
-
-    /** Checks if the request is made by an authenticated user. */
     function isSignedIn() {
       return request.auth != null;
     }
 
-    /** Checks if the authenticated user's ID matches the provided userId. */
     function isOwner(userId) {
       return isSignedIn() && request.auth.uid == userId;
     }
 
-    /** Checks if the document exists and the current user is the owner based on path. */
-    function isExistingOwner(userId) {
-      return resource != null && isOwner(userId);
-    }
-
-    // --- Collection Rules ---
-
-    /**
-     * @description Rules for private documents uploaded by users.
-     * @path /users/{userId}/documents/{documentId}
-     * @allow (create) if auth.uid == 'user_123' and path is /users/user_123/...
-     * @deny (list) if auth.uid == 'user_abc' and path is /users/user_xyz/...
-     * @principle Path-based ownership: Users have full CRUD over their own document subcollection.
-     */
     match /users/{userId}/documents/{documentId} {
       allow get, list: if isOwner(userId);
       allow create: if isOwner(userId);
-      allow update, delete: if isExistingOwner(userId);
-
-      /**
-       * @description Rules for AI-generated results linked to specific private documents.
-       * @path /users/{userId}/documents/{documentId}/aiResults/{aiResultId}
-       * @allow (get) if auth.uid == userId.
-       * @deny (create) if the internal 'documentId' field does not match the '{documentId}' in the path.
-       * @principle Relational integrity: Ensures private results are correctly linked to their parent document.
-       */
-      match /aiResults/{aiResultId} {
-        allow get, list: if isOwner(userId);
-        allow create: if isOwner(userId) && request.resource.data.documentId == documentId;
-        allow update: if isExistingOwner(userId) && request.resource.data.documentId == resource.data.documentId;
-        allow delete: if isExistingOwner(userId);
-      }
+      allow update, delete: if isOwner(userId);
     }
 
-    /**
-     * @description Rules for publicly shared AI results.
-     * @path /public_ai_results/{shareSlug}
-     * @allow (get) for any user if the document exists and is marked as shareable.
-     * @deny (list) for all users to prevent bulk scraping of results.
-     * @principle Structural Segregation: Provides a safe, read-only public entry point for shared content.
-     */
-    match /public_ai_results/{shareSlug} {
-      allow get: if resource.data.isPubliclyShareable == true;
-      allow list: if false;
+    match /users/{userId}/usageLogs/{logId} {
+      allow create: if isOwner(userId);
+      allow get, list: if isOwner(userId);
+    }
 
-      // CRITICAL: Cannot implement owner-only writes. The 'AIResult' entity is missing an 'ownerId' or 'authorId' field.
-      // This prevents us from verifying that the user creating/editing a public record is the owner of the source document.
-      allow create, update, delete: if false; // TODO: Add owner validation once the schema is updated with an ownership field (e.g., creatorId).
+    match /usageLogs/{logId} {
+      allow create: if isSignedIn();
+      allow get, list: if isSignedIn() && (request.auth.token.email == 'office.contact.sufian@gmail.com' || request.auth.uid == 'NNEu5gbMlVRKd094f3PuPO23jow2');
+    }
+
+    match /system/config {
+      allow get: if true;
+      allow update: if isSignedIn() && (request.auth.token.email == 'office.contact.sufian@gmail.com' || request.auth.uid == 'NNEu5gbMlVRKd094f3PuPO23jow2');
+    }
+
+    match /users/{userId} {
+      allow get: if isOwner(userId);
+      allow delete: if isSignedIn() && (request.auth.token.email == 'office.contact.sufian@gmail.com' || request.auth.uid == 'NNEu5gbMlVRKd094f3PuPO23jow2');
+    }
+
+    match /public_ai_results/{shareSlug} {
+      allow get: if true;
+      allow create: if isSignedIn() && request.resource.data.creatorId == request.auth.uid;
+      allow list: if false;
     }
   }
 }

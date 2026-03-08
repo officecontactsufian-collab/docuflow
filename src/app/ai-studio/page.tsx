@@ -1,3 +1,4 @@
+
 "use client"
 
 import * as React from 'react';
@@ -31,7 +32,12 @@ import {
   LayoutDashboard,
   Clock,
   Sparkles,
-  Image as ImageIcon
+  Share2,
+  Twitter,
+  Linkedin,
+  Facebook,
+  MessageCircle,
+  ExternalLink
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Card } from '@/components/ui/card';
@@ -39,11 +45,19 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { executeAIStudioAction } from './actions';
-import { useUser, useAuth, useFirestore, addDocumentNonBlocking } from '@/firebase';
+import { useUser, useAuth, useFirestore, addDocumentNonBlocking, setDocumentNonBlocking } from '@/firebase';
 import { cn } from '@/lib/utils';
 import mammoth from 'mammoth';
 import { signInAnonymously } from 'firebase/auth';
-import { collection, query, where, getDocs, Timestamp, limit, serverTimestamp } from 'firebase/firestore';
+import { collection, query, where, getDocs, Timestamp, limit, serverTimestamp, doc } from 'firebase/firestore';
+import { 
+  Dialog, 
+  DialogContent, 
+  DialogHeader, 
+  DialogTitle, 
+  DialogDescription,
+  DialogTrigger 
+} from '@/components/ui/dialog';
 
 type AIStudioTool = 'PARAPHRASE' | 'SUMMARIZE' | 'EMAIL' | 'TRANSLATE' | 'CHAT' | 'GRAMMAR' | 'ESSAY' | 'RESUME' | 'COVER_LETTER';
 
@@ -54,6 +68,7 @@ interface Message {
   tool?: AIStudioTool;
   timestamp: Date;
   fileName?: string;
+  shareSlug?: string;
 }
 
 interface ToolConfig {
@@ -98,6 +113,7 @@ export default function AIStudioPage() {
   const [selectedFile, setSelectedFile] = React.useState<File | null>(null);
   const [messages, setMessages] = React.useState<Message[]>([]);
   const [isProcessing, setIsProcessing] = React.useState(false);
+  const [isSharing, setIsSharing] = React.useState<string | null>(null);
   
   const chatEndRef = React.useRef<HTMLDivElement>(null);
   const activeConfig = TOOLS.find(t => t.id === activeTool)!;
@@ -116,6 +132,53 @@ export default function AIStudioPage() {
     const msgBuffer = new TextEncoder().encode(JSON.stringify(data));
     const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
     return Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, '0')).join('');
+  };
+
+  const slugify = (text: string) => {
+    return text
+      .toString()
+      .toLowerCase()
+      .trim()
+      .replace(/\s+/g, '-')
+      .replace(/[^\w-]+/g, '')
+      .replace(/--+/g, '-');
+  };
+
+  const handleShare = async (message: Message) => {
+    if (!user || !firestore || isSharing) return;
+    setIsSharing(message.id);
+
+    try {
+      const toolLabel = TOOLS.find(t => t.id === message.tool)?.label || "Result";
+      const slugBase = slugify(toolLabel);
+      const uniqueSuffix = Math.random().toString(36).substring(2, 8);
+      const shareSlug = `${slugBase}-${uniqueSuffix}`;
+
+      const publicRef = doc(firestore, 'public_ai_results', shareSlug);
+      await setDocumentNonBlocking(publicRef, {
+        creatorId: user.uid,
+        toolName: toolLabel,
+        generatedContent: message.content,
+        shareSlug: shareSlug,
+        createdAt: serverTimestamp(),
+        isPubliclyShareable: true
+      }, { merge: true });
+
+      setMessages(prev => prev.map(msg => 
+        msg.id === message.id ? { ...msg, shareSlug } : msg
+      ));
+
+      toast({ title: "Result Published", description: "Public share link generated successfully." });
+    } catch (e: any) {
+      toast({ variant: "destructive", title: "Sharing Failed", description: e.message });
+    } finally {
+      setIsSharing(null);
+    }
+  };
+
+  const getShareUrl = (slug: string) => {
+    if (typeof window === 'undefined') return '';
+    return `${window.location.origin}/share/${slug}`;
   };
 
   const handleDeploy = async () => {
@@ -177,7 +240,6 @@ export default function AIStudioPage() {
       if (validCache) {
         result = validCache.data().aiResult;
       } else {
-        // FREE UNLIMITED ACCESS - NO DAILY LIMIT
         const response = await executeAIStudioAction({ ...inputPayload, fileDataUri });
         result = response.result;
 
@@ -371,6 +433,72 @@ export default function AIStudioPage() {
                                >
                                  <Copy className="h-3.5 w-3.5" />
                                </button>
+                               
+                               <Dialog>
+                                 <DialogTrigger asChild>
+                                   <button 
+                                    onClick={() => !msg.shareSlug && handleShare(msg)}
+                                    className="p-2 rounded-xl bg-muted/30 text-accent/20 hover:text-primary hover:bg-primary/5 transition-all"
+                                    title="Share Protocol Result"
+                                   >
+                                     {isSharing === msg.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Share2 className="h-3.5 w-3.5" />}
+                                   </button>
+                                 </DialogTrigger>
+                                 <DialogContent className="rounded-[2.5rem] p-8 max-w-sm border-none shadow-2xl">
+                                   <DialogHeader className="space-y-3">
+                                     <DialogTitle className="text-2xl font-black uppercase italic tracking-tighter text-accent">Share Result</DialogTitle>
+                                     <DialogDescription className="text-[10px] font-bold uppercase tracking-widest italic">Industrial Transmission Gate</DialogDescription>
+                                   </DialogHeader>
+                                   <div className="space-y-8 pt-6">
+                                      <div className="flex flex-col items-center gap-4">
+                                         <div className="flex gap-4">
+                                            {[
+                                              { icon: Twitter, color: "bg-[#1DA1F2]", label: "X", link: `https://twitter.com/intent/tweet?text=Check out this AI analysis from DOCFLOW!&url=${getShareUrl(msg.shareSlug || '')}` },
+                                              { icon: Linkedin, color: "bg-[#0077B5]", label: "LinkedIn", link: `https://www.linkedin.com/sharing/share-offsite/?url=${getShareUrl(msg.shareSlug || '')}` },
+                                              { icon: Facebook, color: "bg-[#4267B2]", label: "Facebook", link: `https://www.facebook.com/sharer/sharer.php?u=${getShareUrl(msg.shareSlug || '')}` },
+                                              { icon: MessageCircle, color: "bg-[#25D366]", label: "WhatsApp", link: `https://wa.me/?text=Check out this AI analysis from DOCFLOW: ${getShareUrl(msg.shareSlug || '')}` }
+                                            ].map((social) => (
+                                              <a 
+                                                key={social.label} 
+                                                href={social.link} 
+                                                target="_blank" 
+                                                rel="noopener noreferrer"
+                                                className={cn("h-12 w-12 rounded-2xl flex items-center justify-center text-white shadow-lg hover:scale-110 transition-all", social.color)}
+                                              >
+                                                <social.icon className="h-5 w-5" />
+                                              </a>
+                                            ))}
+                                         </div>
+                                      </div>
+                                      
+                                      <div className="space-y-3">
+                                         <Label className="text-[9px] font-black uppercase tracking-widest text-accent/40 px-1">Registry Endpoint</Label>
+                                         <div className="flex items-center gap-2 p-2 bg-muted/30 rounded-2xl border border-accent/5">
+                                            <input 
+                                              readOnly 
+                                              value={getShareUrl(msg.shareSlug || '')} 
+                                              className="flex-1 bg-transparent text-[10px] font-bold text-accent px-2 outline-none truncate" 
+                                            />
+                                            <Button 
+                                              size="icon" 
+                                              variant="ghost" 
+                                              onClick={() => copyToClipboard(getShareUrl(msg.shareSlug || ''))}
+                                              className="h-10 w-10 rounded-xl hover:bg-primary/10 text-primary shrink-0"
+                                            >
+                                              <Copy className="h-4 w-4" />
+                                            </Button>
+                                         </div>
+                                      </div>
+
+                                      <div className="p-4 bg-primary/5 rounded-2xl border border-primary/10 flex items-start gap-3">
+                                         <ShieldCheck className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                                         <p className="text-[9px] font-bold text-accent/60 uppercase leading-relaxed tracking-tight">
+                                           Shared results are stored in the public registry. Original document binary streams remain locally encrypted.
+                                         </p>
+                                      </div>
+                                   </div>
+                                 </DialogContent>
+                               </Dialog>
                              </div>
                            )}
                         </div>
