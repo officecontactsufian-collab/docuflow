@@ -106,14 +106,19 @@ export async function executeConversionAction(
 
       case 'pdf-to-jpg': {
         const pdfDoc = await PDFDocument.load(buffer, { ignoreEncryption: true });
-        const pages = pdfDoc.getPages();
-        const targetPageIndex = Math.min(Math.max(0, pageNumber - 1), pages.length - 1);
-        const page = pages[targetPageIndex];
+        const totalPageCount = pdfDoc.getPageCount();
+        const targetPageIndex = Math.min(Math.max(0, pageNumber - 1), totalPageCount - 1);
+        
+        // CRITICAL: Isolate target page into a transient one-page PDF for processing
+        const singlePagePdf = await PDFDocument.create();
+        const [copiedPage] = await singlePagePdf.copyPages(pdfDoc, [targetPageIndex]);
+        singlePagePdf.addPage(copiedPage);
+        const singlePageBuffer = Buffer.from(await singlePagePdf.save());
         
         let extractedImageBuffer: Buffer | null = null;
 
-        // Attempt image extraction from specific page
-        const resources = (page as any).node.get(PDFName.of('Resources'));
+        // Attempt image extraction from the isolated page resources
+        const resources = (copiedPage as any).node.get(PDFName.of('Resources'));
         if (resources instanceof PDFDict) {
           const xObjects = resources.get(PDFName.of('XObject'));
           if (xObjects instanceof PDFDict) {
@@ -135,8 +140,8 @@ export async function executeConversionAction(
           resultBuffer = extractedImageBuffer;
           mimeType = 'image/jpeg';
         } else {
-          // Rasterization Fallback
-          const data = await pdfParse(buffer);
+          // Rasterization Fallback using ONLY the target page stream
+          const data = await pdfParse(singlePageBuffer);
           const image = new Jimp(1200, 1600, 0xFFFFFFFF);
           const font = await Jimp.loadFont(JIMP_FONT_URL);
           const text = sanitizeText(data.text).substring(0, 5000);
@@ -158,6 +163,17 @@ export async function executeConversionAction(
         });
         resultBuffer = await Packer.toBuffer(doc);
         mimeType = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+        break;
+      }
+
+      case 'pdf-to-excel': {
+        const data = await pdfParse(buffer);
+        const rows = data.text.split('\n').map(line => line.trim().split(/\s{2,}/));
+        const ws = XLSX.utils.aoa_to_sheet(rows);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "Reconstructed_Data");
+        resultBuffer = XLSX.write(wb, { type: 'buffer', bookType: 'csv' });
+        mimeType = 'text/csv';
         break;
       }
 
