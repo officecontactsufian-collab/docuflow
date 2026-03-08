@@ -1,3 +1,4 @@
+
 'use server';
 
 import { PDFDocument, StandardFonts, PDFName, PDFDict, PDFRawStream } from 'pdf-lib';
@@ -7,16 +8,22 @@ import { Document, Packer, Paragraph, TextRun } from 'docx';
 import pdfParse from 'pdf-parse';
 import { convert as htmlToText } from 'html-to-text';
 import Jimp from 'jimp';
+import JSZip from 'jszip';
+import PptxGenJS from 'pptxgenjs';
 
 /**
  * @fileOverview DOCFLOW Industrial Transformation Actions
  * Executes high-fidelity document reconstruction on the backend.
  * Uses in-memory processing with zero-retention architecture.
+ * Fixed Jimp font loading for serverless environments.
  */
 
 type ConversionType = 
   | 'word-to-pdf' | 'jpg-to-pdf' | 'excel-to-pdf' | 'ppt-to-pdf' | 'html-to-pdf'
   | 'pdf-to-word' | 'pdf-to-jpg' | 'pdf-to-excel' | 'pdf-to-ppt' | 'pdf-to-pdfa';
+
+// Resilient font path for Jimp in Next.js environment
+const JIMP_FONT_URL = 'https://unpkg.com/jimp@0.22.12/fonts/open-sans/open-sans-32-black/open-sans-32-black.fnt';
 
 function sanitizeText(text: string) {
   return text.replace(/[^\x00-\x7F]/g, "").replace(/\r/g, "");
@@ -52,7 +59,7 @@ export async function executeConversionAction(base64Data: string, type: Conversi
         const csv = XLSX.utils.sheet_to_csv(sheet);
         const pdfDoc = await PDFDocument.create();
         const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
-        const page = pdfDoc.addPage([842, 595]); // Landscape
+        const page = pdfDoc.addPage([842, 595]); // Landscape for spreadsheets
         const lines = csv.split('\n').slice(0, 100);
         let y = 550;
         lines.forEach(line => {
@@ -65,13 +72,39 @@ export async function executeConversionAction(base64Data: string, type: Conversi
         break;
       }
 
+      case 'ppt-to-pdf': {
+        const zip = await JSZip.loadAsync(buffer);
+        const slideFiles = Object.keys(zip.files).filter(name => name.startsWith('ppt/slides/slide') && name.endsWith('.xml')).sort();
+        const pdfDoc = await PDFDocument.create();
+        const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
+        
+        for (const slideFile of slideFiles) {
+          const content = await zip.file(slideFile)?.async('text');
+          if (content) {
+            const textMatches = content.match(/<a:t>([^<]+)<\/a:t>/g);
+            const slideText = textMatches ? textMatches.map(m => m.replace(/<a:t>|<\/a:t>/g, '')).join(' ') : 'Empty Slide';
+            const page = pdfDoc.addPage([842, 595]);
+            page.drawText(sanitizeText(slideText.substring(0, 2000)), { x: 50, y: 500, size: 12, font, maxWidth: 742 });
+          }
+        }
+        resultBuffer = Buffer.from(await pdfDoc.save());
+        break;
+      }
+
+      case 'jpg-to-pdf': {
+        const pdfDoc = await PDFDocument.create();
+        const image = await pdfDoc.embedJpg(buffer);
+        const page = pdfDoc.addPage([image.width, image.height]);
+        page.drawImage(image, { x: 0, y: 0, width: image.width, height: image.height });
+        resultBuffer = Buffer.from(await pdfDoc.save());
+        break;
+      }
+
       case 'pdf-to-jpg': {
-        // DUAL-MODE EXTRACTION
         const pdfDoc = await PDFDocument.load(buffer, { ignoreEncryption: true });
         const pages = pdfDoc.getPages();
         let extractedImageBuffer: Buffer | null = null;
 
-        // MODE 1: Scan for embedded high-fidelity XObjects
         for (const page of pages) {
           const resources = (page as any).node.get(PDFName.of('Resources'));
           if (resources instanceof PDFDict) {
@@ -97,10 +130,10 @@ export async function executeConversionAction(base64Data: string, type: Conversi
           resultBuffer = extractedImageBuffer;
           mimeType = 'image/jpeg';
         } else {
-          // MODE 2: Text Rasterization Fallback (Render text onto white canvas)
           const data = await pdfParse(buffer);
           const image = new Jimp(1200, 1600, 0xFFFFFFFF);
-          const font = await Jimp.loadFont(Jimp.FONT_SANS_32_BLACK);
+          // FIXED: Load font from URL to avoid local ENOENT issues in Next.js environment
+          const font = await Jimp.loadFont(JIMP_FONT_URL);
           const text = sanitizeText(data.text).substring(0, 5000);
           image.print(font, 80, 80, text, 1040);
           resultBuffer = await image.getBufferAsync(Jimp.MIME_JPEG);
@@ -134,6 +167,19 @@ export async function executeConversionAction(base64Data: string, type: Conversi
         break;
       }
 
+      case 'pdf-to-ppt': {
+        const data = await pdfParse(buffer);
+        const pptx = new PptxGenJS();
+        const lines = data.text.split('\n');
+        for (let i = 0; i < lines.length; i += 20) {
+          const slide = pptx.addSlide();
+          slide.addText(sanitizeText(lines.slice(i, i + 20).join('\n')), { x: 0.5, y: 0.5, w: '90%', h: '90%', fontSize: 12 });
+        }
+        resultBuffer = await pptx.write('nodebuffer') as Buffer;
+        mimeType = 'application/vnd.openxmlformats-officedocument.presentationml.presentation';
+        break;
+      }
+
       case 'pdf-to-pdfa': {
         const pdfDoc = await PDFDocument.load(buffer, { ignoreEncryption: true });
         pdfDoc.setProducer('DOCFLOW Industrial Backend v2.5 (Archival Grade)');
@@ -147,15 +193,13 @@ export async function executeConversionAction(base64Data: string, type: Conversi
         const pdfDoc = await PDFDocument.create();
         const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
         const page = pdfDoc.addPage([595, 842]);
-        page.drawText(sanitizeText(text.substring(0, 2000)), { x: 50, y: 800, size: 10, font });
+        page.drawText(sanitizeText(text.substring(0, 2000)), { x: 50, y: 800, size: 10, font, maxWidth: 495 });
         resultBuffer = Buffer.from(await pdfDoc.save());
         break;
       }
 
       default: {
-        const fallbackPdf = await PDFDocument.create();
-        fallbackPdf.addPage().drawText(`Protocol ${type} executed in memory.`);
-        resultBuffer = Buffer.from(await fallbackPdf.save());
+        throw new Error(`Transformation Protocol ${type} not recognized.`);
       }
     }
 
@@ -164,7 +208,7 @@ export async function executeConversionAction(base64Data: string, type: Conversi
       mimeType
     };
   } catch (error: any) {
-    console.error('Transformation failure:', error);
-    throw new Error(error.message || 'Industrial reconstruction sequence interrupted.');
+    console.error('Industrial reconstruction sequence interrupted:', error);
+    throw new Error(error.message || 'Transformation failure: The protocol stream could not be established.');
   }
 }
