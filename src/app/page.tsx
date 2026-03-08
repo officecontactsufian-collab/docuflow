@@ -1,3 +1,4 @@
+
 "use client"
 
 import * as React from 'react';
@@ -64,60 +65,59 @@ export default function Home() {
       label: "AI Discovery & Business",
       description: "Identify markets, evaluate decisions, and synthesize knowledge.",
       items: [
-        { title: "Niche Finder", desc: "Identify markets.", icon: TrendingUp, href: "/tools/ai-niche-finder" },
-        { title: "Decision Helper", desc: "Logic analysis.", icon: Scale, href: "/tools/ai-decision-helper" },
-        { title: "Reality Check", desc: "Brutal project scan.", icon: Target, href: "/tools/ai-reality-check" },
-        { title: "Niche Finder", desc: "Market opportunities.", icon: TrendingUp, href: "/tools/ai-niche-finder" },
+        { title: "Niche Finder", desc: "Identify profitable markets & opportunities.", icon: TrendingUp, href: "/tools/ai-niche-finder" },
+        { title: "Decision Helper", desc: "Structured logic analysis framework.", icon: Scale, href: "/tools/ai-decision-helper" },
+        { title: "Reality Check", desc: "Brutal project scan & viability check.", icon: Target, href: "/tools/ai-reality-check" },
       ]
     },
     {
       label: "AI Learning & Life",
       description: "Temporal simulations and structured learning protocols.",
       items: [
-        { title: "Life Simulator", desc: "Path projections.", icon: Globe, href: "/tools/ai-life-simulator" },
-        { title: "Skill Generator", desc: "30-day curriculum.", icon: BookOpen, href: "/tools/ai-skill-generator" },
-        { title: "Personal Brain", desc: "Knowledge map.", icon: BrainCircuit, href: "/tools/ai-personal-brain" },
-        { title: "Prompt Improver", desc: "Optimize AI input.", icon: Sparkles, href: "/tools/ai-prompt-improver" },
+        { title: "Life Simulator", desc: "Temporal future path projections.", icon: Globe, href: "/tools/ai-life-simulator" },
+        { title: "Skill Generator", desc: "30-day industrial mastery curriculum.", icon: BookOpen, href: "/tools/ai-skill-generator" },
+        { title: "Personal Brain", desc: "Structured cognitive knowledge map.", icon: BrainCircuit, href: "/tools/ai-personal-brain" },
+        { title: "Prompt Improver", desc: "Optimize AI input payload integrity.", icon: Sparkles, href: "/tools/ai-prompt-improver" },
       ]
     },
     {
       label: "AI Writing & Content",
       description: "Generative protocols for structural content evolution.",
       items: [
-        { title: "AI Humanizer", desc: "Natural synthesis.", icon: ShieldCheck, href: "/tools/ai-humanizer" },
-        { title: "Content Repurposer", desc: "Omnichannel stream.", icon: RefreshCcw, href: "/tools/ai-content-repurposer" },
-        { title: "AI Summarizer", desc: "Executive distillation.", icon: Activity, href: "/ai-studio" },
-        { title: "Paraphraser", desc: "Re-engineer text.", icon: RefreshCcw, href: "/ai-studio" },
+        { title: "AI Humanizer", desc: "Natural synthesis of AI output text.", icon: ShieldCheck, href: "/tools/ai-humanizer" },
+        { title: "Content Repurposer", desc: "Omnichannel viral stream synthesis.", icon: RefreshCcw, href: "/tools/ai-content-repurposer" },
+        { title: "AI Summarizer", desc: "High-fidelity executive distillation.", icon: Activity, href: "/ai-studio" },
+        { title: "Paraphraser", desc: "Re-engineer text structural integrity.", icon: RefreshCcw, href: "/ai-studio" },
       ]
     },
     {
       label: "AI Productivity Suite",
       description: "Industrial efficiency and document interrogation.",
       items: [
-        { title: "Translator", desc: "Linguistic shift.", icon: Languages, href: "/ai-studio" },
-        { title: "Doc Intelligence", desc: "Asset interrogation.", icon: MessageSquare, href: "/ai-studio" },
-        { title: "Scan to PDF", desc: "Direct camera capture.", icon: Camera, href: "/scan-to-pdf" },
-        { title: "Deep Inspect", desc: "Metadata analysis.", icon: Search, href: "/analyze" },
+        { title: "Translator", desc: "Context-aware linguistic shift.", icon: Languages, href: "/ai-studio" },
+        { title: "Doc Intelligence", desc: "Deep asset interrogation stream.", icon: MessageSquare, href: "/ai-studio" },
+        { title: "Scan to PDF", desc: "Direct hardware camera capture.", icon: Camera, href: "/scan-to-pdf" },
+        { title: "Deep Inspect", desc: "Structural metadata analysis.", icon: Search, href: "/analyze" },
       ]
     },
     {
       label: "Modify & Capture",
       description: "Direct page and structural modifications.",
       items: [
-        { title: "Crop PDF", desc: "Trim page margins.", icon: Crop, href: "/crop" },
-        { title: "Visual Organizer", desc: "Reorder & Rotate.", icon: RotateCw, href: "/organize" },
-        { title: "Add Numbers", desc: "Sequential counters.", icon: Hash, href: "/numbers" },
-        { title: "Merge PDF", desc: "Combine assets.", icon: Merge, href: "/merge" },
+        { title: "Crop PDF", desc: "Visual page margin trimming.", icon: Crop, href: "/crop" },
+        { title: "Visual Organizer", desc: "Reorder and rotate page segments.", icon: RotateCw, href: "/organize" },
+        { title: "Add Numbers", desc: "Sequential page counter anchoring.", icon: Hash, href: "/numbers" },
+        { title: "Merge PDF", desc: "Combine multiple industrial assets.", icon: Merge, href: "/merge" },
       ]
     },
     {
       label: "Convert & Export",
       description: "Lossless transformation between formats.",
       items: [
-        { title: "Convert Hub", desc: "Transformation Hub.", icon: ArrowRightLeft, href: "/convert" },
-        { title: "PDF to Word", desc: "Text recovery.", icon: FileText, href: "/convert?type=pdf-to-word" },
-        { title: "Word to PDF", desc: "Standardize DOCX.", icon: FilePenLine, href: "/convert?type=word-to-pdf" },
-        { title: "PDF to Excel", desc: "Table recovery.", icon: Table, href: "/convert?type=pdf-to-excel" },
+        { title: "Convert Hub", desc: "High-fidelity transformation hub.", icon: ArrowRightLeft, href: "/convert" },
+        { title: "PDF to Word", desc: "Text recovery and reconstruction.", icon: FileText, href: "/convert?type=pdf-to-word" },
+        { title: "Word to PDF", desc: "Standardize DOCX asset buffers.", icon: FilePenLine, href: "/convert?type=word-to-pdf" },
+        { title: "PDF to Excel", desc: "Tabular dataset recovery sequence.", icon: Table, href: "/convert?type=pdf-to-excel" },
       ]
     }
   ];
@@ -359,8 +359,8 @@ export default function Home() {
               </div>
               <ul className="space-y-4 text-[11px] font-black uppercase tracking-widest italic">
                 <li><Link href="/secure" className="hover:text-primary transition-colors flex items-center gap-2 group"><div className="w-1 h-1 bg-primary/20 rounded-full group-hover:bg-primary" /> Password Protect</Link></li>
-                <li><Link href="/sign" className="hover:text-primary transition-colors flex items-center gap-2 group"><div className="w-1 h-1 bg-primary/20 rounded-full group-hover:bg-primary" /> Identity Synthesis</Link></li>
                 <li><Link href="/protect" className="hover:text-primary transition-colors flex items-center gap-2 group"><div className="w-1 h-1 bg-primary/20 rounded-full group-hover:bg-primary" /> Privacy Shield</Link></li>
+                <li><Link href="/protect?mode=unlock" className="hover:text-primary transition-colors flex items-center gap-2 group"><div className="h-1 w-1 bg-primary/20 rounded-full group-hover:bg-primary" /> Unlock Sequence</Link></li>
                 <li><Link href="/analyze" className="hover:text-primary transition-colors flex items-center gap-2 group"><div className="w-1 h-1 bg-primary/20 rounded-full group-hover:bg-primary" /> Deep Inspection</Link></li>
               </ul>
             </div>
