@@ -24,7 +24,7 @@ import { useToast } from '@/hooks/use-toast';
 import { executePromptImprovementAction } from './actions';
 import { useUser, useAuth, useFirestore, addDocumentNonBlocking, setDocumentNonBlocking } from '@/firebase';
 import { signInAnonymously } from 'firebase/auth';
-import { collection, query, where, getDocs, limit, serverTimestamp, doc } from 'firebase/firestore';
+import { collection, query, where, getDocs, limit, serverTimestamp, doc, orderBy, Timestamp } from 'firebase/firestore';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from '@/components/ui/dialog';
 import { cn } from '@/lib/utils';
 
@@ -55,10 +55,23 @@ export default function PromptImproverPage() {
     try {
       // Check usage limits locally using the user's private subcollection
       const logsRef = collection(firestore, 'users', user.uid, 'usageLogs');
-      const q = query(logsRef, limit(10));
+      // Fetch the last 10 logs to check if limit hit TODAY
+      const q = query(logsRef, orderBy('requestTimestamp', 'desc'), limit(10));
       const snap = await getDocs(q);
-      if (snap.size >= 10) {
-        throw new Error("DAILY_LIMIT_REACHED: 10 operations allowed per day.");
+      
+      const startOfToday = new Date();
+      startOfToday.setHours(0, 0, 0, 0);
+
+      const logsToday = snap.docs.filter(doc => {
+        const data = doc.data();
+        const ts = data.requestTimestamp;
+        if (!ts) return false;
+        const date = ts instanceof Timestamp ? ts.toDate() : new Date(ts);
+        return date >= startOfToday;
+      });
+
+      if (logsToday.length >= 10) {
+        throw new Error("DAILY_LIMIT_REACHED: 10 operations allowed per day. Please return tomorrow.");
       }
 
       const res = await executePromptImprovementAction({ userPrompt: input });
@@ -124,7 +137,7 @@ export default function PromptImproverPage() {
                     placeholder="Write a blog post about..." 
                     value={input} 
                     onChange={(e) => setInput(e.target.value)}
-                    className="min-h-[150px] bg-muted/20 border-accent/5 rounded-2xl font-bold text-accent resize-none"
+                    className="min-h-[150px] bg-muted/20 border-accent/10 rounded-2xl font-bold text-accent resize-none"
                   />
                 </div>
                 <Button 

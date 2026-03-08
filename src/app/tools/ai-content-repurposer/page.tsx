@@ -23,7 +23,7 @@ import { useToast } from '@/hooks/use-toast';
 import { executeRepurposerAction } from './actions';
 import { useUser, useAuth, useFirestore, addDocumentNonBlocking, setDocumentNonBlocking } from '@/firebase';
 import { signInAnonymously } from 'firebase/auth';
-import { collection, query, where, getDocs, limit, serverTimestamp, doc } from 'firebase/firestore';
+import { collection, query, where, getDocs, limit, serverTimestamp, doc, orderBy, Timestamp } from 'firebase/firestore';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 
@@ -51,9 +51,23 @@ export default function ContentRepurposerPage() {
 
     try {
       const logsRef = collection(firestore, 'users', user.uid, 'usageLogs');
-      const q = query(logsRef, limit(10));
+      const q = query(logsRef, orderBy('requestTimestamp', 'desc'), limit(10));
       const snap = await getDocs(q);
-      if (snap.size >= 10) throw new Error("DAILY_LIMIT_REACHED: 10 operations allowed per day.");
+      
+      const startOfToday = new Date();
+      startOfToday.setHours(0, 0, 0, 0);
+
+      const logsToday = snap.docs.filter(doc => {
+        const data = doc.data();
+        const ts = data.requestTimestamp;
+        if (!ts) return false;
+        const date = ts instanceof Timestamp ? ts.toDate() : new Date(ts);
+        return date >= startOfToday;
+      });
+
+      if (logsToday.length >= 10) {
+        throw new Error("DAILY_LIMIT_REACHED: 10 operations allowed per day. Please return tomorrow.");
+      }
 
       const res = await executeRepurposerAction({ content: input });
       setResult(res);

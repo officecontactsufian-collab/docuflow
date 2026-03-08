@@ -25,7 +25,7 @@ import { useToast } from '@/hooks/use-toast';
 import { executeNicheFinderAction } from './actions';
 import { useUser, useAuth, useFirestore, addDocumentNonBlocking, setDocumentNonBlocking } from '@/firebase';
 import { signInAnonymously } from 'firebase/auth';
-import { collection, serverTimestamp, doc, query, limit, getDocs } from 'firebase/firestore';
+import { collection, serverTimestamp, doc, query, limit, getDocs, orderBy, Timestamp } from 'firebase/firestore';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from '@/components/ui/dialog';
 import { cn } from '@/lib/utils';
 
@@ -53,9 +53,23 @@ export default function NicheFinderPage() {
 
     try {
       const logsRef = collection(firestore, 'users', user.uid, 'usageLogs');
-      const q = query(logsRef, limit(10));
+      const q = query(logsRef, orderBy('requestTimestamp', 'desc'), limit(10));
       const snap = await getDocs(q);
-      if (snap.size >= 10) throw new Error("DAILY_LIMIT_REACHED: 10 operations allowed per day.");
+      
+      const startOfToday = new Date();
+      startOfToday.setHours(0, 0, 0, 0);
+
+      const logsToday = snap.docs.filter(doc => {
+        const data = doc.data();
+        const ts = data.requestTimestamp;
+        if (!ts) return false;
+        const date = ts instanceof Timestamp ? ts.toDate() : new Date(ts);
+        return date >= startOfToday;
+      });
+
+      if (logsToday.length >= 10) {
+        throw new Error("DAILY_LIMIT_REACHED: 10 operations allowed per day. Please return tomorrow.");
+      }
 
       const res = await executeNicheFinderAction({ interests: input });
       setResult(res);
@@ -119,7 +133,7 @@ export default function NicheFinderPage() {
                     placeholder="e.g. Sustainable energy, pet tech, remote work..." 
                     value={input} 
                     onChange={(e) => setInput(e.target.value)}
-                    className="h-14 pl-12 bg-muted/20 border-accent/5 rounded-2xl font-bold text-accent"
+                    className="h-14 pl-12 bg-muted/20 border-accent/10 rounded-2xl font-bold text-accent"
                   />
                   <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-accent/20" />
                 </div>

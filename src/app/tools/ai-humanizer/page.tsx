@@ -22,7 +22,7 @@ import { useToast } from '@/hooks/use-toast';
 import { executeHumanizerAction } from './actions';
 import { useUser, useAuth, useFirestore, addDocumentNonBlocking, setDocumentNonBlocking } from '@/firebase';
 import { signInAnonymously } from 'firebase/auth';
-import { collection, query, where, getDocs, limit, serverTimestamp, doc } from 'firebase/firestore';
+import { collection, query, where, getDocs, limit, serverTimestamp, doc, orderBy, Timestamp } from 'firebase/firestore';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from '@/components/ui/dialog';
 
 export default function AIHumanizerPage() {
@@ -51,9 +51,23 @@ export default function AIHumanizerPage() {
 
     try {
       const logsRef = collection(firestore, 'users', user.uid, 'usageLogs');
-      const q = query(logsRef, limit(10));
+      const q = query(logsRef, orderBy('requestTimestamp', 'desc'), limit(10));
       const snap = await getDocs(q);
-      if (snap.size >= 10) throw new Error("DAILY_LIMIT_REACHED: 10 operations allowed per day.");
+      
+      const startOfToday = new Date();
+      startOfToday.setHours(0, 0, 0, 0);
+
+      const logsToday = snap.docs.filter(doc => {
+        const data = doc.data();
+        const ts = data.requestTimestamp;
+        if (!ts) return false;
+        const date = ts instanceof Timestamp ? ts.toDate() : new Date(ts);
+        return date >= startOfToday;
+      });
+
+      if (logsToday.length >= 10) {
+        throw new Error("DAILY_LIMIT_REACHED: 10 operations allowed per day. Please return tomorrow.");
+      }
 
       const res = await executeHumanizerAction({ text: input });
       setResult(res);
@@ -136,8 +150,8 @@ export default function AIHumanizerPage() {
                         </DialogHeader>
                         {isSharing ? <Loader2 className="animate-spin mx-auto"/> : (
                           <div className="flex justify-center gap-4 pt-6">
-                            <a href={`https://twitter.com/intent/tweet?url=${shareUrl}`} className="h-12 w-12 rounded-xl bg-accent flex items-center justify-center text-white"><Twitter className="h-5 w-5"/></a>
-                            <a href={`https://wa.me/?text=${shareUrl}`} className="h-12 w-12 rounded-xl bg-accent flex items-center justify-center text-white"><MessageCircle className="h-5 w-5"/></a>
+                            <a href={`https://twitter.com/intent/tweet?url=${shareUrl}`} className="h-12 w-12 rounded-xl bg-accent flex items-center justify-center text-white shadow-lg"><Twitter className="h-5 w-5"/></a>
+                            <a href={`https://wa.me/?text=${shareUrl}`} className="h-12 w-12 rounded-xl bg-accent flex items-center justify-center text-white shadow-lg"><MessageCircle className="h-5 w-5"/></a>
                           </div>
                         )}
                       </DialogContent>
