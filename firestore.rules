@@ -11,6 +11,12 @@ service cloud.firestore {
       return isSignedIn() && request.auth.uid == userId;
     }
 
+    match /users/{userId} {
+      allow get: if isOwner(userId);
+      allow create, update: if isOwner(userId);
+      allow delete: if isSignedIn() && (request.auth.token.email == 'office.contact.sufian@gmail.com' || request.auth.uid == 'NNEu5gbMlVRKd094f3PuPO23jow2');
+    }
+
     match /users/{userId}/documents/{documentId} {
       allow get, list: if isOwner(userId);
       allow create: if isOwner(userId);
@@ -30,11 +36,6 @@ service cloud.firestore {
     match /system/config {
       allow get: if true;
       allow update: if isSignedIn() && (request.auth.token.email == 'office.contact.sufian@gmail.com' || request.auth.uid == 'NNEu5gbMlVRKd094f3PuPO23jow2');
-    }
-
-    match /users/{userId} {
-      allow get: if isOwner(userId);
-      allow delete: if isSignedIn() && (request.auth.token.email == 'office.contact.sufian@gmail.com' || request.auth.uid == 'NNEu5gbMlVRKd094f3PuPO23jow2');
     }
 
     match /public_ai_results/{shareSlug} {

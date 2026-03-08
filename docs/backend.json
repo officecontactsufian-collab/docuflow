@@ -93,16 +93,61 @@
         "isPubliclyShareable",
         "creatorId"
       ]
+    },
+    "UserProfile": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "UserProfile",
+      "type": "object",
+      "description": "Represents a user's account and usage data in the DOCFLOW system.",
+      "properties": {
+        "uid": { "type": "string" },
+        "email": { "type": "string" },
+        "displayName": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "usageCount": { "type": "number", "default": 0 }
+      },
+      "required": ["uid", "email"]
+    },
+    "UsageLog": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "UsageLog",
+      "type": "object",
+      "description": "Chronological log of AI and document tool executions for audit and quota management.",
+      "properties": {
+        "userId": { "type": "string" },
+        "toolUsed": { "type": "string" },
+        "requestTimestamp": { "type": "string", "format": "date-time" },
+        "status": { "type": "string" },
+        "costUnits": { "type": "number" }
+      },
+      "required": ["userId", "toolUsed", "requestTimestamp"]
     }
   },
   "auth": {
     "providers": [
       "password",
-      "anonymous"
+      "anonymous",
+      "google.com"
     ]
   },
   "firestore": {
     "structure": [
+      {
+        "path": "/users/{userId}",
+        "definition": {
+          "entityName": "UserProfile",
+          "schema": { "$ref": "#/backend/entities/UserProfile" },
+          "description": "User profile and global usage statistics."
+        }
+      },
+      {
+        "path": "/users/{userId}/usageLogs/{logId}",
+        "definition": {
+          "entityName": "UsageLog",
+          "schema": { "$ref": "#/backend/entities/UsageLog" },
+          "description": "Private log of operations performed by the user."
+        }
+      },
       {
         "path": "/users/{userId}/documents/{documentId}",
         "definition": {
