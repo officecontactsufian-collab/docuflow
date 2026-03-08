@@ -1,4 +1,3 @@
-
 "use client"
 
 import * as React from 'react';
@@ -41,14 +40,15 @@ import {
   FileBadge,
   FileText,
   ArrowRightLeft,
-  Image as ImageIcon,
+  ImageIcon,
   Scissors,
   Eraser,
   Table,
   Wrench,
   TrendingUp,
   Sparkles,
-  Target
+  Target,
+  UserCheck
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
@@ -84,10 +84,10 @@ export default function Home() {
       label: "AI Writing & Content",
       description: "Generative protocols for structural content evolution.",
       items: [
-        { title: "AI Humanizer", desc: "Natural synthesis of AI output text.", icon: ShieldCheck, href: "/tools/ai-humanizer" },
+        { title: "AI Humanizer", desc: "Natural synthesis of AI output text.", icon: UserCheck, href: "/tools/ai-humanizer" },
         { title: "Content Repurposer", desc: "Omnichannel viral stream synthesis.", icon: RefreshCcw, href: "/tools/ai-content-repurposer" },
         { title: "AI Summarizer", desc: "High-fidelity executive distillation.", icon: Activity, href: "/ai-studio" },
-        { title: "Paraphraser", desc: "Re-engineer text structural integrity.", icon: RefreshCcw, href: "/ai-studio" },
+        { title: "Paraphraser", desc: "Re-engineer text structural integrity.", icon: FilePenLine, href: "/ai-studio" },
       ]
     },
     {
@@ -108,6 +108,7 @@ export default function Home() {
         { title: "Visual Organizer", desc: "Reorder and rotate page segments.", icon: RotateCw, href: "/organize" },
         { title: "Add Numbers", desc: "Sequential page counter anchoring.", icon: Hash, href: "/numbers" },
         { title: "Merge PDF", desc: "Combine multiple industrial assets.", icon: Merge, href: "/merge" },
+        { title: "Split PDF", desc: "Extract specific page ranges.", icon: Scissors, href: "/split" },
       ]
     },
     {
@@ -118,6 +119,16 @@ export default function Home() {
         { title: "PDF to Word", desc: "Text recovery and reconstruction.", icon: FileText, href: "/convert?type=pdf-to-word" },
         { title: "Word to PDF", desc: "Standardize DOCX asset buffers.", icon: FilePenLine, href: "/convert?type=word-to-pdf" },
         { title: "PDF to Excel", desc: "Tabular dataset recovery sequence.", icon: Table, href: "/convert?type=pdf-to-excel" },
+      ]
+    },
+    {
+      label: "Security & Privacy",
+      description: "Hardened metadata stripping and protection.",
+      items: [
+        { title: "Password Protect", desc: "Encrypt PDF binary streams.", icon: Lock, href: "/secure" },
+        { title: "Privacy Shield", desc: "Strip author ID and history.", icon: ShieldCheck, href: "/protect" },
+        { title: "Unlock PDF", desc: "Remove administrative restrictions.", icon: Unlock, href: "/protect?mode=unlock" },
+        { title: "Sanitize Asset", desc: "Deep structural metadata purge.", icon: Eraser, href: "/sanitize" },
       ]
     }
   ];

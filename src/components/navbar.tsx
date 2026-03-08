@@ -21,7 +21,7 @@ import {
   Menu,
   BrainCircuit,
   Lock,
-  CheckCircle2,
+  UserCheck,
   BookOpen,
   Briefcase,
   Mail,
@@ -30,7 +30,7 @@ import {
   RefreshCcw,
   FileBadge,
   ArrowRightLeft,
-  Image as ImageIcon,
+  ImageIcon,
   Table,
   Eraser,
   Wrench,
@@ -73,8 +73,8 @@ export function Navbar() {
     {
       label: t('nav.ai_writing'),
       items: [
-        { href: "/ai-studio", icon: RefreshCcw, title: t('tools.paraphraser.title'), desc: t('tools.paraphraser.desc') },
-        { href: "/tools/ai-humanizer", icon: ShieldCheck, title: "AI Humanizer", desc: "Natural synthesis." },
+        { href: "/ai-studio", icon: FilePenLine, title: t('tools.paraphraser.title'), desc: t('tools.paraphraser.desc') },
+        { href: "/tools/ai-humanizer", icon: UserCheck, title: "AI Humanizer", desc: "Natural synthesis." },
         { href: "/ai-studio", icon: Activity, title: t('tools.summarizer.title'), desc: t('tools.summarizer.desc') },
         { href: "/tools/ai-prompt-improver", icon: Sparkles, title: "Prompt Improver", desc: "Optimize payloads." },
       ]
@@ -98,12 +98,21 @@ export function Navbar() {
       ]
     },
     {
+      label: "Asset Intelligence",
+      items: [
+        { href: "/ai-studio", icon: MessageSquare, title: "Doc Intelligence", desc: "Deep interrogation." },
+        { href: "/scan-to-pdf", icon: Camera, title: "Scan to PDF", desc: "Hardware capture." },
+        { href: "/analyze", icon: Search, title: "Deep Inspect", desc: "Structural metadata." },
+        { href: "/organize", icon: RotateCw, title: "Visual Organizer", desc: "Reorder & rotate." },
+      ]
+    },
+    {
       label: t('nav.layout'),
       items: [
         { href: "/crop", icon: Crop, title: t('tools.crop.title'), desc: t('tools.crop.desc') },
-        { href: "/organize", icon: RotateCw, title: t('tools.organize.title'), desc: t('tools.organize.desc') },
         { href: "/numbers", icon: Hash, title: t('tools.numbers.title'), desc: t('tools.numbers.desc') },
         { href: "/merge", icon: Merge, title: t('tools.merge.title'), desc: t('tools.merge.desc') },
+        { href: "/split", icon: Scissors, title: "Split PDF", desc: "Range extraction." },
       ]
     },
     {
@@ -144,10 +153,10 @@ export function Navbar() {
                 <span suppressHydrationWarning>{isHydrated ? t('common.all_protocols') : 'All Protocols'}</span> 
                 <ChevronDown className="h-2.5 w-2.5 opacity-40" />
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="w-[1000px] p-6 rounded-2xl shadow-2xl border-white/20 grid grid-cols-3 gap-8 bg-white/95 backdrop-blur-xl mt-2">
+              <DropdownMenuContent align="start" className="w-[1000px] p-6 rounded-2xl shadow-2xl border-white/20 grid grid-cols-3 gap-x-8 gap-y-10 bg-white/95 backdrop-blur-xl mt-2 max-h-[80vh] overflow-y-auto custom-scrollbar">
                 {categories.map((cat) => (
                   <div key={cat.label} className="space-y-4">
-                    <DropdownMenuLabel className="px-0 text-[9px] font-black uppercase tracking-[0.3em] text-primary/40">
+                    <DropdownMenuLabel className="px-0 text-[9px] font-black uppercase tracking-[0.3em] text-primary/40 border-b border-accent/5 pb-2">
                       {cat.label}
                     </DropdownMenuLabel>
                     <div className="grid gap-1">
