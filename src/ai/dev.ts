@@ -5,3 +5,6 @@ import '@/ai/flows/summarize-pdf-content-flow.ts';
 import '@/ai/flows/extract-key-information-from-pdf.ts';
 import '@/ai/flows/remove-watermark-image-flow.ts';
 import '@/ai/flows/ai-studio-flow.ts';
+import '@/ai/flows/prompt-improver-flow.ts';
+import '@/ai/flows/humanizer-flow.ts';
+import '@/ai/flows/content-repurposer-flow.ts';
