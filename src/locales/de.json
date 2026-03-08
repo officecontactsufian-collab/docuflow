@@ -1,0 +1,47 @@
+
+{
+  "common": {
+    "all_protocols": "Alle Protokolle",
+    "pricing": "Preise",
+    "inspect": "Prüfen",
+    "unlimited": "Unbegrenzt",
+    "success": "Protokoll-Erfolg",
+    "failure": "Protokoll-Fehler",
+    "loading": "Protokoll wird geladen..."
+  },
+  "nav": {
+    "ai_writing": "KI-Schreib-Suite",
+    "ai_career": "KI-Karriere-Suite",
+    "ai_productivity": "KI-Produktivitäts-Suite",
+    "layout": "Bearbeiten & Erfassen",
+    "convert": "Konvertieren & Exportieren",
+    "security": "Sicherheit & Vertrauen",
+    "ai_studio": "KI Studio"
+  },
+  "tools": {
+    "paraphraser": { "title": "Paraphrasierer", "desc": "Text-Umstrukturierung." },
+    "summarizer": { "title": "KI-Zusammenfassung", "desc": "Executive Destillation." },
+    "grammar": { "title": "Grammatikprüfung", "desc": "Industrielles Korrekturlesen." },
+    "essay": { "title": "Essay-Schreiber", "desc": "Strukturierte Entwürfe." },
+    "resume": { "title": "Lebenslauf-Ersteller", "desc": "Profil-Engineering." },
+    "cover_letter": { "title": "Anschreiben", "desc": "Intro-Architekt." },
+    "email": { "title": "E-Mail-Architekt", "desc": "Strukturelle Synthese." },
+    "sign": { "title": "Digitale Signatur", "desc": "Identitätsanker." },
+    "translator": { "title": "Übersetzer", "desc": "Linguistischer Shift." },
+    "doc_intel": { "title": "Dokumenten-KI", "desc": "Asset-Abfrage." },
+    "scan": { "title": "Scan zu PDF", "desc": "Direkte Erfassung." },
+    "inspect": { "title": "Tiefe Inspektion", "desc": "Metadaten-Analyse." },
+    "crop": { "title": "PDF Zuschneiden", "desc": "Seitenränder trimmen." },
+    "organize": { "title": "Visueller Organizer", "desc": "Umordnen & Drehen." },
+    "numbers": { "title": "Seitenzahlen", "desc": "Sequentielle Zähler." },
+    "merge": { "title": "PDF Zusammenführen", "desc": "Assets kombinieren." },
+    "convert_hub": { "title": "Konvertierungshub", "desc": "Inversions-Engine." },
+    "pdf_to_word": { "title": "PDF zu Word", "desc": "Textwiederherstellung." },
+    "word_to_pdf": { "title": "Word zu PDF", "desc": "DOCX standardisieren." },
+    "pdf_to_excel": { "title": "PDF zu Excel", "desc": "Tabellenwiederherstellung." },
+    "protect": { "title": "Passwortschutz", "desc": "PDF verschlüsseln." },
+    "privacy": { "title": "Privatsphäre-Schild", "desc": "Metadaten-Löschung." },
+    "unlock": { "title": "PDF Entsperren", "desc": "Beschränkungen aufheben." },
+    "sanitize": { "title": "Asset Bereinigen", "desc": "Tiefenreinigung." }
+  }
+}

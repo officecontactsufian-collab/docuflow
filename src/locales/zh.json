@@ -1,0 +1,47 @@
+
+{
+  "common": {
+    "all_protocols": "所有协议",
+    "pricing": "定价",
+    "inspect": "检查",
+    "unlimited": "无限",
+    "success": "协议成功",
+    "failure": "协议失败",
+    "loading": "协议加载中..."
+  },
+  "nav": {
+    "ai_writing": "AI 写作套件",
+    "ai_career": "AI 职业套件",
+    "ai_productivity": "AI 生产力套件",
+    "layout": "修改与捕捉",
+    "convert": "转换与导出",
+    "security": "安全与信任",
+    "ai_studio": "AI 工作室"
+  },
+  "tools": {
+    "paraphraser": { "title": "改写器", "desc": "文本重构。" },
+    "summarizer": { "title": "AI 摘要", "desc": "高保真提取。" },
+    "grammar": { "title": "语法检查", "desc": "工业级校对。" },
+    "essay": { "title": "论文写作", "desc": "结构化草案。" },
+    "resume": { "title": "简历构建", "desc": "个人资料工程。" },
+    "cover_letter": { "title": "求职信", "desc": "开篇架构。" },
+    "email": { "title": "邮件架构", "desc": "结构化合成。" },
+    "sign": { "title": "数字签名", "desc": "身份锚点。" },
+    "translator": { "title": "翻译", "desc": "语言转换。" },
+    "doc_intel": { "title": "文档智能", "desc": "资产查询。" },
+    "scan": { "title": "扫描至 PDF", "desc": "直接捕捉。" },
+    "inspect": { "title": "深度检查", "desc": "元数据分析。" },
+    "crop": { "title": "裁剪 PDF", "desc": "修整页面边距。" },
+    "organize": { "title": "视觉整理", "desc": "重新排序与旋转。" },
+    "numbers": { "title": "添加页码", "desc": "顺序计数器。" },
+    "merge": { "title": "合并 PDF", "desc": "组合资产。" },
+    "convert_hub": { "title": "转换中心", "desc": "逆向引擎。" },
+    "pdf_to_word": { "title": "PDF 转 Word", "desc": "文本恢复。" },
+    "word_to_pdf": { "title": "Word 转 PDF", "desc": "标准化 DOCX。" },
+    "pdf_to_excel": { "title": "PDF 转 Excel", "desc": "表格恢复。" },
+    "protect": { "title": "密码保护", "desc": "加密 PDF。" },
+    "privacy": { "title": "隐私屏蔽", "desc": "元数据擦除。" },
+    "unlock": { "title": "解锁 PDF", "desc": "去除限制。" },
+    "sanitize": { "title": "资产消毒", "desc": "深度清理。" }
+  }
+}

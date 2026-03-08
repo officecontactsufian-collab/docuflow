@@ -39,7 +39,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const t = (key: string): string => {
-    // CRITICAL: Force English during hydration to match SSR
+    // CRITICAL: Force English during hydration pass to perfectly match SSR output
     const currentLocale = isHydrated ? locale : 'en';
     const keys = key.split('.');
     let result = translations[currentLocale];

@@ -1,0 +1,46 @@
+{
+  "common": {
+    "all_protocols": "All Protocols",
+    "pricing": "Pricing",
+    "inspect": "Inspect",
+    "unlimited": "Unlimited",
+    "success": "Protocol Success",
+    "failure": "Protocol Failure",
+    "loading": "Loading Protocol..."
+  },
+  "nav": {
+    "ai_writing": "AI Writing Suite",
+    "ai_career": "AI Career Suite",
+    "ai_productivity": "AI Productivity Suite",
+    "layout": "Modify & Capture",
+    "convert": "Convert & Export",
+    "security": "Security & Trust",
+    "ai_studio": "AI Studio"
+  },
+  "tools": {
+    "paraphraser": { "title": "Paraphraser", "desc": "Re-engineer text." },
+    "summarizer": { "title": "AI Summarizer", "desc": "Executive distillation." },
+    "grammar": { "title": "Grammar Check", "desc": "Industrial proofing." },
+    "essay": { "title": "Essay Writer", "desc": "Structured drafts." },
+    "resume": { "title": "Resume Builder", "desc": "Profile engineering." },
+    "cover_letter": { "title": "Cover Letter", "desc": "Intro architect." },
+    "email": { "title": "Email Architect", "desc": "Structural synthesis." },
+    "sign": { "title": "Digital Sign", "desc": "Identity anchors." },
+    "translator": { "title": "Translator", "desc": "Linguistic shift." },
+    "doc_intel": { "title": "Doc Intelligence", "desc": "Asset interrogation." },
+    "scan": { "title": "Scan to PDF", "desc": "Direct capture." },
+    "inspect": { "title": "Deep Inspect", "desc": "Metadata analysis." },
+    "crop": { "title": "Crop PDF", "desc": "Trim page margins." },
+    "organize": { "title": "Visual Organizer", "desc": "Reorder & Rotate." },
+    "numbers": { "title": "Add Numbers", "desc": "Sequential counters." },
+    "merge": { "title": "Merge PDF", "desc": "Combine assets." },
+    "convert_hub": { "title": "Convert Hub", "desc": "Inversion Engine." },
+    "pdf_to_word": { "title": "PDF to Word", "desc": "Text recovery." },
+    "word_to_pdf": { "title": "Word to PDF", "desc": "Standardize DOCX." },
+    "pdf_to_excel": { "title": "PDF to Excel", "desc": "Table recovery." },
+    "protect": { "title": "Password Protect", "desc": "Encrypt PDF." },
+    "privacy": { "title": "Privacy Shield", "desc": "Metadata erasure." },
+    "unlock": { "title": "Unlock PDF", "desc": "Strip restrictions." },
+    "sanitize": { "title": "Sanitize Asset", "desc": "Deep cleaning." }
+  }
+}

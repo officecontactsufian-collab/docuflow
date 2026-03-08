@@ -1,0 +1,47 @@
+
+{
+  "common": {
+    "all_protocols": "すべてのプロトコル",
+    "pricing": "料金",
+    "inspect": "検査",
+    "unlimited": "無制限",
+    "success": "プロトコル成功",
+    "failure": "プロトコル失敗",
+    "loading": "プロトコルを読み込み中..."
+  },
+  "nav": {
+    "ai_writing": "AIライティングスイート",
+    "ai_career": "AIキャリアスイート",
+    "ai_productivity": "AI生産性スイート",
+    "layout": "編集とキャプチャ",
+    "convert": "変換とエクスポート",
+    "security": "セキュリティと信頼",
+    "ai_studio": "AIスタジオ"
+  },
+  "tools": {
+    "paraphraser": { "title": "言い換え", "desc": "テキストの再構築" },
+    "summarizer": { "title": "AI要約", "desc": "要点抽出" },
+    "grammar": { "title": "文法チェック", "desc": "工業グレードの校正" },
+    "essay": { "title": "エッセイ執筆", "desc": "構成案の作成" },
+    "resume": { "title": "履歴書作成", "desc": "プロフィールの設計" },
+    "cover_letter": { "title": "カバーレター", "desc": "導入の設計" },
+    "email": { "title": "メール設計", "desc": "構造的合成" },
+    "sign": { "title": "電子署名", "desc": "IDアンカー" },
+    "translator": { "title": "翻訳", "desc": "言語シフト" },
+    "doc_intel": { "title": "文書インテリジェンス", "desc": "資産の尋問" },
+    "scan": { "title": "PDFスキャン", "desc": "直接キャプチャ" },
+    "inspect": { "title": "詳細検査", "desc": "メタデータ分析" },
+    "crop": { "title": "PDF切り抜き", "desc": "余白の調整" },
+    "organize": { "title": "視覚的整理", "desc": "並べ替えと回転" },
+    "numbers": { "title": "ページ番号", "desc": "順次カウンター" },
+    "merge": { "title": "PDF結合", "desc": "資産の統合" },
+    "convert_hub": { "title": "変換ハブ", "desc": "インバージョンエンジン" },
+    "pdf_to_word": { "title": "PDFからWord", "desc": "テキスト復元" },
+    "word_to_pdf": { "title": "WordからPDF", "desc": "DOCXの標準化" },
+    "pdf_to_excel": { "title": "PDFからExcel", "desc": "表の復元" },
+    "protect": { "title": "パスワード保護", "desc": "PDF暗号化" },
+    "privacy": { "title": "プライバシーシールド", "desc": "メタデータの消去" },
+    "unlock": { "title": "PDF解除", "desc": "制限の解除" },
+    "sanitize": { "title": "資産のサニタイズ", "desc": "徹底的なクリーニング" }
+  }
+}

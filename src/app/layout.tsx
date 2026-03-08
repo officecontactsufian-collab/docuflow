@@ -2,6 +2,7 @@ import type {Metadata} from 'next';
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
 import { FirebaseClientProvider } from '@/firebase/client-provider';
+import { LanguageProvider } from '@/lib/i18n-context';
 import { Suspense } from 'react';
 import { Loader2 } from 'lucide-react';
 
@@ -62,7 +63,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
@@ -70,14 +71,16 @@ export default function RootLayout({
       </head>
       <body className="font-body antialiased min-h-screen bg-background selection:bg-primary/20">
         <FirebaseClientProvider>
-          <Suspense fallback={
-            <div className="flex min-h-screen items-center justify-center bg-muted/30">
-              <Loader2 className="h-8 w-8 animate-spin text-primary" />
-            </div>
-          }>
-            {children}
-          </Suspense>
-          <Toaster />
+          <LanguageProvider>
+            <Suspense fallback={
+              <div className="flex min-h-screen items-center justify-center bg-muted/30">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+              </div>
+            }>
+              {children}
+            </Suspense>
+            <Toaster />
+          </LanguageProvider>
         </FirebaseClientProvider>
       </body>
     </html>

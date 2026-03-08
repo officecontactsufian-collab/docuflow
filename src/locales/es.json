@@ -1,0 +1,46 @@
+{
+  "common": {
+    "all_protocols": "Todos los protocolos",
+    "pricing": "Precios",
+    "inspect": "Inspeccionar",
+    "unlimited": "Ilimitado",
+    "success": "Éxito del protocolo",
+    "failure": "Fallo del protocolo",
+    "loading": "Cargando protocolo..."
+  },
+  "nav": {
+    "ai_writing": "Suite de Escritura IA",
+    "ai_career": "Suite de Carrera IA",
+    "ai_productivity": "Suite de Productividad IA",
+    "layout": "Modificar y Capturar",
+    "convert": "Convertir y Exportar",
+    "security": "Seguridad y Confianza",
+    "ai_studio": "IA Studio"
+  },
+  "tools": {
+    "paraphraser": { "title": "Parafraseador", "desc": "Reingeniería de texto." },
+    "summarizer": { "title": "Resumidor IA", "desc": "Destilación ejecutiva." },
+    "grammar": { "title": "Gramática", "desc": "Corrección industrial." },
+    "essay": { "title": "Escritor de Ensayos", "desc": "Borradores estructurados." },
+    "resume": { "title": "Creador de CV", "desc": "Ingeniería de perfil." },
+    "cover_letter": { "title": "Carta de Presentación", "desc": "Arquitecto de intro." },
+    "email": { "title": "Arquitecto de E-mail", "desc": "Síntesis estructural." },
+    "sign": { "title": "Firma Digital", "desc": "Anclajes de identidad." },
+    "translator": { "title": "Traductor", "desc": "Cambio lingüístico." },
+    "doc_intel": { "title": "Inteligencia Doc", "desc": "Interrogación de activos." },
+    "scan": { "title": "Escanear a PDF", "desc": "Captura directa." },
+    "inspect": { "title": "Inspección Profunda", "desc": "Análisis de metadatos." },
+    "crop": { "title": "Recortar PDF", "desc": "Ajustar márgenes." },
+    "organize": { "title": "Organizador Visual", "desc": "Reordenar y Rotar." },
+    "numbers": { "title": "Añadir Números", "desc": "Contadores secuenciales." },
+    "merge": { "title": "Fusionar PDF", "desc": "Combinar activos." },
+    "convert_hub": { "title": "Centro de Conversión", "desc": "Motor de inversión." },
+    "pdf_to_word": { "title": "PDF a Word", "desc": "Recuperación de texto." },
+    "word_to_pdf": { "title": "Word a PDF", "desc": "Estandarizar DOCX." },
+    "pdf_to_excel": { "title": "PDF a Excel", "desc": "Recuperación de tablas." },
+    "protect": { "title": "Proteger Contraseña", "desc": "Cifrar PDF." },
+    "privacy": { "title": "Escudo Privacidad", "desc": "Borrado de metadatos." },
+    "unlock": { "title": "Desbloquear PDF", "desc": "Quitar restricciones." },
+    "sanitize": { "title": "Sanear Activo", "desc": "Limpieza profunda." }
+  }
+}
