@@ -36,7 +36,12 @@ import {
   Wrench,
   Scissors,
   TrendingUp,
-  Scale
+  Scale,
+  Sparkles,
+  Target,
+  Zap,
+  Globe,
+  Compass
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -75,21 +80,21 @@ export function Navbar() {
       ]
     },
     {
-      label: "Business & Discovery",
+      label: "Discovery & Learning",
       items: [
         { href: "/tools/ai-niche-finder", icon: TrendingUp, title: "Niche Finder", desc: "Market opportunities." },
-        { href: "/tools/ai-decision-helper", icon: Scale, title: "Decision Helper", desc: "Logic framework." },
-        { href: "/tools/ai-content-repurposer", icon: RefreshCcw, title: "Content Repurposer", desc: "Omnichannel stream." },
-        { href: "/tools/ai-personal-brain", icon: BrainCircuit, title: "Personal Brain", desc: "Cognitive indexing." },
+        { href: "/tools/ai-skill-generator", icon: BookOpen, title: "Skill Generator", desc: "30-day learning plans." },
+        { href: "/tools/ai-reality-check", icon: Target, title: "Reality Check", desc: "Project viability scan." },
+        { href: "/tools/ai-life-simulator", icon: Globe, title: "Life Simulator", desc: "Simulate future paths." },
       ]
     },
     {
-      label: t('nav.ai_productivity'),
+      label: "Productivity & Logic",
       items: [
+        { href: "/tools/ai-decision-helper", icon: Scale, title: "Decision Helper", desc: "Logic framework." },
+        { href: "/tools/ai-content-repurposer", icon: RefreshCcw, title: "Content Repurposer", desc: "Omnichannel stream." },
+        { href: "/tools/ai-personal-brain", icon: BrainCircuit, title: "Personal Brain", desc: "Cognitive indexing." },
         { href: "/ai-studio", icon: Languages, title: t('tools.translator.title'), desc: t('tools.translator.desc') },
-        { href: "/ai-studio", icon: MessageSquare, title: t('tools.doc_intel.title'), desc: t('tools.doc_intel.desc') },
-        { href: "/scan-to-pdf", icon: Camera, title: t('tools.scan.title'), desc: t('tools.scan.desc') },
-        { href: "/analyze", icon: Search, title: t('tools.inspect.title'), desc: t('tools.inspect.desc') },
       ]
     },
     {
@@ -171,8 +176,8 @@ export function Navbar() {
             <Link href="/tools/ai-niche-finder" className="flex items-center gap-1.5 text-[9px] font-black uppercase tracking-widest text-accent/80 hover:text-accent transition-all group">
               <TrendingUp className="h-3 w-3 text-primary/60 group-hover:text-primary transition-colors" /> Niche Finder
             </Link>
-            <Link href="/tools/ai-decision-helper" className="flex items-center gap-1.5 text-[9px] font-black uppercase tracking-widest text-accent/80 hover:text-accent transition-all group">
-              <Scale className="h-3 w-3 text-primary/60 group-hover:text-primary transition-colors" /> Decisions
+            <Link href="/tools/ai-reality-check" className="flex items-center gap-1.5 text-[9px] font-black uppercase tracking-widest text-accent/80 hover:text-accent transition-all group">
+              <Target className="h-3 w-3 text-primary/60 group-hover:text-primary transition-colors" /> Reality Check
             </Link>
           </div>
         </div>

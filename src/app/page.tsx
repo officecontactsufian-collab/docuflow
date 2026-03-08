@@ -46,7 +46,8 @@ import {
   Table,
   Wrench,
   TrendingUp,
-  Sparkles
+  Sparkles,
+  Target
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
@@ -65,6 +66,16 @@ export default function Home() {
       items: [
         { title: "Niche Finder", desc: "Identify markets.", icon: TrendingUp, href: "/tools/ai-niche-finder" },
         { title: "Decision Helper", desc: "Logic analysis.", icon: Scale, href: "/tools/ai-decision-helper" },
+        { title: "Reality Check", desc: "Brutal project scan.", icon: Target, href: "/tools/ai-reality-check" },
+        { title: "Niche Finder", desc: "Market opportunities.", icon: TrendingUp, href: "/tools/ai-niche-finder" },
+      ]
+    },
+    {
+      label: "AI Learning & Life",
+      description: "Temporal simulations and structured learning protocols.",
+      items: [
+        { title: "Life Simulator", desc: "Path projections.", icon: Globe, href: "/tools/ai-life-simulator" },
+        { title: "Skill Generator", desc: "30-day curriculum.", icon: BookOpen, href: "/tools/ai-skill-generator" },
         { title: "Personal Brain", desc: "Knowledge map.", icon: BrainCircuit, href: "/tools/ai-personal-brain" },
         { title: "Prompt Improver", desc: "Optimize AI input.", icon: Sparkles, href: "/tools/ai-prompt-improver" },
       ]
@@ -107,16 +118,6 @@ export default function Home() {
         { title: "PDF to Word", desc: "Text recovery.", icon: FileText, href: "/convert?type=pdf-to-word" },
         { title: "Word to PDF", desc: "Standardize DOCX.", icon: FilePenLine, href: "/convert?type=word-to-pdf" },
         { title: "PDF to Excel", desc: "Table recovery.", icon: Table, href: "/convert?type=pdf-to-excel" },
-      ]
-    },
-    {
-      label: "Security & Trust",
-      description: "Industrial grade data protection.",
-      items: [
-        { title: "Password Protect", desc: "Encrypt PDF.", icon: Lock, href: "/secure" },
-        { title: "Privacy Shield", desc: "Metadata erasure.", icon: ShieldCheck, href: "/protect" },
-        { title: "Unlock PDF", desc: "Strip restrictions.", icon: Unlock, href: "/protect?mode=unlock" },
-        { title: "Sanitize Asset", desc: "Deep cleaning.", icon: Eraser, href: "/sanitize" },
       ]
     }
   ];

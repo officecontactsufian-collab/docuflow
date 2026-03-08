@@ -11,3 +11,6 @@ import '@/ai/flows/content-repurposer-flow.ts';
 import '@/ai/flows/niche-finder-flow.ts';
 import '@/ai/flows/decision-helper-flow.ts';
 import '@/ai/flows/personal-brain-flow.ts';
+import '@/ai/flows/life-simulator-flow.ts';
+import '@/ai/flows/skill-generator-flow.ts';
+import '@/ai/flows/reality-check-flow.ts';
