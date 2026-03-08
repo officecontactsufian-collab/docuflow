@@ -8,3 +8,6 @@ import '@/ai/flows/ai-studio-flow.ts';
 import '@/ai/flows/prompt-improver-flow.ts';
 import '@/ai/flows/humanizer-flow.ts';
 import '@/ai/flows/content-repurposer-flow.ts';
+import '@/ai/flows/niche-finder-flow.ts';
+import '@/ai/flows/decision-helper-flow.ts';
+import '@/ai/flows/personal-brain-flow.ts';

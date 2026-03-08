@@ -1,4 +1,3 @@
-
 "use client"
 
 import * as React from 'react';
@@ -45,7 +44,9 @@ import {
   Scissors,
   Eraser,
   Table,
-  Wrench
+  Wrench,
+  TrendingUp,
+  Sparkles
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
@@ -59,23 +60,23 @@ export default function Home() {
 
   const toolCategories = [
     {
-      label: "AI Writing Suite",
-      description: "Generative protocols for structural content evolution.",
+      label: "AI Discovery & Business",
+      description: "Identify markets, evaluate decisions, and synthesize knowledge.",
       items: [
-        { title: "Paraphraser", desc: "Re-engineer text.", icon: RefreshCcw, href: "/ai-studio" },
-        { title: "AI Summarizer", desc: "Executive distillation.", icon: Activity, href: "/ai-studio" },
-        { title: "Grammar Check", desc: "Industrial proofing.", icon: CheckCircle2, href: "/ai-studio" },
-        { title: "Essay Writer", desc: "Structured drafts.", icon: BookOpen, href: "/ai-studio" },
+        { title: "Niche Finder", desc: "Identify markets.", icon: TrendingUp, href: "/tools/ai-niche-finder" },
+        { title: "Decision Helper", desc: "Logic analysis.", icon: Scale, href: "/tools/ai-decision-helper" },
+        { title: "Personal Brain", desc: "Knowledge map.", icon: BrainCircuit, href: "/tools/ai-personal-brain" },
+        { title: "Prompt Improver", desc: "Optimize AI input.", icon: Sparkles, href: "/tools/ai-prompt-improver" },
       ]
     },
     {
-      label: "AI Career Suite",
-      description: "AI-powered protocols for career advancement.",
+      label: "AI Writing & Content",
+      description: "Generative protocols for structural content evolution.",
       items: [
-        { title: "Resume Builder", desc: "Profile engineering.", icon: Briefcase, href: "/ai-studio" },
-        { title: "Cover Letter", desc: "Intro architect.", icon: FileBadge, href: "/ai-studio" },
-        { title: "Email Architect", desc: "Structural synthesis.", icon: Mail, href: "/ai-studio" },
-        { title: "Digital Sign", desc: "Apply identity anchors.", icon: Signature, href: "/sign" },
+        { title: "AI Humanizer", desc: "Natural synthesis.", icon: ShieldCheck, href: "/tools/ai-humanizer" },
+        { title: "Content Repurposer", desc: "Omnichannel stream.", icon: RefreshCcw, href: "/tools/ai-content-repurposer" },
+        { title: "AI Summarizer", desc: "Executive distillation.", icon: Activity, href: "/ai-studio" },
+        { title: "Paraphraser", desc: "Re-engineer text.", icon: RefreshCcw, href: "/ai-studio" },
       ]
     },
     {

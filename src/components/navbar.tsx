@@ -1,4 +1,3 @@
-
 "use client"
 
 import Link from 'next/link';
@@ -35,7 +34,9 @@ import {
   Table,
   Eraser,
   Wrench,
-  Scissors
+  Scissors,
+  TrendingUp,
+  Scale
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -68,18 +69,18 @@ export function Navbar() {
       label: t('nav.ai_writing'),
       items: [
         { href: "/ai-studio", icon: RefreshCcw, title: t('tools.paraphraser.title'), desc: t('tools.paraphraser.desc') },
+        { href: "/tools/ai-humanizer", icon: ShieldCheck, title: "AI Humanizer", desc: "Natural synthesis." },
         { href: "/ai-studio", icon: Activity, title: t('tools.summarizer.title'), desc: t('tools.summarizer.desc') },
-        { href: "/ai-studio", icon: CheckCircle2, title: t('tools.grammar.title'), desc: t('tools.grammar.desc') },
-        { href: "/ai-studio", icon: BookOpen, title: t('tools.essay.title'), desc: t('tools.essay.desc') },
+        { href: "/tools/ai-prompt-improver", icon: Sparkles, title: "Prompt Improver", desc: "Optimize payloads." },
       ]
     },
     {
-      label: t('nav.ai_career'),
+      label: "Business & Discovery",
       items: [
-        { href: "/ai-studio", icon: Briefcase, title: t('tools.resume.title'), desc: t('tools.resume.desc') },
-        { href: "/ai-studio", icon: FileBadge, title: t('tools.cover_letter.title'), desc: t('tools.cover_letter.desc') },
-        { href: "/ai-studio", icon: Mail, title: t('tools.email.title'), desc: t('tools.email.desc') },
-        { href: "/sign", icon: Signature, title: t('tools.sign.title'), desc: t('tools.sign.desc') },
+        { href: "/tools/ai-niche-finder", icon: TrendingUp, title: "Niche Finder", desc: "Market opportunities." },
+        { href: "/tools/ai-decision-helper", icon: Scale, title: "Decision Helper", desc: "Logic framework." },
+        { href: "/tools/ai-content-repurposer", icon: RefreshCcw, title: "Content Repurposer", desc: "Omnichannel stream." },
+        { href: "/tools/ai-personal-brain", icon: BrainCircuit, title: "Personal Brain", desc: "Cognitive indexing." },
       ]
     },
     {
@@ -167,11 +168,11 @@ export function Navbar() {
             <Link href="/ai-studio" className="flex items-center gap-1.5 text-[9px] font-black uppercase tracking-widest text-primary hover:text-primary/80 transition-all group">
               <BrainCircuit className="h-3 w-3" /> {isHydrated ? t('nav.ai_studio') : 'AI Studio'}
             </Link>
-            <Link href="/convert" className="flex items-center gap-1.5 text-[9px] font-black uppercase tracking-widest text-accent/80 hover:text-accent transition-all group">
-              <ArrowRightLeft className="h-3 w-3 text-primary/60 group-hover:text-primary transition-colors" /> {isHydrated ? t('nav.convert') : 'Convert'}
+            <Link href="/tools/ai-niche-finder" className="flex items-center gap-1.5 text-[9px] font-black uppercase tracking-widest text-accent/80 hover:text-accent transition-all group">
+              <TrendingUp className="h-3 w-3 text-primary/60 group-hover:text-primary transition-colors" /> Niche Finder
             </Link>
-            <Link href="/merge" className="flex items-center gap-1.5 text-[9px] font-black uppercase tracking-widest text-accent/80 hover:text-accent transition-all group">
-              <Merge className="h-3 w-3 text-primary/60 group-hover:text-primary transition-colors" /> {isHydrated ? t('nav.merge') : 'Merge'}
+            <Link href="/tools/ai-decision-helper" className="flex items-center gap-1.5 text-[9px] font-black uppercase tracking-widest text-accent/80 hover:text-accent transition-all group">
+              <Scale className="h-3 w-3 text-primary/60 group-hover:text-primary transition-colors" /> Decisions
             </Link>
           </div>
         </div>
