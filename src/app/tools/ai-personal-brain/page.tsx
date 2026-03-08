@@ -26,7 +26,7 @@ import { useToast } from '@/hooks/use-toast';
 import { executeBrainSynthesisAction } from './actions';
 import { useUser, useAuth, useFirestore, addDocumentNonBlocking, setDocumentNonBlocking } from '@/firebase';
 import { signInAnonymously } from 'firebase/auth';
-import { collection, serverTimestamp, doc } from 'firebase/firestore';
+import { collection, serverTimestamp, doc, query, limit, getDocs } from 'firebase/firestore';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from '@/components/ui/dialog';
 import { cn } from '@/lib/utils';
 
@@ -53,9 +53,17 @@ export default function PersonalBrainPage() {
     setShareSlug(null);
 
     try {
+      const logsRef = collection(firestore, 'users', user.uid, 'usageLogs');
+      const q = query(logsRef, limit(10));
+      const snap = await getDocs(q);
+      if (snap.size >= 10) throw new Error("DAILY_LIMIT_REACHED: 10 operations allowed per day.");
+
       const res = await executeBrainSynthesisAction({ content: input });
       setResult(res);
-      addDocumentNonBlocking(collection(firestore, 'usageLogs'), { userId: user.uid, toolUsed: 'AI_PERSONAL_BRAIN', requestTimestamp: serverTimestamp(), status: 'SUCCESS' });
+      
+      const logData = { userId: user.uid, toolUsed: 'AI_PERSONAL_BRAIN', requestTimestamp: serverTimestamp(), status: 'SUCCESS' };
+      addDocumentNonBlocking(collection(firestore, 'users', user.uid, 'usageLogs'), logData);
+      addDocumentNonBlocking(collection(firestore, 'usageLogs'), logData);
     } catch (e: any) {
       toast({ variant: "destructive", title: "Synthesis Failure", description: e.message });
     } finally {
@@ -68,11 +76,13 @@ export default function PersonalBrainPage() {
     setIsSharing(true);
     try {
       const slug = `brain-${Math.random().toString(36).substring(2, 8)}`;
+      const formattedContent = `SUMMARY: ${result.summary}\n\nINDEX:\n${result.index.map((i: any) => `- ${i.category}: ${i.keyPoints.join(', ')}`).join('\n')}`;
+      
       const publicRef = doc(firestore, 'public_ai_results', slug);
       await setDocumentNonBlocking(publicRef, {
         creatorId: user.uid,
         toolName: 'AI Personal Brain',
-        generatedContent: JSON.stringify(result),
+        generatedContent: formattedContent,
         shareSlug: slug,
         createdAt: serverTimestamp(),
         isPubliclyShareable: true
@@ -114,7 +124,7 @@ export default function PersonalBrainPage() {
                       className="min-h-[300px] bg-muted/20 border-accent/5 rounded-2xl font-bold text-accent"
                     />
                   </div>
-                  <Button onClick={handleSynthesize} disabled={isProcessing || !input.trim()} className="w-full h-16 rounded-2xl bg-accent text-white font-black uppercase tracking-widest text-[11px] shadow-2xl shadow-accent/20">
+                  <Button onClick={handleSynthesize} disabled={isProcessing || !input.trim()} className="w-full h-16 rounded-2xl bg-accent text-white font-black uppercase tracking-widest text-[11px] shadow-2xl">
                     {isProcessing ? <Loader2 className="animate-spin" /> : <Zap className="mr-2 h-4 w-4" />}
                     Synthesize Digital Brain
                   </Button>
@@ -137,9 +147,24 @@ export default function PersonalBrainPage() {
                       <LayoutDashboard className="h-3 w-3" /> Cognitive Index
                     </h3>
                     <div className="flex gap-2">
-                      <Button variant="ghost" size="sm" onClick={handleShare} className="text-[9px] font-black uppercase text-primary">
-                        <Share2 className="h-3 w-3 mr-2" /> Share Result
-                      </Button>
+                      <Dialog>
+                        <DialogTrigger asChild>
+                          <Button variant="ghost" onClick={handleShare} size="sm" className="text-[9px] font-black uppercase text-primary">
+                            <Share2 className="h-3 w-3 mr-2" /> Share Result
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent className="rounded-[2rem] p-8 max-w-sm">
+                          {isSharing ? <Loader2 className="animate-spin mx-auto"/> : (
+                            <div className="space-y-6 pt-6 flex flex-col items-center">
+                              <div className="flex gap-4">
+                                <a href={`https://wa.me/?text=${shareUrl}`} className="h-12 w-12 rounded-xl bg-accent flex items-center justify-center text-white shadow-lg"><MessageCircle className="h-5 w-5"/></a>
+                                <a href={`https://twitter.com/intent/tweet?url=${shareUrl}`} className="h-12 w-12 rounded-xl bg-accent flex items-center justify-center text-white shadow-lg"><Twitter className="h-5 w-5"/></a>
+                              </div>
+                              <p className="text-[9px] font-bold truncate opacity-40">{shareUrl}</p>
+                            </div>
+                          )}
+                        </DialogContent>
+                      </Dialog>
                     </div>
                   </div>
 

@@ -25,6 +25,7 @@ import { useUser, useAuth, useFirestore, addDocumentNonBlocking, setDocumentNonB
 import { signInAnonymously } from 'firebase/auth';
 import { collection, query, where, getDocs, limit, serverTimestamp, doc } from 'firebase/firestore';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 
 export default function ContentRepurposerPage() {
   const { user } = useUser();
@@ -35,6 +36,8 @@ export default function ContentRepurposerPage() {
   const [input, setInput] = React.useState('');
   const [result, setResult] = React.useState<any>(null);
   const [isProcessing, setIsProcessing] = React.useState(false);
+  const [isSharing, setIsSharing] = React.useState(false);
+  const [shareSlug, setShareSlug] = React.useState<string | null>(null);
 
   React.useEffect(() => {
     if (!user && auth) signInAnonymously(auth);
@@ -44,17 +47,49 @@ export default function ContentRepurposerPage() {
     if (!input.trim() || !user || !firestore) return;
     setIsProcessing(true);
     setResult(null);
+    setShareSlug(null);
 
     try {
+      const logsRef = collection(firestore, 'users', user.uid, 'usageLogs');
+      const q = query(logsRef, limit(10));
+      const snap = await getDocs(q);
+      if (snap.size >= 10) throw new Error("DAILY_LIMIT_REACHED: 10 operations allowed per day.");
+
       const res = await executeRepurposerAction({ content: input });
       setResult(res);
-      addDocumentNonBlocking(collection(firestore, 'usageLogs'), { userId: user.uid, toolUsed: 'AI_REPURPOSER', requestTimestamp: serverTimestamp() });
+      
+      const logData = { userId: user.uid, toolUsed: 'AI_REPURPOSER', requestTimestamp: serverTimestamp(), status: 'SUCCESS' };
+      addDocumentNonBlocking(collection(firestore, 'users', user.uid, 'usageLogs'), logData);
+      addDocumentNonBlocking(collection(firestore, 'usageLogs'), logData);
     } catch (e: any) {
       toast({ variant: "destructive", title: "Error", description: e.message });
     } finally {
       setIsProcessing(false);
     }
   };
+
+  const handleShare = async () => {
+    if (!user || !firestore || !result) return;
+    setIsSharing(true);
+    try {
+      const slug = `repurpose-${Math.random().toString(36).substring(2, 8)}`;
+      const formattedContent = `X THREAD:\n${result.tweetThread.join('\n')}\n\nLINKEDIN POST:\n${result.linkedInPost}\n\nTIKTOK SCRIPT:\n${result.tiktokScript}\n\nSUMMARY:\n${result.shortSummary}`;
+      
+      await setDocumentNonBlocking(doc(firestore, 'public_ai_results', slug), {
+        creatorId: user.uid,
+        toolName: 'AI Content Repurposer',
+        generatedContent: formattedContent,
+        shareSlug: slug,
+        createdAt: serverTimestamp(),
+        isPubliclyShareable: true
+      }, { merge: true });
+      setShareSlug(slug);
+    } finally {
+      setIsSharing(false);
+    }
+  };
+
+  const shareUrl = shareSlug ? `${window.location.origin}/share/${shareSlug}` : '';
 
   return (
     <div className="flex min-h-screen flex-col bg-muted/20">
@@ -74,9 +109,9 @@ export default function ContentRepurposerPage() {
                   placeholder="Paste your article or transcript..." 
                   value={input} 
                   onChange={(e) => setInput(e.target.value)}
-                  className="min-h-[300px] bg-muted/20 border-accent/5 rounded-2xl"
+                  className="min-h-[300px] bg-muted/20 border-accent/5 rounded-2xl font-bold"
                 />
-                <Button onClick={handleRepurpose} disabled={isProcessing || !input.trim()} className="w-full h-16 rounded-2xl bg-accent text-white font-black uppercase tracking-widest text-[11px]">
+                <Button onClick={handleRepurpose} disabled={isProcessing || !input.trim()} className="w-full h-16 rounded-2xl bg-accent text-white font-black uppercase tracking-widest text-[11px] shadow-2xl">
                   {isProcessing ? <Loader2 className="animate-spin" /> : <Zap className="mr-2 h-4 w-4" />}
                   Deploy omnichannel synthesis
                 </Button>
@@ -84,42 +119,66 @@ export default function ContentRepurposerPage() {
             </Card>
 
             {result ? (
-              <Tabs defaultValue="x" className="w-full space-y-6">
-                <TabsList className="bg-white/50 border border-accent/5 p-1 rounded-2xl h-14 w-full grid grid-cols-4">
-                  <TabsTrigger value="x" className="rounded-xl font-black text-[9px] uppercase"><Twitter className="h-3 w-3 mr-2"/> X</TabsTrigger>
-                  <TabsTrigger value="li" className="rounded-xl font-black text-[9px] uppercase"><Linkedin className="h-3 w-3 mr-2"/> LI</TabsTrigger>
-                  <TabsTrigger value="tk" className="rounded-xl font-black text-[9px] uppercase"><Video className="h-3 w-3 mr-2"/> TK</TabsTrigger>
-                  <TabsTrigger value="sum" className="rounded-xl font-black text-[9px] uppercase"><FileText className="h-3 w-3 mr-2"/> SUM</TabsTrigger>
-                </TabsList>
+              <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-700">
+                <div className="flex items-center justify-between px-4">
+                  <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-accent/40">Synthesis Layers</h3>
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <Button variant="ghost" onClick={handleShare} size="sm" className="text-[9px] font-black uppercase text-primary">
+                        <Share2 className="h-3 w-3 mr-2" /> Viral Distribution
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="rounded-[2rem] p-8 max-w-sm">
+                      {isSharing ? <Loader2 className="animate-spin mx-auto"/> : (
+                        <div className="space-y-6 pt-6 flex flex-col items-center">
+                          <div className="flex gap-4">
+                            <a href={`https://wa.me/?text=${shareUrl}`} className="h-12 w-12 rounded-xl bg-accent flex items-center justify-center text-white shadow-lg"><MessageCircle className="h-5 w-5"/></a>
+                            <a href={`https://twitter.com/intent/tweet?url=${shareUrl}`} className="h-12 w-12 rounded-xl bg-accent flex items-center justify-center text-white shadow-lg"><Twitter className="h-5 w-5"/></a>
+                          </div>
+                          <p className="text-[9px] font-bold truncate opacity-40">{shareUrl}</p>
+                        </div>
+                      )}
+                    </DialogContent>
+                  </Dialog>
+                </div>
 
-                <TabsContent value="x">
-                  <Card className="border-none shadow-2xl rounded-[2.5rem] bg-white p-8 space-y-4">
-                    {result.tweetThread.map((t: string, i: number) => (
-                      <div key={i} className="p-4 bg-muted/20 rounded-xl border border-accent/5 text-sm font-medium">{t}</div>
-                    ))}
-                  </Card>
-                </TabsContent>
-                
-                <TabsContent value="li">
-                  <Card className="border-none shadow-2xl rounded-[2.5rem] bg-white p-8">
-                    <div className="whitespace-pre-wrap text-sm font-medium">{result.linkedInPost}</div>
-                  </Card>
-                </TabsContent>
+                <Tabs defaultValue="x" className="w-full space-y-6">
+                  <TabsList className="bg-white/50 border border-accent/5 p-1 rounded-2xl h-14 w-full grid grid-cols-4">
+                    <TabsTrigger value="x" className="rounded-xl font-black text-[9px] uppercase"><Twitter className="h-3 w-3 mr-2"/> X</TabsTrigger>
+                    <TabsTrigger value="li" className="rounded-xl font-black text-[9px] uppercase"><Linkedin className="h-3 w-3 mr-2"/> LI</TabsTrigger>
+                    <TabsTrigger value="tk" className="rounded-xl font-black text-[9px] uppercase"><Video className="h-3 w-3 mr-2"/> TK</TabsTrigger>
+                    <TabsTrigger value="sum" className="rounded-xl font-black text-[9px] uppercase"><FileText className="h-3 w-3 mr-2"/> SUM</TabsTrigger>
+                  </TabsList>
 
-                <TabsContent value="tk">
-                  <Card className="border-none shadow-2xl rounded-[2.5rem] bg-white p-8">
-                    <div className="whitespace-pre-wrap text-sm font-medium">{result.tiktokScript}</div>
-                  </Card>
-                </TabsContent>
+                  <TabsContent value="x">
+                    <Card className="border-none shadow-2xl rounded-[2.5rem] bg-white p-8 space-y-4">
+                      {result.tweetThread.map((t: string, i: number) => (
+                        <div key={i} className="p-4 bg-muted/20 rounded-xl border border-accent/5 text-sm font-medium">{t}</div>
+                      ))}
+                    </Card>
+                  </TabsContent>
+                  
+                  <TabsContent value="li">
+                    <Card className="border-none shadow-2xl rounded-[2.5rem] bg-white p-8">
+                      <div className="whitespace-pre-wrap text-sm font-medium">{result.linkedInPost}</div>
+                    </Card>
+                  </TabsContent>
 
-                <TabsContent value="sum">
-                  <Card className="border-none shadow-2xl rounded-[2.5rem] bg-white p-8">
-                    <div className="text-sm font-medium italic">{result.shortSummary}</div>
-                  </Card>
-                </TabsContent>
-              </Tabs>
+                  <TabsContent value="tk">
+                    <Card className="border-none shadow-2xl rounded-[2.5rem] bg-white p-8">
+                      <div className="whitespace-pre-wrap text-sm font-medium">{result.tiktokScript}</div>
+                    </Card>
+                  </TabsContent>
+
+                  <TabsContent value="sum">
+                    <Card className="border-none shadow-2xl rounded-[2.5rem] bg-white p-8">
+                      <div className="text-sm font-medium italic">{result.shortSummary}</div>
+                    </Card>
+                  </TabsContent>
+                </Tabs>
+              </div>
             ) : (
-              <div className="h-full flex flex-col items-center justify-center p-12 border-2 border-dashed rounded-[3rem] opacity-20">
+              <div className="h-full flex flex-col items-center justify-center p-12 border-2 border-dashed rounded-[3rem] opacity-20 bg-white/50 min-h-[400px]">
                 <Hash className="h-12 w-12 mb-4" />
                 <p className="text-[10px] font-black uppercase tracking-widest text-center">Awaiting Content Payload...</p>
               </div>

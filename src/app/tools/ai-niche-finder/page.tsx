@@ -14,7 +14,6 @@ import {
   Zap,
   TrendingUp,
   Search,
-  Badge,
   ArrowRight,
   Sparkles,
   Twitter,
@@ -26,7 +25,7 @@ import { useToast } from '@/hooks/use-toast';
 import { executeNicheFinderAction } from './actions';
 import { useUser, useAuth, useFirestore, addDocumentNonBlocking, setDocumentNonBlocking } from '@/firebase';
 import { signInAnonymously } from 'firebase/auth';
-import { collection, serverTimestamp, doc } from 'firebase/firestore';
+import { collection, serverTimestamp, doc, query, limit, getDocs } from 'firebase/firestore';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from '@/components/ui/dialog';
 import { cn } from '@/lib/utils';
 
@@ -53,9 +52,17 @@ export default function NicheFinderPage() {
     setShareSlug(null);
 
     try {
+      const logsRef = collection(firestore, 'users', user.uid, 'usageLogs');
+      const q = query(logsRef, limit(10));
+      const snap = await getDocs(q);
+      if (snap.size >= 10) throw new Error("DAILY_LIMIT_REACHED: 10 operations allowed per day.");
+
       const res = await executeNicheFinderAction({ interests: input });
       setResult(res);
-      addDocumentNonBlocking(collection(firestore, 'usageLogs'), { userId: user.uid, toolUsed: 'AI_NICHE_FINDER', requestTimestamp: serverTimestamp(), status: 'SUCCESS' });
+      
+      const logData = { userId: user.uid, toolUsed: 'AI_NICHE_FINDER', requestTimestamp: serverTimestamp(), status: 'SUCCESS' };
+      addDocumentNonBlocking(collection(firestore, 'users', user.uid, 'usageLogs'), logData);
+      addDocumentNonBlocking(collection(firestore, 'usageLogs'), logData);
     } catch (e: any) {
       toast({ variant: "destructive", title: "Protocol Error", description: e.message });
     } finally {
@@ -68,11 +75,13 @@ export default function NicheFinderPage() {
     setIsSharing(true);
     try {
       const slug = `niche-${Math.random().toString(36).substring(2, 8)}`;
+      const formattedContent = result.niches.map((n: any) => `NICHE: ${n.title}\nDIFFICULTY: ${n.difficulty}\nWHY: ${n.explanation}\nUSE CASES: ${n.useCases.join(', ')}`).join('\n\n');
+      
       const publicRef = doc(firestore, 'public_ai_results', slug);
       await setDocumentNonBlocking(publicRef, {
         creatorId: user.uid,
         toolName: 'AI Niche Finder',
-        generatedContent: JSON.stringify(result),
+        generatedContent: formattedContent,
         shareSlug: slug,
         createdAt: serverTimestamp(),
         isPubliclyShareable: true
@@ -115,7 +124,7 @@ export default function NicheFinderPage() {
                   <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-accent/20" />
                 </div>
               </div>
-              <Button onClick={handleDeploy} disabled={isProcessing || !input.trim()} className="w-full h-16 rounded-2xl bg-accent text-white font-black uppercase tracking-widest text-[11px] shadow-2xl shadow-accent/20 transition-all hover:scale-[1.01]">
+              <Button onClick={handleDeploy} disabled={isProcessing || !input.trim()} className="w-full h-16 rounded-2xl bg-accent text-white font-black uppercase tracking-widest text-[11px] shadow-2xl transition-all hover:scale-[1.01]">
                 {isProcessing ? <Loader2 className="animate-spin" /> : <Zap className="mr-2 h-4 w-4" />}
                 Execute niche synthesis
               </Button>
@@ -141,9 +150,9 @@ export default function NicheFinderPage() {
                     {isSharing ? <Loader2 className="animate-spin mx-auto"/> : (
                       <div className="space-y-6 pt-6">
                         <div className="flex justify-center gap-4">
-                          <a href={`https://twitter.com/intent/tweet?url=${shareUrl}`} className="h-12 w-12 rounded-xl bg-[#1DA1F2] flex items-center justify-center text-white"><Twitter className="h-5 w-5"/></a>
-                          <a href={`https://www.linkedin.com/sharing/share-offsite/?url=${shareUrl}`} className="h-12 w-12 rounded-xl bg-[#0077B5] flex items-center justify-center text-white"><Linkedin className="h-5 w-5"/></a>
-                          <a href={`https://wa.me/?text=${shareUrl}`} className="h-12 w-12 rounded-xl bg-[#25D366] flex items-center justify-center text-white"><MessageCircle className="h-5 w-5"/></a>
+                          <a href={`https://twitter.com/intent/tweet?url=${shareUrl}`} className="h-12 w-12 rounded-xl bg-[#1DA1F2] flex items-center justify-center text-white shadow-lg"><Twitter className="h-5 w-5"/></a>
+                          <a href={`https://www.linkedin.com/sharing/share-offsite/?url=${shareUrl}`} className="h-12 w-12 rounded-xl bg-[#0077B5] flex items-center justify-center text-white shadow-lg"><Linkedin className="h-5 w-5"/></a>
+                          <a href={`https://wa.me/?text=${shareUrl}`} className="h-12 w-12 rounded-xl bg-[#25D366] flex items-center justify-center text-white shadow-lg"><MessageCircle className="h-5 w-5"/></a>
                         </div>
                         <div className="p-3 bg-muted/30 rounded-xl text-center"><p className="text-[9px] font-bold truncate">{shareUrl}</p></div>
                       </div>

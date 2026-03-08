@@ -53,9 +53,9 @@ export default function PromptImproverPage() {
     setShareSlug(null);
 
     try {
-      // Check usage limits locally (MVP)
-      const logsRef = collection(firestore, 'usageLogs');
-      const q = query(logsRef, where('userId', '==', user.uid), limit(10));
+      // Check usage limits locally using the user's private subcollection
+      const logsRef = collection(firestore, 'users', user.uid, 'usageLogs');
+      const q = query(logsRef, limit(10));
       const snap = await getDocs(q);
       if (snap.size >= 10) {
         throw new Error("DAILY_LIMIT_REACHED: 10 operations allowed per day.");
@@ -65,6 +65,7 @@ export default function PromptImproverPage() {
       setResult(res);
 
       const logData = { userId: user.uid, toolUsed: 'PROMPT_IMPROVER', requestTimestamp: serverTimestamp(), status: 'SUCCESS' };
+      addDocumentNonBlocking(collection(firestore, 'users', user.uid, 'usageLogs'), logData);
       addDocumentNonBlocking(collection(firestore, 'usageLogs'), logData);
     } catch (e: any) {
       toast({ variant: "destructive", title: "Protocol Error", description: e.message });
@@ -131,7 +132,7 @@ export default function PromptImproverPage() {
                   disabled={isProcessing || !input.trim()}
                   className="w-full h-16 rounded-2xl bg-accent text-white font-black uppercase tracking-widest text-[11px] shadow-2xl shadow-accent/20"
                 >
-                  {isProcessing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Zap className="mr-2 h-4 w-4" />}
+                  {isProcessing ? <Loader2 className="animate-spin" /> : <Zap className="mr-2 h-4 w-4" />}
                   Optimize Protocol
                 </Button>
               </CardContent>

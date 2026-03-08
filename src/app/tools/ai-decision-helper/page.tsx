@@ -26,7 +26,7 @@ import { useToast } from '@/hooks/use-toast';
 import { executeDecisionAction } from './actions';
 import { useUser, useAuth, useFirestore, addDocumentNonBlocking, setDocumentNonBlocking } from '@/firebase';
 import { signInAnonymously } from 'firebase/auth';
-import { collection, serverTimestamp, doc } from 'firebase/firestore';
+import { collection, serverTimestamp, doc, query, limit, getDocs } from 'firebase/firestore';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from '@/components/ui/dialog';
 import { cn } from '@/lib/utils';
 
@@ -53,9 +53,17 @@ export default function DecisionHelperPage() {
     setShareSlug(null);
 
     try {
+      const logsRef = collection(firestore, 'users', user.uid, 'usageLogs');
+      const q = query(logsRef, limit(10));
+      const snap = await getDocs(q);
+      if (snap.size >= 10) throw new Error("DAILY_LIMIT_REACHED: 10 operations allowed per day.");
+
       const res = await executeDecisionAction({ decision: input });
       setResult(res);
-      addDocumentNonBlocking(collection(firestore, 'usageLogs'), { userId: user.uid, toolUsed: 'AI_DECISION_HELPER', requestTimestamp: serverTimestamp(), status: 'SUCCESS' });
+      
+      const logData = { userId: user.uid, toolUsed: 'AI_DECISION_HELPER', requestTimestamp: serverTimestamp(), status: 'SUCCESS' };
+      addDocumentNonBlocking(collection(firestore, 'users', user.uid, 'usageLogs'), logData);
+      addDocumentNonBlocking(collection(firestore, 'usageLogs'), logData);
     } catch (e: any) {
       toast({ variant: "destructive", title: "Analysis Failure", description: e.message });
     } finally {
@@ -68,11 +76,13 @@ export default function DecisionHelperPage() {
     setIsSharing(true);
     try {
       const slug = `decision-${Math.random().toString(36).substring(2, 8)}`;
+      const formattedContent = `DECISION: ${input}\n\nPROS:\n${result.pros.map((p: string) => `- ${p}`).join('\n')}\n\nCONS:\n${result.cons.map((c: string) => `- ${c}`).join('\n')}\n\nSYNTHESIS:\n${result.synthesis}\n\nRISK LEVEL: ${result.riskLevel}`;
+      
       const publicRef = doc(firestore, 'public_ai_results', slug);
       await setDocumentNonBlocking(publicRef, {
         creatorId: user.uid,
         toolName: 'AI Decision Helper',
-        generatedContent: JSON.stringify(result),
+        generatedContent: formattedContent,
         shareSlug: slug,
         createdAt: serverTimestamp(),
         isPubliclyShareable: true
@@ -181,7 +191,7 @@ export default function DecisionHelperPage() {
                 </Card>
               </div>
             ) : (
-              <div className="h-full flex flex-col items-center justify-center p-12 border-2 border-dashed rounded-[3rem] opacity-20">
+              <div className="h-full flex flex-col items-center justify-center p-12 border-2 border-dashed rounded-[3rem] opacity-20 bg-white/50 min-h-[400px]">
                 <Scale className="h-12 w-12 mb-4" />
                 <p className="text-[10px] font-black uppercase tracking-widest text-center">Awaiting Decision Payload...</p>
               </div>

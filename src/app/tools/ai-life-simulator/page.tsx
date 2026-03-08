@@ -22,7 +22,7 @@ import { useToast } from '@/hooks/use-toast';
 import { executeLifeSimulationAction } from './actions';
 import { useUser, useAuth, useFirestore, addDocumentNonBlocking, setDocumentNonBlocking } from '@/firebase';
 import { signInAnonymously } from 'firebase/auth';
-import { collection, serverTimestamp, doc } from 'firebase/firestore';
+import { collection, serverTimestamp, doc, query, limit, getDocs } from 'firebase/firestore';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 
 export default function LifeSimulatorPage() {
@@ -48,9 +48,17 @@ export default function LifeSimulatorPage() {
     setShareSlug(null);
 
     try {
+      const logsRef = collection(firestore, 'users', user.uid, 'usageLogs');
+      const q = query(logsRef, limit(10));
+      const snap = await getDocs(q);
+      if (snap.size >= 10) throw new Error("DAILY_LIMIT_REACHED: 10 operations allowed per day.");
+
       const res = await executeLifeSimulationAction({ decision: input });
       setResult(res);
-      addDocumentNonBlocking(collection(firestore, 'usageLogs'), { userId: user.uid, toolUsed: 'AI_LIFE_SIM', requestTimestamp: serverTimestamp(), status: 'SUCCESS' });
+      
+      const logData = { userId: user.uid, toolUsed: 'AI_LIFE_SIM', requestTimestamp: serverTimestamp(), status: 'SUCCESS' };
+      addDocumentNonBlocking(collection(firestore, 'users', user.uid, 'usageLogs'), logData);
+      addDocumentNonBlocking(collection(firestore, 'usageLogs'), logData);
     } catch (e: any) {
       toast({ variant: "destructive", title: "Error", description: e.message });
     } finally {
@@ -63,10 +71,12 @@ export default function LifeSimulatorPage() {
     setIsSharing(true);
     try {
       const slug = `sim-${Math.random().toString(36).substring(2, 8)}`;
+      const formattedContent = `SUMMARY: ${result.summary}\n\nSCENARIOS:\n${result.scenarios.map((s: any) => `${s.timeframe} (${s.probability} prob): ${s.outcome}`).join('\n')}`;
+      
       await setDocumentNonBlocking(doc(firestore, 'public_ai_results', slug), {
         creatorId: user.uid,
         toolName: 'AI Life Simulator',
-        generatedContent: JSON.stringify(result),
+        generatedContent: formattedContent,
         shareSlug: slug,
         createdAt: serverTimestamp(),
         isPubliclyShareable: true
@@ -99,7 +109,7 @@ export default function LifeSimulatorPage() {
                   onChange={(e) => setInput(e.target.value)}
                   className="min-h-[200px] bg-muted/20 border-accent/5 rounded-2xl font-bold"
                 />
-                <Button onClick={handleSimulate} disabled={isProcessing || !input.trim()} className="w-full h-16 rounded-2xl bg-accent text-white font-black uppercase tracking-widest text-[11px]">
+                <Button onClick={handleSimulate} disabled={isProcessing || !input.trim()} className="w-full h-16 rounded-2xl bg-accent text-white font-black uppercase tracking-widest text-[11px] shadow-2xl">
                   {isProcessing ? <Loader2 className="animate-spin" /> : <Globe className="mr-2 h-4 w-4" />}
                   Deploy Simulation Sequence
                 </Button>
@@ -148,7 +158,7 @@ export default function LifeSimulatorPage() {
                 </Dialog>
               </div>
             ) : (
-              <div className="h-full flex flex-col items-center justify-center p-12 border-2 border-dashed rounded-[3rem] opacity-20">
+              <div className="h-full flex flex-col items-center justify-center p-12 border-2 border-dashed rounded-[3rem] opacity-20 bg-white/50 min-h-[400px]">
                 <Globe className="h-12 w-12 mb-4" />
                 <p className="text-[10px] font-black uppercase tracking-widest text-center">Awaiting Temporal Input...</p>
               </div>

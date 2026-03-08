@@ -50,14 +50,17 @@ export default function AIHumanizerPage() {
     setShareSlug(null);
 
     try {
-      const q = query(collection(firestore, 'usageLogs'), where('userId', '==', user.uid), limit(10));
+      const logsRef = collection(firestore, 'users', user.uid, 'usageLogs');
+      const q = query(logsRef, limit(10));
       const snap = await getDocs(q);
-      if (snap.size >= 10) throw new Error("DAILY_LIMIT_REACHED");
+      if (snap.size >= 10) throw new Error("DAILY_LIMIT_REACHED: 10 operations allowed per day.");
 
       const res = await executeHumanizerAction({ text: input });
       setResult(res);
 
-      addDocumentNonBlocking(collection(firestore, 'usageLogs'), { userId: user.uid, toolUsed: 'AI_HUMANIZER', requestTimestamp: serverTimestamp() });
+      const logData = { userId: user.uid, toolUsed: 'AI_HUMANIZER', requestTimestamp: serverTimestamp(), status: 'SUCCESS' };
+      addDocumentNonBlocking(collection(firestore, 'users', user.uid, 'usageLogs'), logData);
+      addDocumentNonBlocking(collection(firestore, 'usageLogs'), logData);
     } catch (e: any) {
       toast({ variant: "destructive", title: "Error", description: e.message });
     } finally {

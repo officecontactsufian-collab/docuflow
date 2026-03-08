@@ -71,11 +71,11 @@ export function Navbar() {
 
   const categories = [
     {
-      label: t('nav.ai_writing'),
+      label: isHydrated ? t('nav.ai_writing') : "AI Writing Suite",
       items: [
-        { href: "/ai-studio", icon: FilePenLine, title: t('tools.paraphraser.title'), desc: t('tools.paraphraser.desc') },
+        { href: "/ai-studio", icon: FilePenLine, title: "Paraphraser", desc: "Re-engineer text." },
         { href: "/tools/ai-humanizer", icon: UserCheck, title: "AI Humanizer", desc: "Natural synthesis." },
-        { href: "/ai-studio", icon: Activity, title: t('tools.summarizer.title'), desc: t('tools.summarizer.desc') },
+        { href: "/ai-studio", icon: Activity, title: "AI Summarizer", desc: "Executive distillation." },
         { href: "/tools/ai-prompt-improver", icon: Sparkles, title: "Prompt Improver", desc: "Optimize payloads." },
       ]
     },
@@ -94,7 +94,7 @@ export function Navbar() {
         { href: "/tools/ai-decision-helper", icon: Scale, title: "Decision Helper", desc: "Logic framework." },
         { href: "/tools/ai-content-repurposer", icon: RefreshCcw, title: "Content Repurposer", desc: "Omnichannel stream." },
         { href: "/tools/ai-personal-brain", icon: BrainCircuit, title: "Personal Brain", desc: "Cognitive indexing." },
-        { href: "/ai-studio", icon: Languages, title: t('tools.translator.title'), desc: t('tools.translator.desc') },
+        { href: "/ai-studio", icon: Languages, title: "Translator", desc: "Linguistic shift." },
       ]
     },
     {
@@ -103,34 +103,36 @@ export function Navbar() {
         { href: "/ai-studio", icon: MessageSquare, title: "Doc Intelligence", desc: "Deep interrogation." },
         { href: "/scan-to-pdf", icon: Camera, title: "Scan to PDF", desc: "Hardware capture." },
         { href: "/analyze", icon: Search, title: "Deep Inspect", desc: "Structural metadata." },
+        { href: "/repair", icon: Wrench, title: "Repair PDF", desc: "Fix broken catalogs." },
+      ]
+    },
+    {
+      label: isHydrated ? t('nav.layout') : "Modify & Capture",
+      items: [
+        { href: "/crop", icon: Crop, title: "Crop PDF", desc: "Trim page margins." },
         { href: "/organize", icon: RotateCw, title: "Visual Organizer", desc: "Reorder & rotate." },
-      ]
-    },
-    {
-      label: t('nav.layout'),
-      items: [
-        { href: "/crop", icon: Crop, title: t('tools.crop.title'), desc: t('tools.crop.desc') },
-        { href: "/numbers", icon: Hash, title: t('tools.numbers.title'), desc: t('tools.numbers.desc') },
-        { href: "/merge", icon: Merge, title: t('tools.merge.title'), desc: t('tools.merge.desc') },
+        { href: "/numbers", icon: Hash, title: "Add Numbers", desc: "Sequential counters." },
+        { href: "/merge", icon: Merge, title: "Merge PDF", desc: "Combine assets." },
         { href: "/split", icon: Scissors, title: "Split PDF", desc: "Range extraction." },
+        { href: "/sign", icon: Signature, title: "Sign PDF", desc: "Digital signatures." },
       ]
     },
     {
-      label: t('nav.convert'),
+      label: isHydrated ? t('nav.convert') : "Convert & Export",
       items: [
-        { href: "/convert", icon: ArrowRightLeft, title: t('tools.convert_hub.title'), desc: t('tools.convert_hub.desc') },
-        { href: "/convert?type=pdf-to-word", icon: FileText, title: t('tools.pdf_to_word.title'), desc: t('tools.pdf_to_word.desc') },
-        { href: "/convert?type=word-to-pdf", icon: FilePenLine, title: t('tools.word_to_pdf.title'), desc: t('tools.word_to_pdf.desc') },
-        { href: "/convert?type=pdf-to-excel", icon: Table, title: t('tools.pdf_to_excel.title'), desc: t('tools.pdf_to_excel.desc') },
+        { href: "/convert", icon: ArrowRightLeft, title: "Convert Hub", desc: "Inversion Engine." },
+        { href: "/convert?type=pdf-to-word", icon: FileText, title: "PDF to Word", desc: "Text recovery." },
+        { href: "/convert?type=word-to-pdf", icon: FilePenLine, title: "Word to PDF", desc: "Standardize DOCX." },
+        { href: "/convert?type=pdf-to-excel", icon: Table, title: "PDF to Excel", desc: "Table recovery." },
       ]
     },
     {
-      label: t('nav.security'),
+      label: isHydrated ? t('nav.security') : "Security & Trust",
       items: [
-        { href: "/secure", icon: Lock, title: t('tools.protect.title'), desc: t('tools.protect.desc') },
-        { href: "/protect", icon: ShieldCheck, title: t('tools.privacy.title'), desc: t('tools.privacy.desc') },
-        { href: "/protect?mode=unlock", icon: Unlock, title: t('tools.unlock.title'), desc: t('tools.unlock.desc') },
-        { href: "/sanitize", icon: Eraser, title: t('tools.sanitize.title'), desc: t('tools.sanitize.desc') },
+        { href: "/secure", icon: Lock, title: "Password Protect", desc: "Encrypt PDF." },
+        { href: "/protect", icon: ShieldCheck, title: "Privacy Shield", desc: "Metadata erasure." },
+        { href: "/protect?mode=unlock", icon: Unlock, title: "Unlock PDF", desc: "Strip restrictions." },
+        { href: "/sanitize", icon: Eraser, title: "Sanitize Asset", desc: "Deep cleaning." },
       ]
     }
   ];
@@ -161,7 +163,7 @@ export function Navbar() {
                     </DropdownMenuLabel>
                     <div className="grid gap-1">
                       {cat.items.map((item) => (
-                        <DropdownMenuItem key={item.title} asChild className="p-2 rounded-xl cursor-pointer hover:bg-primary/5 transition-all">
+                        <DropdownMenuItem key={`${cat.label}-${item.title}`} asChild className="p-2 rounded-xl cursor-pointer hover:bg-primary/5 transition-all">
                           <Link href={item.href} className="flex items-center gap-3">
                             <div className="h-8 w-8 text-primary flex items-center justify-center bg-primary/5 rounded-lg shrink-0">
                               <item.icon className="h-4 w-4" />

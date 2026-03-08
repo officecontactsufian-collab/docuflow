@@ -91,13 +91,13 @@ export default function Home() {
       ]
     },
     {
-      label: "AI Productivity Suite",
+      label: "Asset Intelligence",
       description: "Industrial efficiency and document interrogation.",
       items: [
-        { title: "Translator", desc: "Context-aware linguistic shift.", icon: Languages, href: "/ai-studio" },
-        { title: "Doc Intelligence", desc: "Deep asset interrogation stream.", icon: MessageSquare, href: "/ai-studio" },
         { title: "Scan to PDF", desc: "Direct hardware camera capture.", icon: Camera, href: "/scan-to-pdf" },
         { title: "Deep Inspect", desc: "Structural metadata analysis.", icon: Search, href: "/analyze" },
+        { title: "Doc Intel", desc: "Deep asset interrogation stream.", icon: MessageSquare, href: "/ai-studio" },
+        { title: "Repair PDF", desc: "Rebuild broken object catalogs.", icon: Wrench, href: "/repair" },
       ]
     },
     {
@@ -109,6 +109,7 @@ export default function Home() {
         { title: "Add Numbers", desc: "Sequential page counter anchoring.", icon: Hash, href: "/numbers" },
         { title: "Merge PDF", desc: "Combine multiple industrial assets.", icon: Merge, href: "/merge" },
         { title: "Split PDF", desc: "Extract specific page ranges.", icon: Scissors, href: "/split" },
+        { title: "Sign PDF", desc: "Digital identity and signatures.", icon: Signature, href: "/sign" },
       ]
     },
     {
@@ -197,7 +198,7 @@ export default function Home() {
                   
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                     {cat.items.map((tool) => (
-                      <ToolCard key={tool.title} title={tool.title} description={tool.desc} icon={tool.icon} href={tool.href} />
+                      <ToolCard key={`${cat.label}-${tool.title}`} title={tool.title} description={tool.desc} icon={tool.icon} href={tool.href} />
                     ))}
                   </div>
                 </div>

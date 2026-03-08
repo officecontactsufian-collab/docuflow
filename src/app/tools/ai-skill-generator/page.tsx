@@ -23,7 +23,7 @@ import { useToast } from '@/hooks/use-toast';
 import { executeSkillGenerationAction } from './actions';
 import { useUser, useAuth, useFirestore, addDocumentNonBlocking, setDocumentNonBlocking } from '@/firebase';
 import { signInAnonymously } from 'firebase/auth';
-import { collection, serverTimestamp, doc } from 'firebase/firestore';
+import { collection, serverTimestamp, doc, query, limit, getDocs } from 'firebase/firestore';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 
 export default function SkillGeneratorPage() {
@@ -49,9 +49,17 @@ export default function SkillGeneratorPage() {
     setShareSlug(null);
 
     try {
+      const logsRef = collection(firestore, 'users', user.uid, 'usageLogs');
+      const q = query(logsRef, limit(10));
+      const snap = await getDocs(q);
+      if (snap.size >= 10) throw new Error("DAILY_LIMIT_REACHED: 10 operations allowed per day.");
+
       const res = await executeSkillGenerationAction({ interests: input });
       setResult(res);
-      addDocumentNonBlocking(collection(firestore, 'usageLogs'), { userId: user.uid, toolUsed: 'AI_SKILL_GEN', requestTimestamp: serverTimestamp(), status: 'SUCCESS' });
+      
+      const logData = { userId: user.uid, toolUsed: 'AI_SKILL_GEN', requestTimestamp: serverTimestamp(), status: 'SUCCESS' };
+      addDocumentNonBlocking(collection(firestore, 'users', user.uid, 'usageLogs'), logData);
+      addDocumentNonBlocking(collection(firestore, 'usageLogs'), logData);
     } catch (e: any) {
       toast({ variant: "destructive", title: "Synthesis Failure", description: e.message });
     } finally {
@@ -64,10 +72,12 @@ export default function SkillGeneratorPage() {
     setIsSharing(true);
     try {
       const slug = `skill-${Math.random().toString(36).substring(2, 8)}`;
+      const formattedContent = `SKILL: ${result.skillName}\nWHY: ${result.rationale}\n\nCURRICULUM:\n${result.curriculum.map((w: any) => `WEEK ${w.week} - ${w.topic}:\n${w.dailyPlan}\nExercise: ${w.exercise}`).join('\n\n')}`;
+      
       await setDocumentNonBlocking(doc(firestore, 'public_ai_results', slug), {
         creatorId: user.uid,
         toolName: 'AI Skill Generator',
-        generatedContent: JSON.stringify(result),
+        generatedContent: formattedContent,
         shareSlug: slug,
         createdAt: serverTimestamp(),
         isPubliclyShareable: true
@@ -108,7 +118,7 @@ export default function SkillGeneratorPage() {
                     className="h-14 bg-muted/20 border-accent/5 rounded-2xl font-bold"
                   />
                 </div>
-                <Button onClick={handleGenerate} disabled={isProcessing || !input.trim()} className="w-full h-16 rounded-2xl bg-accent text-white font-black uppercase tracking-widest text-[11px]">
+                <Button onClick={handleGenerate} disabled={isProcessing || !input.trim()} className="w-full h-16 rounded-2xl bg-accent text-white font-black uppercase tracking-widest text-[11px] shadow-2xl">
                   {isProcessing ? <Loader2 className="animate-spin" /> : <Zap className="mr-2 h-4 w-4" />}
                   Generate 30-Day Plan
                 </Button>
@@ -169,7 +179,7 @@ export default function SkillGeneratorPage() {
                   </Dialog>
                 </div>
               ) : (
-                <div className="h-full min-h-[400px] flex flex-col items-center justify-center p-12 border-2 border-dashed rounded-[3rem] opacity-20">
+                <div className="h-full min-h-[400px] flex flex-col items-center justify-center p-12 border-2 border-dashed rounded-[3rem] opacity-20 bg-white/50">
                   <BookOpen className="h-16 w-16 mb-4" />
                   <p className="text-[10px] font-black uppercase tracking-widest text-center">Awaiting Learning Payload...</p>
                 </div>
