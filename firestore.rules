@@ -28,6 +28,12 @@ service cloud.firestore {
       allow get, list: if isOwner(userId);
     }
 
+    match /users/{userId}/operations/{opId} {
+      allow create: if isOwner(userId);
+      allow get, list: if isOwner(userId);
+      allow update, delete: if isOwner(userId);
+    }
+
     match /usageLogs/{logId} {
       allow create: if isSignedIn();
       allow get, list: if isSignedIn() && (request.auth.token.email == 'office.contact.sufian@gmail.com' || request.auth.uid == 'NNEu5gbMlVRKd094f3PuPO23jow2');

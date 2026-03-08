@@ -121,6 +121,22 @@
         "costUnits": { "type": "number" }
       },
       "required": ["userId", "toolUsed", "requestTimestamp"]
+    },
+    "Operation": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Operation",
+      "type": "object",
+      "description": "Represents an AI operation execution and its cached result.",
+      "properties": {
+        "userId": { "type": "string" },
+        "operationType": { "type": "string" },
+        "status": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "aiPrompt": { "type": "string", "description": "SHA-256 hash of the input payload." },
+        "aiResult": { "type": "string" },
+        "inputFilesIds": { "type": "array", "items": { "type": "string" } }
+      },
+      "required": ["userId", "operationType", "status", "aiPrompt"]
     }
   },
   "auth": {
@@ -146,6 +162,14 @@
           "entityName": "UsageLog",
           "schema": { "$ref": "#/backend/entities/UsageLog" },
           "description": "Private log of operations performed by the user."
+        }
+      },
+      {
+        "path": "/users/{userId}/operations/{opId}",
+        "definition": {
+          "entityName": "Operation",
+          "schema": { "$ref": "#/backend/entities/Operation" },
+          "description": "Private cache of AI operations and their results."
         }
       },
       {
