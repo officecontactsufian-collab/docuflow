@@ -9,6 +9,18 @@ const nextConfig: NextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
+  // Optimization: Prevent heavy libraries from being bundled/traced by Turbopack
+  // This improves startup stability and reduces memory usage.
+  serverExternalPackages: [
+    'pdf-lib',
+    'mammoth',
+    'xlsx',
+    'docx',
+    'pdf-parse',
+    'jimp',
+    'pptxgenjs',
+    'jszip'
+  ],
   experimental: {
     serverActions: {
       bodySizeLimit: '100mb',

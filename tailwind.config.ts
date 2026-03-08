@@ -1,3 +1,4 @@
+
 import type {Config} from 'tailwindcss';
 
 export default {
@@ -13,6 +14,10 @@ export default {
         body: ['Inter', 'sans-serif'],
         headline: ['Inter', 'sans-serif'],
         code: ['monospace'],
+      },
+      // Resolve ambiguous duration warnings by explicitly defining the extended duration
+      transitionDuration: {
+        '2000': '2000ms',
       },
       colors: {
         background: 'hsl(var(--background))',
