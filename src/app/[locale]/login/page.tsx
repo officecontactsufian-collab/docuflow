@@ -9,7 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAuth, useUser } from '@/firebase';
 import { signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
-import { Loader2, Lock, Mail, Chrome, ArrowRight } from 'lucide-react';
+import { Loader2, Lock, Mail, Chrome, ArrowRight, AlertCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import Link from 'next/link';
 
@@ -39,7 +39,7 @@ export default function LoginPage() {
       toast({ title: "Session Initialized", description: "Welcome back to DOCFLOW Professional." });
       router.push(`/${locale}/dashboard`);
     } catch (error: any) {
-      toast({ variant: "destructive", title: "Authentication Failed", description: "Invalid credentials or account non-existent." });
+      toast({ variant: "destructive", title: "Authentication Failed", description: error.message || "Invalid credentials." });
     } finally {
       setIsLoading(false);
     }
@@ -48,12 +48,22 @@ export default function LoginPage() {
   const handleGoogleLogin = async () => {
     setIsLoading(true);
     const provider = new GoogleAuthProvider();
+    // Industrial Hardening: Ensure proper popup behavior
+    provider.setCustomParameters({ prompt: 'select_account' });
+    
     try {
       await signInWithPopup(auth, provider);
       toast({ title: "Identity Verified", description: "Google authentication successful." });
       router.push(`/${locale}/dashboard`);
     } catch (error: any) {
-      toast({ variant: "destructive", title: "Protocol Error", description: "Google sign-in sequence interrupted." });
+      console.error('Google Sign-In Error:', error);
+      toast({ 
+        variant: "destructive", 
+        title: "Protocol Error", 
+        description: error.code === 'auth/popup-blocked' 
+          ? "Identity popup blocked by browser. Please enable popups." 
+          : error.message || "Google sign-in sequence interrupted." 
+      });
     } finally {
       setIsLoading(false);
     }

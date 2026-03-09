@@ -64,13 +64,22 @@ export default function SignupPage() {
   const handleGoogleSignup = async () => {
     setIsLoading(true);
     const provider = new GoogleAuthProvider();
+    provider.setCustomParameters({ prompt: 'select_account' });
+
     try {
       const cred = await signInWithPopup(auth, provider);
       await syncUserProfile(cred.user.uid, cred.user.email!, cred.user.displayName!);
       toast({ title: "Identity Federated", description: "Account created via Google tunnel." });
       router.push(`/${locale}/dashboard`);
     } catch (error: any) {
-      toast({ variant: "destructive", title: "Protocol Error", description: "Google onboarding sequence interrupted." });
+      console.error('Google Signup Error:', error);
+      toast({ 
+        variant: "destructive", 
+        title: "Protocol Error", 
+        description: error.code === 'auth/popup-blocked' 
+          ? "Identity popup blocked by browser. Please enable popups." 
+          : error.message || "Google onboarding sequence interrupted." 
+      });
     } finally {
       setIsLoading(false);
     }
