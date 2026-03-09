@@ -3,26 +3,11 @@ service cloud.firestore {
   match /databases/{database}/documents {
 
     /**
-     * PDF Spark Security Rules
+     * DOCFLOW Professional Security Rules v2.5
      * 
      * Core Philosophy: 
-     * This ruleset enforces a strict user-ownership model. All application data is 
-     * hierarchically nested under the user's profile, ensuring that users can only 
-     * access and manage their own documents and processing jobs.
-     * 
-     * Data Structure: 
-     * - /users/{userId}: Root profile for each user, keyed by Auth UID.
-     * - /users/{userId}/documents/{documentId}: Private storage for user files.
-     * - /users/{userId}/processingJobs/{jobId}: Records of PDF operations (merge, split, etc.).
-     * 
-     * Key Security Decisions: 
-     * - Authorization Independence: Sub-collections denormalize the `userId` field to allow 
-     *   for fast, independent security checks without parent document lookups.
-     * - Relational Integrity: On creation and update, rules enforce that the internal 
-     *   `userId` or `id` fields match the authenticated user and the document path.
-     * - Prototyping Flexibility: While authorization is strictly enforced, the schema 
-     *   of content fields (filenames, status, parameters) is not validated to allow 
-     *   for rapid development.
+     * "Trust Nothing, Verify Everything." This ruleset enforces strict user ownership
+     * and administrative clearance protocols across the entire intelligence lattice.
      */
 
     // --- Global Helper Functions ---
@@ -37,53 +22,84 @@ service cloud.firestore {
       return isSignedIn() && request.auth.uid == userId;
     }
 
-    /** Checks if the user is the owner and the document exists (for update/delete). */
+    /** Checks if the user is the owner and the document exists. */
     function isExistingOwner(userId) {
       return isOwner(userId) && resource != null;
+    }
+
+    /** Checks for master administrative clearance. */
+    function isAdmin() {
+      return isSignedIn() && (
+        request.auth.token.email == "office.contact.sufian@gmail.com" || 
+        request.auth.uid == "NNEu5gbMlVRKd094f3PuPO23jow2"
+      );
     }
 
     // --- Collection Rules ---
 
     /**
-     * @description Rules for the UserProfile entity. Users can only manage their own profile.
-     * @path /users/{userId}
-     * @allow (get) If the requesting user's UID matches the {userId} in the path.
-     * @deny (list) If trying to query all users.
-     * @principle Restricts access to a user's own data tree and validates path consistency.
+     * @description System configuration node. Restricted to administrative override.
+     */
+    match /system/{docId} {
+      allow get: if isSignedIn();
+      allow write: if isAdmin();
+    }
+
+    /**
+     * @description Public AI Result Sharing. 
+     * Allows universal read for shared links, but restricted creation.
+     */
+    match /public_ai_results/{slug} {
+      allow get: if true; // Public access for shared slugs
+      allow list: if isAdmin();
+      allow create: if isSignedIn() && request.resource.data.creatorId == request.auth.uid;
+      allow update, delete: if isAdmin() || (isSignedIn() && resource.data.creatorId == request.auth.uid);
+    }
+
+    /**
+     * @description Global Audit Registry.
+     * Authenticated users can append logs; only admins can audit.
+     */
+    match /usageLogs/{logId} {
+      allow create: if isSignedIn();
+      allow get, list, delete: if isAdmin();
+    }
+
+    /**
+     * @description Identity Lattice. Users can only manage their own profile and sub-registries.
      */
     match /users/{userId} {
-      allow get: if isOwner(userId);
-      allow list: if isOwner(userId);
-      allow create: if isOwner(userId) && request.resource.data.id == userId;
-      allow update: if isExistingOwner(userId) && request.resource.data.id == resource.data.id;
-      allow delete: if isExistingOwner(userId);
+      allow get: if isOwner(userId) || isAdmin();
+      allow list: if isAdmin();
+      allow create: if isOwner(userId);
+      allow update: if isExistingOwner(userId) || isAdmin();
+      allow delete: if isAdmin();
 
       /**
-       * @description Rules for Documents. Private files owned by the parent user.
-       * @path /users/{userId}/documents/{documentId}
-       * @allow (create) If the user owns the path and sets the internal userId correctly.
-       * @deny (update) If attempting to change the document's owner (userId).
-       * @principle Enforces document ownership and relational integrity via denormalized fields.
+       * @description Private User Sub-collections.
        */
       match /documents/{documentId} {
-        allow get, list: if isOwner(userId);
+        allow get, list: if isOwner(userId) || isAdmin();
         allow create: if isOwner(userId) && request.resource.data.userId == userId;
-        allow update: if isExistingOwner(userId) && request.resource.data.userId == resource.data.userId;
-        allow delete: if isExistingOwner(userId);
+        allow update: if (isExistingOwner(userId) && request.resource.data.userId == resource.data.userId) || isAdmin();
+        allow delete: if isExistingOwner(userId) || isAdmin();
       }
 
-      /**
-       * @description Rules for ProcessingJobs. Tracks operations initiated by the user.
-       * @path /users/{userId}/processingJobs/{jobId}
-       * @allow (list) The owner can list their own processing jobs.
-       * @deny (create) If the userId field in the data does not match the path userId.
-       * @principle Uses denormalization for authorization independence and query security.
-       */
       match /processingJobs/{jobId} {
-        allow get, list: if isOwner(userId);
+        allow get, list: if isOwner(userId) || isAdmin();
         allow create: if isOwner(userId) && request.resource.data.userId == userId;
-        allow update: if isExistingOwner(userId) && request.resource.data.userId == resource.data.userId;
-        allow delete: if isExistingOwner(userId);
+        allow update: if (isExistingOwner(userId) && request.resource.data.userId == resource.data.userId) || isAdmin();
+        allow delete: if isExistingOwner(userId) || isAdmin();
+      }
+
+      match /usageLogs/{logId} {
+        allow get, list, create: if isOwner(userId) || isAdmin();
+        allow delete: if isAdmin();
+      }
+
+      match /operations/{opId} {
+        allow get, list, create: if isOwner(userId) || isAdmin();
+        allow update, delete: if isAdmin();
       }
     }
   }
