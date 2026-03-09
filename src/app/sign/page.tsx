@@ -19,18 +19,26 @@ import {
   ChevronRight,
   Target,
   MousePointer2,
-  Scan
+  Maximize,
+  Calendar,
+  User,
+  Upload,
+  Palette,
+  X,
+  ShieldCheck,
+  Zap
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
 import { PDFDocument } from 'pdf-lib';
 import { PDFPreview } from '@/components/pdf-preview';
 import { cn } from '@/lib/utils';
 
-type SignatureMode = 'draw' | 'type';
+type SignatureMode = 'draw' | 'type' | 'upload';
 type Position = "top-left" | "top-center" | "top-right" | "middle-left" | "center" | "middle-right" | "bottom-left" | "bottom-center" | "bottom-right";
 
 const POSITION_MAP: { label: string; value: Position }[] = [
@@ -54,7 +62,13 @@ export default function SignPage() {
   const [mode, setMode] = React.useState<SignatureMode>('draw');
   const [typedName, setTypedName] = React.useState("");
   const [selectedFont, setSelectedFont] = React.useState("'Dancing Script', cursive");
+  const [inkColor, setInkColor] = React.useState("#251F4A");
+  const [uploadedImage, setUploadedImage] = React.useState<string | null>(null);
   
+  const [includeDate, setIncludeDate] = React.useState(false);
+  const [includeName, setIncludeName] = React.useState(false);
+  const [legalName, setLegalName] = React.useState("");
+
   const [isProcessing, setIsProcessing] = React.useState(false);
   const [isDone, setIsDone] = React.useState(false);
   const [downloadUrl, setDownloadUrl] = React.useState<string | null>(null);
@@ -76,10 +90,19 @@ export default function SignPage() {
       const buffer = await file.arrayBuffer();
       const pdf = await PDFDocument.load(buffer, { ignoreEncryption: true });
       setTotalPages(pdf.getPageCount());
-      setTargetPage(1); // Default to first page for better visibility
+      setTargetPage(1);
       setPdfFile(file);
     } catch (e) {
-      toast({ variant: "destructive", title: "Invalid PDF" });
+      toast({ variant: "destructive", title: "Invalid PDF", description: "Failed to parse document structure." });
+    }
+  };
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (event) => setUploadedImage(event.target?.result as string);
+      reader.readAsDataURL(file);
     }
   };
 
@@ -106,9 +129,9 @@ export default function SignPage() {
     const x = ('touches' in e ? e.touches[0].clientX : e.clientX) - rect.left;
     const y = ('touches' in e ? e.touches[0].clientY : e.clientY) - rect.top;
 
-    ctx.lineWidth = 2;
+    ctx.lineWidth = 2.5;
     ctx.lineCap = 'round';
-    ctx.strokeStyle = '#251F4A';
+    ctx.strokeStyle = inkColor;
 
     ctx.lineTo(x, y);
     ctx.stroke();
@@ -124,22 +147,41 @@ export default function SignPage() {
 
   const getSignatureImage = async (): Promise<Uint8Array | null> => {
     const canvas = document.createElement('canvas');
-    canvas.width = 600;
-    canvas.height = 200;
+    canvas.width = 800;
+    canvas.height = 400;
     const ctx = canvas.getContext('2d');
     if (!ctx) return null;
-
-    ctx.fillStyle = 'transparent';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     if (mode === 'draw' && canvasRef.current) {
       ctx.drawImage(canvasRef.current, 0, 0, canvas.width, canvas.height);
     } else if (mode === 'type') {
-      ctx.fillStyle = '#251F4A';
-      ctx.font = `70px ${selectedFont}`;
+      ctx.fillStyle = inkColor;
+      ctx.font = `italic bold 80px ${selectedFont}`;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
-      ctx.fillText(typedName || "Signature", canvas.width / 2, canvas.height / 2);
+      ctx.fillText(typedName || "Signature", canvas.width / 2, canvas.height / 2 - 40);
+    } else if (mode === 'upload' && uploadedImage) {
+      const img = new Image();
+      img.src = uploadedImage;
+      await new Promise(r => img.onload = r);
+      const scale = Math.min(canvas.width / img.width, (canvas.height - 100) / img.height);
+      const w = img.width * scale;
+      const h = img.height * scale;
+      ctx.drawImage(img, (canvas.width - w) / 2, (canvas.height - h) / 2 - 40, w, h);
+    }
+
+    let metadataY = canvas.height - 60;
+    ctx.fillStyle = inkColor;
+    ctx.font = "bold 24px Inter, sans-serif";
+    ctx.textAlign = 'center';
+
+    if (includeName && (legalName || typedName)) {
+      ctx.fillText(legalName || typedName, canvas.width / 2, metadataY);
+      metadataY += 30;
+    }
+    if (includeDate) {
+      const dateStr = new Date().toLocaleDateString();
+      ctx.fillText(`Date: ${dateStr}`, canvas.width / 2, metadataY);
     }
 
     const blob = await new Promise<Blob>((resolve) => canvas.toBlob((b) => resolve(b!), 'image/png'));
@@ -164,7 +206,7 @@ export default function SignPage() {
       const { width, height } = page.getSize();
       const mediaBox = page.getMediaBox();
 
-      const sigWidth = 150;
+      const sigWidth = 180;
       const sigHeight = (sigImg.height / sigImg.width) * sigWidth;
       const margin = 50;
 
@@ -188,7 +230,7 @@ export default function SignPage() {
       const finalBytes = await pdfDoc.save();
       setDownloadUrl(URL.createObjectURL(new Blob([finalBytes], { type: 'application/pdf' })));
       setIsDone(true);
-      toast({ title: "Protocol Success", description: "Identity permanently embedded." });
+      toast({ title: "Protocol Success", description: "Identity block embedded and verified." });
     } catch (error: any) {
       console.error(error);
       toast({ variant: "destructive", title: "Sequence Failed", description: error.message });
@@ -201,6 +243,7 @@ export default function SignPage() {
     setPdfFile(null);
     setIsDone(false);
     setTypedName("");
+    setUploadedImage(null);
     if (downloadUrl) URL.revokeObjectURL(downloadUrl);
     setDownloadUrl(null);
   };
@@ -217,7 +260,7 @@ export default function SignPage() {
             </div>
             <h1 className="text-4xl font-black tracking-tighter text-accent uppercase italic">Identity Engine</h1>
             <p className="text-muted-foreground font-bold text-xs uppercase tracking-widest max-w-xl mx-auto">
-              Professional Document Execution. Synthesis and precision anchor controls for high-fidelity assets.
+              Professional Document Execution. Construct composite identity blocks with precision anchor controls.
             </p>
           </div>
 
@@ -239,15 +282,13 @@ export default function SignPage() {
                       </h3>
                       <div className="flex items-center gap-2 bg-primary/10 px-3 py-1 rounded-full">
                          <MousePointer2 className="h-3 w-3 text-primary" />
-                         <span className="text-[9px] font-black text-primary uppercase">Click Preview to Place Bar</span>
+                         <span className="text-[9px] font-black text-primary uppercase">Click Zone to Anchor</span>
                       </div>
                     </div>
                     
                     <div className="relative group">
-                      {/* Document Preview with tunneling currentPage prop */}
                       <PDFPreview file={pdfFile} className="h-[750px]" currentPage={targetPage} />
                       
-                      {/* Interactive Target Overlay */}
                       <div className="absolute inset-0 top-[40px] bottom-0 left-0 right-0 z-10 grid grid-cols-3 grid-rows-3 p-12">
                         {POSITION_MAP.map((pos) => (
                           <div 
@@ -263,10 +304,10 @@ export default function SignPage() {
                             {position === pos.value && (
                               <div className="absolute pointer-events-none flex flex-col items-center gap-2 animate-in zoom-in-90 duration-300">
                                  <div className="px-4 py-2 bg-accent text-white rounded-xl shadow-2xl border border-white/20 flex items-center gap-3">
-                                    <Scan className="h-4 w-4 text-primary" />
+                                    <Maximize className="h-4 w-4 text-primary" />
                                     <div className="flex flex-col">
-                                       <span className="text-[8px] font-black uppercase tracking-widest">Signature Bar</span>
-                                       <span className="text-[7px] font-bold text-white/40 uppercase tracking-tighter">Anchor Active</span>
+                                       <span className="text-[8px] font-black uppercase tracking-widest">Identity Bar</span>
+                                       <span className="text-[7px] font-bold text-white/40 uppercase tracking-tighter">Anchor: {pos.label}</span>
                                     </div>
                                  </div>
                                  <div className="w-32 h-0.5 bg-primary/40 rounded-full" />
@@ -293,23 +334,39 @@ export default function SignPage() {
                            </div>
                         </div>
                       </CardHeader>
-                      <CardContent className="p-8 pt-0 space-y-10">
+                      <CardContent className="p-8 pt-0 space-y-8">
                         <Tabs value={mode} onValueChange={(v: any) => setMode(v)} className="w-full">
-                          <TabsList className="grid grid-cols-2 h-12 bg-muted/30 p-1 rounded-xl mb-6">
+                          <TabsList className="grid grid-cols-3 h-12 bg-muted/30 p-1 rounded-xl mb-6">
                             <TabsTrigger value="draw" className="rounded-lg font-black text-[9px] uppercase tracking-widest gap-2">
-                              <PenTool className="h-3 w-3" /> Draw Ink
+                              <PenTool className="h-3 w-3" /> Ink
                             </TabsTrigger>
                             <TabsTrigger value="type" className="rounded-lg font-black text-[9px] uppercase tracking-widest gap-2">
-                              <Type className="h-3 w-3" /> Synthesize
+                              <Type className="h-3 w-3" /> Script
+                            </TabsTrigger>
+                            <TabsTrigger value="upload" className="rounded-lg font-black text-[9px] uppercase tracking-widest gap-2">
+                              <Upload className="h-3 w-3" /> Asset
                             </TabsTrigger>
                           </TabsList>
 
                           <TabsContent value="draw" className="space-y-4">
+                            <div className="flex items-center justify-between mb-2">
+                               <p className="text-[9px] font-black uppercase text-accent/40 tracking-widest">Wet Ink Surface</p>
+                               <div className="flex gap-2">
+                                  {["#251F4A", "#000000"].map(c => (
+                                    <button 
+                                      key={c} 
+                                      onClick={() => setInkColor(c)}
+                                      className={cn("h-4 w-4 rounded-full border-2", inkColor === c ? "border-primary" : "border-transparent")}
+                                      style={{ backgroundColor: c }}
+                                    />
+                                  ))}
+                               </div>
+                            </div>
                             <div className="relative bg-muted/10 rounded-2xl border-2 border-dashed border-accent/10 overflow-hidden">
                               <canvas 
                                 ref={canvasRef}
-                                width={600}
-                                height={200}
+                                width={800}
+                                height={400}
                                 onMouseDown={startDrawing}
                                 onMouseMove={draw}
                                 onMouseUp={stopDrawing}
@@ -317,7 +374,7 @@ export default function SignPage() {
                                 onTouchStart={startDrawing}
                                 onTouchMove={draw}
                                 onTouchEnd={stopDrawing}
-                                className="w-full h-[150px] cursor-crosshair touch-none"
+                                className="w-full h-[200px] cursor-crosshair touch-none"
                               />
                               <Button 
                                 variant="ghost" 
@@ -328,13 +385,12 @@ export default function SignPage() {
                                 <Eraser className="h-4 w-4" />
                               </Button>
                             </div>
-                            <p className="text-[8px] font-black uppercase text-center text-accent/30 tracking-widest">Wet Ink Surface: Local Capture Active</p>
                           </TabsContent>
 
                           <TabsContent value="type" className="space-y-6">
                             <div className="space-y-4">
                               <div className="space-y-2">
-                                <Label className="text-[10px] font-black uppercase tracking-widest text-accent/60">Legal Entity Name</Label>
+                                <Label className="text-[10px] font-black uppercase tracking-widest text-accent/60">Script Synthesis Payload</Label>
                                 <Input 
                                   value={typedName} 
                                   onChange={(e) => setTypedName(e.target.value)}
@@ -348,12 +404,12 @@ export default function SignPage() {
                                     key={f.value}
                                     onClick={() => setSelectedFont(f.value)}
                                     className={cn(
-                                      "p-4 rounded-xl border text-xl text-center transition-all",
+                                      "p-4 rounded-xl border text-2xl text-center transition-all",
                                       selectedFont === f.value 
                                         ? "border-primary bg-primary/5 ring-1 ring-primary shadow-lg" 
                                         : "bg-white border-accent/5 hover:border-primary/20"
                                     )}
-                                    style={{ fontFamily: f.value }}
+                                    style={{ fontFamily: f.value, color: inkColor }}
                                   >
                                     {typedName || "Script Style"}
                                   </button>
@@ -361,10 +417,62 @@ export default function SignPage() {
                               </div>
                             </div>
                           </TabsContent>
+
+                          <TabsContent value="upload" className="space-y-4">
+                             <div className="border-2 border-dashed border-accent/10 rounded-2xl p-8 flex flex-col items-center justify-center text-center gap-4 bg-muted/5 group hover:border-primary/40 transition-all cursor-pointer relative">
+                                {uploadedImage ? (
+                                  <div className="relative group/img">
+                                    <img src={uploadedImage} className="max-h-[150px] rounded-lg shadow-xl" alt="Signature Asset" />
+                                    <button onClick={() => setUploadedImage(null)} className="absolute -top-2 -right-2 h-6 w-6 bg-destructive text-white rounded-full flex items-center justify-center shadow-lg"><X className="h-3 w-3"/></button>
+                                  </div>
+                                ) : (
+                                  <>
+                                    <Upload className="h-8 w-8 text-accent/20 group-hover:text-primary transition-colors" />
+                                    <div className="space-y-1">
+                                      <p className="text-[10px] font-black uppercase italic text-accent">Upload Signature Asset</p>
+                                      <p className="text-[8px] font-bold text-accent/20 uppercase">Supports PNG, JPG, WEBP</p>
+                                    </div>
+                                    <input type="file" onChange={handleImageUpload} accept="image/*" className="absolute inset-0 opacity-0 cursor-pointer" />
+                                  </>
+                                )}
+                             </div>
+                          </TabsContent>
                         </Tabs>
 
-                        <div className="space-y-8 pt-8 border-t border-accent/5">
-                           <div className="grid grid-cols-2 gap-8">
+                        <div className="space-y-6 pt-6 border-t border-accent/5">
+                           <div className="grid grid-cols-1 gap-4">
+                              <div className="flex items-center justify-between p-4 bg-muted/20 rounded-2xl border border-accent/5">
+                                 <div className="flex items-center gap-3">
+                                    <User className="h-4 w-4 text-primary" />
+                                    <div className="flex flex-col">
+                                       <span className="text-[10px] font-black uppercase">Include Legal Name</span>
+                                       <span className="text-[8px] font-bold text-accent/40 uppercase">Construct Name Metadata</span>
+                                    </div>
+                                 </div>
+                                 <Switch checked={includeName} onCheckedChange={setIncludeName} />
+                              </div>
+                              {includeName && (
+                                <Input 
+                                  value={legalName} 
+                                  onChange={(e) => setLegalName(e.target.value)} 
+                                  placeholder="FULL LEGAL NAME..." 
+                                  className="h-10 bg-white border-accent/10 rounded-xl text-[10px] font-bold"
+                                />
+                              )}
+                              
+                              <div className="flex items-center justify-between p-4 bg-muted/20 rounded-2xl border border-accent/5">
+                                 <div className="flex items-center gap-3">
+                                    <Calendar className="h-4 w-4 text-primary" />
+                                    <div className="flex flex-col">
+                                       <span className="text-[10px] font-black uppercase">Include Current Date</span>
+                                       <span className="text-[8px] font-bold text-accent/40 uppercase">Auto-synthesize temporal data</span>
+                                    </div>
+                                 </div>
+                                 <Switch checked={includeDate} onCheckedChange={setIncludeDate} />
+                              </div>
+                           </div>
+
+                           <div className="grid grid-cols-2 gap-8 pt-4">
                               <div className="space-y-4">
                                 <Label className="text-[10px] font-black uppercase tracking-widest text-accent/60 flex items-center gap-2">
                                   <Layers className="h-3 w-3" /> Page Target
@@ -417,8 +525,8 @@ export default function SignPage() {
 
                            <Button 
                             onClick={handleDeploy} 
-                            disabled={isProcessing || (mode === 'type' && !typedName)}
-                            className="w-full h-16 rounded-2xl bg-accent text-white font-black uppercase tracking-[0.2em] text-[11px] shadow-2xl shadow-accent/20 hover:scale-[1.01] transition-transform"
+                            disabled={isProcessing || (mode === 'type' && !typedName) || (mode === 'upload' && !uploadedImage)}
+                            className="w-full h-16 rounded-2xl bg-accent text-white font-black uppercase tracking-[0.2em] text-[11px] shadow-2xl shadow-accent/20 hover:scale-[1.01] transition-all group"
                           >
                             {isProcessing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <UserCheck className="mr-2 h-4 w-4" />}
                             Deploy Identity Anchor
@@ -426,6 +534,17 @@ export default function SignPage() {
                         </div>
                       </CardContent>
                     </Card>
+                    
+                    <div className="p-6 bg-primary/5 rounded-[2.5rem] border border-primary/10 flex items-start gap-4">
+                       <ShieldCheck className="h-6 w-6 text-primary shrink-0" />
+                       <div className="space-y-1">
+                          <p className="text-[10px] font-black text-accent uppercase italic">Industrial verification</p>
+                          <p className="text-[9px] font-bold text-muted-foreground uppercase leading-relaxed tracking-tight">
+                            Identity blocks are permanently merged into the document object stream using high-resolution rendering. 
+                            Zero training or storage protocols are active.
+                          </p>
+                       </div>
+                    </div>
                   </div>
                 </div>
               )}
@@ -438,7 +557,25 @@ export default function SignPage() {
                 </div>
                 <div className="space-y-2">
                   <h2 className="text-2xl font-black uppercase italic tracking-tight text-accent">Anchor Complete!</h2>
-                  <p className="text-muted-foreground text-sm font-medium">Identity permanently embedded at specified coordinates.</p>
+                  <p className="text-muted-foreground text-sm font-medium">Identity block permanently embedded at verified coordinates.</p>
+                </div>
+                <div className="p-4 bg-muted/30 rounded-2xl border border-accent/5 text-left">
+                   <div className="flex items-center gap-2 mb-3">
+                      <Zap className="h-3 w-3 text-primary" />
+                      <span className="text-[9px] font-black uppercase tracking-widest text-accent/60">Execution Audit</span>
+                   </div>
+                   <ul className="space-y-2">
+                      {[
+                        "Identity Mode: Composite Block",
+                        `Placement: ${position.replace('-', ' ').toUpperCase()}`,
+                        `Metadata: ${[includeName && 'NAME', includeDate && 'DATE'].filter(Boolean).join(' + ') || 'NONE'}`,
+                        "Reconstruction: Verified"
+                      ].map(item => (
+                        <li key={item} className="flex items-center gap-2 text-[9px] font-bold text-accent italic">
+                           <div className="h-1 w-1 rounded-full bg-green-500" /> {item}
+                        </li>
+                      ))}
+                   </ul>
                 </div>
                 <Button 
                   size="lg" 
