@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, ReactNode, useMemo } from 'react';
@@ -22,60 +21,39 @@ interface LanguageContextType {
   locale: Locale;
   setLocale: (locale: Locale) => void;
   t: (key: string) => string;
-  isHydrated: boolean;
 }
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
-export function LanguageProvider({ children }: { children: ReactNode }) {
-  const params = useParams();
+export function LanguageProvider({ children, initialLocale }: { children: ReactNode, initialLocale: Locale }) {
   const router = useRouter();
   const pathname = usePathname();
-  
-  // params.locale is available during SSR for client components within localized route segments
-  const urlLocale = params?.locale as string;
-  
-  const [locale, setLocaleState] = useState<Locale>('en');
-  const [isHydrated, setIsHydrated] = useState(false);
+  const [locale, setLocaleState] = useState<Locale>(initialLocale);
 
-  // Determine the locale to use for rendering synchronously.
-  // This ensures that the server-rendered HTML matches the initial client-side render.
-  const activeLocale: Locale = useMemo(() => {
-    if (urlLocale && translations[urlLocale as Locale]) {
-      return urlLocale as Locale;
-    }
-    return locale;
-  }, [urlLocale, locale]);
-
+  // Sync state if initialLocale changes (e.g. on navigation)
   useEffect(() => {
-    // On the client, if we are not in a localized route, try to restore from localStorage
-    if (!urlLocale) {
-      const saved = localStorage.getItem('docflow_locale') as Locale;
-      if (saved && translations[saved]) {
-        setLocaleState(saved);
-      }
+    if (initialLocale && initialLocale !== locale) {
+      setLocaleState(initialLocale);
     }
-    setIsHydrated(true);
-  }, [urlLocale]);
+  }, [initialLocale, locale]);
 
   const setLocale = (newLocale: Locale) => {
     setLocaleState(newLocale);
-    localStorage.setItem('docflow_locale', newLocale);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('docflow_locale', newLocale);
+    }
     
     // Redirect if currently in a localized path to maintain URL consistency
-    if (urlLocale && translations[urlLocale as Locale]) {
-      const pathSegments = pathname.split('/');
-      // Format: /locale/subpath...
-      if (pathSegments[1] === urlLocale) {
-        pathSegments[1] = newLocale;
-        router.push(pathSegments.join('/'));
-      }
+    const pathSegments = pathname.split('/');
+    if (pathSegments[1] && translations[pathSegments[1] as Locale]) {
+      pathSegments[1] = newLocale;
+      router.push(pathSegments.join('/'));
     }
   };
 
   const t = (key: string): string => {
     const keys = key.split('.');
-    let result = translations[activeLocale] || translations['en'];
+    let result = translations[locale] || translations['en'];
     
     for (const k of keys) {
       if (result && result[k]) {
@@ -92,16 +70,8 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     return typeof result === 'string' ? result : key;
   };
 
-  // Synchronize document metadata attributes on the client
-  useEffect(() => {
-    if (isHydrated) {
-      document.documentElement.lang = activeLocale;
-      document.documentElement.dir = activeLocale === 'ar' ? 'rtl' : 'ltr';
-    }
-  }, [activeLocale, isHydrated]);
-
   return (
-    <LanguageContext.Provider value={{ locale: activeLocale, setLocale, t, isHydrated }}>
+    <LanguageContext.Provider value={{ locale, setLocale, t }}>
       {children}
     </LanguageContext.Provider>
   );

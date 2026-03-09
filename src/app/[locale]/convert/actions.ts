@@ -27,16 +27,17 @@ function sanitizeText(text: string) {
 
 export async function executeConversionAction(
   base64Data: string, 
-  type: ConversionType, 
+  type: string, 
   fileName: string,
   pageNumber: number = 1
 ): Promise<{ resultBase64: string; mimeType: string }> {
   try {
+    const protocol = type.trim() as ConversionType;
     const buffer = Buffer.from(base64Data.split(',')[1] || base64Data, 'base64');
     let resultBuffer: Buffer;
     let mimeType = 'application/pdf';
 
-    switch (type) {
+    switch (protocol) {
       case 'word-to-pdf': {
         const textResult = await mammoth.extractRawText({ buffer });
         const pdfDoc = await PDFDocument.create();
@@ -150,7 +151,7 @@ export async function executeConversionAction(
         const rows = data.text.split('\n').map(line => line.trim().split(/\s{2,}/));
         const ws = XLSX.utils.aoa_to_sheet(rows);
         const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, "Data");
+        XLSX.utils.book_append_sheet(wb, ws, "Reconstructed_Data");
         resultBuffer = XLSX.write(wb, { type: 'buffer', bookType: 'csv' });
         mimeType = 'text/csv';
         break;
@@ -172,12 +173,13 @@ export async function executeConversionAction(
       case 'pdf-to-pdfa': {
         const pdfDoc = await PDFDocument.load(buffer, { ignoreEncryption: true });
         pdfDoc.setProducer('DOCFLOW Industrial Backend v2.5');
+        pdfDoc.setModificationDate(new Date());
         resultBuffer = Buffer.from(await pdfDoc.save());
         break;
       }
 
       default: {
-        throw new Error(`Transformation Protocol ${type} not recognized.`);
+        throw new Error(`Transformation Protocol ${protocol} not recognized.`);
       }
     }
 

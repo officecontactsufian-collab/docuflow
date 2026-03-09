@@ -1,10 +1,6 @@
 import type {Metadata} from 'next';
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
-import { FirebaseClientProvider } from '@/firebase/client-provider';
-import { LanguageProvider } from '@/lib/i18n-context';
-import { Suspense } from 'react';
-import { Loader2 } from 'lucide-react';
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://docflow.pro'),
@@ -62,27 +58,12 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // The html and body tags are managed by the localized layout [locale]/layout.tsx
+  // This root layout serves as a passthrough for global providers and metadata.
   return (
-    <html lang="en" suppressHydrationWarning>
-      <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-      </head>
-      <body className="font-body antialiased min-h-screen bg-background selection:bg-primary/20">
-        <FirebaseClientProvider>
-          <LanguageProvider>
-            <Suspense fallback={
-              <div className="flex min-h-screen items-center justify-center bg-muted/30">
-                <Loader2 className="h-8 w-8 animate-spin text-primary" />
-              </div>
-            }>
-              {children}
-            </Suspense>
-            <Toaster />
-          </LanguageProvider>
-        </FirebaseClientProvider>
-      </body>
-    </html>
+    <>
+      {children}
+      <Toaster />
+    </>
   );
 }

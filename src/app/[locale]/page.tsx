@@ -52,6 +52,8 @@ export default function Home() {
   const { t } = useTranslation();
   const params = useParams();
   const locale = params.locale as string || 'en';
+  
+  // Use a fallback state for the year to avoid hydration mismatch
   const [year, setYear] = React.useState<string>("....");
 
   React.useEffect(() => {

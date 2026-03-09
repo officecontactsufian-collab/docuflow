@@ -67,7 +67,7 @@
     "pdf_to_excel": { "title": "PDF para Excel", "desc": "Recuperação de tabelas." },
     "protect": { "title": "Proteger Senha", "desc": "Criptografar PDF." },
     "privacy": { "title": "Escudo de Privacidade", "desc": "Apagar metadados." },
-    "unlock": { "title": "Desbloquear PDF", "desc": "Remover restrições." },
+    "unlock": { "title": "Desbloquear PDF", "desc": "Remover restrizioni." },
     "sanitize": { "title": "Sanitizar Ativo", "desc": "Limpeza profunda." },
     "niche_finder": { "title": "Buscador de Nicho", "desc": "Identifique mercados lucrativos." },
     "decision_helper": { "title": "Ajuda Decisões", "desc": "Análise lógica estruturada." },
