@@ -22,6 +22,7 @@ import {
   BrainCircuit,
   Lock,
   UserCheck,
+  Sparkles,
   BookOpen,
   Languages,
   MessageSquare,
@@ -36,8 +37,7 @@ import {
   Target,
   Zap,
   Globe,
-  Sparkles,
-  Image as ImageIcon
+  Share2
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -53,6 +53,7 @@ import { signOut } from 'firebase/auth';
 import { useRouter, useParams } from 'next/navigation';
 import { useTranslation } from '@/lib/i18n-context';
 import { LanguageSwitcher } from './language-switcher';
+import { ShareDialog } from './share-dialog';
 
 export function Navbar() {
   const { user } = useUser();
@@ -197,6 +198,7 @@ export function Navbar() {
 
         <div className="flex items-center gap-4">
           <div className="hidden sm:flex items-center gap-6 mr-2">
+            <ShareDialog />
             <Link href={`/${locale}/analyze`} className="flex items-center gap-1.5 text-[9px] font-black uppercase tracking-widest text-accent/80 hover:text-accent transition-all">
               <Search className="h-3 w-3 text-primary" /> {t('common.inspect')}
             </Link>
