@@ -128,7 +128,7 @@ export default function LoginPage() {
                 </Button>
 
                 <div className="pt-4 text-center">
-                  <p className="text-[10px] font-bold text-accent/40 uppercase">New to the protocol? <Link href="/signup" className="text-primary hover:underline italic">Synthesize Account <ArrowRight className="inline h-2.5 w-2.5" /></Link></p>
+                  <p className="text-[10px] font-bold text-accent/40 uppercase">New to the protocol? <Link href="/signup" className="text-primary hover:underline italic">SIGN UP <ArrowRight className="inline h-2.5 w-2.5" /></Link></p>
                 </div>
               </CardFooter>
             </form>

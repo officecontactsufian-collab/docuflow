@@ -93,7 +93,7 @@ export default function SignupPage() {
       const cred = await createUserWithEmailAndPassword(auth, email, password);
       await updateProfile(cred.user, { displayName: name });
       await syncUserProfile(cred.user.uid, email, name);
-      toast({ title: "Account Synthesized", description: "Your professional registry has been established." });
+      toast({ title: "SIGN UP SUCCESS", description: "Your professional registry has been established." });
       router.push(`/${locale}/dashboard`);
     } catch (error: any) {
       toast({ variant: "destructive", title: "Synthesis Error", description: error.message || "Failed to create account." });
@@ -157,7 +157,7 @@ export default function SignupPage() {
             <div className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-primary text-white shadow-lg mb-4">
               <UserPlus className="h-6 w-6" />
             </div>
-            <h1 className="text-3xl font-black tracking-tight uppercase italic text-accent">Synthesize Account</h1>
+            <h1 className="text-3xl font-black tracking-tight uppercase italic text-accent">SIGN UP</h1>
             <p className="text-muted-foreground font-bold text-xs uppercase tracking-widest">Establish your professional presence.</p>
           </div>
 
