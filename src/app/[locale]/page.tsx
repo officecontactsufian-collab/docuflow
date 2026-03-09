@@ -52,15 +52,19 @@ import { useParams } from 'next/navigation';
 export default function Home() {
   const { t } = useTranslation();
   const params = useParams();
-  const locale = params.locale as string || 'en';
+  const locale = (params?.locale as string) || 'en';
   
-  // Use a fallback state for the year to avoid hydration mismatch
+  // Temporal Sync: Avoid hydration mismatch by deferring dynamic values
   const [year, setYear] = React.useState<string>("....");
 
   React.useEffect(() => {
     setYear(new Date().getFullYear().toString());
   }, []);
 
+  /**
+   * Industrial Tool Lattice
+   * Maps tool configurations from the global translate state.
+   */
   const toolCategories = [
     {
       id: "cat-ai-biz",

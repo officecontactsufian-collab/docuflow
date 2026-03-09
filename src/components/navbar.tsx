@@ -71,66 +71,66 @@ export function Navbar() {
     {
       label: t('nav.ai_writing'),
       items: [
-        { href: `/${locale}/ai-studio`, icon: FilePenLine, title: "Paraphraser", desc: "Re-engineer text." },
-        { href: `/${locale}/tools/ai-humanizer`, icon: UserCheck, title: "AI Humanizer", desc: "Natural synthesis." },
-        { href: `/${locale}/ai-studio`, icon: Activity, title: "AI Summarizer", desc: "Executive distillation." },
-        { href: `/${locale}/tools/ai-prompt-improver`, icon: Sparkles, title: "Prompt Improver", desc: "Optimize payloads." },
+        { href: `/${locale}/ai-studio`, icon: FilePenLine, title: t('tools.paraphraser.title'), desc: t('tools.paraphraser.desc') },
+        { href: `/${locale}/tools/ai-humanizer`, icon: UserCheck, title: t('tools.humanizer.title'), desc: t('tools.humanizer.desc') },
+        { href: `/${locale}/ai-studio`, icon: Activity, title: t('tools.summarizer.title'), desc: t('tools.summarizer.desc') },
+        { href: `/${locale}/tools/ai-prompt-improver`, icon: Sparkles, title: t('tools.prompt_improver.title'), desc: t('tools.prompt_improver.desc') },
       ]
     },
     {
-      label: "Discovery & Learning",
+      label: t('nav.ai_discovery'),
       items: [
-        { href: `/${locale}/tools/ai-niche-finder`, icon: TrendingUp, title: "Niche Finder", desc: "Market opportunities." },
-        { href: `/${locale}/tools/ai-skill-generator`, icon: BookOpen, title: "Skill Generator", desc: "30-day learning plans." },
-        { href: `/${locale}/tools/ai-reality-check`, icon: Target, title: "Reality Check", desc: "Project viability scan." },
-        { href: `/${locale}/tools/ai-life-simulator`, icon: Globe, title: "Life Simulator", desc: "Simulate future paths." },
+        { href: `/${locale}/tools/ai-niche-finder`, icon: TrendingUp, title: t('tools.niche_finder.title'), desc: t('tools.niche_finder.desc') },
+        { href: `/${locale}/tools/ai-skill-generator`, icon: BookOpen, title: t('tools.skill_generator.title'), desc: t('tools.skill_generator.desc') },
+        { href: `/${locale}/tools/ai-reality-check`, icon: Target, title: t('tools.reality_check.title'), desc: t('tools.reality_check.desc') },
+        { href: `/${locale}/tools/ai-life-simulator`, icon: Globe, title: t('tools.life_simulator.title'), desc: t('tools.life_simulator.desc') },
       ]
     },
     {
-      label: "Productivity & Logic",
+      label: t('nav.ai_productivity'),
       items: [
-        { href: `/${locale}/tools/ai-decision-helper`, icon: Scale, title: "Decision Helper", desc: "Logic framework." },
-        { href: `/${locale}/tools/ai-content-repurposer`, icon: RefreshCcw, title: "Content Repurposer", desc: "Omnichannel stream." },
-        { href: `/${locale}/tools/ai-personal-brain`, icon: BrainCircuit, title: "Personal Brain", desc: "Cognitive indexing." },
-        { href: `/${locale}/ai-studio`, icon: Languages, title: "Translator", desc: "Linguistic shift." },
+        { href: `/${locale}/tools/ai-decision-helper`, icon: Scale, title: t('tools.decision_helper.title'), desc: t('tools.decision_helper.desc') },
+        { href: `/${locale}/tools/ai-content-repurposer`, icon: RefreshCcw, title: t('tools.repurposer.title'), desc: t('tools.repurposer.desc') },
+        { href: `/${locale}/tools/ai-personal-brain`, icon: BrainCircuit, title: t('tools.personal_brain.title'), desc: t('tools.personal_brain.desc') },
+        { href: `/${locale}/ai-studio`, icon: Languages, title: t('tools.translator.title'), desc: t('tools.translator.desc') },
       ]
     },
     {
-      label: "Asset Intelligence",
+      label: t('home.categories.asset_intel'),
       items: [
-        { href: `/${locale}/ai-studio`, icon: MessageSquare, title: "Doc Intelligence", desc: "Deep interrogation." },
-        { href: `/${locale}/scan-to-pdf`, icon: Camera, title: "Scan to PDF", desc: "Hardware capture." },
-        { href: `/${locale}/analyze`, icon: Search, title: "Deep Inspect", desc: "Structural metadata." },
-        { href: `/${locale}/repair`, icon: Wrench, title: "Repair PDF", desc: "Fix broken catalogs." },
+        { href: `/${locale}/ai-studio`, icon: MessageSquare, title: t('tools.doc_intel.title'), desc: t('tools.doc_intel.desc') },
+        { href: `/${locale}/scan-to-pdf`, icon: Camera, title: t('tools.scan.title'), desc: t('tools.scan.desc') },
+        { href: `/${locale}/analyze`, icon: Search, title: t('tools.inspect.title'), desc: t('tools.inspect.desc') },
+        { href: `/${locale}/repair`, icon: Wrench, title: t('tools.repair.title'), desc: t('tools.repair.desc') },
       ]
     },
     {
       label: t('nav.layout'),
       items: [
-        { href: `/${locale}/crop`, icon: Crop, title: "Crop PDF", desc: "Trim page margins." },
-        { href: `/${locale}/organize`, icon: RotateCw, title: "Visual Organizer", desc: "Reorder & rotate." },
-        { href: `/${locale}/numbers`, icon: Hash, title: "Add Numbers", desc: "Sequential counters." },
-        { href: `/${locale}/merge`, icon: Merge, title: "Merge PDF", desc: "Combine assets." },
-        { href: `/${locale}/split`, icon: Scissors, title: "Split PDF", desc: "Range extraction." },
-        { href: `/${locale}/sign`, icon: Signature, title: "Sign PDF", desc: "Digital signatures." },
+        { href: `/${locale}/crop`, icon: Crop, title: t('tools.crop.title'), desc: t('tools.crop.desc') },
+        { href: `/${locale}/organize`, icon: RotateCw, title: t('tools.organize.title'), desc: t('tools.organize.desc') },
+        { href: `/${locale}/numbers`, icon: Hash, title: t('tools.numbers.title'), desc: t('tools.numbers.desc') },
+        { href: `/${locale}/merge`, icon: Merge, title: t('tools.merge.title'), desc: t('tools.merge.desc') },
+        { href: `/${locale}/split`, icon: Scissors, title: t('tools.split.title'), desc: t('tools.split.desc') },
+        { href: `/${locale}/sign`, icon: Signature, title: t('tools.sign.title'), desc: t('tools.sign.desc') },
       ]
     },
     {
       label: t('nav.convert'),
       items: [
-        { href: `/${locale}/convert`, icon: ArrowRightLeft, title: "Convert Hub", desc: "Inversion Engine." },
-        { href: `/${locale}/convert?type=pdf-to-word`, icon: FileText, title: "PDF to Word", desc: "Text recovery." },
-        { href: `/${locale}/convert?type=word-to-pdf`, icon: FilePenLine, title: "Word to PDF", desc: "Standardize DOCX." },
-        { href: `/${locale}/convert?type=pdf-to-excel`, icon: Table, title: "PDF to Excel", desc: "Table recovery." },
+        { href: `/${locale}/convert`, icon: ArrowRightLeft, title: t('tools.convert_hub.title'), desc: t('tools.convert_hub.desc') },
+        { href: `/${locale}/convert?type=pdf-to-word`, icon: FileText, title: t('tools.pdf_to_word.title'), desc: t('tools.pdf_to_word.desc') },
+        { href: `/${locale}/convert?type=word-to-pdf`, icon: FilePenLine, title: t('tools.word_to_pdf.title'), desc: t('tools.word_to_pdf.desc') },
+        { href: `/${locale}/convert?type=pdf-to-excel`, icon: Table, title: t('tools.pdf_to_excel.title'), desc: t('tools.pdf_to_excel.desc') },
       ]
     },
     {
       label: t('nav.security'),
       items: [
-        { href: `/${locale}/secure`, icon: Lock, title: "Password Protect", desc: "Encrypt PDF." },
-        { href: `/${locale}/protect`, icon: ShieldCheck, title: "Privacy Shield", desc: "Metadata erasure." },
-        { href: `/${locale}/protect?mode=unlock`, icon: Unlock, title: "Unlock PDF", desc: "Strip restrictions." },
-        { href: `/${locale}/sanitize`, icon: Eraser, title: "Sanitize Asset", desc: "Deep cleaning." },
+        { href: `/${locale}/secure`, icon: Lock, title: t('tools.protect.title'), desc: t('tools.protect.desc') },
+        { href: `/${locale}/protect`, icon: ShieldCheck, title: t('tools.privacy.title'), desc: t('tools.privacy.desc') },
+        { href: `/${locale}/protect?mode=unlock`, icon: Unlock, title: t('tools.unlock.title'), desc: t('tools.unlock.desc') },
+        { href: `/${locale}/sanitize`, icon: Eraser, title: t('tools.sanitize.title'), desc: t('tools.sanitize.desc') },
       ]
     }
   ];
@@ -186,10 +186,10 @@ export function Navbar() {
               <BrainCircuit className="h-3 w-3" /> {t('nav.ai_studio')}
             </Link>
             <Link href={`/${locale}/tools/ai-niche-finder`} className="flex items-center gap-1.5 text-[9px] font-black uppercase tracking-widest text-accent/80 hover:text-accent transition-all group">
-              <TrendingUp className="h-3 w-3 text-primary/60 group-hover:text-primary transition-colors" /> Niche Finder
+              <TrendingUp className="h-3 w-3 text-primary/60 group-hover:text-primary transition-colors" /> {t('tools.niche_finder.title')}
             </Link>
             <Link href={`/${locale}/tools/ai-reality-check`} className="flex items-center gap-1.5 text-[9px] font-black uppercase tracking-widest text-accent/80 hover:text-accent transition-all group">
-              <Target className="h-3 w-3 text-primary/60 group-hover:text-primary transition-colors" /> Reality Check
+              <Target className="h-3 w-3 text-primary/60 group-hover:text-primary transition-colors" /> {t('tools.reality_check.title')}
             </Link>
           </div>
         </div>
@@ -207,24 +207,24 @@ export function Navbar() {
             <DropdownMenu>
               <DropdownMenuTrigger suppressHydrationWarning asChild>
                 <Button variant="ghost" size="sm" className="h-8 rounded-lg text-[9px] font-black uppercase tracking-widest gap-2 bg-accent text-white hover:bg-accent/90">
-                  <Layout className="h-3 w-3" /> Dashboard
+                  <Layout className="h-3 w-3" /> {t('nav.dashboard')}
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-48 rounded-xl bg-white shadow-2xl border-accent/5">
                 <DropdownMenuLabel className="text-[8px] font-black uppercase tracking-widest text-accent/40">{user.email}</DropdownMenuLabel>
                 <DropdownMenuItem asChild>
                   <Link href={`/${locale}/dashboard`} className="cursor-pointer text-[10px] font-bold uppercase">
-                    <Activity className="h-3 w-3 mr-2" /> Command Center
+                    <Activity className="h-3.5 w-3.5 mr-2" /> Command Center
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={handleLogout} className="text-destructive cursor-pointer text-[10px] font-bold uppercase">
-                  <LogOut className="h-3 w-3 mr-2" /> End Session
+                  <LogOut className="h-3.5 w-3.5 mr-2" /> End Session
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           ) : (
             <Button asChild variant="outline" size="sm" className="h-8 rounded-lg text-[9px] font-black uppercase tracking-widest border-accent/10">
-              <Link href={`/${locale}/login`}>Sign Up - Login</Link>
+              <Link href={`/${locale}/login`}>{t('nav.login')}</Link>
             </Button>
           )}
 
