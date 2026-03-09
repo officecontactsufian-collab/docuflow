@@ -1,3 +1,4 @@
+
 "use client"
 
 import * as React from 'react';
@@ -20,16 +21,13 @@ const LANGUAGES = [
   { code: 'zh', label: '中文', flag: '🇨🇳' },
   { code: 'de', label: 'Deutsch', flag: '🇩🇪' },
   { code: 'ja', label: '日本語', flag: '🇯🇵' },
+  { code: 'pt', label: 'Português', flag: '🇵🇹' },
+  { code: 'ru', label: 'Русский', flag: '🇷🇺' },
+  { code: 'it', label: 'Italiano', flag: '🇮🇹' },
 ] as const;
 
 export function LanguageSwitcher() {
-  const { locale, setLocale, isHydrated } = useTranslation();
-
-  if (!isHydrated) return (
-    <Button variant="ghost" size="sm" className="h-8 w-8 rounded-lg opacity-20">
-      <Languages className="h-4 w-4" />
-    </Button>
-  );
+  const { locale, setLocale } = useTranslation();
 
   const currentLang = LANGUAGES.find(l => l.code === locale) || LANGUAGES[0];
 
