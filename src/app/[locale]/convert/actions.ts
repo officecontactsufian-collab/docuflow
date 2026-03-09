@@ -1,6 +1,6 @@
 'use server';
 
-import { PDFDocument, StandardFonts, PDFName, PDFDict, PDFRawStream } from 'pdf-lib';
+import { PDFDocument, StandardFonts } from 'pdf-lib';
 import mammoth from 'mammoth';
 import * as XLSX from 'xlsx';
 import { Document, Packer, Paragraph, TextRun } from 'docx';

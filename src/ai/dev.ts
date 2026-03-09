@@ -14,3 +14,4 @@ import '@/ai/flows/personal-brain-flow.ts';
 import '@/ai/flows/life-simulator-flow.ts';
 import '@/ai/flows/skill-generator-flow.ts';
 import '@/ai/flows/reality-check-flow.ts';
+import '@/ai/flows/remove-background-flow.ts';
