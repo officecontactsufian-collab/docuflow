@@ -1,3 +1,4 @@
+
 "use client"
 
 import * as React from 'react';
@@ -36,7 +37,9 @@ import {
   Linkedin,
   Facebook,
   MessageCircle,
-  ExternalLink
+  ExternalLink,
+  ShieldAlert,
+  Globe
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Card } from '@/components/ui/card';
@@ -167,7 +170,7 @@ export default function AIStudioPage() {
         msg.id === message.id ? { ...msg, shareSlug } : msg
       ));
 
-      toast({ title: "Result Published", description: "Public share link generated successfully." });
+      toast({ title: "Manifest Published", description: "Protocol transmission link generated successfully." });
     } catch (e: any) {
       toast({ variant: "destructive", title: "Sharing Failed", description: e.message });
     } finally {
@@ -441,14 +444,18 @@ export default function AIStudioPage() {
                                      {isSharing === msg.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Share2 className="h-3.5 w-3.5" />}
                                    </button>
                                  </DialogTrigger>
-                                 <DialogContent className="rounded-[2.5rem] p-8 max-w-sm border-none shadow-2xl">
+                                 <DialogContent className="rounded-[2.5rem] p-10 max-w-md border-none shadow-2xl overflow-hidden bg-white">
                                    <DialogHeader className="space-y-3">
-                                     <DialogTitle className="text-2xl font-black uppercase italic tracking-tighter text-accent">Share Result</DialogTitle>
-                                     <DialogDescription className="text-[10px] font-bold uppercase tracking-widest italic">Industrial Transmission Gate</DialogDescription>
+                                     <div className="h-14 w-14 rounded-2xl bg-primary/5 text-primary flex items-center justify-center mb-2 mx-auto">
+                                        <Globe className="h-7 w-7" />
+                                     </div>
+                                     <DialogTitle className="text-3xl font-black uppercase italic tracking-tighter text-accent text-center leading-none">Transmission <br/><span className="not-italic text-primary">Gate.</span></DialogTitle>
+                                     <DialogDescription className="text-[10px] font-bold uppercase tracking-[0.3em] italic text-center text-accent/30">Viral Distribution Channel v2.5</DialogDescription>
                                    </DialogHeader>
-                                   <div className="space-y-8 pt-6">
-                                      <div className="flex flex-col items-center gap-4">
-                                         <div className="flex gap-4">
+                                   <div className="space-y-10 pt-8">
+                                      <div className="flex flex-col items-center gap-6">
+                                         <p className="text-[9px] font-black uppercase tracking-widest text-accent/40">Authorized Networks</p>
+                                         <div className="flex gap-5">
                                             {[
                                               { icon: Twitter, color: "bg-[#1DA1F2]", label: "X", link: `https://twitter.com/intent/tweet?text=Check out this AI analysis from DOCFLOW!&url=${getShareUrl(msg.shareSlug || '')}` },
                                               { icon: Linkedin, color: "bg-[#0077B5]", label: "LinkedIn", link: `https://www.linkedin.com/sharing/share-offsite/?url=${getShareUrl(msg.shareSlug || '')}` },
@@ -460,38 +467,41 @@ export default function AIStudioPage() {
                                                 href={social.link} 
                                                 target="_blank" 
                                                 rel="noopener noreferrer"
-                                                className={cn("h-12 w-12 rounded-2xl flex items-center justify-center text-white shadow-lg hover:scale-110 transition-all", social.color)}
+                                                className={cn("h-14 w-14 rounded-[1.25rem] flex items-center justify-center text-white shadow-xl hover:scale-110 active:scale-95 transition-all", social.color)}
                                               >
-                                                <social.icon className="h-5 w-5" />
+                                                <social.icon className="h-6 w-6" />
                                               </a>
                                             ))}
                                          </div>
                                       </div>
                                       
-                                      <div className="space-y-3">
-                                         <Label className="text-[9px] font-black uppercase tracking-widest text-accent/40 px-1">Registry Endpoint</Label>
-                                         <div className="flex items-center gap-2 p-2 bg-muted/30 rounded-2xl border border-accent/5">
+                                      <div className="space-y-4">
+                                         <Label className="text-[9px] font-black uppercase tracking-widest text-accent/40 px-1">Registry Endpoint (Public Manifest)</Label>
+                                         <div className="flex items-center gap-3 p-3 bg-muted/30 rounded-2xl border border-accent/5 group focus-within:border-primary/40 transition-all">
                                             <input 
                                               readOnly 
                                               value={getShareUrl(msg.shareSlug || '')} 
-                                              className="flex-1 bg-transparent text-[10px] font-bold text-accent px-2 outline-none truncate" 
+                                              className="flex-1 bg-transparent text-[11px] font-bold text-accent px-2 outline-none truncate" 
                                             />
                                             <Button 
                                               size="icon" 
                                               variant="ghost" 
                                               onClick={() => copyToClipboard(getShareUrl(msg.shareSlug || ''))}
-                                              className="h-10 w-10 rounded-xl hover:bg-primary/10 text-primary shrink-0"
+                                              className="h-10 w-10 rounded-xl hover:bg-primary/10 text-primary shrink-0 transition-transform active:scale-90"
                                             >
                                               <Copy className="h-4 w-4" />
                                             </Button>
                                          </div>
                                       </div>
 
-                                      <div className="p-4 bg-primary/5 rounded-2xl border border-primary/10 flex items-start gap-3">
-                                         <ShieldCheck className="h-4 w-4 text-primary shrink-0 mt-0.5" />
-                                         <p className="text-[9px] font-bold text-accent/60 uppercase leading-relaxed tracking-tight">
-                                           Shared results are stored in the public registry. Original document binary streams remain locally encrypted.
-                                         </p>
+                                      <div className="p-6 bg-primary/5 rounded-[2rem] border border-primary/10 flex items-start gap-4">
+                                         <ShieldAlert className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+                                         <div className="space-y-1">
+                                            <p className="text-[10px] font-black text-accent uppercase italic">Privacy Sync Note</p>
+                                            <p className="text-[9px] font-bold text-muted-foreground uppercase leading-relaxed tracking-tight">
+                                              Shared results are archived in the public registry. Original document binary streams remain locally encrypted and are never transmitted.
+                                            </p>
+                                         </div>
                                       </div>
                                    </div>
                                  </DialogContent>

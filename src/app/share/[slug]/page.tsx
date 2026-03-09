@@ -19,17 +19,24 @@ import {
   Zap,
   ShieldCheck,
   BrainCircuit,
-  LayoutDashboard
+  LayoutDashboard,
+  Copy,
+  Printer,
+  Download,
+  Terminal,
+  Cpu
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { doc, Timestamp } from 'firebase/firestore';
 import { Badge } from '@/components/ui/badge';
+import { useToast } from '@/hooks/use-toast';
 
 export default function ShareResultPage() {
   const { slug } = useParams();
   const firestore = useFirestore();
+  const { toast } = useToast();
 
   const shareRef = useMemoFirebase(() => {
     if (!firestore || !slug) return null;
@@ -37,6 +44,17 @@ export default function ShareResultPage() {
   }, [firestore, slug]);
 
   const { data: result, isLoading } = useDoc(shareRef);
+
+  const copyToClipboard = () => {
+    if (result?.generatedContent) {
+      navigator.clipboard.writeText(result.generatedContent);
+      toast({ title: "Copied to Buffer", description: "Manifest content shifted to local clipboard." });
+    }
+  };
+
+  const handlePrint = () => {
+    window.print();
+  };
 
   if (isLoading) {
     return (
@@ -81,72 +99,116 @@ export default function ShareResultPage() {
       <Navbar />
       
       <main className="flex-1 container mx-auto px-6 py-12">
-        <div className="max-w-4xl mx-auto space-y-12">
+        <div className="max-w-5xl mx-auto space-y-12">
           {/* Header */}
-          <div className="text-center space-y-6">
+          <div className="text-center space-y-6 animate-in fade-in slide-in-from-top-4 duration-700">
             <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/5 text-primary border border-primary/10 text-[10px] font-black uppercase tracking-[0.3em]">
-              <Sparkles className="h-3 w-3" /> Published Analysis
+              <Sparkles className="h-3 w-3" /> Intelligence Manifest v2.5
             </div>
-            <h1 className="text-4xl md:text-6xl font-black tracking-tighter text-accent uppercase italic leading-none">
-              Intelligence <br />
-              <span className="not-italic text-primary">Manifest.</span>
+            <h1 className="text-4xl md:text-7xl font-black tracking-tighter text-accent uppercase italic leading-[0.9]">
+              Protocol <br />
+              <span className="not-italic text-primary">Synthesis Report.</span>
             </h1>
-            <div className="flex items-center justify-center gap-6 pt-4">
+            
+            <div className="flex flex-wrap items-center justify-center gap-6 pt-4">
                <div className="flex items-center gap-2 text-[9px] font-black uppercase text-accent/40 tracking-widest">
                   <Calendar className="h-3.5 w-3.5 text-primary" />
                   {result.createdAt instanceof Timestamp ? result.createdAt.toDate().toLocaleDateString() : 'Historical Registry'}
                </div>
-               <div className="h-1 w-1 rounded-full bg-accent/10" />
+               <div className="h-1.5 w-1.5 rounded-full bg-accent/10" />
                <div className="flex items-center gap-2 text-[9px] font-black uppercase text-accent/40 tracking-widest">
                   <ShieldCheck className="h-3.5 w-3.5 text-primary" />
-                  Verified Protocol
+                  Verified Transmission
+               </div>
+               <div className="h-1.5 w-1.5 rounded-full bg-accent/10" />
+               <div className="flex items-center gap-2 text-[9px] font-black uppercase text-accent/40 tracking-widest">
+                  <Terminal className="h-3.5 w-3.5 text-primary" />
+                  ID: {result.shareSlug}
                </div>
             </div>
           </div>
 
-          {/* Main Result Card */}
-          <Card className="border-none shadow-2xl rounded-[3rem] bg-white overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-1000">
-            <CardHeader className="p-10 border-b border-accent/5 bg-muted/5 flex flex-row items-center justify-between">
-              <div className="space-y-1">
-                <CardTitle className="text-xl font-black uppercase italic text-accent tracking-tighter flex items-center gap-3">
-                  <BrainCircuit className="h-6 w-6 text-primary" /> {result.toolName} Output
-                </CardTitle>
-                <CardDescription className="text-[10px] font-bold uppercase tracking-widest italic">High-Fidelity AI Synthesis</CardDescription>
-              </div>
-              <Badge variant="outline" className="rounded-xl border-accent/10 text-[9px] font-black uppercase py-1.5 px-4 bg-white shadow-sm">
-                ID: {result.id.substring(0, 8)}
-              </Badge>
-            </CardHeader>
-            <CardContent className="p-10 md:p-16">
-              <div className="prose prose-sm max-w-none">
-                <div className="whitespace-pre-wrap text-lg font-medium leading-relaxed text-accent/80 selection:bg-primary/20">
-                  {result.generatedContent}
-                </div>
-              </div>
-            </CardContent>
-            <div className="p-8 bg-accent text-white flex flex-col md:flex-row items-center justify-between gap-8 border-t border-white/5">
-               <div className="space-y-2">
-                  <p className="text-xl font-black italic uppercase tracking-tighter leading-none">Ready to generate?</p>
-                  <p className="text-[10px] font-bold text-white/40 uppercase tracking-widest">Execute your own industrial document sequence today.</p>
-               </div>
-               <Button asChild size="lg" className="h-16 px-10 rounded-2xl bg-primary text-white font-black uppercase tracking-[0.2em] text-[11px] shadow-2xl shadow-primary/30 hover:scale-105 transition-all group">
-                  <Link href="/ai-studio" className="flex items-center gap-3">
-                    Initialize Protocol <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
-                  </Link>
-               </Button>
-            </div>
-          </Card>
+          <div className="grid lg:grid-cols-12 gap-8 items-start">
+            {/* Control Sidebar */}
+            <aside className="lg:col-span-3 space-y-6 order-2 lg:order-1 print:hidden">
+               <Card className="border-none shadow-xl rounded-[2.5rem] bg-white p-6 space-y-6">
+                  <p className="text-[9px] font-black uppercase tracking-widest text-accent/30 border-b border-accent/5 pb-2">Manifest Actions</p>
+                  <div className="grid gap-3">
+                    <Button onClick={copyToClipboard} variant="outline" className="w-full justify-start rounded-xl border-accent/5 hover:bg-primary/5 hover:text-primary font-black text-[9px] uppercase tracking-widest h-12">
+                      <Copy className="mr-3 h-4 w-4" /> Copy Content
+                    </Button>
+                    <Button onClick={handlePrint} variant="outline" className="w-full justify-start rounded-xl border-accent/5 hover:bg-primary/5 hover:text-primary font-black text-[9px] uppercase tracking-widest h-12">
+                      <Printer className="mr-3 h-4 w-4" /> Print Report
+                    </Button>
+                    <Button variant="outline" className="w-full justify-start rounded-xl border-accent/5 hover:bg-primary/5 hover:text-primary font-black text-[9px] uppercase tracking-widest h-12" disabled>
+                      <Download className="mr-3 h-4 w-4" /> Export JSON
+                    </Button>
+                  </div>
+               </Card>
 
-          {/* Footer Info */}
-          <div className="flex flex-col md:flex-row items-center justify-center gap-12 opacity-30 grayscale hover:opacity-100 transition-all duration-1000 cursor-default pb-12">
-             <div className="flex items-center gap-3 text-[9px] font-black uppercase tracking-[0.4em] italic">
-                <LayoutDashboard className="h-3.5 w-3.5" /> Platform Registry
+               <div className="p-6 bg-accent text-white rounded-[2.5rem] shadow-2xl relative overflow-hidden group">
+                  <div className="relative z-10 space-y-4">
+                    <p className="text-[10px] font-black uppercase italic tracking-tighter text-primary">Deploy Your Own</p>
+                    <p className="text-[11px] font-bold leading-relaxed opacity-60">Initialize a professional generative sequence with zero cloud retention.</p>
+                    <Button asChild className="w-full bg-white text-accent hover:bg-primary hover:text-white transition-all rounded-xl h-10 font-black text-[9px] uppercase tracking-widest">
+                      <Link href="/ai-studio">Enter Studio</Link>
+                    </Button>
+                  </div>
+                  <Cpu className="absolute -bottom-6 -right-6 h-24 w-24 text-white/5" />
+               </div>
+            </aside>
+
+            {/* Main Content */}
+            <div className="lg:col-span-9 order-1 lg:order-2">
+              <Card className="border-none shadow-2xl rounded-[3rem] bg-white overflow-hidden animate-in slide-in-from-bottom-8 duration-1000 print:shadow-none print:border">
+                <CardHeader className="p-10 md:p-16 border-b border-accent/5 bg-muted/5 flex flex-col md:flex-row md:items-center justify-between gap-6">
+                  <div className="space-y-2">
+                    <Badge className="bg-primary/10 text-primary border-primary/20 rounded-lg px-3 py-1 text-[9px] font-black uppercase tracking-widest mb-2">
+                      {result.toolName || 'Protocol Result'}
+                    </Badge>
+                    <CardTitle className="text-2xl md:text-3xl font-black uppercase italic text-accent tracking-tighter flex items-center gap-4">
+                      <BrainCircuit className="h-8 w-8 text-primary" /> Synthesis Stream
+                    </CardTitle>
+                    <CardDescription className="text-[10px] font-bold uppercase tracking-[0.3em] text-accent/30 italic">High-Fidelity AI Reconstruction v2.5</CardDescription>
+                  </div>
+                  <div className="flex items-center gap-4 print:hidden">
+                    <div className="h-12 w-12 rounded-2xl bg-white shadow-xl flex items-center justify-center border border-accent/5">
+                       <Zap className="h-6 w-6 text-primary animate-pulse" />
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent className="p-10 md:p-20">
+                  <div className="prose prose-sm max-w-none">
+                    <div className="whitespace-pre-wrap text-lg md:text-xl font-medium leading-relaxed text-accent/80 selection:bg-primary/30 first-letter:text-4xl first-letter:font-black first-letter:text-primary">
+                      {result.generatedContent}
+                    </div>
+                  </div>
+                </CardContent>
+                
+                <div className="p-10 bg-muted/5 border-t border-accent/5 flex flex-col md:flex-row items-center justify-between gap-8">
+                   <div className="space-y-1">
+                      <p className="text-[10px] font-black uppercase tracking-widest text-accent/40 italic">Industrial Origin</p>
+                      <p className="text-xs font-bold text-accent italic">Generated via DOCFLOW Professional Protocols</p>
+                   </div>
+                   <div className="flex items-center gap-10 opacity-20 grayscale print:hidden">
+                      <div className="text-[8px] font-black uppercase tracking-[0.4em]">ISO-27001 SECURE</div>
+                      <div className="text-[8px] font-black uppercase tracking-[0.4em]">AES-256 ENCRYPTED</div>
+                   </div>
+                </div>
+              </Card>
+            </div>
+          </div>
+
+          {/* Verification Bar */}
+          <div className="flex flex-col md:flex-row items-center justify-center gap-12 opacity-30 grayscale hover:opacity-100 transition-all duration-1000 cursor-default py-12 print:hidden">
+             <div className="flex items-center gap-3 text-[9px] font-black uppercase tracking-[0.4em] italic transition-colors hover:text-primary">
+                <LayoutDashboard className="h-3.5 w-3.5" /> Registry Verification
              </div>
              <div className="flex items-center gap-3 text-[9px] font-black uppercase tracking-[0.4em] italic text-primary">
-                <ShieldCheck className="h-3.5 w-3.5" /> AES-256 Hardened
+                <ShieldCheck className="h-3.5 w-3.5 animate-pulse" /> Asset Authenticated
              </div>
-             <div className="flex items-center gap-3 text-[9px] font-black uppercase tracking-[0.4em] italic">
-                <Cpu className="h-3.5 w-3.5" /> Cloud-Edge Tunnel
+             <div className="flex items-center gap-3 text-[9px] font-black uppercase tracking-[0.4em] italic transition-colors hover:text-primary">
+                <Cpu className="h-3.5 w-3.5" /> Bit-Perfect Manifest
              </div>
           </div>
         </div>
