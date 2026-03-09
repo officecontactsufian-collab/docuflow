@@ -35,7 +35,8 @@ import {
   Scale,
   Target,
   Zap,
-  Globe
+  Globe,
+  Sparkles
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -152,7 +153,7 @@ export function Navbar() {
                 className="flex items-center gap-1.5 text-[9px] font-black uppercase tracking-widest text-accent hover:text-primary transition-all outline-none"
               >
                 <LayoutDashboard className="h-3 w-3 text-primary" />
-                <span>{t('common.all_protocols')}</span> 
+                <span suppressHydrationWarning>{t('common.all_protocols')}</span> 
                 <ChevronDown className="h-2.5 w-2.5 opacity-40" />
               </DropdownMenuTrigger>
               <DropdownMenuContent align="start" className="w-[1000px] p-6 rounded-2xl shadow-2xl border-white/20 grid grid-cols-3 gap-x-8 gap-y-10 bg-white/95 backdrop-blur-xl mt-2 max-h-[80vh] overflow-y-auto custom-scrollbar">
