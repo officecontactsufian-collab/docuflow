@@ -42,7 +42,7 @@ import {
   TrendingUp,
   Sparkles,
   Target,
-  Image as ImageIcon
+  ImageIcon
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
@@ -54,17 +54,12 @@ export default function Home() {
   const params = useParams();
   const locale = (params?.locale as string) || 'en';
   
-  // Temporal Sync: Avoid hydration mismatch by deferring dynamic values
   const [year, setYear] = React.useState<string>("....");
 
   React.useEffect(() => {
     setYear(new Date().getFullYear().toString());
   }, []);
 
-  /**
-   * Industrial Tool Lattice
-   * Maps tool configurations from the global translate state.
-   */
   const toolCategories = [
     {
       id: "cat-ai-biz",
@@ -198,7 +193,7 @@ export default function Home() {
                     <div className={`space-y-3 max-w-2xl ${idx % 2 === 1 ? 'md:text-right' : ''}`}>
                       <div className="section-label">
                         <LayoutDashboard className="h-3 w-3 text-primary" />
-                        <span>{t('home.categories.label_prefix') || 'Protocol'} 0{idx + 1}</span>
+                        <span>{t('home.categories.label_prefix')} 0{idx + 1}</span>
                       </div>
                       <h2 className="text-3xl md:text-4xl font-black text-accent uppercase italic tracking-tighter">{cat.label}</h2>
                       <p className="text-accent/60 text-base font-bold leading-relaxed">
@@ -223,10 +218,10 @@ export default function Home() {
             <div className="text-center mb-24 space-y-4">
               <div className="section-label mx-auto">
                 <Layers className="h-3 w-3 text-primary" />
-                <span>Operational Excellence</span>
+                <span>{t('home.steps.subtitle')}</span>
               </div>
-              <h2 className="text-4xl md:text-6xl font-black text-accent uppercase italic tracking-tighter">Pure Precision.</h2>
-              <p className="text-accent/40 font-black uppercase text-[10px] tracking-[0.4em]">High-Fidelity Transformation Pipeline</p>
+              <h2 className="text-4xl md:text-6xl font-black text-accent uppercase italic tracking-tighter">{t('home.steps.title')}</h2>
+              <p className="text-accent/40 font-black uppercase text-[10px] tracking-[0.4em]">{t('home.hero.badge')}</p>
             </div>
             
             <div className="max-w-6xl mx-auto space-y-16">
@@ -234,21 +229,21 @@ export default function Home() {
                 {[
                   { 
                     icon: FileUp, 
-                    title: "Stage", 
-                    desc: "Select your assets securely. Local staging occurs instantly within your browser with zero latency. No files are uploaded to our servers during this phase.",
-                    tip: "Accepts PDF, JPG, PNG, and DOCX."
+                    title: t('home.steps.step1.title'), 
+                    desc: t('home.steps.step1.desc'),
+                    tip: t('home.steps.step1.tip')
                   },
                   { 
                     icon: Settings2, 
-                    title: "Process", 
-                    desc: "Our high-fidelity engine reconstructs your document architecture with industrial accuracy. Apply rotations, crops, signatures, or AI analysis locally.",
-                    tip: "256-bit AES memory hardening active."
+                    title: t('home.steps.step2.title'), 
+                    desc: t('home.steps.step2.desc'),
+                    tip: t('home.steps.step2.tip')
                   },
                   { 
                     icon: Download, 
-                    title: "Deploy", 
-                    desc: "Save your optimized document instantly. Verified, private, and ready for professional deployment. All session data is auto-shredded upon completion.",
-                    tip: "Direct browser-to-disk transmission."
+                    title: t('home.steps.step3.title'), 
+                    desc: t('home.steps.step3.desc'),
+                    tip: t('home.steps.step3.tip')
                   }
                 ].map((step, idx) => (
                   <div key={step.title} className="relative group">
@@ -278,70 +273,9 @@ export default function Home() {
                 <Button size="lg" className="h-16 px-12 rounded-[2rem] bg-accent text-white font-black uppercase tracking-[0.2em] text-[11px] shadow-2xl shadow-accent/20 hover:scale-105 transition-all group" asChild>
                   <Link href="#tools">
                     <Play className="mr-3 h-4 w-4 fill-primary text-primary group-hover:translate-x-1 transition-transform" />
-                    Initialize Protocol
+                    {t('home.hero.cta')}
                   </Link>
                 </Button>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section className="py-24 bg-accent text-white relative overflow-hidden">
-          <div className="container mx-auto px-6 relative z-10">
-            <div className="grid lg:grid-cols-2 gap-20 items-center max-w-6xl mx-auto">
-              <div className="space-y-12">
-                <div className="space-y-4">
-                  <div className="inline-flex items-center gap-2 text-primary font-black uppercase tracking-[0.4em] text-[9px]">
-                    <Shield className="h-3 w-3" /> Industrial Security Registry
-                  </div>
-                  <h2 className="text-4xl md:text-6xl font-black uppercase italic leading-[1] tracking-tighter">Secure <br />By Nature.</h2>
-                  <p className="text-xl text-white/60 leading-relaxed font-bold max-w-lg">
-                    We've eliminated the data-retention layer. DOCFLOW operates as an encrypted bridge between your hardware and your document architecture.
-                  </p>
-                </div>
-
-                <div className="grid gap-8">
-                  {[
-                    { title: "Local Sandboxing", desc: "All document binary streams are isolated within your browser's private memory pool. No cloud-persistence protocol exists.", icon: Cpu },
-                    { title: "Memory-Level AES", desc: "256-bit encryption hardening applied to all active document buffers during the transformation sequence.", icon: Lock },
-                    { title: "Automated Shredding", desc: "Zero-latency purging. Every memory bit utilized during your session is overwritten upon process completion or tab closure.", icon: RefreshCcw },
-                    { title: "ISO Standard Archival", desc: "Reconstructions adhere to ISO 32000 and 19005 standards, ensuring structural integrity without tracking meta-data.", icon: Globe }
-                  ].map((item) => (
-                    <div key={item.title} className="flex gap-5 group">
-                      <div className="w-12 h-12 shrink-0 bg-white/5 rounded-2xl flex items-center justify-center border border-white/10 group-hover:bg-primary transition-all">
-                        <item.icon className="h-5 w-5 text-primary group-hover:text-white" />
-                      </div>
-                      <div className="space-y-1">
-                        <div className="flex items-center gap-3">
-                          <h4 className="font-black text-xs uppercase tracking-widest">{item.title}</h4>
-                          <div className="h-1 w-1 rounded-full bg-green-500 animate-pulse" />
-                        </div>
-                        <p className="text-[10px] text-white/40 font-bold uppercase leading-relaxed tracking-tight max-w-md">
-                          {item.desc}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-
-                <div className="pt-8 border-t border-white/10">
-                   <p className="text-[8px] font-black uppercase tracking-[0.5em] text-white/20 mb-6">Global Compliance Registry</p>
-                   <div className="flex flex-wrap gap-6 items-center opacity-40 grayscale hover:opacity-100 transition-opacity">
-                      {["GDPR", "ISO 27001", "SOC2", "HIPAA", "PCI DSS"].map(badge => (
-                        <div key={badge} className="px-4 py-1.5 border border-white/20 rounded-full text-[9px] font-black tracking-widest">{badge}</div>
-                      ))}
-                   </div>
-                </div>
-              </div>
-
-              <div className="relative hidden lg:block">
-                <div className="aspect-square bg-white/5 rounded-[4rem] flex items-center justify-center p-20 backdrop-blur-3xl border border-white/10 shadow-2xl relative overflow-hidden group">
-                   <ShieldCheck className="w-full h-full text-primary/20 group-hover:scale-110 transition-transform duration-700" />
-                   <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-accent/20 pointer-events-none" />
-                   <div className="absolute inset-x-0 h-1 bg-primary/20 blur-sm animate-scan" />
-                </div>
-                <div className="absolute -bottom-10 -right-10 w-48 h-48 bg-primary/20 rounded-full blur-[80px] pointer-events-none" />
-                <div className="absolute -top-10 -left-10 w-48 h-48 bg-accent/20 rounded-full blur-[80px] pointer-events-none" />
               </div>
             </div>
           </div>
@@ -367,11 +301,11 @@ export default function Home() {
                 <div className="h-px w-8 bg-primary/30" />
               </div>
               <ul className="space-y-4 text-[11px] font-black uppercase tracking-widest italic">
-                <li><Link href={`/${locale}/ai-studio`} className="hover:text-primary transition-colors flex items-center gap-2 group text-primary"><div className="w-1 h-1 bg-primary/40 rounded-full group-hover:bg-primary" /> AI Intelligence Suite</Link></li>
-                <li><Link href={`/${locale}/merge`} className="hover:text-primary transition-colors flex items-center gap-2 group"><div className="w-1 h-1 bg-primary/20 rounded-full group-hover:bg-primary" /> Structural Merge</Link></li>
-                <li><Link href={`/${locale}/convert`} className="hover:text-primary transition-colors flex items-center gap-2 group"><div className="w-1 h-1 bg-primary/20 rounded-full group-hover:bg-primary" /> Asset Transformation</Link></li>
-                <li><Link href={`/${locale}/split`} className="hover:text-primary transition-colors flex items-center gap-2 group"><div className="w-1 h-1 bg-primary/20 rounded-full group-hover:bg-primary" /> Range Extraction</Link></li>
-                <li><Link href={`/${locale}/organize`} className="hover:text-primary transition-colors flex items-center gap-2 group"><div className="w-1 h-1 bg-primary/20 rounded-full group-hover:bg-primary" /> Visual Mapping</Link></li>
+                <li><Link href={`/${locale}/ai-studio`} className="hover:text-primary transition-colors flex items-center gap-2 group text-primary"><div className="w-1 h-1 bg-primary/40 rounded-full group-hover:bg-primary" /> {t('nav.ai_studio')}</Link></li>
+                <li><Link href={`/${locale}/merge`} className="hover:text-primary transition-colors flex items-center gap-2 group"><div className="w-1 h-1 bg-primary/20 rounded-full group-hover:bg-primary" /> {t('tools.merge.title')}</Link></li>
+                <li><Link href={`/${locale}/convert`} className="hover:text-primary transition-colors flex items-center gap-2 group"><div className="w-1 h-1 bg-primary/20 rounded-full group-hover:bg-primary" /> {t('tools.convert_hub.title')}</Link></li>
+                <li><Link href={`/${locale}/split`} className="hover:text-primary transition-colors flex items-center gap-2 group"><div className="w-1 h-1 bg-primary/20 rounded-full group-hover:bg-primary" /> {t('tools.split.title')}</Link></li>
+                <li><Link href={`/${locale}/organize`} className="hover:text-primary transition-colors flex items-center gap-2 group"><div className="w-1 h-1 bg-primary/20 rounded-full group-hover:bg-primary" /> {t('tools.organize.title')}</Link></li>
               </ul>
             </div>
 
@@ -381,10 +315,10 @@ export default function Home() {
                 <div className="h-px w-8 bg-primary/30" />
               </div>
               <ul className="space-y-4 text-[11px] font-black uppercase tracking-widest italic">
-                <li><Link href={`/${locale}/secure`} className="hover:text-primary transition-colors flex items-center gap-2 group"><div className="w-1 h-1 bg-primary/20 rounded-full group-hover:bg-primary" /> Password Protect</Link></li>
-                <li><Link href={`/${locale}/protect`} className="hover:text-primary transition-colors flex items-center gap-2 group"><div className="w-1 h-1 bg-primary/20 rounded-full group-hover:bg-primary" /> Privacy Shield</Link></li>
-                <li><Link href={`/${locale}/protect?mode=unlock`} className="hover:text-primary transition-colors flex items-center gap-2 group"><div className="h-1 w-1 bg-primary/20 rounded-full group-hover:bg-primary" /> Unlock Sequence</Link></li>
-                <li><Link href={`/${locale}/analyze`} className="hover:text-primary transition-colors flex items-center gap-2 group"><div className="w-1 h-1 bg-primary/20 rounded-full group-hover:bg-primary" /> Deep Inspection</Link></li>
+                <li><Link href={`/${locale}/secure`} className="hover:text-primary transition-colors flex items-center gap-2 group"><div className="w-1 h-1 bg-primary/20 rounded-full group-hover:bg-primary" /> {t('tools.protect.title')}</Link></li>
+                <li><Link href={`/${locale}/protect`} className="hover:text-primary transition-colors flex items-center gap-2 group"><div className="w-1 h-1 bg-primary/20 rounded-full group-hover:bg-primary" /> {t('tools.privacy.title')}</Link></li>
+                <li><Link href={`/${locale}/protect?mode=unlock`} className="hover:text-primary transition-colors flex items-center gap-2 group"><div className="h-1 w-1 bg-primary/20 rounded-full group-hover:bg-primary" /> {t('tools.unlock.title')}</Link></li>
+                <li><Link href={`/${locale}/analyze`} className="hover:text-primary transition-colors flex items-center gap-2 group"><div className="w-1 h-1 bg-primary/20 rounded-full group-hover:bg-primary" /> {t('tools.inspect.title')}</Link></li>
               </ul>
             </div>
 
@@ -395,7 +329,7 @@ export default function Home() {
               </div>
               <ul className="space-y-4 text-[11px] font-black uppercase tracking-widest italic">
                 <li><Link href={`/${locale}/about`} className="hover:text-primary transition-colors flex items-center gap-2 group"><div className="w-1 h-1 bg-primary/20 rounded-full group-hover:bg-primary" /> About Mission</Link></li>
-                <li><Link href={`/${locale}/contact`} className="hover:text-primary transition-colors flex items-center gap-2 group"><div className="w-1 h-1 bg-primary/20 rounded-full group-hover:bg-primary" /> Contact Gateway</Link></li>
+                <li><Link href={`/${locale}/contact`} className="hover:text-primary transition-colors flex items-center gap-2 group"><div className="w-1 h-1 bg-primary/20 rounded-full group-hover:bg-primary" /> {t('common.contact')}</Link></li>
                 <li><Link href={`/${locale}/privacy`} className="hover:text-primary transition-colors flex items-center gap-2 group"><div className="w-1 h-1 bg-primary/20 rounded-full group-hover:bg-primary" /> Privacy Shield</Link></li>
                 <li><Link href={`/${locale}/terms`} className="hover:text-primary transition-colors flex items-center gap-2 group"><div className="w-1 h-1 bg-primary/20 rounded-full group-hover:bg-primary" /> Terms of Operation</Link></li>
               </ul>

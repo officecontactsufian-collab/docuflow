@@ -9,8 +9,15 @@
     "loading": "Loading Protocol...",
     "deploy": "Deploy Protocol",
     "copy": "Copy to Buffer",
-    "share": "Share Protocol",
-    "viral": "Viral Share"
+    "share": "Share Result",
+    "viral": "Viral Share",
+    "login": "Sign Up - Login",
+    "signup": "Sign Up",
+    "dashboard": "Dashboard",
+    "logout": "End Session",
+    "back": "Back",
+    "get_started": "Get Started",
+    "contact": "Contact Gateway"
   },
   "nav": {
     "ai_writing": "AI Writing Suite",
@@ -19,10 +26,7 @@
     "layout": "Modify & Capture",
     "convert": "Convert & Export",
     "security": "Security & Trust",
-    "ai_studio": "AI Studio",
-    "dashboard": "Dashboard",
-    "login": "Sign Up - Login",
-    "signup": "Sign Up"
+    "ai_studio": "AI Studio"
   },
   "home": {
     "hero": {
@@ -49,6 +53,13 @@
       "convert_desc": "Lossless transformation between formats.",
       "security": "Security & Privacy",
       "security_desc": "Hardened metadata stripping and protection."
+    },
+    "steps": {
+      "title": "Pure Precision.",
+      "subtitle": "High-Fidelity Transformation Pipeline",
+      "step1": { "title": "Stage", "desc": "Select your assets securely. Local staging occurs instantly within your browser with zero latency.", "tip": "Accepts PDF, JPG, PNG, and DOCX." },
+      "step2": { "title": "Process", "desc": "Our high-fidelity engine reconstructs your document architecture with industrial accuracy.", "tip": "256-bit AES memory hardening active." },
+      "step3": { "title": "Deploy", "desc": "Save your optimized document instantly. Verified, private, and ready for professional deployment.", "tip": "Direct browser-to-disk transmission." }
     }
   },
   "tools": {
@@ -63,9 +74,10 @@
     "repurposer": { "title": "Content Repurposer", "desc": "Viral stream synthesis." },
     "summarizer": { "title": "AI Summarizer", "desc": "Executive distillation." },
     "paraphraser": { "title": "Paraphraser", "desc": "Re-engineer text structure." },
+    "translator": { "title": "Translator", "desc": "Linguistic shift." },
+    "doc_intel": { "title": "Doc Intel", "desc": "Deep asset interrogation." },
     "scan": { "title": "Scan to PDF", "desc": "Direct capture." },
     "inspect": { "title": "Deep Inspect", "desc": "Metadata analysis." },
-    "doc_intel": { "title": "Doc Intel", "desc": "Deep asset interrogation." },
     "repair": { "title": "Repair PDF", "desc": "Fix broken object catalogs." },
     "crop": { "title": "Crop PDF", "desc": "Trim page margins." },
     "organize": { "title": "Visual Organizer", "desc": "Reorder & Rotate." },

@@ -218,13 +218,13 @@ export function Navbar() {
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={handleLogout} className="text-destructive cursor-pointer text-[10px] font-bold uppercase">
-                  <LogOut className="h-3.5 w-3.5 mr-2" /> End Session
+                  <LogOut className="h-3.5 w-3.5 mr-2" /> {t('common.logout')}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           ) : (
             <Button asChild variant="outline" size="sm" className="h-8 rounded-lg text-[9px] font-black uppercase tracking-widest border-accent/10">
-              <Link href={`/${locale}/login`}>{t('nav.login')}</Link>
+              <Link href={`/${locale}/login`}>{t('common.login')}</Link>
             </Button>
           )}
 

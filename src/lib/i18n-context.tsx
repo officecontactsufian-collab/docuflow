@@ -30,11 +30,9 @@ export function LanguageProvider({ children, initialLocale }: { children: ReactN
   const pathname = usePathname();
   const params = useParams();
   
-  // Use param or initial locale, fallback to English
   const activeLocale = (params?.locale as Locale) || initialLocale || 'en';
   const [locale, setLocaleState] = useState<Locale>(activeLocale);
 
-  // Global Linguistic Sync: Update document attributes for RTL and Lang support
   useEffect(() => {
     if (typeof document !== 'undefined') {
       document.documentElement.lang = locale;
@@ -42,7 +40,6 @@ export function LanguageProvider({ children, initialLocale }: { children: ReactN
     }
   }, [locale]);
 
-  // Sync state if URL param changes externally
   useEffect(() => {
     if (params?.locale && params.locale !== locale) {
       setLocaleState(params.locale as Locale);
@@ -58,7 +55,6 @@ export function LanguageProvider({ children, initialLocale }: { children: ReactN
     const pathSegments = pathname.split('/');
     const localesList = ['en', 'fr', 'es', 'ar', 'zh', 'de', 'ja', 'pt', 'ru', 'it'];
     
-    // Industrial Re-routing: Preserve the internal path while shifting the locale tunnel
     if (pathSegments[1] && localesList.includes(pathSegments[1])) {
       pathSegments[1] = newLocale;
       router.push(pathSegments.join('/'));
@@ -67,10 +63,6 @@ export function LanguageProvider({ children, initialLocale }: { children: ReactN
     }
   };
 
-  /**
-   * Industrial Translation Hook
-   * Traverses the global state registry to retrieve localized strings.
-   */
   const t = (key: string): string => {
     const keys = key.split('.');
     let result = translations[locale] || translations['en'];
@@ -79,7 +71,6 @@ export function LanguageProvider({ children, initialLocale }: { children: ReactN
       if (result && result[k]) {
         result = result[k];
       } else {
-        // Registry Fallback: Recover from master English registry
         let engFallback = translations['en'];
         for (const ek of keys) {
           engFallback = engFallback?.[ek];
