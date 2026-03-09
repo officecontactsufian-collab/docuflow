@@ -12,6 +12,7 @@ import PptxGenJS from 'pptxgenjs';
 
 /**
  * @fileOverview DOCFLOW Industrial Transformation Actions (Localized)
+ * Executes high-fidelity document reconstruction on the backend.
  */
 
 type ConversionType = 
@@ -72,6 +73,44 @@ export async function executeConversionAction(
         break;
       }
 
+      case 'jpg-to-pdf': {
+        const pdfDoc = await PDFDocument.create();
+        const image = await pdfDoc.embedJpg(buffer);
+        const page = pdfDoc.addPage([image.width, image.height]);
+        page.drawImage(image, { x: 0, y: 0, width: image.width, height: image.height });
+        resultBuffer = Buffer.from(await pdfDoc.save());
+        break;
+      }
+
+      case 'ppt-to-pdf': {
+        const zip = await JSZip.loadAsync(buffer);
+        const slideFiles = Object.keys(zip.files).filter(name => name.startsWith('ppt/slides/slide') && name.endsWith('.xml')).sort();
+        const pdfDoc = await PDFDocument.create();
+        const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
+        
+        for (const slideFile of slideFiles) {
+          const content = await zip.file(slideFile)?.async('text');
+          if (content) {
+            const textMatches = content.match(/<a:t>([^<]+)<\/a:t>/g);
+            const slideText = textMatches ? textMatches.map(m => m.replace(/<a:t>|<\/a:t>/g, '')).join(' ') : 'Empty Slide';
+            const page = pdfDoc.addPage([842, 595]);
+            page.drawText(sanitizeText(slideText.substring(0, 2000)), { x: 50, y: 500, size: 12, font, maxWidth: 742 });
+          }
+        }
+        resultBuffer = Buffer.from(await pdfDoc.save());
+        break;
+      }
+
+      case 'html-to-pdf': {
+        const text = htmlToText(buffer.toString('utf-8'));
+        const pdfDoc = await PDFDocument.create();
+        const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
+        const page = pdfDoc.addPage([595, 842]);
+        page.drawText(sanitizeText(text.substring(0, 2000)), { x: 50, y: 800, size: 10, font, maxWidth: 495 });
+        resultBuffer = Buffer.from(await pdfDoc.save());
+        break;
+      }
+
       case 'pdf-to-jpg': {
         const pdfDoc = await PDFDocument.load(buffer, { ignoreEncryption: true });
         const totalPageCount = pdfDoc.getPageCount();
@@ -114,6 +153,19 @@ export async function executeConversionAction(
         XLSX.utils.book_append_sheet(wb, ws, "Data");
         resultBuffer = XLSX.write(wb, { type: 'buffer', bookType: 'csv' });
         mimeType = 'text/csv';
+        break;
+      }
+
+      case 'pdf-to-ppt': {
+        const data = await pdfParse(buffer);
+        const pptx = new PptxGenJS();
+        const lines = data.text.split('\n');
+        for (let i = 0; i < lines.length; i += 20) {
+          const slide = pptx.addSlide();
+          slide.addText(sanitizeText(lines.slice(i, i + 20).join('\n')), { x: 0.5, y: 0.5, w: '90%', h: '90%', fontSize: 12 });
+        }
+        resultBuffer = await pptx.write('nodebuffer') as Buffer;
+        mimeType = 'application/vnd.openxmlformats-officedocument.presentationml.presentation';
         break;
       }
 
