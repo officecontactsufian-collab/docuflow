@@ -1,4 +1,3 @@
-
 "use client"
 
 import * as React from 'react';
@@ -53,6 +52,9 @@ export default function LoginPage() {
       toast({ title: "Identity Verified", description: "Google authentication successful." });
       router.push('/dashboard');
     } catch (error: any) {
+      if (error.code === 'auth/popup-closed-by-user') {
+        return; // Silent cancellation
+      }
       toast({ variant: "destructive", title: "Protocol Error", description: "Google sign-in sequence interrupted." });
     } finally {
       setIsLoading(false);

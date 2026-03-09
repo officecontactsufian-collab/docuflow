@@ -72,6 +72,11 @@ export default function SignupPage() {
       toast({ title: "Identity Federated", description: "Account created via Google tunnel." });
       router.push(`/${locale}/dashboard`);
     } catch (error: any) {
+      // User closed the popup manually - handle silently
+      if (error.code === 'auth/popup-closed-by-user') {
+        return;
+      }
+
       console.error('Google Signup Error:', error);
       toast({ 
         variant: "destructive", 

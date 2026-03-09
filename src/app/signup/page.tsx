@@ -1,4 +1,3 @@
-
 "use client"
 
 import * as React from 'react';
@@ -69,6 +68,9 @@ export default function SignupPage() {
       toast({ title: "Identity Federated", description: "Account created via Google tunnel." });
       router.push('/dashboard');
     } catch (error: any) {
+      if (error.code === 'auth/popup-closed-by-user') {
+        return; // Silent cancellation
+      }
       toast({ variant: "destructive", title: "Protocol Error", description: "Google onboarding sequence interrupted." });
     } finally {
       setIsLoading(false);

@@ -56,6 +56,11 @@ export default function LoginPage() {
       toast({ title: "Identity Verified", description: "Google authentication successful." });
       router.push(`/${locale}/dashboard`);
     } catch (error: any) {
+      // User closed the popup manually - handle silently
+      if (error.code === 'auth/popup-closed-by-user') {
+        return;
+      }
+      
       console.error('Google Sign-In Error:', error);
       toast({ 
         variant: "destructive", 
