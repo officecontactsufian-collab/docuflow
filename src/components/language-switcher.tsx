@@ -1,4 +1,3 @@
-
 "use client"
 
 import * as React from 'react';
@@ -33,7 +32,7 @@ export function LanguageSwitcher() {
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger asChild>
+      <DropdownMenuTrigger suppressHydrationWarning asChild>
         <Button variant="ghost" size="sm" className="h-8 rounded-lg gap-2 text-[10px] font-black uppercase tracking-widest hover:bg-primary/5 transition-all">
           <Languages className="h-4 w-4 text-primary" />
           <span className="hidden md:inline">{currentLang.label}</span>
