@@ -1,7 +1,7 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect, ReactNode, useMemo } from 'react';
-import { useParams, useRouter, usePathname } from 'next/navigation';
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { useRouter, usePathname } from 'next/navigation';
 import en from '@/locales/en.json';
 import fr from '@/locales/fr.json';
 import es from '@/locales/es.json';
@@ -30,6 +30,14 @@ export function LanguageProvider({ children, initialLocale }: { children: ReactN
   const pathname = usePathname();
   const [locale, setLocaleState] = useState<Locale>(initialLocale);
 
+  // Sync HTML attributes with current locale
+  useEffect(() => {
+    if (typeof document !== 'undefined') {
+      document.documentElement.lang = locale;
+      document.documentElement.dir = locale === 'ar' ? 'rtl' : 'ltr';
+    }
+  }, [locale]);
+
   // Sync state if initialLocale changes (e.g. on navigation)
   useEffect(() => {
     if (initialLocale && initialLocale !== locale) {
@@ -45,11 +53,16 @@ export function LanguageProvider({ children, initialLocale }: { children: ReactN
     
     // Redirect if currently in a localized path to maintain URL consistency
     const pathSegments = pathname.split('/');
-    if (pathSegments[1] && translations[pathSegments[1] as Locale]) {
+    // Segments: ["", "en", "login"]
+    if (pathSegments[1] && localesList.includes(pathSegments[1])) {
       pathSegments[1] = newLocale;
       router.push(pathSegments.join('/'));
+    } else {
+      router.push(`/${newLocale}`);
     }
   };
+
+  const localesList = ['en', 'fr', 'es', 'ar', 'zh', 'de', 'ja', 'pt', 'ru', 'it'];
 
   const t = (key: string): string => {
     const keys = key.split('.');

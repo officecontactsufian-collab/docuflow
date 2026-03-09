@@ -58,12 +58,17 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  // The html and body tags are managed by the localized layout [locale]/layout.tsx
-  // This root layout serves as a passthrough for global providers and metadata.
   return (
-    <>
-      {children}
-      <Toaster />
-    </>
+    <html lang="en" suppressHydrationWarning>
+      <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Dancing+Script:wght@400;700&family=Pacifico&family=Caveat:wght@400;700&display=swap" rel="stylesheet" />
+      </head>
+      <body className="font-body antialiased min-h-screen bg-background selection:bg-primary/20">
+        {children}
+        <Toaster />
+      </body>
+    </html>
   );
 }
