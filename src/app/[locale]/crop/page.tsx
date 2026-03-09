@@ -1,3 +1,4 @@
+
 "use client"
 
 import * as React from 'react';
@@ -14,11 +15,12 @@ import {
   ChevronRight,
   Layers,
   Settings2,
-  Scan,
+  Maximize,
   FileType,
   AlertCircle,
   RefreshCcw,
-  Copy
+  Copy,
+  Scan
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -235,7 +237,7 @@ export default function CropPage() {
                       </CardHeader>
                       <CardContent className="p-0 space-y-8">
                         <Button onClick={handleCrop} disabled={isProcessing} className="w-full h-16 rounded-2xl bg-accent text-white font-black uppercase tracking-widest text-[11px] shadow-2xl">
-                          {isProcessing ? <Loader2 className="animate-spin" /> : <Scan className="mr-2 h-4 w-4" />}
+                          {isProcessing ? <Loader2 className="animate-spin" /> : <Maximize className="mr-2 h-4 w-4" />}
                           Deploy extraction
                         </Button>
                         <Button variant="ghost" onClick={() => setSelectedFile(null)} className="w-full text-[10px] font-bold uppercase tracking-widest text-accent/40">Discard Document</Button>
