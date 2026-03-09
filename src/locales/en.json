@@ -17,8 +17,35 @@
     "security": "Security & Trust",
     "ai_studio": "AI Studio"
   },
+  "home": {
+    "hero": {
+      "badge": "Generative Document Intelligence",
+      "title_line1": "Intelligent",
+      "title_line2": "Document",
+      "title_line3": "Flow.",
+      "subtitle": "High-performance document intelligence for professionals. AI-powered, private, and processed entirely within secure tunnels.",
+      "cta": "Explore Core Protocols"
+    },
+    "categories": {
+      "label_prefix": "Protocol",
+      "ai_business": "AI Discovery & Business",
+      "ai_business_desc": "Identify markets, evaluate decisions, and synthesize knowledge.",
+      "ai_learning": "AI Learning & Life",
+      "ai_learning_desc": "Temporal simulations and structured learning protocols.",
+      "ai_writing": "AI Writing & Content",
+      "ai_writing_desc": "Generative protocols for structural content evolution.",
+      "asset_intel": "Asset Intelligence",
+      "asset_intel_desc": "Industrial efficiency and document interrogation.",
+      "modify": "Modify & Capture",
+      "modify_desc": "Direct page and structural modifications.",
+      "convert": "Convert & Export",
+      "convert_desc": "Lossless transformation between formats.",
+      "security": "Security & Privacy",
+      "security_desc": "Hardened metadata stripping and protection."
+    }
+  },
   "tools": {
-    "paraphraser": { "title": "Paraphraser", "desc": "Re-engineer text." },
+    "paraphraser": { "title": "Paraphraser", "desc": "Re-engineer text structure." },
     "summarizer": { "title": "AI Summarizer", "desc": "Executive distillation." },
     "grammar": { "title": "Grammar Check", "desc": "Industrial proofing." },
     "essay": { "title": "Essay Writer", "desc": "Structured drafts." },
@@ -41,6 +68,18 @@
     "protect": { "title": "Password Protect", "desc": "Encrypt PDF." },
     "privacy": { "title": "Privacy Shield", "desc": "Metadata erasure." },
     "unlock": { "title": "Unlock PDF", "desc": "Strip restrictions." },
-    "sanitize": { "title": "Sanitize Asset", "desc": "Deep cleaning." }
+    "sanitize": { "title": "Sanitize Asset", "desc": "Deep cleaning." },
+    "niche_finder": { "title": "Niche Finder", "desc": "Identify profitable markets." },
+    "decision_helper": { "title": "Decision Helper", "desc": "Structured logic analysis." },
+    "reality_check": { "title": "Reality Check", "desc": "Brutal project viability." },
+    "life_simulator": { "title": "Life Simulator", "desc": "Future path projections." },
+    "skill_generator": { "title": "Skill Generator", "desc": "30-day mastery curriculum." },
+    "personal_brain": { "title": "Personal Brain", "desc": "Cognitive knowledge map." },
+    "prompt_improver": { "title": "Prompt Improver", "desc": "Optimize AI input payload." },
+    "humanizer": { "title": "AI Humanizer", "desc": "Natural synthesis of AI text." },
+    "repurposer": { "title": "Content Repurposer", "desc": "Viral stream synthesis." },
+    "repair": { "title": "Repair PDF", "desc": "Rebuild broken object catalogs." },
+    "doc_intel": { "title": "Doc Intel", "desc": "Deep asset interrogation." },
+    "split": { "title": "Split PDF", "desc": "Extract specific page ranges." }
   }
 }
