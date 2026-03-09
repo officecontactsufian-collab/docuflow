@@ -1,4 +1,3 @@
-
 "use client"
 
 import * as React from 'react';
@@ -42,21 +41,35 @@ export default function LoginPage() {
 
   const executeRecaptcha = async (action: string): Promise<string | null> => {
     return new Promise((resolve) => {
-      if (typeof window === 'undefined' || !window.grecaptcha) {
+      const siteKey = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY;
+      
+      if (!siteKey) {
+        console.warn('reCAPTCHA site key is missing. Initializing in sandbox mode.');
         resolve(null);
         return;
       }
+
+      if (typeof window === 'undefined' || !window.grecaptcha) {
+        console.warn('reCAPTCHA registry not found in window buffer.');
+        resolve(null);
+        return;
+      }
+
       window.grecaptcha.ready(() => {
         window.grecaptcha
-          .execute(process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY, { action })
-          .then((token: string) => resolve(token));
+          .execute(siteKey, { action })
+          .then((token: string) => resolve(token))
+          .catch((err: any) => {
+            console.error('reCAPTCHA Synthesis Failure:', err);
+            resolve(null);
+          });
       });
     });
   };
 
   const verifyHumanity = async (action: string) => {
     const token = await executeRecaptcha(action);
-    if (!token) return true; // Fallback if keys not configured
+    if (!token) return true; // Fallback for missing keys in dev environment
     return await verifyRecaptcha(token);
   };
 
@@ -94,7 +107,10 @@ export default function LoginPage() {
       toast({ title: "Identity Verified", description: "Google authentication successful." });
       router.push(`/${locale}/dashboard`);
     } catch (error: any) {
-      if (error.code === 'auth/popup-closed-by-user') return;
+      if (error.code === 'auth/popup-closed-by-user') {
+        setIsLoading(false);
+        return;
+      }
       toast({ 
         variant: "destructive", 
         title: "Protocol Error", 
@@ -113,12 +129,16 @@ export default function LoginPage() {
     );
   }
 
+  const siteKey = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY;
+
   return (
     <div className="flex min-h-screen flex-col bg-muted/20">
-      <Script 
-        src={`https://www.google.com/recaptcha/api.js?render=${process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY}`}
-        strategy="afterInteractive"
-      />
+      {siteKey && (
+        <Script 
+          src={`https://www.google.com/recaptcha/api.js?render=${siteKey}`}
+          strategy="afterInteractive"
+        />
+      )}
       <Navbar />
       <main className="flex-1 flex items-center justify-center p-4 py-12">
         <div className="w-full max-w-md space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
