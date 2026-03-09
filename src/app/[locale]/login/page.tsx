@@ -1,3 +1,4 @@
+
 "use client"
 
 import * as React from 'react';
@@ -9,9 +10,17 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAuth, useUser } from '@/firebase';
 import { signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
-import { Loader2, Lock, Mail, Chrome, ArrowRight, AlertCircle } from 'lucide-react';
+import { Loader2, Lock, Mail, Chrome, ArrowRight, ShieldCheck } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import Link from 'next/link';
+import Script from 'next/script';
+import { verifyRecaptcha } from '../auth-actions';
+
+declare global {
+  interface Window {
+    grecaptcha: any;
+  }
+}
 
 export default function LoginPage() {
   const router = useRouter();
@@ -31,10 +40,35 @@ export default function LoginPage() {
     }
   }, [user, isUserLoading, router, locale]);
 
+  const executeRecaptcha = async (action: string): Promise<string | null> => {
+    return new Promise((resolve) => {
+      if (typeof window === 'undefined' || !window.grecaptcha) {
+        resolve(null);
+        return;
+      }
+      window.grecaptcha.ready(() => {
+        window.grecaptcha
+          .execute(process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY, { action })
+          .then((token: string) => resolve(token));
+      });
+    });
+  };
+
+  const verifyHumanity = async (action: string) => {
+    const token = await executeRecaptcha(action);
+    if (!token) return true; // Fallback if keys not configured
+    return await verifyRecaptcha(token);
+  };
+
   const handleEmailLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     try {
+      const isHuman = await verifyHumanity('login_email');
+      if (!isHuman) {
+        throw new Error("Security verification failed. High risk activity detected.");
+      }
+
       await signInWithEmailAndPassword(auth, email, password);
       toast({ title: "Session Initialized", description: "Welcome back to DOCFLOW Professional." });
       router.push(`/${locale}/dashboard`);
@@ -48,26 +82,23 @@ export default function LoginPage() {
   const handleGoogleLogin = async () => {
     setIsLoading(true);
     const provider = new GoogleAuthProvider();
-    // Industrial Hardening: Ensure proper popup behavior
     provider.setCustomParameters({ prompt: 'select_account' });
     
     try {
+      const isHuman = await verifyHumanity('login_google');
+      if (!isHuman) {
+        throw new Error("Security verification failed. High risk activity detected.");
+      }
+
       await signInWithPopup(auth, provider);
       toast({ title: "Identity Verified", description: "Google authentication successful." });
       router.push(`/${locale}/dashboard`);
     } catch (error: any) {
-      // User closed the popup manually - handle silently
-      if (error.code === 'auth/popup-closed-by-user') {
-        return;
-      }
-      
-      console.error('Google Sign-In Error:', error);
+      if (error.code === 'auth/popup-closed-by-user') return;
       toast({ 
         variant: "destructive", 
         title: "Protocol Error", 
-        description: error.code === 'auth/popup-blocked' 
-          ? "Identity popup blocked by browser. Please enable popups." 
-          : error.message || "Google sign-in sequence interrupted." 
+        description: error.message || "Google sign-in sequence interrupted." 
       });
     } finally {
       setIsLoading(false);
@@ -84,6 +115,10 @@ export default function LoginPage() {
 
   return (
     <div className="flex min-h-screen flex-col bg-muted/20">
+      <Script 
+        src={`https://www.google.com/recaptcha/api.js?render=${process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY}`}
+        strategy="afterInteractive"
+      />
       <Navbar />
       <main className="flex-1 flex items-center justify-center p-4 py-12">
         <div className="w-full max-w-md space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
@@ -145,6 +180,12 @@ export default function LoginPage() {
               </CardFooter>
             </form>
           </Card>
+          
+          <div className="text-center">
+             <p className="text-[8px] font-bold text-accent/20 uppercase tracking-[0.2em] max-w-[240px] mx-auto leading-relaxed">
+               Protected by reCAPTCHA v3. Google <Link href="/privacy" className="underline">Privacy</Link> and <Link href="/terms" className="underline">Terms</Link> apply.
+             </p>
+          </div>
         </div>
       </main>
     </div>

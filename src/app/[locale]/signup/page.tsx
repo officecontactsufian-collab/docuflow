@@ -1,3 +1,4 @@
+
 "use client"
 
 import * as React from 'react';
@@ -13,6 +14,8 @@ import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { Loader2, UserPlus, Mail, Lock, Chrome, ArrowRight, ShieldCheck } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import Link from 'next/link';
+import Script from 'next/script';
+import { verifyRecaptcha } from '../auth-actions';
 
 export default function SignupPage() {
   const router = useRouter();
@@ -45,10 +48,35 @@ export default function SignupPage() {
     }, { merge: true });
   };
 
+  const executeRecaptcha = async (action: string): Promise<string | null> => {
+    return new Promise((resolve) => {
+      if (typeof window === 'undefined' || !window.grecaptcha) {
+        resolve(null);
+        return;
+      }
+      window.grecaptcha.ready(() => {
+        window.grecaptcha
+          .execute(process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY, { action })
+          .then((token: string) => resolve(token));
+      });
+    });
+  };
+
+  const verifyHumanity = async (action: string) => {
+    const token = await executeRecaptcha(action);
+    if (!token) return true;
+    return await verifyRecaptcha(token);
+  };
+
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     try {
+      const isHuman = await verifyHumanity('signup_email');
+      if (!isHuman) {
+        throw new Error("Security verification failed. High risk activity detected.");
+      }
+
       const cred = await createUserWithEmailAndPassword(auth, email, password);
       await updateProfile(cred.user, { displayName: name });
       await syncUserProfile(cred.user.uid, email, name);
@@ -67,23 +95,21 @@ export default function SignupPage() {
     provider.setCustomParameters({ prompt: 'select_account' });
 
     try {
+      const isHuman = await verifyHumanity('signup_google');
+      if (!isHuman) {
+        throw new Error("Security verification failed. High risk activity detected.");
+      }
+
       const cred = await signInWithPopup(auth, provider);
       await syncUserProfile(cred.user.uid, cred.user.email!, cred.user.displayName!);
       toast({ title: "Identity Federated", description: "Account created via Google tunnel." });
       router.push(`/${locale}/dashboard`);
     } catch (error: any) {
-      // User closed the popup manually - handle silently
-      if (error.code === 'auth/popup-closed-by-user') {
-        return;
-      }
-
-      console.error('Google Signup Error:', error);
+      if (error.code === 'auth/popup-closed-by-user') return;
       toast({ 
         variant: "destructive", 
         title: "Protocol Error", 
-        description: error.code === 'auth/popup-blocked' 
-          ? "Identity popup blocked by browser. Please enable popups." 
-          : error.message || "Google onboarding sequence interrupted." 
+        description: error.message || "Google onboarding sequence interrupted." 
       });
     } finally {
       setIsLoading(false);
@@ -100,6 +126,10 @@ export default function SignupPage() {
 
   return (
     <div className="flex min-h-screen flex-col bg-muted/20">
+      <Script 
+        src={`https://www.google.com/recaptcha/api.js?render=${process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY}`}
+        strategy="afterInteractive"
+      />
       <Navbar />
       <main className="flex-1 flex items-center justify-center p-4 py-12">
         <div className="w-full max-w-md space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
@@ -163,6 +193,12 @@ export default function SignupPage() {
               </CardFooter>
             </form>
           </Card>
+          
+          <div className="text-center">
+             <p className="text-[8px] font-bold text-accent/20 uppercase tracking-[0.2em] max-w-[240px] mx-auto leading-relaxed">
+               Protected by reCAPTCHA v3. Google <Link href="/privacy" className="underline">Privacy</Link> and <Link href="/terms" className="underline">Terms</Link> apply.
+             </p>
+          </div>
         </div>
       </main>
     </div>
