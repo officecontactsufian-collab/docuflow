@@ -1,4 +1,3 @@
-
 "use client"
 
 import * as React from 'react';
@@ -33,7 +32,6 @@ export default function DashboardPage() {
   const [profile, setProfile] = React.useState<any>(null);
   const [isProfileLoading, setIsProfileLoading] = React.useState(true);
 
-  // usageLogs registry
   const logsQuery = useMemoFirebase(() => {
     if (!firestore || !user) return null;
     return query(collection(firestore, 'users', user.uid, 'usageLogs'), orderBy('requestTimestamp', 'desc'), limit(20));
