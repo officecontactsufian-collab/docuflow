@@ -11,22 +11,15 @@ import {
   Loader2, 
   Copy, 
   Share2, 
-  Twitter, 
-  Linkedin, 
-  Facebook, 
-  MessageCircle,
   BrainCircuit,
-  ShieldCheck,
-  ChevronRight,
   Zap
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { executePromptImprovementAction } from './actions';
 import { useUser, useAuth, useFirestore, addDocumentNonBlocking, setDocumentNonBlocking } from '@/firebase';
 import { signInAnonymously } from 'firebase/auth';
-import { collection, query, where, getDocs, limit, serverTimestamp, doc, orderBy, Timestamp } from 'firebase/firestore';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from '@/components/ui/dialog';
-import { cn } from '@/lib/utils';
+import { collection, query, getDocs, limit, serverTimestamp, doc, orderBy, Timestamp } from 'firebase/firestore';
+import { ShareDialog } from '@/components/share-dialog';
 
 export default function PromptImproverPage() {
   const { user, isUserLoading } = useUser();
@@ -100,15 +93,15 @@ export default function PromptImproverPage() {
         isPubliclyShareable: true
       }, { merge: true });
       setShareSlug(slug);
-      toast({ title: "Shared", description: "Public URL generated." });
-    } catch (e: any) {
-      toast({ variant: "destructive", title: "Sharing Failed", description: e.message });
     } finally {
       setIsSharing(false);
     }
   };
 
-  const shareUrl = shareSlug ? `${window.location.origin}/share/${shareSlug}` : '';
+  const getShareUrl = () => {
+    if (typeof window === 'undefined' || !shareSlug) return '';
+    return `${window.location.origin}/share/${shareSlug}`;
+  };
 
   return (
     <div className="flex min-h-screen flex-col bg-[#F9FAFB]">
@@ -157,33 +150,22 @@ export default function PromptImproverPage() {
                     <Button variant="ghost" size="icon" onClick={() => navigator.clipboard.writeText(result.improvedPrompt)} className="text-white/40 hover:text-white">
                       <Copy className="h-4 w-4" />
                     </Button>
-                    <Dialog>
-                      <DialogTrigger asChild>
-                        <Button variant="ghost" size="icon" onClick={handleShare} className="text-white/40 hover:text-white">
-                          <Share2 className="h-4 w-4" />
+                    
+                    <ShareDialog 
+                      url={shareSlug ? getShareUrl() : undefined}
+                      title="Optimized Prompt Published"
+                      description="Industrial viral distribution protocol."
+                      trigger={
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          onClick={() => !shareSlug && handleShare()} 
+                          className="text-white/40 hover:text-white"
+                        >
+                          {isSharing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Share2 className="h-4 w-4" />}
                         </Button>
-                      </DialogTrigger>
-                      <DialogContent className="rounded-[2rem] bg-white border-none shadow-2xl p-8 max-w-sm">
-                        <DialogHeader>
-                          <DialogTitle className="text-2xl font-black uppercase italic text-accent">Viral Sharing</DialogTitle>
-                          <DialogDescription className="text-[10px] font-bold uppercase text-accent/40">Distribute this protocol result</DialogDescription>
-                        </DialogHeader>
-                        {isSharing ? (
-                          <div className="py-12 flex justify-center"><Loader2 className="animate-spin h-8 w-8 text-primary" /></div>
-                        ) : (
-                          <div className="space-y-6 pt-6">
-                            <div className="flex justify-center gap-4">
-                              <a href={`https://twitter.com/intent/tweet?url=${shareUrl}`} target="_blank" className="h-12 w-12 rounded-xl bg-[#1DA1F2] flex items-center justify-center text-white shadow-lg"><Twitter className="h-5 w-5" /></a>
-                              <a href={`https://www.linkedin.com/sharing/share-offsite/?url=${shareUrl}`} target="_blank" className="h-12 w-12 rounded-xl bg-[#0077B5] flex items-center justify-center text-white shadow-lg"><Linkedin className="h-5 w-5" /></a>
-                              <a href={`https://wa.me/?text=${shareUrl}`} target="_blank" className="h-12 w-12 rounded-xl bg-[#25D366] flex items-center justify-center text-white shadow-lg"><MessageCircle className="h-5 w-5" /></a>
-                            </div>
-                            <div className="p-3 bg-muted/30 rounded-xl border border-accent/5 text-center">
-                              <p className="text-[9px] font-black text-accent truncate">{shareUrl}</p>
-                            </div>
-                          </div>
-                        )}
-                      </DialogContent>
-                    </Dialog>
+                      }
+                    />
                   </div>
                 </CardHeader>
                 <CardContent className="p-10 pt-4 space-y-8">

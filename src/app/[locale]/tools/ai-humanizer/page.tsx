@@ -3,7 +3,7 @@
 import * as React from 'react';
 import { Navbar } from '@/components/navbar';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { 
@@ -11,19 +11,14 @@ import {
   Loader2, 
   Copy, 
   Share2, 
-  BrainCircuit,
-  ShieldCheck,
-  Zap,
-  Twitter,
-  Linkedin,
-  MessageCircle
+  Zap
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { executeHumanizerAction } from './actions';
 import { useUser, useAuth, useFirestore, addDocumentNonBlocking, setDocumentNonBlocking } from '@/firebase';
 import { signInAnonymously } from 'firebase/auth';
-import { collection, query, where, getDocs, limit, serverTimestamp, doc, orderBy, Timestamp } from 'firebase/firestore';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from '@/components/ui/dialog';
+import { collection, query, getDocs, limit, serverTimestamp, doc, orderBy, Timestamp } from 'firebase/firestore';
+import { ShareDialog } from '@/components/share-dialog';
 
 export default function AIHumanizerPage() {
   const { user, isUserLoading } = useUser();
@@ -101,7 +96,10 @@ export default function AIHumanizerPage() {
     }
   };
 
-  const shareUrl = shareSlug ? `${window.location.origin}/share/${shareSlug}` : '';
+  const getShareUrl = () => {
+    if (typeof window === 'undefined' || !shareSlug) return '';
+    return `${window.location.origin}/share/${shareSlug}`;
+  };
 
   return (
     <div className="flex min-h-screen flex-col bg-background">
@@ -140,22 +138,21 @@ export default function AIHumanizerPage() {
                   <p className="text-[10px] font-black uppercase text-accent/40 tracking-widest">Humanized Output</p>
                   <div className="flex gap-2">
                     <Button variant="ghost" size="icon" onClick={() => navigator.clipboard.writeText(result.humanizedText)}><Copy className="h-4 w-4"/></Button>
-                    <Dialog>
-                      <DialogTrigger asChild>
-                        <Button variant="ghost" size="icon" onClick={handleShare}><Share2 className="h-4 w-4"/></Button>
-                      </DialogTrigger>
-                      <DialogContent className="rounded-[2rem] p-8 max-w-sm">
-                        <DialogHeader>
-                          <DialogTitle className="text-xl font-black uppercase italic">Share Result</DialogTitle>
-                        </DialogHeader>
-                        {isSharing ? <Loader2 className="animate-spin mx-auto"/> : (
-                          <div className="flex justify-center gap-4 pt-6">
-                            <a href={`https://twitter.com/intent/tweet?url=${shareUrl}`} className="h-12 w-12 rounded-xl bg-accent flex items-center justify-center text-white shadow-lg"><Twitter className="h-5 w-5"/></a>
-                            <a href={`https://wa.me/?text=${shareUrl}`} className="h-12 w-12 rounded-xl bg-accent flex items-center justify-center text-white shadow-lg"><MessageCircle className="h-5 w-5"/></a>
-                          </div>
-                        )}
-                      </DialogContent>
-                    </Dialog>
+                    
+                    <ShareDialog 
+                      url={shareSlug ? getShareUrl() : undefined}
+                      title="Humanized Output Published"
+                      description="Industrial viral distribution protocol."
+                      trigger={
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          onClick={() => !shareSlug && handleShare()}
+                        >
+                          {isSharing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Share2 className="h-4 w-4" />}
+                        </Button>
+                      }
+                    />
                   </div>
                 </div>
                 <div className="text-lg font-medium leading-relaxed text-accent/80 whitespace-pre-wrap">

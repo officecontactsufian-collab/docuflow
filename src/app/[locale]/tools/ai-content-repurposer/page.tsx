@@ -3,29 +3,26 @@
 import * as React from 'react';
 import { Navbar } from '@/components/navbar';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { 
-  RefreshCcw, 
   Loader2, 
-  Copy, 
-  Share2, 
   Zap,
   Twitter,
   Linkedin,
-  MessageCircle,
   FileText,
   Video,
-  Hash
+  Hash,
+  Share2
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { executeRepurposerAction } from './actions';
 import { useUser, useAuth, useFirestore, addDocumentNonBlocking, setDocumentNonBlocking } from '@/firebase';
 import { signInAnonymously } from 'firebase/auth';
-import { collection, query, where, getDocs, limit, serverTimestamp, doc, orderBy, Timestamp } from 'firebase/firestore';
+import { collection, query, getDocs, limit, serverTimestamp, doc, orderBy, Timestamp } from 'firebase/firestore';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { ShareDialog } from '@/components/share-dialog';
 
 export default function ContentRepurposerPage() {
   const { user } = useUser();
@@ -103,7 +100,10 @@ export default function ContentRepurposerPage() {
     }
   };
 
-  const shareUrl = shareSlug ? `${window.location.origin}/share/${shareSlug}` : '';
+  const getShareUrl = () => {
+    if (typeof window === 'undefined' || !shareSlug) return '';
+    return `${window.location.origin}/share/${shareSlug}`;
+  };
 
   return (
     <div className="flex min-h-screen flex-col bg-muted/20">
@@ -136,24 +136,23 @@ export default function ContentRepurposerPage() {
               <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-700">
                 <div className="flex items-center justify-between px-4">
                   <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-accent/40">Synthesis Layers</h3>
-                  <Dialog>
-                    <DialogTrigger asChild>
-                      <Button variant="ghost" onClick={handleShare} size="sm" className="text-[9px] font-black uppercase text-primary">
-                        <Share2 className="h-3 w-3 mr-2" /> Viral Distribution
+                  
+                  <ShareDialog 
+                    url={shareSlug ? getShareUrl() : undefined}
+                    title="Share Repurposed Content"
+                    description="Industrial viral distribution protocol."
+                    trigger={
+                      <Button 
+                        variant="ghost" 
+                        onClick={() => !shareSlug && handleShare()} 
+                        size="sm" 
+                        className="text-[9px] font-black uppercase text-primary"
+                      >
+                        {isSharing ? <Loader2 className="h-3 w-3 animate-spin mr-2" /> : <Share2 className="h-3 w-3 mr-2" />} 
+                        Viral Distribution
                       </Button>
-                    </DialogTrigger>
-                    <DialogContent className="rounded-[2rem] p-8 max-w-sm">
-                      {isSharing ? <Loader2 className="animate-spin mx-auto"/> : (
-                        <div className="space-y-6 pt-6 flex flex-col items-center">
-                          <div className="flex gap-4">
-                            <a href={`https://wa.me/?text=${shareUrl}`} className="h-12 w-12 rounded-xl bg-accent flex items-center justify-center text-white shadow-lg"><MessageCircle className="h-5 w-5"/></a>
-                            <a href={`https://twitter.com/intent/tweet?url=${shareUrl}`} className="h-12 w-12 rounded-xl bg-accent flex items-center justify-center text-white shadow-lg"><Twitter className="h-5 w-5"/></a>
-                          </div>
-                          <p className="text-[9px] font-bold truncate opacity-40">{shareUrl}</p>
-                        </div>
-                      )}
-                    </DialogContent>
-                  </Dialog>
+                    }
+                  />
                 </div>
 
                 <Tabs defaultValue="x" className="w-full space-y-6">

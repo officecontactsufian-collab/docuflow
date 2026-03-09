@@ -3,31 +3,24 @@
 import * as React from 'react';
 import { Navbar } from '@/components/navbar';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { 
   Target, 
   Loader2, 
   Share2, 
-  Zap,
   AlertCircle,
   Activity,
   TrendingUp,
-  Scale,
-  BrainCircuit,
-  ShieldAlert,
-  Twitter,
-  Linkedin,
-  MessageCircle,
-  X
+  Zap
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { executeRealityCheckAction } from './actions';
 import { useUser, useAuth, useFirestore, addDocumentNonBlocking, setDocumentNonBlocking } from '@/firebase';
 import { signInAnonymously } from 'firebase/auth';
 import { collection, serverTimestamp, doc, query, limit, getDocs, orderBy, Timestamp } from 'firebase/firestore';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { ShareDialog } from '@/components/share-dialog';
 import { cn } from '@/lib/utils';
 
 export default function RealityCheckPage() {
@@ -106,7 +99,10 @@ export default function RealityCheckPage() {
     }
   };
 
-  const shareUrl = shareSlug ? `${window.location.origin}/share/${shareSlug}` : '';
+  const getShareUrl = () => {
+    if (typeof window === 'undefined' || !shareSlug) return '';
+    return `${window.location.origin}/share/${shareSlug}`;
+  };
 
   return (
     <div className="flex min-h-screen flex-col bg-background">
@@ -129,7 +125,7 @@ export default function RealityCheckPage() {
                   className="min-h-[250px] bg-muted/20 border-accent/10 rounded-2xl font-bold text-accent"
                 />
                 <Button onClick={handleCheck} disabled={isProcessing || !input.trim()} className="w-full h-16 rounded-2xl bg-accent text-white font-black uppercase tracking-widest text-[11px] shadow-2xl">
-                  {isProcessing ? <Loader2 className="animate-spin" /> : <ShieldAlert className="mr-2 h-4 w-4" />}
+                  {isProcessing ? <Loader2 className="animate-spin" /> : <AlertCircle className="mr-2 h-4 w-4" />}
                   Execute Brutal Analysis
                 </Button>
               </CardContent>
@@ -167,24 +163,17 @@ export default function RealityCheckPage() {
                    ))}
                 </div>
 
-                <Dialog>
-                  <DialogTrigger asChild>
-                    <Button onClick={handleShare} variant="outline" className="w-full h-14 rounded-2xl border-accent/10 font-black uppercase text-[10px] tracking-widest">
-                      <Share2 className="h-4 w-4 mr-2" /> Share Brutal Analysis
+                <ShareDialog 
+                  url={shareSlug ? getShareUrl() : undefined}
+                  title="Brutal Analysis Published"
+                  description="Industrial viral distribution protocol."
+                  trigger={
+                    <Button onClick={() => !shareSlug && handleShare()} variant="outline" className="w-full h-14 rounded-2xl border-accent/10 font-black uppercase text-[10px] tracking-widest">
+                      {isSharing ? <Loader2 className="h-3 w-3 animate-spin mr-2" /> : <Share2 className="h-4 w-4 mr-2" />} 
+                      Share Brutal Analysis
                     </Button>
-                  </DialogTrigger>
-                  <DialogContent className="rounded-[2rem] p-8 max-w-sm">
-                    {isSharing ? <Loader2 className="animate-spin mx-auto"/> : (
-                      <div className="space-y-6 pt-6 flex flex-col items-center">
-                        <div className="flex gap-4">
-                          <a href={`https://twitter.com/intent/tweet?url=${shareUrl}`} className="h-12 w-12 rounded-xl bg-accent flex items-center justify-center text-white shadow-lg"><Twitter className="h-5 w-5"/></a>
-                          <a href={`https://wa.me/?text=${shareUrl}`} className="h-12 w-12 rounded-xl bg-accent flex items-center justify-center text-white shadow-lg"><MessageCircle className="h-5 w-5"/></a>
-                        </div>
-                        <p className="text-[9px] font-bold truncate opacity-40">{shareUrl}</p>
-                      </div>
-                    )}
-                  </DialogContent>
-                </Dialog>
+                  }
+                />
               </div>
             ) : (
               <div className="h-full flex flex-col items-center justify-center p-12 border-2 border-dashed rounded-[3rem] opacity-20 bg-white/50 min-h-[400px]">

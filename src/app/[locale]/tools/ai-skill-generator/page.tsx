@@ -3,7 +3,7 @@
 import * as React from 'react';
 import { Navbar } from '@/components/navbar';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { 
@@ -12,11 +12,6 @@ import {
   Share2, 
   Zap,
   CheckCircle2,
-  LayoutDashboard,
-  Sparkles,
-  Twitter,
-  Linkedin,
-  MessageCircle,
   Calendar
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
@@ -24,7 +19,7 @@ import { executeSkillGenerationAction } from './actions';
 import { useUser, useAuth, useFirestore, addDocumentNonBlocking, setDocumentNonBlocking } from '@/firebase';
 import { signInAnonymously } from 'firebase/auth';
 import { collection, serverTimestamp, doc, query, limit, getDocs, orderBy, Timestamp } from 'firebase/firestore';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { ShareDialog } from '@/components/share-dialog';
 
 export default function SkillGeneratorPage() {
   const { user } = useUser();
@@ -102,7 +97,10 @@ export default function SkillGeneratorPage() {
     }
   };
 
-  const shareUrl = shareSlug ? `${window.location.origin}/share/${shareSlug}` : '';
+  const getShareUrl = () => {
+    if (typeof window === 'undefined' || !shareSlug) return '';
+    return `${window.location.origin}/share/${shareSlug}`;
+  };
 
   return (
     <div className="flex min-h-screen flex-col bg-[#F9FAFB]">
@@ -173,24 +171,20 @@ export default function SkillGeneratorPage() {
                     ))}
                   </div>
 
-                  <Dialog>
-                    <DialogTrigger asChild>
-                      <Button onClick={handleShare} className="w-full h-16 rounded-2xl border-accent/10 font-black uppercase text-[11px] tracking-widest shadow-2xl">
-                        <Share2 className="h-4 w-4 mr-2" /> Share Protocol
+                  <ShareDialog 
+                    url={shareSlug ? getShareUrl() : undefined}
+                    title="Skill Curriculum Published"
+                    description="Industrial viral distribution protocol."
+                    trigger={
+                      <Button 
+                        onClick={() => !shareSlug && handleShare()} 
+                        className="w-full h-16 rounded-2xl border-accent/10 font-black uppercase text-[11px] tracking-widest shadow-2xl"
+                      >
+                        {isSharing ? <Loader2 className="h-3 w-3 animate-spin mr-2" /> : <Share2 className="h-3 w-3 mr-2" />} 
+                        Share Protocol
                       </Button>
-                    </DialogTrigger>
-                    <DialogContent className="rounded-[2rem] p-8 max-w-sm">
-                      {isSharing ? <Loader2 className="animate-spin mx-auto"/> : (
-                        <div className="space-y-6 pt-6 flex flex-col items-center">
-                          <div className="flex gap-4">
-                            <a href={`https://wa.me/?text=${shareUrl}`} className="h-12 w-12 rounded-xl bg-accent flex items-center justify-center text-white shadow-lg"><MessageCircle className="h-5 w-5"/></a>
-                            <a href={`https://twitter.com/intent/tweet?url=${shareUrl}`} className="h-12 w-12 rounded-xl bg-accent flex items-center justify-center text-white shadow-lg"><Twitter className="h-5 w-5"/></a>
-                          </div>
-                          <p className="text-[9px] font-bold truncate opacity-40">{shareUrl}</p>
-                        </div>
-                      )}
-                    </DialogContent>
-                  </Dialog>
+                    }
+                  />
                 </div>
               ) : (
                 <div className="h-full min-h-[400px] flex flex-col items-center justify-center p-12 border-2 border-dashed rounded-[3rem] opacity-20 bg-white/50">

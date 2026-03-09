@@ -3,7 +3,7 @@
 import * as React from 'react';
 import { Navbar } from '@/components/navbar';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { 
@@ -11,23 +11,16 @@ import {
   Loader2, 
   Copy, 
   Share2, 
-  Zap,
   CheckCircle2,
   AlertCircle,
-  ArrowRight,
-  BrainCircuit,
-  ShieldCheck,
-  Twitter,
-  Linkedin,
-  MessageCircle,
-  X
+  BrainCircuit
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { executeDecisionAction } from './actions';
 import { useUser, useAuth, useFirestore, addDocumentNonBlocking, setDocumentNonBlocking } from '@/firebase';
 import { signInAnonymously } from 'firebase/auth';
 import { collection, serverTimestamp, doc, query, limit, getDocs, orderBy, Timestamp } from 'firebase/firestore';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from '@/components/ui/dialog';
+import { ShareDialog } from '@/components/share-dialog';
 import { cn } from '@/lib/utils';
 
 export default function DecisionHelperPage() {
@@ -107,7 +100,10 @@ export default function DecisionHelperPage() {
     }
   };
 
-  const shareUrl = shareSlug ? `${window.location.origin}/share/${shareSlug}` : '';
+  const getShareUrl = () => {
+    if (typeof window === 'undefined' || !shareSlug) return '';
+    return `${window.location.origin}/share/${shareSlug}`;
+  };
 
   return (
     <div className="flex min-h-screen flex-col bg-background">
@@ -178,24 +174,24 @@ export default function DecisionHelperPage() {
                     </div>
                     <p className="text-lg font-medium leading-relaxed italic text-white/80 whitespace-pre-wrap">{result.synthesis}</p>
                     <div className="pt-6 border-t border-white/10 flex items-center justify-between">
-                      <Dialog>
-                        <DialogTrigger asChild>
-                          <Button variant="ghost" onClick={handleShare} size="sm" className="text-[9px] font-black uppercase tracking-widest text-white/40 hover:text-white">
-                            <Share2 className="h-3 w-3 mr-2" /> Share Protocol
+                      
+                      <ShareDialog 
+                        url={shareSlug ? getShareUrl() : undefined}
+                        title="Decision Logic Shared"
+                        description="Professional logic analysis manifest."
+                        trigger={
+                          <Button 
+                            variant="ghost" 
+                            onClick={() => !shareSlug && handleShare()} 
+                            size="sm" 
+                            className="text-[9px] font-black uppercase tracking-widest text-white/40 hover:text-white"
+                          >
+                            {isSharing ? <Loader2 className="h-3 w-3 animate-spin mr-2" /> : <Share2 className="h-3 w-3 mr-2" />} 
+                            Share Protocol
                           </Button>
-                        </DialogTrigger>
-                        <DialogContent className="rounded-[2rem] p-8 max-w-sm">
-                          <DialogHeader><DialogTitle className="font-black uppercase italic">Share Result</DialogTitle></DialogHeader>
-                          {isSharing ? <Loader2 className="animate-spin mx-auto"/> : (
-                            <div className="space-y-6 pt-6">
-                              <div className="flex justify-center gap-4">
-                                <a href={`https://twitter.com/intent/tweet?url=${shareUrl}`} className="h-12 w-12 rounded-xl bg-accent flex items-center justify-center text-white shadow-lg"><Twitter className="h-5 w-5"/></a>
-                                <a href={`https://wa.me/?text=${shareUrl}`} className="h-12 w-12 rounded-xl bg-accent flex items-center justify-center text-white shadow-lg"><MessageCircle className="h-5 w-5"/></a>
-                              </div>
-                            </div>
-                          )}
-                        </DialogContent>
-                      </Dialog>
+                        }
+                      />
+
                       <Button variant="ghost" size="sm" className="text-[9px] font-black uppercase tracking-widest text-white/40 hover:text-white" onClick={() => navigator.clipboard.writeText(result.synthesis)}>
                         <Copy className="h-3 w-3 mr-2" /> Copy Analysis
                       </Button>

@@ -3,30 +3,24 @@
 import * as React from 'react';
 import { Navbar } from '@/components/navbar';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { 
   Target, 
   Loader2, 
-  Copy, 
   Share2, 
   Zap,
   TrendingUp,
   Search,
-  ArrowRight,
-  Sparkles,
-  Twitter,
-  Linkedin,
-  MessageCircle,
-  X
+  Sparkles
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { executeNicheFinderAction } from './actions';
 import { useUser, useAuth, useFirestore, addDocumentNonBlocking, setDocumentNonBlocking } from '@/firebase';
 import { signInAnonymously } from 'firebase/auth';
 import { collection, serverTimestamp, doc, query, limit, getDocs, orderBy, Timestamp } from 'firebase/firestore';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from '@/components/ui/dialog';
+import { ShareDialog } from '@/components/share-dialog';
 import { cn } from '@/lib/utils';
 
 export default function NicheFinderPage() {
@@ -106,7 +100,10 @@ export default function NicheFinderPage() {
     }
   };
 
-  const shareUrl = shareSlug ? `${window.location.origin}/share/${shareSlug}` : '';
+  const getShareUrl = () => {
+    if (typeof window === 'undefined' || !shareSlug) return '';
+    return `${window.location.origin}/share/${shareSlug}`;
+  };
 
   return (
     <div className="flex min-h-screen flex-col bg-muted/20">
@@ -151,28 +148,23 @@ export default function NicheFinderPage() {
                 <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-accent/40 flex items-center gap-2">
                   <Sparkles className="h-3 w-3" /> Synthesis Results
                 </h3>
-                <Dialog>
-                  <DialogTrigger asChild>
-                    <Button variant="ghost" onClick={handleShare} size="sm" className="text-[9px] font-black uppercase tracking-widest">
-                      <Share2 className="h-3 w-3 mr-2" /> Viral Share
+                
+                <ShareDialog 
+                  url={shareSlug ? getShareUrl() : undefined}
+                  title="Market Analysis Published"
+                  description="Industrial viral distribution protocol."
+                  trigger={
+                    <Button 
+                      variant="ghost" 
+                      onClick={() => !shareSlug && handleShare()} 
+                      size="sm" 
+                      className="text-[9px] font-black uppercase tracking-widest"
+                    >
+                      {isSharing ? <Loader2 className="h-3 w-3 animate-spin mr-2" /> : <Share2 className="h-3 w-3 mr-2" />} 
+                      Viral Share
                     </Button>
-                  </DialogTrigger>
-                  <DialogContent className="rounded-[2rem] p-8 max-w-sm">
-                    <DialogHeader>
-                      <DialogTitle className="text-xl font-black uppercase italic">Share Protocol</DialogTitle>
-                    </DialogHeader>
-                    {isSharing ? <Loader2 className="animate-spin mx-auto"/> : (
-                      <div className="space-y-6 pt-6">
-                        <div className="flex justify-center gap-4">
-                          <a href={`https://twitter.com/intent/tweet?url=${shareUrl}`} className="h-12 w-12 rounded-xl bg-[#1DA1F2] flex items-center justify-center text-white shadow-lg"><Twitter className="h-5 w-5"/></a>
-                          <a href={`https://www.linkedin.com/sharing/share-offsite/?url=${shareUrl}`} className="h-12 w-12 rounded-xl bg-[#0077B5] flex items-center justify-center text-white shadow-lg"><Linkedin className="h-5 w-5"/></a>
-                          <a href={`https://wa.me/?text=${shareUrl}`} className="h-12 w-12 rounded-xl bg-[#25D366] flex items-center justify-center text-white shadow-lg"><MessageCircle className="h-5 w-5"/></a>
-                        </div>
-                        <div className="p-3 bg-muted/30 rounded-xl text-center"><p className="text-[9px] font-bold truncate">{shareUrl}</p></div>
-                      </div>
-                    )}
-                  </DialogContent>
-                </Dialog>
+                  }
+                />
               </div>
 
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
