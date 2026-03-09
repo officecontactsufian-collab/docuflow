@@ -146,7 +146,7 @@ export default function LoginPage() {
             <div className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-accent text-white shadow-lg mb-4">
               <Lock className="h-6 w-6" />
             </div>
-            <h1 className="text-3xl font-black tracking-tight uppercase italic text-accent">Initialize Session</h1>
+            <h1 className="text-3xl font-black tracking-tight uppercase italic text-accent">Sign Up - Login</h1>
             <p className="text-muted-foreground font-bold text-xs uppercase tracking-widest">Secure identity verification required.</p>
           </div>
 

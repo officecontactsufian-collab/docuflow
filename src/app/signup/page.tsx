@@ -145,7 +145,7 @@ export default function SignupPage() {
                 </Button>
 
                 <div className="pt-4 text-center">
-                  <p className="text-[10px] font-bold text-accent/40 uppercase">Already registered? <Link href="/login" className="text-primary hover:underline italic">Initialize Session <ArrowRight className="inline h-2.5 w-2.5" /></Link></p>
+                  <p className="text-[10px] font-bold text-accent/40 uppercase">Already registered? <Link href="/login" className="text-primary hover:underline italic">Sign Up - Login <ArrowRight className="inline h-2.5 w-2.5" /></Link></p>
                 </div>
               </CardFooter>
             </form>

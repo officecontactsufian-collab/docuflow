@@ -58,7 +58,7 @@ export function Navbar() {
   const auth = useAuth();
   const router = useRouter();
   const params = useParams();
-  const locale = params?.locale as string || 'en';
+  const locale = (params?.locale as string) || 'en';
   const { t } = useTranslation();
 
   const handleLogout = async () => {
@@ -224,7 +224,7 @@ export function Navbar() {
             </DropdownMenu>
           ) : (
             <Button asChild variant="outline" size="sm" className="h-8 rounded-lg text-[9px] font-black uppercase tracking-widest border-accent/10">
-              <Link href={`/${locale}/login`}>Initialize Session</Link>
+              <Link href={`/${locale}/login`}>Sign Up - Login</Link>
             </Button>
           )}
 
