@@ -41,7 +41,8 @@ import {
   Wrench,
   TrendingUp,
   Sparkles,
-  Target
+  Target,
+  Image as ImageIcon
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';

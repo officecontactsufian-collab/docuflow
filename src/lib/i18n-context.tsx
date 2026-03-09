@@ -1,7 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { useRouter, usePathname } from 'next/navigation';
+import { useRouter, usePathname, useParams } from 'next/navigation';
 import en from '@/locales/en.json';
 import fr from '@/locales/fr.json';
 import es from '@/locales/es.json';
@@ -28,9 +28,13 @@ const LanguageContext = createContext<LanguageContextType | undefined>(undefined
 export function LanguageProvider({ children, initialLocale }: { children: ReactNode, initialLocale: Locale }) {
   const router = useRouter();
   const pathname = usePathname();
-  const [locale, setLocaleState] = useState<Locale>(initialLocale);
+  const params = useParams();
+  
+  // Robust initialization using the URL segment to avoid hydration mismatch
+  const activeLocale = (params?.locale as Locale) || initialLocale || 'en';
+  const [locale, setLocaleState] = useState<Locale>(activeLocale);
 
-  // Sync HTML attributes with current locale
+  // Synchronize HTML attributes with the active locale to support RTL/LTR
   useEffect(() => {
     if (typeof document !== 'undefined') {
       document.documentElement.lang = locale;
@@ -38,12 +42,12 @@ export function LanguageProvider({ children, initialLocale }: { children: ReactN
     }
   }, [locale]);
 
-  // Sync state if initialLocale changes (e.g. on navigation)
+  // Handle locale shifts from navigation events
   useEffect(() => {
-    if (initialLocale && initialLocale !== locale) {
-      setLocaleState(initialLocale);
+    if (params?.locale && params.locale !== locale) {
+      setLocaleState(params.locale as Locale);
     }
-  }, [initialLocale, locale]);
+  }, [params?.locale, locale]);
 
   const setLocale = (newLocale: Locale) => {
     setLocaleState(newLocale);
@@ -51,18 +55,17 @@ export function LanguageProvider({ children, initialLocale }: { children: ReactN
       localStorage.setItem('docflow_locale', newLocale);
     }
     
-    // Redirect if currently in a localized path to maintain URL consistency
     const pathSegments = pathname.split('/');
-    // Segments: ["", "en", "login"]
+    const localesList = ['en', 'fr', 'es', 'ar', 'zh', 'de', 'ja', 'pt', 'ru', 'it'];
+    
+    // Redirect if currently in a localized tunnel
     if (pathSegments[1] && localesList.includes(pathSegments[1])) {
       pathSegments[1] = newLocale;
       router.push(pathSegments.join('/'));
     } else {
-      router.push(`/${newLocale}`);
+      router.push(`/${newLocale}${pathname === '/' ? '' : pathname}`);
     }
   };
-
-  const localesList = ['en', 'fr', 'es', 'ar', 'zh', 'de', 'ja', 'pt', 'ru', 'it'];
 
   const t = (key: string): string => {
     const keys = key.split('.');
@@ -72,7 +75,7 @@ export function LanguageProvider({ children, initialLocale }: { children: ReactN
       if (result && result[k]) {
         result = result[k];
       } else {
-        // Fallback to English if the translation key is missing
+        // Industrial Fallback: Recover from English registry
         let engFallback = translations['en'];
         for (const ek of keys) {
           engFallback = engFallback?.[ek];

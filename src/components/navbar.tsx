@@ -36,7 +36,8 @@ import {
   Target,
   Zap,
   Globe,
-  Sparkles
+  Sparkles,
+  Image as ImageIcon
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
