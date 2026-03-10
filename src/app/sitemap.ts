@@ -1,8 +1,10 @@
+
 import { MetadataRoute } from 'next'
 
 /**
  * @fileOverview Automated Multilingual Sitemap Generation
  * Generates SEO entries for all languages and core protocols.
+ * Follows Google's cross-language link standards.
  */
 
 export default function sitemap(): MetadataRoute.Sitemap {
@@ -47,6 +49,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
       const url = `${baseUrl}/${locale}${path}`
       
       // Create alternates mapping for this specific path
+      // This helps Google understand localized versions of the same content
       const languages: Record<string, string> = {}
       locales.forEach((l) => {
         languages[l] = `${baseUrl}/${l}${path}`

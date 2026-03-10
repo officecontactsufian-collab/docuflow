@@ -1,3 +1,4 @@
+
 {
   "common": {
     "all_protocols": "All Protocols",
@@ -49,10 +50,50 @@
     "terms": "Terms of Operation"
   },
   "seo": {
-    "home": {
+    "default": {
       "title": "DOCFLOW Professional - Industrial Document Intelligence",
-      "description": "High-performance, local-first document intelligence workspace. Securely merge, split, compress, and sign PDF documents with zero-retention architecture.",
-      "keywords": "PDF tools, Document Intelligence, Merge PDF, Split PDF, Digital Signature, Local-first PDF"
+      "desc": "High-performance, local-first document intelligence workspace. Securely merge, split, compress, and sign PDF documents with zero-retention architecture.",
+      "keywords": "PDF tools, Document Intelligence, Merge PDF, Split PDF, Digital Signature, Secure PDF"
+    },
+    "home": {
+      "title": "DOCFLOW Professional - Secure Document Intelligence",
+      "desc": "The industrial benchmark for local-first document manipulation. AI-powered, private, and instant transformation protocols.",
+      "keywords": "Online PDF tools, secure pdf editor, AI document assistant, private file conversion"
+    },
+    "merge": {
+      "title": "Merge PDF Online - Secure & High Fidelity | DOCFLOW",
+      "desc": "Combine multiple PDF documents into a single professional asset. Secure, local-first merging with zero cloud retention.",
+      "keywords": "combine pdf, join pdf files, merge documents online, secure pdf merger"
+    },
+    "split": {
+      "title": "Split PDF Pages - Extract PDF Ranges | DOCFLOW",
+      "desc": "Extract specific pages or ranges from your PDF documents. High-fidelity page segmentation with visual mapping.",
+      "keywords": "split pdf, extract pdf pages, separate pdf, cut pdf pages"
+    },
+    "compress": {
+      "title": "Compress PDF Online - Optimize File Size | DOCFLOW",
+      "desc": "Optimize PDF file size for web delivery. Rebuilds internal object streams for maximum efficiency without loss of quality.",
+      "keywords": "compress pdf, reduce pdf size, optimize pdf, small pdf"
+    },
+    "organize": {
+      "title": "Organize PDF Pages - Reorder & Rotate | DOCFLOW",
+      "desc": "Manage your document structure with a high-fidelity visual map. Reorder and rotate page segments locally.",
+      "keywords": "organize pdf, reorder pdf pages, rotate pdf, visual pdf editor"
+    },
+    "sign": {
+      "title": "Sign PDF Online - Secure Digital Signatures | DOCFLOW",
+      "desc": "Apply professional digital signatures to your documents. Identity synthesis with wet ink and script engines.",
+      "keywords": "e-signature, sign pdf, digital signature, sign documents online"
+    },
+    "ai_studio": {
+      "title": "AI Studio - Industrial Generative Workspace | DOCFLOW",
+      "desc": "Initialize mission-critical generative sequences. Paraphrase, summarize, and translate documents with zero training protocols.",
+      "keywords": "AI writing assistant, document summarizer, AI paraphraser, Doc Intel"
+    },
+    "convert": {
+      "title": "Convert PDF Hub - High-Fidelity Transformation | DOCFLOW",
+      "desc": "Lossless transformation between formats. Convert PDF to Word, Excel, JPG, and PPT with archival-grade accuracy.",
+      "keywords": "pdf converter, convert to word, pdf to excel, word to pdf"
     }
   },
   "home": {
@@ -95,7 +136,7 @@
     "decision_helper": { "title": "Decision Helper", "desc": "Structured logic analysis." },
     "reality_check": { "title": "Reality Check", "desc": "Brutal project viability." },
     "life_simulator": { "title": "Life Simulator", "desc": "Future path projections." },
-    "skill_generator": { "title": "Skill Generator", "desc": "30-day mastery curriculum." },
+    "skill_generator": { "title": "Skill Generator", "desc": " masters curriculum." },
     "personal_brain": { "title": "Personal Brain", "desc": "Structured cognitive map." },
     "prompt_improver": { "title": "Prompt Improver", "desc": "Optimize AI input payload." },
     "humanizer": { "title": "AI Humanizer", "desc": "Natural synthesis of AI text." },
@@ -125,11 +166,7 @@
     "protect": { "title": "Password Protect", "desc": "Encrypt PDF." },
     "privacy": { "title": "Privacy Shield", "desc": "Metadata erasure." },
     "unlock": { "title": "Unlock PDF", "desc": "Strip restrictions." },
-    "sanitize": { "title": "Sanitize Asset", "desc": "Deep cleaning." },
-    "compress": { "title": "Compress PDF", "desc": "Optimize file size." },
-    "scan_to_pdf": { "title": "Scan to PDF", "desc": "Direct capture." },
-    "remove_bg": { "title": "Remove BG", "desc": "AI isolation." },
-    "remove_wm": { "title": "Remove Watermark", "desc": "Structural purge." }
+    "sanitize": { "title": "Sanitize Asset", "desc": "Deep cleaning." }
   },
   "ui": {
     "dropzone": {
