@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { notFound } from 'next/navigation';
 import { FirebaseClientProvider } from '@/firebase/client-provider';
@@ -37,6 +36,7 @@ interface LocaleLayoutProps {
 /**
  * Industrial SEO Metadata Engine
  * Dynamically generates metadata based on locale and active route segment.
+ * Hardened with optional chaining and fallbacks to prevent runtime crashes.
  */
 export async function generateMetadata(
   { params }: LocaleLayoutProps,
@@ -47,7 +47,7 @@ export async function generateMetadata(
   
   // Use a fallback for the base translations
   const t = translationRegistry[locale] || translationRegistry['en'];
-  const seo = t.seo || translationRegistry['en'].seo;
+  const seo = t?.seo || translationRegistry['en']?.seo || {};
 
   // Hreflang alternates for global indexing
   const languages: Record<string, string> = {};
@@ -55,8 +55,10 @@ export async function generateMetadata(
     languages[l] = `${baseUrl}/${l}`;
   });
 
-  const defaultTitle = seo.default.title;
-  const defaultDesc = seo.default.desc;
+  // Robust access with fallbacks to prevent "Cannot read properties of undefined"
+  const defaultTitle = seo?.default?.title || "DOCFLOW Professional - Industrial Document Intelligence";
+  const defaultDesc = seo?.default?.desc || "High-performance, local-first document intelligence workspace. Securely merge, split, compress, and sign PDF documents.";
+  const defaultKeywords = seo?.default?.keywords || "PDF tools, Document Intelligence, Merge PDF, Split PDF, Digital Signature, Secure PDF";
 
   return {
     title: {
@@ -64,7 +66,7 @@ export async function generateMetadata(
       template: `%s | DOCFLOW`
     },
     description: defaultDesc,
-    keywords: seo.default.keywords,
+    keywords: defaultKeywords,
     alternates: {
       canonical: `${baseUrl}/${locale}`,
       languages: languages,

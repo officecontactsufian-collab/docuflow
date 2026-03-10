@@ -1,4 +1,3 @@
-
 {
   "common": {
     "all_protocols": "All Protocols",
@@ -89,11 +88,6 @@
       "title": "AI Studio - Industrial Generative Workspace | DOCFLOW",
       "desc": "Initialize mission-critical generative sequences. Paraphrase, summarize, and translate documents with zero training protocols.",
       "keywords": "AI writing assistant, document summarizer, AI paraphraser, Doc Intel"
-    },
-    "convert": {
-      "title": "Convert PDF Hub - High-Fidelity Transformation | DOCFLOW",
-      "desc": "Lossless transformation between formats. Convert PDF to Word, Excel, JPG, and PPT with archival-grade accuracy.",
-      "keywords": "pdf converter, convert to word, pdf to excel, word to pdf"
     }
   },
   "home": {
@@ -136,7 +130,7 @@
     "decision_helper": { "title": "Decision Helper", "desc": "Structured logic analysis." },
     "reality_check": { "title": "Reality Check", "desc": "Brutal project viability." },
     "life_simulator": { "title": "Life Simulator", "desc": "Future path projections." },
-    "skill_generator": { "title": "Skill Generator", "desc": " masters curriculum." },
+    "skill_generator": { "title": "Skill Generator", "desc": "30-day masters curriculum." },
     "personal_brain": { "title": "Personal Brain", "desc": "Structured cognitive map." },
     "prompt_improver": { "title": "Prompt Improver", "desc": "Optimize AI input payload." },
     "humanizer": { "title": "AI Humanizer", "desc": "Natural synthesis of AI text." },
