@@ -1,9 +1,11 @@
+
 "use client"
 
 import * as React from 'react';
 import { Upload, FileText, X, CheckCircle2, ImageIcon, FileCode, FileSpreadsheet, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { useTranslation } from '@/lib/i18n-context';
 
 interface FileDropzoneProps {
   onFilesSelected: (files: File[]) => void;
@@ -15,6 +17,7 @@ interface FileDropzoneProps {
 }
 
 export function FileDropzone({ onFilesSelected, accept = ".pdf", maxFiles = 10, isLoading, className, isHero }: FileDropzoneProps) {
+  const { t } = useTranslation();
   const [isDragging, setIsDragging] = React.useState(false);
   const [selectedFiles, setSelectedFiles] = React.useState<File[]>([]);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
@@ -33,16 +36,13 @@ export function FileDropzone({ onFilesSelected, accept = ".pdf", maxFiles = 10, 
     setIsDragging(false);
     const files = Array.from(e.dataTransfer.files);
     
-    // Industrial grade file filtering
     const acceptedFiles = files.filter(file => {
       if (!accept || accept === "*") return true;
       const fileName = file.name.toLowerCase();
       const exts = accept.split(',').map(s => s.trim().toLowerCase());
       
       return exts.some(ext => {
-        // Match extension (e.g., .pdf)
         if (fileName.endsWith(ext)) return true;
-        // Match broad categories
         const type = file.type.toLowerCase();
         if (ext.includes('pdf') && type.includes('pdf')) return true;
         if ((ext.includes('jpg') || ext.includes('jpeg')) && type.includes('jpeg')) return true;
@@ -118,14 +118,14 @@ export function FileDropzone({ onFilesSelected, accept = ".pdf", maxFiles = 10, 
           </div>
           <div className="space-y-3">
             <h3 className={cn("font-black tracking-tight uppercase italic text-accent", isHero ? "text-4xl" : "text-2xl")}>
-              {isDragging ? "Drop to Process" : "Select Documents"}
+              {isDragging ? t('ui.dropzone.drop_to_process') : t('ui.dropzone.select_documents')}
             </h3>
             <p className="text-accent/60 font-bold uppercase tracking-widest text-xs">
-              {isHero ? "Encrypted • Private • High-Fidelity" : `Accepts: ${accept.replace(/\./g, '').toUpperCase()}`}
+              {isHero ? t('ui.dropzone.encrypted') : `${t('ui.dropzone.accepts')}: ${accept.replace(/\./g, '').toUpperCase()}`}
             </p>
           </div>
           <Button type="button" size="lg" className="h-14 px-10 rounded-2xl bg-accent text-white font-black uppercase tracking-widest text-[10px] shadow-2xl transition-all">
-            Choose Files
+            {t('ui.dropzone.choose_files')}
           </Button>
         </div>
       </div>
@@ -133,9 +133,9 @@ export function FileDropzone({ onFilesSelected, accept = ".pdf", maxFiles = 10, 
       {selectedFiles.length > 0 && (
         <div className="mt-12 space-y-4 animate-in fade-in slide-in-from-top-4">
           <div className="flex items-center justify-between px-4">
-            <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-accent/50">Staged for Processing ({selectedFiles.length})</h4>
+            <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-accent/50">{t('ui.dropzone.staged')} ({selectedFiles.length})</h4>
             <Button variant="ghost" size="sm" onClick={() => {setSelectedFiles([]); onFilesSelected([]);}} className="text-[10px] font-black uppercase tracking-widest hover:text-destructive">
-              Discard All
+              {t('ui.dropzone.discard_all')}
             </Button>
           </div>
           <div className="grid gap-3">

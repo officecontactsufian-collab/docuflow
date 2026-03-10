@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
@@ -30,9 +31,19 @@ export function LanguageProvider({ children, initialLocale }: { children: ReactN
   const pathname = usePathname();
   const params = useParams();
   
-  const activeLocale = (params?.locale as Locale) || initialLocale || 'en';
-  const [locale, setLocaleState] = useState<Locale>(activeLocale);
+  // Robust initialization: Priority 1: URL Param, Priority 2: LocalStorage, Priority 3: English
+  const getInitialLocale = (): Locale => {
+    if (params?.locale) return params.locale as Locale;
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('docflow_locale');
+      if (saved && Object.keys(translations).includes(saved)) return saved as Locale;
+    }
+    return initialLocale || 'en';
+  };
 
+  const [locale, setLocaleState] = useState<Locale>(getInitialLocale());
+
+  // Update HTML lang and direction attributes (Support RTL for Arabic)
   useEffect(() => {
     if (typeof document !== 'undefined') {
       document.documentElement.lang = locale;
@@ -40,11 +51,12 @@ export function LanguageProvider({ children, initialLocale }: { children: ReactN
     }
   }, [locale]);
 
+  // Sync state if URL param changes
   useEffect(() => {
     if (params?.locale && params.locale !== locale) {
       setLocaleState(params.locale as Locale);
     }
-  }, [params?.locale, locale]);
+  }, [params?.locale]);
 
   const setLocale = (newLocale: Locale) => {
     setLocaleState(newLocale);
@@ -52,17 +64,23 @@ export function LanguageProvider({ children, initialLocale }: { children: ReactN
       localStorage.setItem('docflow_locale', newLocale);
     }
     
+    // Industrial Route Substitution
     const pathSegments = pathname.split('/');
-    const localesList = ['en', 'fr', 'es', 'ar', 'zh', 'de', 'ja', 'pt', 'ru', 'it'];
-    
-    if (pathSegments[1] && localesList.includes(pathSegments[1])) {
-      pathSegments[1] = newLocale;
-      router.push(pathSegments.join('/'));
-    } else {
-      router.push(`/${newLocale}${pathname === '/' ? '' : pathname}`);
+    if (pathSegments.length > 1) {
+      // Find where the locale was and swap it
+      const localesList = Object.keys(translations);
+      const localeIdx = pathSegments.findIndex(seg => localesList.includes(seg));
+      if (localeIdx !== -1) {
+        pathSegments[localeIdx] = newLocale;
+        router.push(pathSegments.join('/'));
+      } else {
+        // Fallback for root path
+        router.push(`/${newLocale}`);
+      }
     }
   };
 
+  // High-fidelity nested translation lookup
   const t = (key: string): string => {
     const keys = key.split('.');
     let result = translations[locale] || translations['en'];
@@ -71,6 +89,7 @@ export function LanguageProvider({ children, initialLocale }: { children: ReactN
       if (result && result[k]) {
         result = result[k];
       } else {
+        // Absolute Fallback to English
         let engFallback = translations['en'];
         for (const ek of keys) {
           engFallback = engFallback?.[ek];

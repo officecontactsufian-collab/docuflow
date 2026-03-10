@@ -1,3 +1,4 @@
+
 {
   "common": {
     "all_protocols": "All Protocols",
@@ -17,7 +18,11 @@
     "logout": "End Session",
     "back": "Back",
     "get_started": "Get Started",
-    "contact": "Contact Gateway"
+    "contact": "Contact Gateway",
+    "search": "Search Protocols...",
+    "all_units": "All Active Units",
+    "cancel": "Cancel",
+    "confirm": "Confirm"
   },
   "nav": {
     "ai_writing": "AI Writing Suite",
@@ -26,7 +31,8 @@
     "layout": "Modify & Capture",
     "convert": "Convert & Export",
     "security": "Security & Trust",
-    "ai_studio": "AI Studio"
+    "ai_studio": "AI Studio",
+    "dashboard_center": "Command Center"
   },
   "home": {
     "hero": {
@@ -93,5 +99,31 @@
     "privacy": { "title": "Privacy Shield", "desc": "Metadata erasure." },
     "unlock": { "title": "Unlock PDF", "desc": "Strip restrictions." },
     "sanitize": { "title": "Sanitize Asset", "desc": "Deep cleaning." }
+  },
+  "ui": {
+    "dropzone": {
+      "drop_to_process": "Drop to Process",
+      "select_documents": "Select Documents",
+      "encrypted": "Encrypted • Private • High-Fidelity",
+      "accepts": "Accepts",
+      "choose_files": "Choose Files",
+      "staged": "Staged for Processing",
+      "discard_all": "Discard All"
+    },
+    "ai_studio": {
+      "registry": "Protocol Registry",
+      "identity_access": "Identity Access",
+      "unlimited_access": "Unlimited Professional Access",
+      "purge_session": "Purge Session Stream",
+      "intelligence_active": "Industrial Intelligence Active",
+      "protocol_synthesis": "Protocol Synthesis",
+      "zero_retention_note": "Initialize a mission-critical generative sequence. Our zero-retention architecture ensures that every binary bit remains private.",
+      "executing": "Executing Protocol...",
+      "stream_analysis": "Structural Stream Analysis v2.5",
+      "attach_asset": "Attach Protocol Asset",
+      "asset_staged": "Asset Staged",
+      "secure_tunnel": "Secure Tunnel",
+      "local_synthesis": "Local Synthesis"
+    }
   }
 }

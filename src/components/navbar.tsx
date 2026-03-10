@@ -1,3 +1,4 @@
+
 "use client"
 
 import Link from 'next/link';
@@ -153,7 +154,7 @@ export function Navbar() {
                 className="flex items-center gap-1.5 text-[9px] font-black uppercase tracking-widest text-accent hover:text-primary transition-all outline-none"
               >
                 <LayoutDashboard className="h-3 w-3 text-primary" />
-                <span suppressHydrationWarning>{t('common.all_protocols')}</span> 
+                <span>{t('common.all_protocols')}</span> 
                 <ChevronDown className="h-2.5 w-2.5 opacity-40" />
               </DropdownMenuTrigger>
               <DropdownMenuContent align="start" className="w-[1000px] p-6 rounded-2xl shadow-2xl border-white/20 grid grid-cols-3 gap-x-8 gap-y-10 bg-white/95 backdrop-blur-xl mt-2 max-h-[80vh] overflow-y-auto custom-scrollbar">
@@ -203,18 +204,18 @@ export function Navbar() {
           
           <LanguageSwitcher />
           
-          {user ? (
+          {user && !user.isAnonymous ? (
             <DropdownMenu>
               <DropdownMenuTrigger suppressHydrationWarning asChild>
                 <Button variant="ghost" size="sm" className="h-8 rounded-lg text-[9px] font-black uppercase tracking-widest gap-2 bg-accent text-white hover:bg-accent/90">
-                  <Layout className="h-3 w-3" /> {t('nav.dashboard')}
+                  <Layout className="h-3 w-3" /> {t('common.dashboard')}
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-48 rounded-xl bg-white shadow-2xl border-accent/5">
                 <DropdownMenuLabel className="text-[8px] font-black uppercase tracking-widest text-accent/40">{user.email}</DropdownMenuLabel>
                 <DropdownMenuItem asChild>
                   <Link href={`/${locale}/dashboard`} className="cursor-pointer text-[10px] font-bold uppercase">
-                    <Activity className="h-3.5 w-3.5 mr-2" /> Command Center
+                    <Activity className="h-3.5 w-3.5 mr-2" /> {t('nav.dashboard_center')}
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={handleLogout} className="text-destructive cursor-pointer text-[10px] font-bold uppercase">

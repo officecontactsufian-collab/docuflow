@@ -1,3 +1,4 @@
+
 "use client"
 
 import * as React from 'react';
@@ -45,6 +46,7 @@ import mammoth from 'mammoth';
 import { signInAnonymously } from 'firebase/auth';
 import { collection, query, where, getDocs, Timestamp, limit, serverTimestamp, doc } from 'firebase/firestore';
 import { ShareDialog } from '@/components/share-dialog';
+import { useTranslation } from '@/lib/i18n-context';
 
 type AIStudioTool = 'PARAPHRASE' | 'SUMMARIZE' | 'EMAIL' | 'TRANSLATE' | 'CHAT' | 'GRAMMAR' | 'ESSAY' | 'RESUME' | 'COVER_LETTER';
 
@@ -68,31 +70,12 @@ interface ToolConfig {
   requiresFile?: boolean;
 }
 
-const TOOLS: ToolConfig[] = [
-  { id: 'PARAPHRASE', label: 'Paraphraser', description: 'Re-engineer text structure.', icon: RefreshCcw, color: 'text-blue-600', placeholder: 'Enter text to re-engineer...' },
-  { id: 'SUMMARIZE', label: 'Summarizer', description: 'Content distillation.', icon: Activity, color: 'text-orange-600', placeholder: 'Enter content or attach document...' },
-  { id: 'GRAMMAR', label: 'Grammar', description: 'Industrial proofing.', icon: CheckCircle2, color: 'text-green-600', placeholder: 'Enter text to check...' },
-  { id: 'ESSAY', label: 'Essay Writer', description: 'Academic synthesis.', icon: BookOpen, color: 'text-indigo-600', placeholder: 'Describe essay topic...' },
-  { id: 'RESUME', label: 'Resume', description: 'Profile engineering.', icon: Briefcase, color: 'text-emerald-600', placeholder: 'List experience and skills...' },
-  { id: 'COVER_LETTER', label: 'Cover Letter', description: 'Intro architect.', icon: FileBadge, color: 'text-cyan-600', placeholder: 'Describe job and background...' },
-  { id: 'EMAIL', label: 'Email', description: 'Corporate drafts.', icon: Mail, color: 'text-purple-600', placeholder: 'Describe email context...' },
-  { id: 'TRANSLATE', label: 'Translator', description: 'Linguistic shift.', icon: Languages, color: 'text-green-600', placeholder: 'Text to translate...' },
-  { id: 'CHAT', label: 'Doc Intel', description: 'Asset interrogation.', icon: MessageSquare, color: 'text-primary', placeholder: 'Ask about the document...', requiresFile: true },
-];
-
-const CATEGORIES = [
-  { id: 'writing', label: 'Writing Suite', tools: ['PARAPHRASE', 'SUMMARIZE', 'GRAMMAR', 'ESSAY'], icon: PenLine },
-  { id: 'career', label: 'Identity Tools', tools: ['RESUME', 'COVER_LETTER', 'EMAIL'], icon: Briefcase },
-  { id: 'productivity', label: 'Productivity', tools: ['TRANSLATE', 'CHAT'], icon: Zap },
-];
-
-const LANGUAGES = ["English", "French", "Spanish", "German", "Japanese", "Chinese", "Arabic", "Portuguese", "Russian", "Italian"];
-
 export default function AIStudioPage() {
   const { user, isUserLoading } = useUser();
   const auth = useAuth();
   const firestore = useFirestore();
   const { toast } = useToast();
+  const { t } = useTranslation();
   
   const [activeTool, setActiveTool] = React.useState<AIStudioTool>('PARAPHRASE');
   const [inputText, setInputText] = React.useState('');
@@ -103,6 +86,27 @@ export default function AIStudioPage() {
   const [isSharing, setIsSharing] = React.useState<string | null>(null);
   
   const chatEndRef = React.useRef<HTMLDivElement>(null);
+
+  const TOOLS: ToolConfig[] = [
+    { id: 'PARAPHRASE', label: t('tools.paraphraser.title'), description: t('tools.paraphraser.desc'), icon: RefreshCcw, color: 'text-blue-600', placeholder: 'Enter text to re-engineer...' },
+    { id: 'SUMMARIZE', label: t('tools.summarizer.title'), description: t('tools.summarizer.desc'), icon: Activity, color: 'text-orange-600', placeholder: 'Enter content or attach document...' },
+    { id: 'GRAMMAR', label: t('tools.grammar.title'), description: t('tools.grammar.desc'), icon: CheckCircle2, color: 'text-green-600', placeholder: 'Enter text to check...' },
+    { id: 'ESSAY', label: t('tools.essay.title'), description: t('tools.essay.desc'), icon: BookOpen, color: 'text-indigo-600', placeholder: 'Describe essay topic...' },
+    { id: 'RESUME', label: t('tools.resume.title'), description: t('tools.resume.desc'), icon: Briefcase, color: 'text-emerald-600', placeholder: 'List experience and skills...' },
+    { id: 'COVER_LETTER', label: t('tools.cover_letter.title'), description: t('tools.cover_letter.desc'), icon: FileBadge, color: 'text-cyan-600', placeholder: 'Describe job and background...' },
+    { id: 'EMAIL', label: t('tools.email.title'), description: t('tools.email.desc'), icon: Mail, color: 'text-purple-600', placeholder: 'Describe email context...' },
+    { id: 'TRANSLATE', label: t('tools.translator.title'), description: t('tools.translator.desc'), icon: Languages, color: 'text-green-600', placeholder: 'Text to translate...' },
+    { id: 'CHAT', label: t('tools.doc_intel.title'), description: t('tools.doc_intel.desc'), icon: MessageSquare, color: 'text-primary', placeholder: 'Ask about the document...', requiresFile: true },
+  ];
+
+  const CATEGORIES = [
+    { id: 'writing', label: t('nav.ai_writing'), tools: ['PARAPHRASE', 'SUMMARIZE', 'GRAMMAR', 'ESSAY'], icon: PenLine },
+    { id: 'career', label: t('nav.ai_discovery'), tools: ['RESUME', 'COVER_LETTER', 'EMAIL'], icon: Briefcase },
+    { id: 'productivity', label: t('nav.ai_productivity'), tools: ['TRANSLATE', 'CHAT'], icon: Zap },
+  ];
+
+  const LANGUAGES = ["English", "French", "Spanish", "German", "Japanese", "Chinese", "Arabic", "Portuguese", "Russian", "Italian"];
+
   const activeConfig = TOOLS.find(t => t.id === activeTool)!;
 
   React.useEffect(() => {
@@ -155,9 +159,9 @@ export default function AIStudioPage() {
         msg.id === message.id ? { ...msg, shareSlug } : msg
       ));
 
-      toast({ title: "Manifest Published", description: "Protocol transmission link generated successfully." });
+      toast({ title: t('common.success'), description: "Protocol transmission link generated successfully." });
     } catch (e: any) {
-      toast({ variant: "destructive", title: "Sharing Failed", description: e.message });
+      toast({ variant: "destructive", title: t('common.failure'), description: e.message });
     } finally {
       setIsSharing(null);
     }
@@ -264,7 +268,7 @@ export default function AIStudioPage() {
 
   const copyToClipboard = (content: string) => {
     navigator.clipboard.writeText(content);
-    toast({ title: "Copied", description: "Content moved to local clipboard buffer." });
+    toast({ title: t('common.copy'), description: "Content moved to local clipboard buffer." });
   };
 
   return (
@@ -275,12 +279,12 @@ export default function AIStudioPage() {
         <aside className="w-80 border-r border-accent/5 bg-white hidden lg:flex flex-col">
           <div className="p-6 border-b border-accent/5">
             <h2 className="text-[10px] font-black uppercase tracking-[0.2em] text-accent/40 mb-4 flex items-center gap-2">
-              <LayoutDashboard className="h-3 w-3" /> Protocol Registry
+              <LayoutDashboard className="h-3 w-3" /> {t('ui.ai_studio.registry')}
             </h2>
             <div className="p-5 bg-accent text-white rounded-[2rem] shadow-2xl relative overflow-hidden group">
                <div className="relative z-10">
                   <div className="flex items-center justify-between mb-2">
-                    <p className="text-[9px] font-black uppercase text-primary">Identity Access</p>
+                    <p className="text-[9px] font-black uppercase text-primary">{t('ui.ai_studio.identity_access')}</p>
                     <ShieldCheck className="h-3 w-3 text-primary" />
                   </div>
                   <div className="flex items-end gap-1 mb-2">
@@ -289,7 +293,7 @@ export default function AIStudioPage() {
                   <div className="h-1.5 w-full bg-white/10 rounded-full overflow-hidden">
                     <div className="h-full bg-primary w-full" />
                   </div>
-                  <p className="mt-2 text-[8px] font-bold text-white/40 uppercase tracking-widest">Unlimited Professional Access</p>
+                  <p className="mt-2 text-[8px] font-bold text-white/40 uppercase tracking-widest">{t('ui.ai_studio.unlimited_access')}</p>
                </div>
                <div className="absolute -bottom-4 -right-4 w-20 h-20 bg-primary/20 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700" />
             </div>
@@ -332,7 +336,7 @@ export default function AIStudioPage() {
           
           <div className="p-6 border-t border-accent/5 bg-muted/5">
              <Button variant="ghost" onClick={() => setMessages([])} className="w-full justify-start h-12 rounded-xl text-[9px] font-black uppercase tracking-widest text-accent/40 hover:text-destructive hover:bg-destructive/5 transition-all">
-                <Trash2 className="mr-3 h-4 w-4" /> Purge Session Stream
+                <Trash2 className="mr-3 h-4 w-4" /> {t('ui.ai_studio.purge_session')}
              </Button>
           </div>
         </aside>
@@ -349,14 +353,14 @@ export default function AIStudioPage() {
               
               <div className="space-y-4">
                 <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/5 text-primary border border-primary/10 text-[10px] font-black uppercase tracking-[0.3em]">
-                  <Sparkles className="h-3 w-3" /> Industrial Intelligence Active
+                  <Sparkles className="h-3 w-3" /> {t('ui.ai_studio.intelligence_active')}
                 </div>
                 <h1 className="text-5xl font-black tracking-tighter text-accent uppercase italic leading-[0.9]">
-                  Protocol <br />
-                  <span className="not-italic text-primary">Synthesis.</span>
+                  {t('ui.ai_studio.protocol_synthesis').split(' ')[0]} <br />
+                  <span className="not-italic text-primary">{t('ui.ai_studio.protocol_synthesis').split(' ')[1]}</span>
                 </h1>
                 <p className="text-accent/40 font-bold uppercase tracking-widest text-xs leading-relaxed max-w-lg mx-auto">
-                  Initialize a mission-critical generative sequence. Our zero-retention architecture ensures that every binary bit remains private.
+                  {t('ui.ai_studio.zero_retention_note')}
                 </p>
               </div>
 
@@ -414,20 +418,20 @@ export default function AIStudioPage() {
                                <button 
                                 onClick={() => copyToClipboard(msg.content)} 
                                 className="p-2 rounded-xl bg-muted/30 text-accent/20 hover:text-primary hover:bg-primary/5 transition-all"
-                                title="Copy to Local Buffer"
+                                title={t('common.copy')}
                                >
                                  <Copy className="h-3.5 w-3.5" />
                                </button>
                                
                                <ShareDialog 
                                 url={msg.shareSlug ? getShareUrl(msg.shareSlug) : undefined}
-                                title={msg.shareSlug ? "Manifest Published" : "Share Result"}
-                                description="Viral Distribution Channel v2.5"
+                                title={msg.shareSlug ? t('common.success') : t('common.share')}
+                                description={t('ui.ai_studio.stream_analysis')}
                                 trigger={
                                   <button 
                                     onClick={() => !msg.shareSlug && handleShare(msg)}
                                     className="p-2 rounded-xl bg-muted/30 text-accent/20 hover:text-primary hover:bg-primary/5 transition-all"
-                                    title="Share Protocol Result"
+                                    title={t('common.share')}
                                   >
                                     {isSharing === msg.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Share2 className="h-3.5 w-3.5" />}
                                   </button>
@@ -452,13 +456,13 @@ export default function AIStudioPage() {
                             <div className="w-2 h-2 bg-primary/40 rounded-full animate-bounce" style={{ animationDelay: '200ms' }} />
                             <div className="w-2 h-2 bg-primary/40 rounded-full animate-bounce" style={{ animationDelay: '400ms' }} />
                           </div>
-                          <span className="text-[11px] font-black uppercase tracking-[0.2em] text-accent/20 italic">Executing Protocol...</span>
+                          <span className="text-[11px] font-black uppercase tracking-[0.2em] text-accent/20 italic">{t('ui.ai_studio.executing')}</span>
                        </div>
                        <div className="space-y-2">
                           <div className="h-1 w-full bg-muted/30 rounded-full overflow-hidden">
                              <div className="h-full bg-primary/20 animate-infinite-scroll w-1/3" />
                           </div>
-                          <p className="text-[8px] font-bold text-accent/10 uppercase tracking-widest">Structural Stream Analysis v2.5</p>
+                          <p className="text-[8px] font-bold text-accent/10 uppercase tracking-widest">{t('ui.ai_studio.stream_analysis')}</p>
                        </div>
                     </div>
                   </div>
@@ -479,7 +483,7 @@ export default function AIStudioPage() {
                        </div>
                        <div className="flex-1 min-w-0">
                           <p className="text-[10px] font-black uppercase text-accent truncate">{selectedFile.name}</p>
-                          <p className="text-[8px] font-bold text-accent/30 uppercase tracking-widest">ASSET STAGED • {(selectedFile.size / 1024).toFixed(0)} KB</p>
+                          <p className="text-[8px] font-bold text-accent/30 uppercase tracking-widest">{t('ui.ai_studio.asset_staged')} • {(selectedFile.size / 1024).toFixed(0)} KB</p>
                        </div>
                        <button onClick={() => setSelectedFile(null)} className="p-2 hover:bg-destructive/10 rounded-xl text-destructive transition-all">
                           <X className="h-4 w-4" />
@@ -491,7 +495,7 @@ export default function AIStudioPage() {
                     <button 
                       onClick={() => document.getElementById('file-trigger')?.click()}
                       className="p-4 rounded-2xl hover:bg-muted/50 transition-all text-accent/40 hover:text-primary group relative overflow-hidden"
-                      title="Attach Protocol Asset"
+                      title={t('ui.ai_studio.attach_asset')}
                     >
                       <Paperclip className="h-6 w-6 relative z-10" />
                       <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -545,13 +549,13 @@ export default function AIStudioPage() {
               
               <div className="flex items-center justify-center gap-12 mt-6 opacity-30 grayscale hover:opacity-100 transition-all duration-1000 cursor-default">
                  <div className="flex items-center gap-3 text-[9px] font-black uppercase tracking-[0.4em] italic transition-colors hover:text-primary">
-                    <ShieldCheck className="h-3.5 w-3.5" /> Secure Tunnel
+                    <ShieldCheck className="h-3.5 w-3.5" /> {t('ui.ai_studio.secure_tunnel')}
                  </div>
                  <div className="flex items-center gap-3 text-[9px] font-black uppercase tracking-[0.4em] italic text-primary">
                     <Activity className="h-3.5 w-3.5 animate-pulse" /> Active: {activeConfig.label}
                  </div>
                  <div className="flex items-center gap-3 text-[9px] font-black uppercase tracking-[0.4em] italic transition-colors hover:text-primary">
-                    <Cpu className="h-3.5 w-3.5" /> Local Synthesis
+                    <Cpu className="h-3.5 w-3.5" /> {t('ui.ai_studio.local_synthesis')}
                  </div>
               </div>
             </div>
