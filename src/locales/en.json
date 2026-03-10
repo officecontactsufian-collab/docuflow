@@ -1,3 +1,4 @@
+
 {
   "common": {
     "all_protocols": "All Protocols",
@@ -47,6 +48,23 @@
     "about": "About Mission",
     "privacy": "Privacy Shield",
     "terms": "Terms of Operation"
+  },
+  "seo": {
+    "home": {
+      "title": "DOCFLOW Professional - Industrial Document Intelligence",
+      "description": "High-performance, local-first document intelligence workspace. Securely merge, split, compress, and sign PDF documents with zero-retention architecture.",
+      "keywords": "PDF tools, Document Intelligence, Merge PDF, Split PDF, Digital Signature, Local-first PDF"
+    },
+    "merge": {
+      "title": "Merge PDF Documents | Industrial Merge Protocol",
+      "description": "Combine multiple PDF documents into a single professional asset. Secure, local-first merging with visual sequence control.",
+      "keywords": "merge pdf, combine pdf, join pdf files, secure pdf merger"
+    },
+    "ai_studio": {
+      "title": "AI Studio | Industrial Generative Protocols",
+      "description": "Initialize mission-critical generative sequences. Paraphrase, summarize, and interrogate documents with zero cloud retention.",
+      "keywords": "AI document analysis, AI summarizer, AI paraphraser, document intelligence"
+    }
   },
   "home": {
     "hero": {

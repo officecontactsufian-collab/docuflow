@@ -4,14 +4,12 @@ import { FirebaseClientProvider } from '@/firebase/client-provider';
 import { LanguageProvider } from '@/lib/i18n-context';
 import { Suspense } from 'react';
 import { Loader2 } from 'lucide-react';
+import type { Metadata, ResolvingMetadata } from 'next';
+
+const locales = ['en', 'fr', 'es', 'ar', 'zh', 'de', 'ja', 'pt', 'ru', 'it'];
 
 export async function generateStaticParams() {
-  return [
-    { locale: 'en' }, { locale: 'fr' }, { locale: 'es' },
-    { locale: 'ar' }, { locale: 'zh' }, { locale: 'de' },
-    { locale: 'ja' }, { locale: 'pt' }, { locale: 'ru' },
-    { locale: 'it' }
-  ];
+  return locales.map((locale) => ({ locale }));
 }
 
 interface LocaleLayoutProps {
@@ -19,9 +17,29 @@ interface LocaleLayoutProps {
   params: Promise<{ locale: string }>;
 }
 
+export async function generateMetadata(
+  { params }: LocaleLayoutProps,
+  parent: ResolvingMetadata
+): Promise<Metadata> {
+  const { locale } = await params;
+  const baseUrl = 'https://docflow.pro';
+
+  // Hreflang alternates for SEO
+  const languages: Record<string, string> = {};
+  locales.forEach((l) => {
+    languages[l] = `${baseUrl}/${l}`;
+  });
+
+  return {
+    alternates: {
+      canonical: `${baseUrl}/${locale}`,
+      languages: languages,
+    },
+  };
+}
+
 export default async function LocaleLayout({ children, params }: LocaleLayoutProps) {
   const { locale } = await params;
-  const locales = ['en', 'fr', 'es', 'ar', 'zh', 'de', 'ja', 'pt', 'ru', 'it'];
 
   if (!locales.includes(locale)) {
     notFound();
