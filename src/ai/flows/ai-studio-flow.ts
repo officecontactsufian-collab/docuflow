@@ -1,13 +1,12 @@
-
 'use server';
 /**
  * @fileOverview DOCFLOW AI Studio Unified Flow
- * Provides a single entry point for specialized AI protocols:
+ * Provides a single entry point for specialized AI protocols with tool-specific API routing:
  * - PARAPHRASE: Professional text re-engineering.
  * - SUMMARIZE: High-fidelity content distillation.
  * - EMAIL: Structural email architecture.
  * - TRANSLATE: Context-aware linguistic transformation.
- * - CHAT: Deep document interrogation.
+ * - CHAT: Deep document interrogation (Doc Intel).
  * - GRAMMAR: Industrial-grade proofing and stylistic refinement.
  * - ESSAY: Structured academic and professional draft synthesis.
  * - RESUME: High-impact professional profile engineering.
@@ -15,7 +14,24 @@
  */
 
 import { ai } from '@/ai/genkit';
-import { z } from 'genkit';
+import { z, genkit } from 'genkit';
+import { googleAI } from '@genkit-ai/google-genai';
+
+/**
+ * Industrial Key Registry
+ * Maps tool identifiers to their specific hardware-accelerated API keys.
+ */
+const TOOL_KEYS: Record<string, string> = {
+  PARAPHRASE: "AIzaSyAOlxjQ95EKBkjNQmyFrkOqQxARZQSqlp0",
+  SUMMARIZE: "AIzaSyBGIHxpsICyxLRsoP01ny7igOTfPrah2kg",
+  GRAMMAR: "AIzaSyAVdSXjQrABpJQFw1_MhPPVr9OnljFz9h4",
+  ESSAY: "AIzaSyA0qN4i4S_V5jGcR4Ma3ZVAWqOOEYY7JXY",
+  RESUME: "AIzaSyDVOZoSU-qMgSOHE4NEmR7jRN4B2J1a5p8",
+  COVER_LETTER: "AIzaSyBylBdnTmcwMpJJJvyuoMbp5UpCs6RxnH4",
+  EMAIL: "AIzaSyDIdfLUytJogFf_e5nX2z78IHk1RCzIGEk",
+  TRANSLATE: "AIzaSyBSjK6JS0XGTFKuLe7e6lUqvR9_e1FpQvk",
+  CHAT: "AIzaSyC7Lt2z-MKs0P4llLlo4oWsDj9ko_1Y74A" // Linked to DOC INTEL key
+};
 
 const AIStudioInputSchema = z.object({
   tool: z.enum(['PARAPHRASE', 'SUMMARIZE', 'EMAIL', 'TRANSLATE', 'CHAT', 'GRAMMAR', 'ESSAY', 'RESUME', 'COVER_LETTER']),
@@ -45,6 +61,15 @@ const aiStudioFlow = ai.defineFlow(
   },
   async (input) => {
     const { tool, text, fileDataUri, targetLanguage, userQuestion } = input;
+
+    // Initialize specialized Genkit instance for this specific tool key
+    // This creates a dedicated tunnel for the specific generative sequence.
+    const specializedAi = genkit({
+      plugins: [
+        googleAI({ apiKey: TOOL_KEYS[tool] })
+      ],
+      model: 'googleai/gemini-2.5-flash',
+    });
 
     let systemInstructions = '';
     let promptParts: any[] = [];
@@ -97,7 +122,7 @@ const aiStudioFlow = ai.defineFlow(
         break;
     }
 
-    const { text: result } = await ai.generate({
+    const { text: result } = await specializedAi.generate({
       system: systemInstructions,
       prompt: promptParts,
       config: {
