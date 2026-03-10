@@ -20,19 +20,18 @@ import {
   Briefcase,
   PenLine,
   FileBadge,
-  ChevronRight,
   Send,
   User,
   Bot,
   Paperclip,
-  Trash2,
   X,
   FileText,
   Copy,
   LayoutDashboard,
   Clock,
   Sparkles,
-  Share2
+  Share2,
+  Trash2
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Card } from '@/components/ui/card';
@@ -552,7 +551,7 @@ export default function AIStudioPage() {
                     <ShieldCheck className="h-3.5 w-3.5" /> {t('ui.ai_studio.secure_tunnel')}
                  </div>
                  <div className="flex items-center gap-3 text-[9px] font-black uppercase tracking-[0.4em] italic text-primary">
-                    <Activity className="h-3.5 w-3.5 animate-pulse" /> Active: {activeConfig.label}
+                    <Activity className="h-3.5 w-3.5 animate-pulse" /> {t('ui.ai_studio.executing')}
                  </div>
                  <div className="flex items-center gap-3 text-[9px] font-black uppercase tracking-[0.4em] italic transition-colors hover:text-primary">
                     <Cpu className="h-3.5 w-3.5" /> {t('ui.ai_studio.local_synthesis')}

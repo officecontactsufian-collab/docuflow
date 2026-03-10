@@ -8,13 +8,11 @@ import {
   Merge, 
   RotateCw, 
   ShieldCheck, 
-  Shield,
   FileUp,
   Settings2,
   Download,
   LayoutDashboard,
   Layers,
-  Unlock,
   Signature,
   Hash,
   Crop,
@@ -42,8 +40,7 @@ import {
   Wrench,
   TrendingUp,
   Sparkles,
-  Target,
-  ImageIcon
+  Target
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
@@ -174,9 +171,9 @@ export default function Home() {
               </div>
 
               <div className="flex items-center justify-center gap-10 pt-8 opacity-20 grayscale filter blur-[0.5px]">
-                 <div className="font-black text-[8px] uppercase tracking-[0.4em] italic">ISO-27001 SECURE</div>
-                 <div className="font-black text-[8px] uppercase tracking-[0.4em] italic">GDPR READY</div>
-                 <div className="font-black text-[8px] uppercase tracking-[0.4em] italic">SOC2 COMPLIANT</div>
+                 {t('home.hero.compliance').split(',').map((badge: string) => (
+                   <div key={badge} className="font-black text-[8px] uppercase tracking-[0.4em] italic">{badge}</div>
+                 ))}
               </div>
             </div>
           </div>
@@ -253,7 +250,7 @@ export default function Home() {
                         <step.icon className="h-8 w-8 text-primary" />
                       </div>
                       <div className="space-y-3">
-                        <div className="text-[9px] font-black uppercase tracking-widest text-primary/60">Sequence 0{idx + 1}</div>
+                        <div className="text-[9px] font-black uppercase tracking-widest text-primary/60">{t('home.categories.label_prefix')} 0{idx + 1}</div>
                         <h3 className="text-2xl font-black text-accent uppercase italic">{step.title}</h3>
                         <p className="text-accent/60 font-bold leading-relaxed text-sm">{step.desc}</p>
                         <div className="pt-4 border-t border-accent/5 w-full">
@@ -292,7 +289,7 @@ export default function Home() {
                 <span className="text-3xl font-black tracking-tighter uppercase italic">DOCFLOW</span>
               </div>
               <p className="text-[10px] leading-relaxed font-bold opacity-40 uppercase tracking-widest max-w-xs">
-                The industrial benchmark for local-first document intelligence. Engineered for high-fidelity assets and mission-critical privacy.
+                {t('home.hero.subtitle')}
               </p>
             </div>
             
@@ -329,10 +326,10 @@ export default function Home() {
                 <div className="h-px w-8 bg-primary/30" />
               </div>
               <ul className="space-y-4 text-[11px] font-black uppercase tracking-widest italic">
-                <li><Link href={`/${locale}/about`} className="hover:text-primary transition-colors flex items-center gap-2 group"><div className="w-1 h-1 bg-primary/20 rounded-full group-hover:bg-primary" /> About Mission</Link></li>
+                <li><Link href={`/${locale}/about`} className="hover:text-primary transition-colors flex items-center gap-2 group"><div className="w-1 h-1 bg-primary/20 rounded-full group-hover:bg-primary" /> {t('nav.about')}</Link></li>
                 <li><Link href={`/${locale}/contact`} className="hover:text-primary transition-colors flex items-center gap-2 group"><div className="w-1 h-1 bg-primary/20 rounded-full group-hover:bg-primary" /> {t('common.contact')}</Link></li>
-                <li><Link href={`/${locale}/privacy`} className="hover:text-primary transition-colors flex items-center gap-2 group"><div className="w-1 h-1 bg-primary/20 rounded-full group-hover:bg-primary" /> Privacy Shield</Link></li>
-                <li><Link href={`/${locale}/terms`} className="hover:text-primary transition-colors flex items-center gap-2 group"><div className="w-1 h-1 bg-primary/20 rounded-full group-hover:bg-primary" /> Terms of Operation</Link></li>
+                <li><Link href={`/${locale}/privacy`} className="hover:text-primary transition-colors flex items-center gap-2 group"><div className="w-1 h-1 bg-primary/20 rounded-full group-hover:bg-primary" /> {t('nav.privacy')}</Link></li>
+                <li><Link href={`/${locale}/terms`} className="hover:text-primary transition-colors flex items-center gap-2 group"><div className="w-1 h-1 bg-primary/20 rounded-full group-hover:bg-primary" /> {t('nav.terms')}</Link></li>
               </ul>
             </div>
           </div>

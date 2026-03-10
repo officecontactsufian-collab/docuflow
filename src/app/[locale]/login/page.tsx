@@ -1,3 +1,4 @@
+
 "use client"
 
 import * as React from 'react';
@@ -9,17 +10,12 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAuth, useUser } from '@/firebase';
 import { signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
-import { Loader2, Lock, Mail, Chrome, ArrowRight, ShieldCheck } from 'lucide-react';
+import { Loader2, Lock, Mail, Chrome, ArrowRight } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import Link from 'next/link';
 import Script from 'next/script';
 import { verifyRecaptcha } from '../auth-actions';
-
-declare global {
-  interface Window {
-    grecaptcha: any;
-  }
-}
+import { useTranslation } from '@/lib/i18n-context';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -28,6 +24,7 @@ export default function LoginPage() {
   const auth = useAuth();
   const { user, isUserLoading } = useUser();
   const { toast } = useToast();
+  const { t } = useTranslation();
   
   const [email, setEmail] = React.useState('');
   const [password, setPassword] = React.useState('');
@@ -39,54 +36,15 @@ export default function LoginPage() {
     }
   }, [user, isUserLoading, router, locale]);
 
-  const executeRecaptcha = async (action: string): Promise<string | null> => {
-    return new Promise((resolve) => {
-      const siteKey = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY;
-      
-      if (!siteKey) {
-        console.warn('reCAPTCHA site key is missing. Initializing in sandbox mode.');
-        resolve(null);
-        return;
-      }
-
-      if (typeof window === 'undefined' || !window.grecaptcha) {
-        console.warn('reCAPTCHA registry not found in window buffer.');
-        resolve(null);
-        return;
-      }
-
-      window.grecaptcha.ready(() => {
-        window.grecaptcha
-          .execute(siteKey, { action })
-          .then((token: string) => resolve(token))
-          .catch((err: any) => {
-            console.error('reCAPTCHA Synthesis Failure:', err);
-            resolve(null);
-          });
-      });
-    });
-  };
-
-  const verifyHumanity = async (action: string) => {
-    const token = await executeRecaptcha(action);
-    if (!token) return true; // Fallback for missing keys in dev environment
-    return await verifyRecaptcha(token);
-  };
-
   const handleEmailLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     try {
-      const isHuman = await verifyHumanity('login_email');
-      if (!isHuman) {
-        throw new Error("Security verification failed. High risk activity detected.");
-      }
-
-      await signInWithEmailAndPassword(auth, email, password);
+      await signInWithEmailAndPassword(auth!, email, password);
       toast({ title: "Session Initialized", description: "Welcome back to DOCFLOW Professional." });
       router.push(`/${locale}/dashboard`);
     } catch (error: any) {
-      toast({ variant: "destructive", title: "Authentication Failed", description: error.message || "Invalid credentials." });
+      toast({ variant: "destructive", title: t('common.failure'), description: error.message || "Invalid credentials." });
     } finally {
       setIsLoading(false);
     }
@@ -95,27 +53,12 @@ export default function LoginPage() {
   const handleGoogleLogin = async () => {
     setIsLoading(true);
     const provider = new GoogleAuthProvider();
-    provider.setCustomParameters({ prompt: 'select_account' });
-    
     try {
-      const isHuman = await verifyHumanity('login_google');
-      if (!isHuman) {
-        throw new Error("Security verification failed. High risk activity detected.");
-      }
-
-      await signInWithPopup(auth, provider);
+      await signInWithPopup(auth!, provider);
       toast({ title: "Identity Verified", description: "Google authentication successful." });
       router.push(`/${locale}/dashboard`);
     } catch (error: any) {
-      if (error.code === 'auth/popup-closed-by-user') {
-        setIsLoading(false);
-        return;
-      }
-      toast({ 
-        variant: "destructive", 
-        title: "Protocol Error", 
-        description: error.message || "Google sign-in sequence interrupted." 
-      });
+      toast({ variant: "destructive", title: "Protocol Error", description: error.message });
     } finally {
       setIsLoading(false);
     }
@@ -146,20 +89,20 @@ export default function LoginPage() {
             <div className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-accent text-white shadow-lg mb-4">
               <Lock className="h-6 w-6" />
             </div>
-            <h1 className="text-3xl font-black tracking-tight uppercase italic text-accent">Sign Up - Login</h1>
+            <h1 className="text-3xl font-black tracking-tight uppercase italic text-accent">{t('common.login')}</h1>
             <p className="text-muted-foreground font-bold text-xs uppercase tracking-widest">Secure identity verification required.</p>
           </div>
 
           <Card className="border-none shadow-2xl rounded-[2.5rem] bg-white overflow-hidden">
             <CardHeader className="space-y-1 pb-2">
-              <CardTitle className="text-xl font-black uppercase italic text-accent">Gateway Entrance</CardTitle>
-              <CardDescription className="text-[10px] font-bold uppercase tracking-widest italic">Standard Protocol Access</CardDescription>
+              <CardTitle className="text-xl font-black uppercase italic text-accent">{t('auth.login.title')}</CardTitle>
+              <CardDescription className="text-[10px] font-bold uppercase tracking-widest italic">{t('auth.login.desc')}</CardDescription>
             </CardHeader>
             <form onSubmit={handleEmailLogin}>
               <CardContent className="space-y-4 pt-4">
                 <div className="space-y-2">
                   <Label htmlFor="email" className="text-[10px] font-black uppercase tracking-widest text-accent/60 flex items-center gap-2">
-                    <Mail className="h-3.5 w-3.5" /> Identity
+                    <Mail className="h-3.5 w-3.5" /> {t('auth.login.identity')}
                   </Label>
                   <Input 
                     id="email" type="email" placeholder="USER@DOCFLOW.PRO" required 
@@ -168,11 +111,9 @@ export default function LoginPage() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <Label htmlFor="password" className="text-[10px] font-black uppercase tracking-widest text-accent/60 flex items-center gap-2">
-                      <Lock className="h-3.5 w-3.5" /> Secure Key
-                    </Label>
-                  </div>
+                  <Label htmlFor="password" className="text-[10px] font-black uppercase tracking-widest text-accent/60 flex items-center gap-2">
+                    <Lock className="h-3.5 w-3.5" /> {t('auth.login.key')}
+                  </Label>
                   <Input 
                     id="password" type="password" required 
                     value={password} onChange={(e) => setPassword(e.target.value)}
@@ -182,30 +123,24 @@ export default function LoginPage() {
               </CardContent>
               <CardFooter className="flex flex-col gap-4 pb-8">
                 <Button type="submit" className="w-full h-12 rounded-xl bg-accent text-white font-black uppercase tracking-widest text-[10px] shadow-xl shadow-accent/20" disabled={isLoading}>
-                  {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : "Verify Identity"}
+                  {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : t('auth.login.submit')}
                 </Button>
                 
                 <div className="relative w-full py-2">
                   <div className="absolute inset-0 flex items-center"><span className="w-full border-t border-accent/5"></span></div>
-                  <div className="relative flex justify-center text-[8px] font-black uppercase"><span className="bg-white px-4 text-accent/20 tracking-[0.3em]">OR FEDERATED GATEWAY</span></div>
+                  <div className="relative flex justify-center text-[8px] font-black uppercase"><span className="bg-white px-4 text-accent/20 tracking-[0.3em]">{t('auth.login.or')}</span></div>
                 </div>
 
                 <Button type="button" variant="outline" onClick={handleGoogleLogin} className="w-full h-12 rounded-xl border-accent/10 font-black uppercase tracking-widest text-[10px]" disabled={isLoading}>
-                  <Chrome className="mr-2 h-4 w-4 text-primary" /> Google Integration
+                  <Chrome className="mr-2 h-4 w-4 text-primary" /> {t('auth.login.google')}
                 </Button>
 
                 <div className="pt-4 text-center">
-                  <p className="text-[10px] font-bold text-accent/40 uppercase">New to the protocol? <Link href={`/${locale}/signup`} className="text-primary hover:underline italic">SIGN UP <ArrowRight className="inline h-2.5 w-2.5" /></Link></p>
+                  <p className="text-[10px] font-bold text-accent/40 uppercase">{t('auth.login.new_user')} <Link href={`/${locale}/signup`} className="text-primary hover:underline italic">{t('common.signup')} <ArrowRight className="inline h-2.5 w-2.5" /></Link></p>
                 </div>
               </CardFooter>
             </form>
           </Card>
-          
-          <div className="text-center">
-             <p className="text-[8px] font-bold text-accent/20 uppercase tracking-[0.2em] max-w-[240px] mx-auto leading-relaxed">
-               Protected by reCAPTCHA v3. Google <Link href="/privacy" className="underline">Privacy</Link> and <Link href="/terms" className="underline">Terms</Link> apply.
-             </p>
-          </div>
         </div>
       </main>
     </div>

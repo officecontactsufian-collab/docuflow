@@ -22,7 +22,17 @@
     "search": "Search Protocols...",
     "all_units": "All Active Units",
     "cancel": "Cancel",
-    "confirm": "Confirm"
+    "confirm": "Confirm",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "close": "Close",
+    "status": "Status",
+    "timestamp": "Timestamp",
+    "actions": "Actions",
+    "download": "Download",
+    "upload": "Upload",
+    "discard": "Discard"
   },
   "nav": {
     "ai_writing": "AI Writing Suite",
@@ -32,7 +42,10 @@
     "convert": "Convert & Export",
     "security": "Security & Trust",
     "ai_studio": "AI Studio",
-    "dashboard_center": "Command Center"
+    "dashboard_center": "Command Center",
+    "about": "About Mission",
+    "privacy": "Privacy Shield",
+    "terms": "Terms of Operation"
   },
   "home": {
     "hero": {
@@ -41,7 +54,8 @@
       "title_line2": "Document",
       "title_line3": "Flow.",
       "subtitle": "High-performance document intelligence for professionals. AI-powered, private, and processed entirely within secure tunnels.",
-      "cta": "Explore Core Protocols"
+      "cta": "Explore Core Protocols",
+      "compliance": ["ISO-27001 SECURE", "GDPR READY", "SOC2 COMPLIANT"]
     },
     "categories": {
       "label_prefix": "Protocol",
@@ -124,6 +138,66 @@
       "asset_staged": "Asset Staged",
       "secure_tunnel": "Secure Tunnel",
       "local_synthesis": "Local Synthesis"
+    }
+  },
+  "about": {
+    "hero": {
+      "mission": "Our Core Mission",
+      "title_redefining": "Redefining",
+      "title_document": "Document",
+      "title_intelligence": "Intelligence.",
+      "subtitle": "DOCFLOW is an industrial-grade workspace engineered for the modern professional. We’ve replaced the traditional cloud-storage model with a stateless, local-first architecture designed for absolute privacy."
+    },
+    "pillars": {
+      "privacy": { "title": "Privacy by Nature", "desc": "We don't just protect your data; we eliminate it. Every document stream is processed in-memory and auto-shredded upon session termination." },
+      "precision": { "title": "Industrial Precision", "desc": "Built on high-fidelity reconstruction engines, DOCFLOW ensures bit-perfect structural integrity for even the most complex legal assets." },
+      "hardware": { "title": "Hardware Accelerated", "desc": "Leveraging the full power of your machine, our local-first protocols deliver instant processing without server-side latency." }
+    },
+    "bridge": {
+      "label": "Origin Protocol",
+      "title": "Stateless Innovation.",
+      "desc": "DOCFLOW was born from a simple observation: most document tools prioritize data retention over user privacy. We set out to build a platform that serves as a bridge, not a vault.",
+      "zero_retention": { "title": "Zero Retention", "desc": "Binary streams are purged immediately after execution." },
+      "identity_first": { "title": "Identity First", "desc": "You maintain 100% ownership of your digital signature and assets." },
+      "stats": { "uptime": "Core Uptime", "daily_ops": "Daily Ops" }
+    }
+  },
+  "contact": {
+    "title": "Contact Gateway",
+    "subtitle": "Direct Tunnel to Administration. Initialize a support sequence or request enterprise-grade integrations.",
+    "endpoint": { "title": "Master Endpoint", "label": "Authorized Protocol Scope" },
+    "form": {
+      "title": "Initialize Inquiry",
+      "desc": "Encrypted Transmission Channel",
+      "identity": "Account Identity",
+      "tunnel": "Communication Tunnel",
+      "payload": "Transmission Payload",
+      "submit": "Deploy Transmission Sequence",
+      "success": "Transmission Logged!",
+      "success_desc": "Protocol successfully archived for review."
+    }
+  },
+  "auth": {
+    "login": {
+      "title": "Gateway Entrance",
+      "desc": "Standard Protocol Access",
+      "identity": "Identity",
+      "key": "Secure Key",
+      "submit": "Verify Identity",
+      "google": "Google Integration",
+      "new_user": "New to the protocol?",
+      "or": "OR FEDERATED GATEWAY"
+    },
+    "signup": {
+      "title": "Identity Registry",
+      "desc": "New User Onboarding",
+      "name": "Full Legal Name",
+      "email": "Email Endpoint",
+      "key": "Secure Key",
+      "submit": "Deploy Identity",
+      "google": "Google Synthesis",
+      "existing_user": "Already registered?",
+      "or": "OR GOOGLE TUNNEL"
     }
   }
 }

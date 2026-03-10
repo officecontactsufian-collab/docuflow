@@ -1,3 +1,4 @@
+
 "use client"
 
 import * as React from 'react';
@@ -18,8 +19,10 @@ import {
   Zap
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { useTranslation } from '@/lib/i18n-context';
 
 export default function ContactPage() {
+  const { t } = useTranslation();
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [isDone, setIsDone] = React.useState(false);
   const { toast } = useToast();
@@ -31,8 +34,8 @@ export default function ContactPage() {
     setIsSubmitting(false);
     setIsDone(true);
     toast({
-      title: "Transmission Success",
-      description: "Your inquiry has been staged for administrative review.",
+      title: t('contact.form.success'),
+      description: t('contact.form.success_desc'),
     });
   };
 
@@ -46,9 +49,9 @@ export default function ContactPage() {
             <div className="inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-accent text-white shadow-xl mb-2">
               <MessageSquare className="h-7 w-7" />
             </div>
-            <h1 className="text-4xl font-black tracking-tighter text-accent uppercase italic">Contact Gateway</h1>
+            <h1 className="text-4xl font-black tracking-tighter text-accent uppercase italic">{t('contact.title')}</h1>
             <p className="text-muted-foreground font-bold text-xs uppercase tracking-widest max-w-xl mx-auto">
-              Direct Tunnel to Administration. Initialize a support sequence or request enterprise-grade integrations.
+              {t('contact.subtitle')}
             </p>
           </div>
 
@@ -71,7 +74,7 @@ export default function ContactPage() {
                     <Mail className="h-8 w-8" />
                   </div>
                   <div className="space-y-1 min-w-0">
-                    <h3 className="text-2xl font-black text-accent uppercase italic tracking-tighter leading-none">Master Endpoint</h3>
+                    <h3 className="text-2xl font-black text-accent uppercase italic tracking-tighter leading-none">{t('contact.endpoint.title')}</h3>
                     <p className="text-lg font-bold text-primary truncate italic">office.contact.sufian@gmail.com</p>
                   </div>
                 </div>
@@ -79,7 +82,7 @@ export default function ContactPage() {
                 <div className="h-px w-full bg-accent/5" />
                 
                 <div className="space-y-4">
-                  <p className="text-[9px] font-black uppercase tracking-[0.3em] text-accent/40">Authorized Protocol Scope</p>
+                  <p className="text-[9px] font-black uppercase tracking-[0.3em] text-accent/40">{t('contact.endpoint.label')}</p>
                   <div className="grid grid-cols-1 gap-3">
                     {[
                       { label: "Primary Protocol", icon: Mail },
@@ -100,23 +103,23 @@ export default function ContactPage() {
               {!isDone ? (
                 <Card className="border-none shadow-2xl rounded-[3rem] bg-white overflow-hidden">
                   <CardHeader className="p-10 pb-4">
-                    <CardTitle className="text-2xl font-black uppercase italic tracking-tighter text-accent">Initialize Inquiry</CardTitle>
-                    <CardDescription className="text-[10px] font-bold uppercase tracking-widest italic">Encrypted Transmission Channel</CardDescription>
+                    <CardTitle className="text-2xl font-black uppercase italic tracking-tighter text-accent">{t('contact.form.title')}</CardTitle>
+                    <CardDescription className="text-[10px] font-bold uppercase tracking-widest italic">{t('contact.form.desc')}</CardDescription>
                   </CardHeader>
                   <form onSubmit={handleSubmit}>
                     <CardContent className="p-10 pt-4 space-y-6">
                       <div className="grid md:grid-cols-2 gap-6">
                         <div className="space-y-2">
-                          <Label className="text-[10px] font-black uppercase tracking-widest text-accent/60">Account Identity</Label>
+                          <Label className="text-[10px] font-black uppercase tracking-widest text-accent/60">{t('contact.form.identity')}</Label>
                           <Input required placeholder="NAME / ENTITY..." className="h-12 bg-muted/20 border-accent/10 rounded-xl font-bold text-accent" />
                         </div>
                         <div className="space-y-2">
-                          <Label className="text-[10px] font-black uppercase tracking-widest text-accent/60">Communication Tunnel</Label>
+                          <Label className="text-[10px] font-black uppercase tracking-widest text-accent/60">{t('contact.form.tunnel')}</Label>
                           <Input required type="email" placeholder="YOUR@EMAIL.PRO..." className="h-12 bg-muted/20 border-accent/10 rounded-xl font-bold text-accent" />
                         </div>
                       </div>
                       <div className="space-y-2">
-                        <Label className="text-[10px] font-black uppercase tracking-widest text-accent/60">Transmission Payload</Label>
+                        <Label className="text-[10px] font-black uppercase tracking-widest text-accent/60">{t('contact.form.payload')}</Label>
                         <Textarea required placeholder="DETAILED INQUIRY STREAM..." className="min-h-[150px] bg-muted/20 border-accent/10 rounded-2xl font-bold text-accent resize-none" />
                       </div>
                       
@@ -125,7 +128,7 @@ export default function ContactPage() {
                         className="w-full h-16 rounded-2xl bg-accent text-white font-black uppercase tracking-[0.2em] text-[11px] shadow-2xl shadow-accent/20 hover:scale-[1.01] transition-transform"
                       >
                         {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Send className="mr-2 h-4 w-4" />}
-                        Deploy Transmission Sequence
+                        {t('contact.form.submit')}
                       </Button>
                     </CardContent>
                   </form>
@@ -137,8 +140,8 @@ export default function ContactPage() {
                       <CheckCircle2 className="h-10 w-10" />
                     </div>
                     <div className="space-y-2">
-                      <h2 className="text-2xl font-black uppercase italic tracking-tight text-accent">Transmission Logged!</h2>
-                      <p className="text-muted-foreground text-sm font-medium uppercase tracking-widest">Protocol successfully archived for review.</p>
+                      <h2 className="text-2xl font-black uppercase italic tracking-tight text-accent">{t('contact.form.success')}</h2>
+                      <p className="text-muted-foreground text-sm font-medium uppercase tracking-widest">{t('contact.form.success_desc')}</p>
                     </div>
                     <Button variant="ghost" onClick={() => setIsDone(false)} className="text-[10px] font-black uppercase tracking-widest text-accent/40">
                       Start New Transmission

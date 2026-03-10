@@ -2,7 +2,7 @@
 "use client"
 
 import * as React from 'react';
-import { Upload, FileText, X, CheckCircle2, ImageIcon, FileCode, FileSpreadsheet, Plus } from 'lucide-react';
+import { Upload, FileText, X, CheckCircle2, ImageIcon, FileSpreadsheet, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useTranslation } from '@/lib/i18n-context';
@@ -80,7 +80,6 @@ export function FileDropzone({ onFilesSelected, accept = ".pdf", maxFiles = 10, 
     if (['jpg', 'jpeg', 'png', 'webp'].includes(ext || '')) return <ImageIcon className="h-5 w-5" />;
     if (['xls', 'xlsx', 'csv'].includes(ext || '')) return <FileSpreadsheet className="h-5 w-5" />;
     if (['doc', 'docx'].includes(ext || '')) return <FileText className="h-5 w-5" />;
-    if (['html', 'htm', 'js', 'ts'].includes(ext || '')) return <FileCode className="h-5 w-5" />;
     return <FileText className="h-5 w-5" />;
   };
 
