@@ -1,3 +1,4 @@
+
 "use client"
 
 import * as React from 'react';
@@ -12,8 +13,10 @@ import { Label } from '@/components/ui/label';
 import { PDFDocument } from 'pdf-lib';
 import { PDFPreview } from '@/components/pdf-preview';
 import { cn } from '@/lib/utils';
+import { useTranslation } from '@/lib/i18n-context';
 
 export default function SplitPage() {
+  const { t } = useTranslation();
   const [selectedFile, setSelectedFile] = React.useState<File | null>(null);
   const [totalPages, setTotalPages] = React.useState(0);
   const [selectedPageIndices, setSelectedPageIndices] = React.useState<Set<number>>(new Set());
@@ -114,7 +117,7 @@ export default function SplitPage() {
       setIsProcessing(false);
       setIsDone(true);
       toast({
-        title: "Split Successful",
+        title: t('common.success'),
         description: `Extracted ${pageIndicesToExtract.length} pages into a new document.`,
       });
     } catch (error: any) {
@@ -122,7 +125,7 @@ export default function SplitPage() {
       setIsProcessing(false);
       toast({
         variant: "destructive",
-        title: "Process Failed",
+        title: t('common.failure'),
         description: error.message || "An error occurred during extraction.",
       });
     }
@@ -150,9 +153,9 @@ export default function SplitPage() {
             <div className="inline-flex h-12 w-12 items-center justify-center text-primary mb-2">
               <Scissors className="h-10 w-10" />
             </div>
-            <h1 className="text-3xl font-bold tracking-tight font-headline text-accent uppercase italic tracking-tighter">Split PDF Intelligence</h1>
+            <h1 className="text-3xl font-bold tracking-tight font-headline text-accent uppercase italic tracking-tighter">{t('tools.split.title')}</h1>
             <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-              Visual page extraction. Select individual pages or specify ranges for precise document segmentation.
+              {t('tools.split.desc')}
             </p>
           </div>
 
@@ -254,7 +257,7 @@ export default function SplitPage() {
                             Extract {selectedPageIndices.size} Pages
                           </Button>
                           <Button variant="ghost" onClick={reset} className="text-[10px] font-bold uppercase tracking-widest text-accent/40 hover:text-accent">
-                            Discard Document
+                            {t('common.discard')}
                           </Button>
                         </div>
                       </CardContent>
@@ -287,8 +290,7 @@ export default function SplitPage() {
                   }} 
                   className="w-full h-14 rounded-2xl bg-accent hover:bg-accent/90 shadow-xl shadow-accent/20 text-[11px] font-black uppercase tracking-widest"
                 >
-                  <Download className="mr-2 h-4 w-4" />
-                  Download Extraction
+                  {t('common.download')}
                 </Button>
               </div>
               <Button variant="ghost" onClick={reset} className="text-[10px] font-bold uppercase tracking-widest text-accent/60">

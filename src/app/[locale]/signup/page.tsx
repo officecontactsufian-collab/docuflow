@@ -1,3 +1,4 @@
+
 "use client"
 
 import * as React from 'react';
@@ -15,6 +16,7 @@ import { useToast } from '@/hooks/use-toast';
 import Link from 'next/link';
 import Script from 'next/script';
 import { verifyRecaptcha } from '../auth-actions';
+import { useTranslation } from '@/lib/i18n-context';
 
 export default function SignupPage() {
   const router = useRouter();
@@ -24,6 +26,7 @@ export default function SignupPage() {
   const firestore = useFirestore();
   const { user, isUserLoading } = useUser();
   const { toast } = useToast();
+  const { t } = useTranslation();
   
   const [name, setName] = React.useState('');
   const [email, setEmail] = React.useState('');
@@ -90,7 +93,7 @@ export default function SignupPage() {
         throw new Error("Security verification failed. High risk activity detected.");
       }
 
-      const cred = await createUserWithEmailAndPassword(auth, email, password);
+      const cred = await createUserWithEmailAndPassword(auth!, email, password);
       await updateProfile(cred.user, { displayName: name });
       await syncUserProfile(cred.user.uid, email, name);
       toast({ title: "SIGN UP SUCCESS", description: "Your professional registry has been established." });
@@ -113,7 +116,7 @@ export default function SignupPage() {
         throw new Error("Security verification failed. High risk activity detected.");
       }
 
-      const cred = await signInWithPopup(auth, provider);
+      const cred = await signInWithPopup(auth!, provider);
       await syncUserProfile(cred.user.uid, cred.user.email!, cred.user.displayName!);
       toast({ title: "Identity Federated", description: "Account created via Google tunnel." });
       router.push(`/${locale}/dashboard`);
@@ -157,19 +160,19 @@ export default function SignupPage() {
             <div className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-primary text-white shadow-lg mb-4">
               <UserPlus className="h-6 w-6" />
             </div>
-            <h1 className="text-3xl font-black tracking-tight uppercase italic text-accent">SIGN UP</h1>
+            <h1 className="text-3xl font-black tracking-tight uppercase italic text-accent">{t('common.signup')}</h1>
             <p className="text-muted-foreground font-bold text-xs uppercase tracking-widest">Establish your professional presence.</p>
           </div>
 
           <Card className="border-none shadow-2xl rounded-[2.5rem] bg-white overflow-hidden">
             <CardHeader className="space-y-1 pb-2">
-              <CardTitle className="text-xl font-black uppercase italic text-accent">Identity Registry</CardTitle>
-              <CardDescription className="text-[10px] font-bold uppercase tracking-widest italic">New User Onboarding</CardDescription>
+              <CardTitle className="text-xl font-black uppercase italic text-accent">{t('auth.signup.title')}</CardTitle>
+              <CardDescription className="text-[10px] font-bold uppercase tracking-widest italic">{t('auth.signup.desc')}</CardDescription>
             </CardHeader>
             <form onSubmit={handleSignup}>
               <CardContent className="space-y-4 pt-4">
                 <div className="space-y-2">
-                  <Label htmlFor="name" className="text-[10px] font-black uppercase tracking-widest text-accent/60">Full Legal Name</Label>
+                  <Label htmlFor="name" className="text-[10px] font-black uppercase tracking-widest text-accent/60">{t('auth.signup.name')}</Label>
                   <Input 
                     id="name" placeholder="JOHN DOE" required 
                     value={name} onChange={(e) => setName(e.target.value)}
@@ -177,7 +180,7 @@ export default function SignupPage() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="email" className="text-[10px] font-black uppercase tracking-widest text-accent/60">Email Endpoint</Label>
+                  <Label htmlFor="email" className="text-[10px] font-black uppercase tracking-widest text-accent/60">{t('auth.signup.email')}</Label>
                   <Input 
                     id="email" type="email" placeholder="YOUR@EMAIL.PRO" required 
                     value={email} onChange={(e) => setEmail(e.target.value)}
@@ -185,7 +188,7 @@ export default function SignupPage() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="password" className="text-[10px] font-black uppercase tracking-widest text-accent/60">Secure Key</Label>
+                  <Label htmlFor="password" className="text-[10px] font-black uppercase tracking-widest text-accent/60">{t('auth.signup.key')}</Label>
                   <Input 
                     id="password" type="password" required 
                     value={password} onChange={(e) => setPassword(e.target.value)}
@@ -195,20 +198,20 @@ export default function SignupPage() {
               </CardContent>
               <CardFooter className="flex flex-col gap-4 pb-8">
                 <Button type="submit" className="w-full h-12 rounded-xl bg-primary text-white font-black uppercase tracking-widest text-[10px] shadow-xl shadow-primary/20" disabled={isLoading}>
-                  {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : "Deploy Identity"}
+                  {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : t('auth.signup.submit')}
                 </Button>
                 
                 <div className="relative w-full py-2">
                   <div className="absolute inset-0 flex items-center"><span className="w-full border-t border-accent/5"></span></div>
-                  <div className="relative flex justify-center text-[8px] font-black uppercase"><span className="bg-white px-4 text-accent/20 tracking-[0.3em]">OR GOOGLE TUNNEL</span></div>
+                  <div className="relative flex justify-center text-[8px] font-black uppercase"><span className="bg-white px-4 text-accent/20 tracking-[0.3em]">{t('auth.signup.or')}</span></div>
                 </div>
 
                 <Button type="button" variant="outline" onClick={handleGoogleSignup} className="w-full h-12 rounded-xl border-accent/10 font-black uppercase tracking-widest text-[10px]" disabled={isLoading}>
-                  <Chrome className="mr-2 h-4 w-4 text-primary" /> Google Synthesis
+                  <Chrome className="mr-2 h-4 w-4 text-primary" /> {t('auth.signup.google')}
                 </Button>
 
                 <div className="pt-4 text-center">
-                  <p className="text-[10px] font-bold text-accent/40 uppercase">Already registered? <Link href={`/${locale}/login`} className="text-primary hover:underline italic">Sign Up - Login <ArrowRight className="inline h-2.5 w-2.5" /></Link></p>
+                  <p className="text-[10px] font-bold text-accent/40 uppercase">{t('auth.signup.existing_user')} <Link href={`/${locale}/login`} className="text-primary hover:underline italic">{t('common.signup')} - {t('common.login')} <ArrowRight className="inline h-2.5 w-2.5" /></Link></p>
                 </div>
               </CardFooter>
             </form>

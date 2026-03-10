@@ -1,3 +1,4 @@
+
 "use client"
 
 import * as React from 'react';
@@ -24,8 +25,10 @@ import { Label } from '@/components/ui/label';
 import { encryptPdfAction } from './actions';
 import { PDFPreview } from '@/components/pdf-preview';
 import { cn } from '@/lib/utils';
+import { useTranslation } from '@/lib/i18n-context';
 
 export default function SecurePage() {
+  const { t } = useTranslation();
   const [selectedFile, setSelectedFile] = React.useState<File | null>(null);
   const [password, setPassword] = React.useState("");
   const [isProcessing, setIsProcessing] = React.useState(false);
@@ -58,13 +61,13 @@ export default function SecurePage() {
       setDownloadUrl(resultUrl);
       setIsDone(true);
       toast({
-        title: "Hardening Complete",
+        title: t('common.success'),
         description: "Document architecture structurally hardened and metadata purged.",
       });
     } catch (e: any) {
       toast({
         variant: "destructive",
-        title: "Protocol Error",
+        title: t('common.failure'),
         description: e.message || "The industrial hardening sequence failed to initialize.",
       });
     } finally {
@@ -90,9 +93,9 @@ export default function SecurePage() {
             <div className="inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-accent text-white shadow-xl mb-2">
               <ShieldCheck className="h-7 w-7 text-primary" />
             </div>
-            <h1 className="text-4xl font-black tracking-tighter text-accent uppercase italic">Industrial Hardening</h1>
+            <h1 className="text-4xl font-black tracking-tighter text-accent uppercase italic">{t('tools.protect.title')}</h1>
             <p className="text-muted-foreground font-bold text-xs uppercase tracking-widest max-w-xl mx-auto">
-              Structural Metadata Anonymization. Mandatory key encryption for high-fidelity document protection.
+              {t('tools.protect.desc')}
             </p>
           </div>
 
@@ -127,7 +130,7 @@ export default function SecurePage() {
                         <div className="space-y-4">
                           <div className="space-y-2">
                             <Label htmlFor="pass" className="text-[10px] font-black uppercase tracking-widest text-accent flex items-center gap-2">
-                              <Lock className="h-3 w-3 text-primary" /> Authorization Key
+                              <Lock className="h-3 w-3 text-primary" /> {t('auth.login.key')}
                             </Label>
                             <Input 
                               id="pass" 
@@ -159,7 +162,7 @@ export default function SecurePage() {
                             {isProcessing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : "Deploy Hardening"}
                           </Button>
                           <Button variant="ghost" onClick={() => setSelectedFile(null)} className="text-[10px] font-bold uppercase tracking-widest text-accent/40 hover:text-accent">
-                            Discard Document
+                            {t('common.discard')}
                           </Button>
                         </div>
                       </CardContent>
@@ -220,7 +223,7 @@ export default function SecurePage() {
                   className="w-full h-14 rounded-2xl bg-accent hover:bg-accent/90 shadow-xl shadow-accent/20 text-[11px] font-black uppercase tracking-widest"
                 >
                   <Download className="mr-2 h-4 w-4" />
-                  Download Hardened PDF
+                  {t('common.download')}
                 </Button>
               </Card>
               <Button variant="ghost" onClick={reset} className="text-[10px] font-bold uppercase tracking-widest text-accent/40 hover:text-accent">

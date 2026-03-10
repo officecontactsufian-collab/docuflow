@@ -1,3 +1,4 @@
+
 "use client"
 
 import * as React from 'react';
@@ -10,8 +11,10 @@ import { Search, Loader2, FileText, Download, Info, ShieldCheck, Tag } from 'luc
 import { useToast } from '@/hooks/use-toast';
 import { PDFDocument } from 'pdf-lib';
 import { PDFPreview } from '@/components/pdf-preview';
+import { useTranslation } from '@/lib/i18n-context';
 
 export default function AnalyzePage() {
+  const { t } = useTranslation();
   const [selectedFile, setSelectedFile] = React.useState<File | null>(null);
   const [isLoading, setIsLoading] = React.useState(false);
   const [result, setResult] = React.useState<{
@@ -81,9 +84,9 @@ export default function AnalyzePage() {
             <div className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-lg mb-2">
               <Search className="h-6 w-6" />
             </div>
-            <h1 className="text-3xl font-bold tracking-tight font-headline text-accent uppercase italic tracking-tighter">Document Inspector</h1>
+            <h1 className="text-3xl font-bold tracking-tight font-headline text-accent uppercase italic tracking-tighter">{t('tools.inspect.title')}</h1>
             <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-              Extract metadata, security properties, and structural information directly from your PDF files.
+              {t('tools.inspect.desc')}
             </p>
           </div>
 
@@ -121,8 +124,8 @@ export default function AnalyzePage() {
                           {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Info className="mr-2 h-4 w-4" />}
                           Begin Inspection
                         </Button>
-                        <Button variant="ghost" onClick={() => setSelectedFile(null)} className="text-[10px] font-bold uppercase tracking-widest text-accent/40 hover:text-accent">
-                          Change Document
+                        <Button variant="ghost" onClick={() => setSelectedFile(null)} className="w-full text-[10px] font-bold uppercase tracking-widest text-accent/40 hover:text-accent">
+                          {t('common.discard')}
                         </Button>
                       </div>
                     </Card>
@@ -235,7 +238,7 @@ export default function AnalyzePage() {
               <div className="flex justify-center pt-8">
                 <Button size="lg" className="h-16 px-12 rounded-2xl bg-accent text-white font-black uppercase tracking-widest text-[11px] shadow-2xl shadow-accent/20">
                   <Download className="mr-2 h-4 w-4" />
-                  Export Structural Metadata
+                  {t('common.download')}
                 </Button>
               </div>
             </div>

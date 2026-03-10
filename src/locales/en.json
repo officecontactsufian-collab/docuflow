@@ -54,16 +54,6 @@
       "title": "DOCFLOW Professional - Industrial Document Intelligence",
       "description": "High-performance, local-first document intelligence workspace. Securely merge, split, compress, and sign PDF documents with zero-retention architecture.",
       "keywords": "PDF tools, Document Intelligence, Merge PDF, Split PDF, Digital Signature, Local-first PDF"
-    },
-    "merge": {
-      "title": "Merge PDF Documents | Industrial Merge Protocol",
-      "description": "Combine multiple PDF documents into a single professional asset. Secure, local-first merging with visual sequence control.",
-      "keywords": "merge pdf, combine pdf, join pdf files, secure pdf merger"
-    },
-    "ai_studio": {
-      "title": "AI Studio | Industrial Generative Protocols",
-      "description": "Initialize mission-critical generative sequences. Paraphrase, summarize, and interrogate documents with zero cloud retention.",
-      "keywords": "AI document analysis, AI summarizer, AI paraphraser, document intelligence"
     }
   },
   "home": {
@@ -113,8 +103,13 @@
     "repurposer": { "title": "Content Repurposer", "desc": "Viral stream synthesis." },
     "summarizer": { "title": "AI Summarizer", "desc": "Executive distillation." },
     "paraphraser": { "title": "Paraphraser", "desc": "Re-engineer text structure." },
+    "grammar": { "title": "Grammar", "desc": "Industrial proofing." },
+    "essay": { "title": "Essay Writer", "desc": "Academic synthesis." },
+    "resume": { "title": "Resume", "desc": "Profile engineering." },
+    "cover_letter": { "title": "Cover Letter", "desc": "Intro architect." },
+    "email": { "title": "Email", "desc": "Corporate drafts." },
     "translator": { "title": "Translator", "desc": "Linguistic shift." },
-    "doc_intel": { "title": "Doc Intel", "desc": "Deep asset interrogation." },
+    "doc_intel": { "title": "Doc Intel", "desc": "Asset interrogation." },
     "scan": { "title": "Scan to PDF", "desc": "Direct capture." },
     "inspect": { "title": "Deep Inspect", "desc": "Metadata analysis." },
     "repair": { "title": "Repair PDF", "desc": "Fix broken object catalogs." },
@@ -131,7 +126,11 @@
     "protect": { "title": "Password Protect", "desc": "Encrypt PDF." },
     "privacy": { "title": "Privacy Shield", "desc": "Metadata erasure." },
     "unlock": { "title": "Unlock PDF", "desc": "Strip restrictions." },
-    "sanitize": { "title": "Sanitize Asset", "desc": "Deep cleaning." }
+    "sanitize": { "title": "Sanitize Asset", "desc": "Deep cleaning." },
+    "compress": { "title": "Compress PDF", "desc": "Optimize file size." },
+    "scan_to_pdf": { "title": "Scan to PDF", "desc": "Direct capture." },
+    "remove_bg": { "title": "Remove BG", "desc": "AI isolation." },
+    "remove_wm": { "title": "Remove Watermark", "desc": "Structural purge." }
   },
   "ui": {
     "dropzone": {
@@ -157,14 +156,6 @@
       "asset_staged": "Asset Staged",
       "secure_tunnel": "Secure Tunnel",
       "local_synthesis": "Local Synthesis"
-    },
-    "share_dialog": {
-      "title": "Transmission Gate",
-      "desc": "Viral Distribution Channel v2.5",
-      "networks": "Authorized Networks",
-      "endpoint": "Manifest Endpoint",
-      "sync_note": "Privacy Sync Note",
-      "sync_desc": "Shared links expose the manifest registry endpoint. Original document binary streams remain locally encrypted within your hardware's memory buffer."
     },
     "sign_pdf": {
       "title": "Identity Engine",
@@ -214,7 +205,6 @@
       "initiate_repair": "Initiate Repair Sequence",
       "success_title": "File Recovered!",
       "success_desc": "Object stream successfully re-serialized and hardened.",
-      "hardening_report": "Hardening Report",
       "new_workspace": "Repair another document"
     }
   },
@@ -237,13 +227,7 @@
       "desc": "DOCFLOW was born from a simple observation: most document tools prioritize data retention over user privacy. We set out to build a platform that serves as a bridge, not a vault.",
       "zero_retention": { "title": "Zero Retention", "desc": "Binary streams are purged immediately after execution." },
       "identity_first": { "title": "Identity First", "desc": "You maintain 100% ownership of your digital signature and assets." },
-      "stats": { "uptime": "Core Uptime", "daily_ops": "Daily Ops" },
-      "high_fidelity": "High-Fidelity Flow",
-      "benchmark": "Operational Benchmark v2.5"
-    },
-    "cta": {
-      "title": "Ready to initialize?",
-      "subtitle": "Join the high-fidelity document flow today."
+      "stats": { "uptime": "Core Uptime", "daily_ops": "Daily Ops" }
     }
   },
   "contact": {

@@ -1,3 +1,4 @@
+
 "use client"
 
 import * as React from 'react';
@@ -10,8 +11,10 @@ import { Progress } from '@/components/ui/progress';
 import { PDFDocument } from 'pdf-lib';
 import { PDFPreview } from '@/components/pdf-preview';
 import { Card } from '@/components/ui/card';
+import { useTranslation } from '@/lib/i18n-context';
 
 export default function MergePage() {
+  const { t } = useTranslation();
   const [files, setFiles] = React.useState<File[]>([]);
   const [isProcessing, setIsProcessing] = React.useState(false);
   const [progress, setProgress] = React.useState(0);
@@ -57,7 +60,7 @@ export default function MergePage() {
       setIsDone(true);
       
       toast({
-        title: "Files merged successfully!",
+        title: t('common.success'),
         description: "Your new PDF is ready for download.",
       });
     } catch (error) {
@@ -65,7 +68,7 @@ export default function MergePage() {
       setIsProcessing(false);
       toast({
         variant: "destructive",
-        title: "Merge failed",
+        title: t('common.failure'),
         description: "An error occurred while merging your PDF files. Some files might be protected.",
       });
     }
@@ -113,9 +116,9 @@ export default function MergePage() {
             <div className="inline-flex h-12 w-12 items-center justify-center text-primary mb-2">
               <Merge className="h-10 w-10" />
             </div>
-            <h1 className="text-3xl font-bold tracking-tight font-headline text-accent uppercase italic tracking-tighter">Merge PDF Files</h1>
+            <h1 className="text-3xl font-bold tracking-tight font-headline text-accent uppercase italic tracking-tighter">{t('tools.merge.title')}</h1>
             <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-              Combine multiple PDF documents into a single, unified file. Manage your sequence with precision.
+              {t('tools.merge.desc')}
             </p>
           </div>
 
@@ -133,7 +136,7 @@ export default function MergePage() {
                     <div className="flex items-center justify-between px-2">
                       <h3 className="text-[10px] font-black uppercase tracking-widest text-accent/60 flex items-center gap-2">
                         <LayoutGrid className="h-3 w-3" />
-                        Staged Assets ({files.length})
+                        {t('ui.dropzone.staged')} ({files.length})
                       </h3>
                       <Button 
                         variant="ghost" 
@@ -141,7 +144,7 @@ export default function MergePage() {
                         onClick={() => setFiles([])}
                         className="text-[9px] font-black uppercase tracking-widest text-destructive hover:text-destructive hover:bg-destructive/5"
                       >
-                        <Trash2 className="h-3 w-3 mr-1" /> Clear All
+                        <Trash2 className="h-3 w-3 mr-1" /> {t('ui.dropzone.discard_all')}
                       </Button>
                     </div>
 
@@ -218,7 +221,7 @@ export default function MergePage() {
                             input.click();
                           }}
                         >
-                          <Plus className="mr-2 h-4 w-4" /> Add Files
+                          <Plus className="mr-2 h-4 w-4" /> {t('common.upload')}
                         </Button>
                         <Button 
                           size="lg" 
@@ -227,14 +230,14 @@ export default function MergePage() {
                           className="h-14 rounded-2xl bg-accent text-white font-black uppercase tracking-[0.2em] text-[11px] shadow-2xl shadow-accent/20"
                         >
                           {isProcessing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Merge className="mr-2 h-4 w-4" />}
-                          Merge All
+                          {t('tools.merge.title')}
                         </Button>
                       </div>
 
                       {isProcessing && (
                         <div className="space-y-2 animate-in fade-in">
                           <Progress value={progress} className="h-1.5" />
-                          <p className="text-[10px] text-center font-bold text-primary uppercase tracking-widest">Compiling documents...</p>
+                          <p className="text-[10px] text-center font-bold text-primary uppercase tracking-widest">{t('common.loading')}</p>
                         </div>
                       )}
                     </div>
@@ -242,7 +245,7 @@ export default function MergePage() {
 
                   <div className="lg:col-span-2">
                     {previewFile ? (
-                      <PDFPreview file={previewFile} title={`Preview: ${previewFile.name}`} />
+                      <PDFPreview file={previewFile} title={`${t('common.inspect')}: ${previewFile.name}`} />
                     ) : (
                       <div className="h-full min-h-[400px] rounded-[2rem] border-2 border-dashed flex flex-col items-center justify-center text-muted-foreground bg-muted/5 gap-4">
                         <FileText className="h-12 w-12 opacity-10" />
@@ -254,7 +257,7 @@ export default function MergePage() {
               )}
             </div>
           ) : (
-            <div className="max-w-md mx-auto space-y-8 text-center animate-in fade-in slide-in-from-bottom-8">
+            <div className="max-w-md mx-auto space-y-8 text-center animate-in fade-in slide-in-from-bottom-8 duration-700">
               <div className="p-12 bg-white border border-white/40 rounded-[3rem] shadow-2xl space-y-8">
                 <div className="w-20 h-20 text-green-600 flex items-center justify-center mx-auto">
                   <Download className="h-10 w-10" />
@@ -277,7 +280,7 @@ export default function MergePage() {
                   }} 
                   className="w-full h-14 rounded-2xl bg-accent hover:bg-accent/90 shadow-xl shadow-accent/20 text-[11px] font-black uppercase tracking-widest"
                 >
-                  Download Merged PDF
+                  {t('common.download')}
                 </Button>
               </div>
               <Button variant="ghost" onClick={reset} className="text-[10px] font-bold uppercase tracking-widest text-accent/60">
