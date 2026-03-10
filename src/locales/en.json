@@ -1,4 +1,3 @@
-
 {
   "common": {
     "all_protocols": "All Protocols",
@@ -164,6 +163,9 @@
       "wet_ink": "Wet Ink Surface",
       "script_payload": "Script Synthesis Payload",
       "style": "Script Style",
+      "style_elegant": "Elegant Script",
+      "style_casual": "Casual Flow",
+      "style_modern": "Modern Caveat",
       "upload_asset": "Upload Signature Asset",
       "supports": "Supports PNG, JPG, WEBP",
       "include_name": "Include Legal Name",

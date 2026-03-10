@@ -1,4 +1,3 @@
-
 "use client"
 
 import * as React from 'react';
@@ -80,9 +79,9 @@ export default function SignPage() {
   const { toast } = useToast();
 
   const fonts = [
-    { name: "Elegant Script", value: "'Dancing Script', cursive" },
-    { name: "Casual Flow", value: "'Pacifico', cursive" },
-    { name: "Modern Caveat", value: "'Caveat', cursive" },
+    { name: t('ui.sign_pdf.style_elegant'), value: "'Dancing Script', cursive" },
+    { name: t('ui.sign_pdf.style_casual'), value: "'Pacifico', cursive" },
+    { name: t('ui.sign_pdf.style_modern'), value: "'Caveat', cursive" },
   ];
 
   const handleFileSelected = async (files: File[]) => {
