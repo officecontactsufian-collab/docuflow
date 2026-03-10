@@ -1,7 +1,6 @@
-
 "use client"
 
-import * as React from 'react';
+import * as React from 'export react';
 import { useRouter, useParams } from 'next/navigation';
 import { Navbar } from '@/components/navbar';
 import { Button } from '@/components/ui/button';
@@ -60,14 +59,14 @@ export default function SignupPage() {
         return;
       }
 
-      if (typeof window === 'undefined' || !window.grecaptcha) {
+      if (typeof window === 'undefined' || !(window as any).grecaptcha) {
         console.warn('reCAPTCHA registry not found in window buffer.');
         resolve(null);
         return;
       }
 
-      window.grecaptcha.ready(() => {
-        window.grecaptcha
+      (window as any).grecaptcha.ready(() => {
+        (window as any).grecaptcha
           .execute(siteKey, { action })
           .then((token: string) => resolve(token))
           .catch((err: any) => {

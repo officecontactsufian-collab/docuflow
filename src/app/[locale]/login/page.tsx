@@ -1,4 +1,3 @@
-
 "use client"
 
 import * as React from 'react';
@@ -14,7 +13,6 @@ import { Loader2, Lock, Mail, Chrome, ArrowRight } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import Link from 'next/link';
 import Script from 'next/script';
-import { verifyRecaptcha } from '../auth-actions';
 import { useTranslation } from '@/lib/i18n-context';
 
 export default function LoginPage() {
