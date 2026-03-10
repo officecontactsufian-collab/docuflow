@@ -32,7 +32,9 @@
     "actions": "Actions",
     "download": "Download",
     "upload": "Upload",
-    "discard": "Discard"
+    "discard": "Discard",
+    "copyright": "All Protocols Reserved.",
+    "secure_tunnel_aes": "SECURE TUNNEL 256-BIT AES"
   },
   "nav": {
     "ai_writing": "AI Writing Suite",
@@ -55,7 +57,7 @@
       "title_line3": "Flow.",
       "subtitle": "High-performance document intelligence for professionals. AI-powered, private, and processed entirely within secure tunnels.",
       "cta": "Explore Core Protocols",
-      "compliance": ["ISO-27001 SECURE", "GDPR READY", "SOC2 COMPLIANT"]
+      "compliance": "ISO-27001 SECURE,GDPR READY,SOC2 COMPLIANT"
     },
     "categories": {
       "label_prefix": "Protocol",
@@ -138,6 +140,62 @@
       "asset_staged": "Asset Staged",
       "secure_tunnel": "Secure Tunnel",
       "local_synthesis": "Local Synthesis"
+    },
+    "share_dialog": {
+      "title": "Transmission Gate",
+      "desc": "Viral Distribution Channel v2.5",
+      "networks": "Authorized Networks",
+      "endpoint": "Manifest Endpoint",
+      "sync_note": "Privacy Sync Note",
+      "sync_desc": "Shared links expose the manifest registry endpoint. Original document binary streams remain locally encrypted within your hardware's memory buffer."
+    },
+    "sign_pdf": {
+      "title": "Identity Engine",
+      "subtitle": "Professional Document Execution. Construct composite identity blocks with precision anchor controls.",
+      "placement_title": "Interactive Placement Preview",
+      "click_zone": "Click Zone to Anchor",
+      "identity_bar": "Identity Bar",
+      "anchor": "Anchor",
+      "control_suite": "Control Suite",
+      "identity_synthesis": "Identity Synthesis & Anchoring",
+      "ink": "Ink",
+      "script": "Script",
+      "asset": "Asset",
+      "wet_ink": "Wet Ink Surface",
+      "script_payload": "Script Synthesis Payload",
+      "style": "Script Style",
+      "upload_asset": "Upload Signature Asset",
+      "supports": "Supports PNG, JPG, WEBP",
+      "include_name": "Include Legal Name",
+      "construct_name": "Construct Name Metadata",
+      "include_date": "Include Current Date",
+      "auto_synthesize": "Auto-synthesize temporal data",
+      "page_target": "Page Target",
+      "registry_pos": "Registry Position",
+      "deploy_anchor": "Deploy Identity Anchor",
+      "industrial_verification": "Industrial verification",
+      "verification_desc": "Identity blocks are permanently merged into the document object stream using high-resolution rendering. Zero training or storage protocols are active.",
+      "success_title": "Anchor Complete!",
+      "success_desc": "Identity block permanently embedded at verified coordinates.",
+      "execution_audit": "Execution Audit",
+      "mode_composite": "Identity Mode: Composite Block",
+      "reconstruction_verified": "Reconstruction: Verified",
+      "new_sequence": "Execute New Sequence"
+    },
+    "repair_pdf": {
+      "title": "Repair & Rebuild",
+      "subtitle": "Structural object tree re-indexing. Fix broken file catalogs and restore cross-reference tables via industrial re-serialization.",
+      "analysis_title": "Source Stream Analysis",
+      "recovery_title": "Structural Recovery",
+      "recovery_desc": "Object Stream Reconstruction",
+      "staged_rebuild": "Staged for Rebuild",
+      "audit_log": "Protocol Audit Log",
+      "industrial_note": "Industrial Protocol: Re-serialization will attempt to reconstruct the internal object tree and re-index the cross-reference table locally.",
+      "initiate_repair": "Initiate Repair Sequence",
+      "success_title": "File Recovered!",
+      "success_desc": "Object stream successfully re-serialized and hardened.",
+      "hardening_report": "Hardening Report",
+      "new_workspace": "Repair another document"
     }
   },
   "about": {
@@ -159,7 +217,13 @@
       "desc": "DOCFLOW was born from a simple observation: most document tools prioritize data retention over user privacy. We set out to build a platform that serves as a bridge, not a vault.",
       "zero_retention": { "title": "Zero Retention", "desc": "Binary streams are purged immediately after execution." },
       "identity_first": { "title": "Identity First", "desc": "You maintain 100% ownership of your digital signature and assets." },
-      "stats": { "uptime": "Core Uptime", "daily_ops": "Daily Ops" }
+      "stats": { "uptime": "Core Uptime", "daily_ops": "Daily Ops" },
+      "high_fidelity": "High-Fidelity Flow",
+      "benchmark": "Operational Benchmark v2.5"
+    },
+    "cta": {
+      "title": "Ready to initialize?",
+      "subtitle": "Join the high-fidelity document flow today."
     }
   },
   "contact": {

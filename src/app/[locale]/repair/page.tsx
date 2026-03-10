@@ -1,3 +1,4 @@
+
 "use client"
 
 import * as React from 'react';
@@ -15,77 +16,57 @@ import {
   Activity, 
   RefreshCcw,
   Zap,
-  Database,
-  LayoutGrid,
-  ShieldCheck,
-  Search,
-  Server
+  ShieldCheck
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/components/ui/card';
 import { PDFDocument } from 'pdf-lib';
 import { PDFPreview } from '@/components/pdf-preview';
 import { cn } from '@/lib/utils';
-
-interface AuditLog {
-  id: string;
-  message: string;
-  type: 'info' | 'success' | 'warning' | 'error';
-}
+import { useTranslation } from '@/lib/i18n-context';
 
 export default function RepairPage() {
+  const { t } = useTranslation();
   const [selectedFile, setSelectedFile] = React.useState<File | null>(null);
   const [isProcessing, setIsProcessing] = React.useState(false);
   const [isDone, setIsDone] = React.useState(false);
   const [downloadUrl, setDownloadUrl] = React.useState<string | null>(null);
-  const [auditLogs, setAuditLogs] = React.useState<AuditLog[]>([]);
+  const [logs, setLogs] = React.useState<string[]>([]);
   const { toast } = useToast();
-
-  const addLog = (message: string, type: AuditLog['type'] = 'info') => {
-    setAuditLogs(prev => [...prev, { id: Math.random().toString(36).substring(7), message, type }]);
-  };
 
   const handleRepair = async () => {
     if (!selectedFile) return;
     setIsProcessing(true);
-    setAuditLogs([]);
-    
-    try {
-      addLog("Initializing Industrial Recovery Protocol...", "info");
-      await new Promise(r => setTimeout(r, 800));
-      
-      addLog("Staging Document Binary Stream...", "info");
-      const arrayBuffer = await selectedFile.arrayBuffer();
-      
-      addLog("Deep Scanning Object Tree Catalog...", "info");
-      await new Promise(r => setTimeout(r, 1200));
-      
-      // Load with ignoreEncryption for maximum recovery potential
-      const pdfDoc = await PDFDocument.load(arrayBuffer, { ignoreEncryption: true });
-      const pageCount = pdfDoc.getPageCount();
-      addLog(`Scan Complete: ${pageCount} Page Segments Identified.`, "success");
+    setLogs([]);
 
-      addLog("Re-indexing Cross-Reference (XRef) Table...", "info");
+    try {
+      setLogs(prev => [...prev, "Initializing industrial recovery sequence..."]);
+      await new Promise(r => setTimeout(r, 500));
+      
+      const arrayBuffer = await selectedFile.arrayBuffer();
+      setLogs(prev => [...prev, "Scanning object tree catalog..."]);
+      
+      const pdfDoc = await PDFDocument.load(arrayBuffer, { ignoreEncryption: true });
+      setLogs(prev => [...prev, "Extracting page stream architecture..."]);
       await new Promise(r => setTimeout(r, 1000));
       
-      addLog("Hardening Stream Architecture...", "info");
       pdfDoc.setProducer('DOCFLOW Industrial Repair v2.5 (Structural Re-indexing)');
       pdfDoc.setModificationDate(new Date());
+      setLogs(prev => [...prev, "Re-indexing Cross-Reference table..."]);
       
-      addLog("Executing Industrial Re-serialization...", "info");
       const pdfBytes = await pdfDoc.save();
+      setLogs(prev => [...prev, "Executing re-serialization protocol..."]);
       await new Promise(r => setTimeout(r, 800));
       
       const blob = new Blob([pdfBytes], { type: 'application/pdf' });
       setDownloadUrl(URL.createObjectURL(blob));
-      
-      addLog("Asset Reconstructed and Verified.", "success");
+      setLogs(prev => [...prev, "Protocol verified. Asset ready."]);
       setIsDone(true);
-      toast({ title: "Repair Complete", description: "Document structure has been rebuilt successfully." });
+      toast({ title: t('common.success'), description: t('ui.repair_pdf.success_desc') });
     } catch (e) {
       console.error(e);
-      addLog("PROTOCOL FAILURE: Structural corruption beyond automated repair threshold.", "error");
-      toast({ variant: "destructive", title: "Repair Failed", description: "This file is too corrupted for automated structural repair." });
+      setLogs(prev => [...prev, "ERROR: Structural corruption detected."]);
+      toast({ variant: "destructive", title: t('common.failure'), description: "This file is too corrupted for automated structural repair." });
     } finally {
       setIsProcessing(false);
     }
@@ -94,7 +75,7 @@ export default function RepairPage() {
   const reset = () => {
     setIsDone(false);
     setSelectedFile(null);
-    setAuditLogs([]);
+    setLogs([]);
     if (downloadUrl) URL.revokeObjectURL(downloadUrl);
     setDownloadUrl(null);
   };
@@ -108,9 +89,9 @@ export default function RepairPage() {
             <div className="inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-accent text-white shadow-xl mb-2">
               <Wrench className="h-7 w-7 text-primary" />
             </div>
-            <h1 className="text-4xl font-black tracking-tighter text-accent uppercase italic">Repair & Rebuild</h1>
+            <h1 className="text-4xl font-black tracking-tighter text-accent uppercase italic">{t('ui.repair_pdf.title')}</h1>
             <p className="text-muted-foreground font-bold text-xs uppercase tracking-widest max-w-2xl mx-auto leading-relaxed">
-              Structural object tree re-indexing. Fix broken file catalogs and restore cross-reference tables via industrial re-serialization.
+              {t('ui.repair_pdf.subtitle')}
             </p>
           </div>
 
@@ -128,7 +109,7 @@ export default function RepairPage() {
                     <div className="flex items-center justify-between px-2">
                       <h3 className="text-[10px] font-black uppercase tracking-widest text-accent/40 flex items-center gap-2">
                         <Activity className="h-3.5 w-3.5 text-primary" />
-                        Source Stream Analysis
+                        {t('ui.repair_pdf.analysis_title')}
                       </h3>
                     </div>
                     <PDFPreview file={selectedFile} title="Recovery Reference" />
@@ -141,8 +122,8 @@ export default function RepairPage() {
                               <ShieldAlert className="h-5 w-5" />
                            </div>
                            <div className="flex flex-col">
-                              <CardTitle className="text-xl font-black uppercase italic tracking-tighter text-accent">Structural Recovery</CardTitle>
-                              <CardDescription className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Object Stream Reconstruction</CardDescription>
+                              <CardTitle className="text-xl font-black uppercase italic tracking-tighter text-accent">{t('ui.repair_pdf.recovery_title')}</CardTitle>
+                              <CardDescription className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">{t('ui.repair_pdf.recovery_desc')}</CardDescription>
                            </div>
                         </div>
                       </CardHeader>
@@ -151,31 +132,19 @@ export default function RepairPage() {
                           <div className="p-2 bg-white rounded-lg shadow-sm"><FileText className="h-6 w-6 text-primary shrink-0" /></div>
                           <div className="min-w-0">
                             <p className="text-xs font-black uppercase italic truncate text-accent">{selectedFile.name}</p>
-                            <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest">Staged for Rebuild</p>
+                            <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest">{t('ui.repair_pdf.staged_rebuild')}</p>
                           </div>
                         </div>
                         
-                        {auditLogs.length > 0 && (
+                        {logs.length > 0 && (
                           <div className="space-y-3">
-                            <p className="text-[8px] font-black uppercase text-accent/40 tracking-widest px-1">Protocol Audit Log</p>
-                            <div className="bg-black/5 rounded-2xl p-5 border border-accent/5 max-h-[200px] overflow-y-auto custom-scrollbar font-mono">
-                              {auditLogs.map(log => (
-                                <div key={log.id} className={cn(
-                                  "text-[9px] uppercase font-bold mb-2 last:mb-0 flex gap-2",
-                                  log.type === 'success' ? "text-green-600" : log.type === 'error' ? "text-destructive" : "text-accent/60"
-                                )}>
-                                  <span className="opacity-30">[{new Date().toLocaleTimeString([], { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' })}]</span>
-                                  <span>{log.message}</span>
+                            <p className="text-[8px] font-black uppercase text-accent/40 tracking-widest px-1">{t('ui.repair_pdf.audit_log')}</p>
+                            <div className="bg-black/5 rounded-2xl p-5 border border-accent/5 space-y-2 font-mono max-h-[200px] overflow-y-auto custom-scrollbar">
+                              {logs.map((log, i) => (
+                                <div key={i} className="text-[9px] uppercase font-bold text-accent/60 flex items-center gap-2">
+                                  <Zap className="h-2 w-2 text-primary" /> {log}
                                 </div>
                               ))}
-                              {isProcessing && (
-                                <div className="flex items-center gap-2 mt-2">
-                                  <Loader2 className="h-2 w-2 animate-spin text-primary" />
-                                  <div className="h-1 w-8 bg-primary/20 rounded-full overflow-hidden">
-                                    <div className="h-full bg-primary animate-infinite-scroll w-1/2" />
-                                  </div>
-                                </div>
-                              )}
                             </div>
                           </div>
                         )}
@@ -183,7 +152,7 @@ export default function RepairPage() {
                         <div className="p-5 bg-primary/5 rounded-[2rem] border border-primary/10 flex items-start gap-4">
                            <Info className="h-5 w-5 text-primary shrink-0 mt-0.5" />
                            <p className="text-[10px] leading-relaxed text-muted-foreground font-medium uppercase tracking-tight">
-                             <span className="font-black text-accent italic">Industrial Protocol:</span> Re-serialization will attempt to reconstruct the internal object tree and re-index the cross-reference table locally.
+                             <span className="font-black text-accent italic">Industrial Protocol:</span> {t('ui.repair_pdf.industrial_note')}
                            </p>
                         </div>
 
@@ -194,10 +163,10 @@ export default function RepairPage() {
                             className="w-full h-16 rounded-2xl bg-accent text-white font-black uppercase tracking-[0.2em] text-[11px] shadow-2xl shadow-accent/20 hover:scale-[1.01] transition-transform"
                           >
                             {isProcessing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <RefreshCcw className="mr-2 h-4 w-4" />}
-                            Initiate Repair Sequence
+                            {t('ui.repair_pdf.initiate_repair')}
                           </Button>
                           <Button variant="ghost" onClick={() => setSelectedFile(null)} className="text-[10px] font-bold uppercase tracking-widest text-accent/40 hover:text-accent">
-                            Discard Document
+                            {t('common.discard')}
                           </Button>
                         </div>
                       </CardContent>
@@ -213,29 +182,9 @@ export default function RepairPage() {
                   <CheckCircle2 className="h-10 w-10" />
                 </div>
                 <div className="space-y-2">
-                  <h2 className="text-2xl font-black uppercase italic tracking-tight text-accent">File Recovered!</h2>
-                  <p className="text-muted-foreground text-sm font-medium uppercase tracking-widest">Object stream successfully re-serialized and hardened.</p>
+                  <h2 className="text-2xl font-black uppercase italic tracking-tight text-accent">{t('ui.repair_pdf.success_title')}</h2>
+                  <p className="text-muted-foreground text-sm font-medium uppercase tracking-widest">{t('ui.repair_pdf.success_desc')}</p>
                 </div>
-
-                <div className="p-6 bg-muted/30 rounded-[2rem] border border-accent/5 text-left space-y-4">
-                   <div className="flex items-center gap-2 mb-1">
-                      <ShieldCheck className="h-4 w-4 text-primary" />
-                      <span className="text-[10px] font-black uppercase tracking-widest text-accent/60">Hardening Report</span>
-                   </div>
-                   <div className="grid grid-cols-1 gap-2">
-                      {[
-                        "Catalog Re-indexed",
-                        "XRef Table Rebuilt",
-                        "Stream Buffers Normalized",
-                        "Metadata Sanitized"
-                      ].map(check => (
-                        <div key={check} className="flex items-center gap-2 text-[9px] font-bold text-accent/40 uppercase italic">
-                           <div className="h-1 w-1 rounded-full bg-green-500" /> {check}
-                        </div>
-                      ))}
-                   </div>
-                </div>
-
                 <Button 
                   size="lg" 
                   onClick={() => {
@@ -251,11 +200,11 @@ export default function RepairPage() {
                   className="w-full h-14 rounded-2xl bg-accent hover:bg-accent/90 shadow-xl shadow-accent/20 text-[11px] font-black uppercase tracking-widest"
                 >
                   <Download className="mr-2 h-4 w-4" />
-                  Download Repaired PDF
+                  {t('common.download')}
                 </Button>
               </Card>
               <Button variant="ghost" onClick={reset} className="text-[10px] font-bold uppercase tracking-widest text-accent/40 hover:text-accent">
-                Repair another document
+                {t('ui.repair_pdf.new_workspace')}
               </Button>
             </div>
           )}

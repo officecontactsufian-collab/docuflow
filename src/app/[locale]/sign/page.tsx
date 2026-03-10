@@ -1,3 +1,4 @@
+
 "use client"
 
 import * as React from 'react';
@@ -23,7 +24,6 @@ import {
   Calendar,
   User,
   Upload,
-  Palette,
   X,
   ShieldCheck,
   Zap
@@ -37,6 +37,7 @@ import { Switch } from '@/components/ui/switch';
 import { PDFDocument } from 'pdf-lib';
 import { PDFPreview } from '@/components/pdf-preview';
 import { cn } from '@/lib/utils';
+import { useTranslation } from '@/lib/i18n-context';
 
 type SignatureMode = 'draw' | 'type' | 'upload';
 type Position = "top-left" | "top-center" | "top-right" | "middle-left" | "center" | "middle-right" | "bottom-left" | "bottom-center" | "bottom-right";
@@ -54,6 +55,7 @@ const POSITION_MAP: { label: string; value: Position }[] = [
 ];
 
 export default function SignPage() {
+  const { t } = useTranslation();
   const [pdfFile, setPdfFile] = React.useState<File | null>(null);
   const [totalPages, setTotalPages] = React.useState(0);
   const [targetPage, setTargetPage] = React.useState(1);
@@ -93,7 +95,7 @@ export default function SignPage() {
       setTargetPage(1);
       setPdfFile(file);
     } catch (e) {
-      toast({ variant: "destructive", title: "Invalid PDF", description: "Failed to parse document structure." });
+      toast({ variant: "destructive", title: t('common.failure'), description: "Failed to parse document structure." });
     }
   };
 
@@ -152,7 +154,6 @@ export default function SignPage() {
     const ctx = canvas.getContext('2d');
     if (!ctx) return null;
 
-    // Render logic for composite signature block
     if (mode === 'draw' && canvasRef.current) {
       ctx.drawImage(canvasRef.current, 0, 0, canvas.width, canvas.height);
     } else if (mode === 'type') {
@@ -171,7 +172,6 @@ export default function SignPage() {
       ctx.drawImage(img, (canvas.width - w) / 2, (canvas.height - h) / 2 - 40, w, h);
     }
 
-    // Embed metadata if requested
     let metadataY = canvas.height - 60;
     ctx.fillStyle = inkColor;
     ctx.font = "bold 24px Inter, sans-serif";
@@ -232,10 +232,10 @@ export default function SignPage() {
       const finalBytes = await pdfDoc.save();
       setDownloadUrl(URL.createObjectURL(new Blob([finalBytes], { type: 'application/pdf' })));
       setIsDone(true);
-      toast({ title: "Protocol Success", description: "Identity block embedded and verified." });
+      toast({ title: t('common.success'), description: t('ui.sign_pdf.verification_desc') });
     } catch (error: any) {
       console.error(error);
-      toast({ variant: "destructive", title: "Sequence Failed", description: error.message });
+      toast({ variant: "destructive", title: t('common.failure'), description: error.message });
     } finally {
       setIsProcessing(false);
     }
@@ -260,9 +260,9 @@ export default function SignPage() {
             <div className="inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-accent text-white shadow-xl mb-2">
               <Signature className="h-7 w-7" />
             </div>
-            <h1 className="text-4xl font-black tracking-tighter text-accent uppercase italic">Identity Engine</h1>
+            <h1 className="text-4xl font-black tracking-tighter text-accent uppercase italic">{t('ui.sign_pdf.title')}</h1>
             <p className="text-muted-foreground font-bold text-xs uppercase tracking-widest max-w-xl mx-auto">
-              Professional Document Execution. Construct composite identity blocks with precision anchor controls.
+              {t('ui.sign_pdf.subtitle')}
             </p>
           </div>
 
@@ -280,11 +280,11 @@ export default function SignPage() {
                     <div className="flex items-center justify-between px-2">
                       <h3 className="text-[10px] font-black uppercase tracking-widest text-accent/60 flex items-center gap-2">
                         <Target className="h-3.5 w-3.5 text-primary" />
-                        Interactive Placement Preview
+                        {t('ui.sign_pdf.placement_title')}
                       </h3>
                       <div className="flex items-center gap-2 bg-primary/10 px-3 py-1 rounded-full">
                          <MousePointer2 className="h-3 w-3 text-primary" />
-                         <span className="text-[9px] font-black text-primary uppercase">Click Zone to Anchor</span>
+                         <span className="text-[9px] font-black text-primary uppercase">{t('ui.sign_pdf.click_zone')}</span>
                       </div>
                     </div>
                     
@@ -308,8 +308,8 @@ export default function SignPage() {
                                  <div className="px-4 py-2 bg-accent text-white rounded-xl shadow-2xl border border-white/20 flex items-center gap-3">
                                     <Maximize className="h-4 w-4 text-primary" />
                                     <div className="flex flex-col">
-                                       <span className="text-[8px] font-black uppercase tracking-widest">Identity Bar</span>
-                                       <span className="text-[7px] font-bold text-white/40 uppercase tracking-tighter">Anchor: {pos.label}</span>
+                                       <span className="text-[8px] font-black uppercase tracking-widest">{t('ui.sign_pdf.identity_bar')}</span>
+                                       <span className="text-[7px] font-bold text-white/40 uppercase tracking-tighter">{t('ui.sign_pdf.anchor')}: {pos.label}</span>
                                     </div>
                                  </div>
                                  <div className="w-32 h-0.5 bg-primary/40 rounded-full" />
@@ -331,8 +331,8 @@ export default function SignPage() {
                               <Settings2 className="h-5 w-5" />
                            </div>
                            <div className="flex flex-col">
-                              <CardTitle className="text-xl font-black uppercase italic tracking-tighter text-accent">Control Suite</CardTitle>
-                              <CardDescription className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Identity Synthesis & Anchoring</CardDescription>
+                              <CardTitle className="text-xl font-black uppercase italic tracking-tighter text-accent">{t('ui.sign_pdf.control_suite')}</CardTitle>
+                              <CardDescription className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">{t('ui.sign_pdf.identity_synthesis')}</CardDescription>
                            </div>
                         </div>
                       </CardHeader>
@@ -340,19 +340,19 @@ export default function SignPage() {
                         <Tabs value={mode} onValueChange={(v: any) => setMode(v)} className="w-full">
                           <TabsList className="grid grid-cols-3 h-12 bg-muted/30 p-1 rounded-xl mb-6">
                             <TabsTrigger value="draw" className="rounded-lg font-black text-[9px] uppercase tracking-widest gap-2">
-                              <PenTool className="h-3 w-3" /> Ink
+                              <PenTool className="h-3 w-3" /> {t('ui.sign_pdf.ink')}
                             </TabsTrigger>
                             <TabsTrigger value="type" className="rounded-lg font-black text-[9px] uppercase tracking-widest gap-2">
-                              <Type className="h-3 w-3" /> Script
+                              <Type className="h-3 w-3" /> {t('ui.sign_pdf.script')}
                             </TabsTrigger>
                             <TabsTrigger value="upload" className="rounded-lg font-black text-[9px] uppercase tracking-widest gap-2">
-                              <Upload className="h-3 w-3" /> Asset
+                              <Upload className="h-3 w-3" /> {t('ui.sign_pdf.asset')}
                             </TabsTrigger>
                           </TabsList>
 
                           <TabsContent value="draw" className="space-y-4">
                             <div className="flex items-center justify-between mb-2">
-                               <p className="text-[9px] font-black uppercase text-accent/40 tracking-widest">Wet Ink Surface</p>
+                               <p className="text-[9px] font-black uppercase text-accent/40 tracking-widest">{t('ui.sign_pdf.wet_ink')}</p>
                                <div className="flex gap-2">
                                   {["#251F4A", "#000000"].map(c => (
                                     <button 
@@ -392,7 +392,7 @@ export default function SignPage() {
                           <TabsContent value="type" className="space-y-6">
                             <div className="space-y-4">
                               <div className="space-y-2">
-                                <Label className="text-[10px] font-black uppercase tracking-widest text-accent/60">Script Synthesis Payload</Label>
+                                <Label className="text-[10px] font-black uppercase tracking-widest text-accent/60">{t('ui.sign_pdf.script_payload')}</Label>
                                 <Input 
                                   value={typedName} 
                                   onChange={(e) => setTypedName(e.target.value)}
@@ -413,7 +413,7 @@ export default function SignPage() {
                                     )}
                                     style={{ fontFamily: f.value, color: inkColor }}
                                   >
-                                    {typedName || "Script Style"}
+                                    {typedName || t('ui.sign_pdf.style')}
                                   </button>
                                 ))}
                               </div>
@@ -431,8 +431,8 @@ export default function SignPage() {
                                   <>
                                     <Upload className="h-8 w-8 text-accent/20 group-hover:text-primary transition-colors" />
                                     <div className="space-y-1">
-                                      <p className="text-[10px] font-black uppercase italic text-accent">Upload Signature Asset</p>
-                                      <p className="text-[8px] font-bold text-accent/20 uppercase">Supports PNG, JPG, WEBP</p>
+                                      <p className="text-[10px] font-black uppercase italic text-accent">{t('ui.sign_pdf.upload_asset')}</p>
+                                      <p className="text-[8px] font-bold text-accent/20 uppercase">{t('ui.sign_pdf.supports')}</p>
                                     </div>
                                     <input type="file" onChange={handleImageUpload} accept="image/*" className="absolute inset-0 opacity-0 cursor-pointer" />
                                   </>
@@ -447,8 +447,8 @@ export default function SignPage() {
                                  <div className="flex items-center gap-3">
                                     <User className="h-4 w-4 text-primary" />
                                     <div className="flex flex-col">
-                                       <span className="text-[10px] font-black uppercase">Include Legal Name</span>
-                                       <span className="text-[8px] font-bold text-accent/40 uppercase">Construct Name Metadata</span>
+                                       <span className="text-[10px] font-black uppercase">{t('ui.sign_pdf.include_name')}</span>
+                                       <span className="text-[8px] font-bold text-accent/40 uppercase">{t('ui.sign_pdf.construct_name')}</span>
                                     </div>
                                  </div>
                                  <Switch checked={includeName} onCheckedChange={setIncludeName} />
@@ -466,8 +466,8 @@ export default function SignPage() {
                                  <div className="flex items-center gap-3">
                                     <Calendar className="h-4 w-4 text-primary" />
                                     <div className="flex flex-col">
-                                       <span className="text-[10px] font-black uppercase">Include Current Date</span>
-                                       <span className="text-[8px] font-bold text-accent/40 uppercase">Auto-synthesize temporal data</span>
+                                       <span className="text-[10px] font-black uppercase">{t('ui.sign_pdf.include_date')}</span>
+                                       <span className="text-[8px] font-bold text-accent/40 uppercase">{t('ui.sign_pdf.auto_synthesize')}</span>
                                     </div>
                                  </div>
                                  <Switch checked={includeDate} onCheckedChange={setIncludeDate} />
@@ -477,7 +477,7 @@ export default function SignPage() {
                            <div className="grid grid-cols-2 gap-8 pt-4">
                               <div className="space-y-4">
                                 <Label className="text-[10px] font-black uppercase tracking-widest text-accent/60 flex items-center gap-2">
-                                  <Layers className="h-3 w-3" /> Page Target
+                                  <Layers className="h-3 w-3" /> {t('ui.sign_pdf.page_target')}
                                 </Label>
                                 <div className="flex items-center gap-2">
                                    <Button 
@@ -504,7 +504,7 @@ export default function SignPage() {
 
                               <div className="space-y-4">
                                 <Label className="text-[10px] font-black uppercase tracking-widest text-accent/60 flex items-center gap-2">
-                                  <MousePointer2 className="h-3 w-3" /> Registry Position
+                                  <MousePointer2 className="h-3 w-3" /> {t('ui.sign_pdf.registry_pos')}
                                 </Label>
                                 <div className="grid grid-cols-3 gap-1 bg-muted/20 p-1 rounded-xl border border-accent/5">
                                    {POSITION_MAP.map((pos) => (
@@ -531,7 +531,7 @@ export default function SignPage() {
                             className="w-full h-16 rounded-2xl bg-accent text-white font-black uppercase tracking-[0.2em] text-[11px] shadow-2xl shadow-accent/20 hover:scale-[1.01] transition-all group"
                           >
                             {isProcessing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <UserCheck className="mr-2 h-4 w-4" />}
-                            Deploy Identity Anchor
+                            {t('ui.sign_pdf.deploy_anchor')}
                           </Button>
                         </div>
                       </CardContent>
@@ -540,10 +540,9 @@ export default function SignPage() {
                     <div className="p-6 bg-primary/5 rounded-[2.5rem] border border-primary/10 flex items-start gap-4">
                        <ShieldCheck className="h-6 w-6 text-primary shrink-0" />
                        <div className="space-y-1">
-                          <p className="text-[10px] font-black text-accent uppercase italic">Industrial verification</p>
+                          <p className="text-[10px] font-black text-accent uppercase italic">{t('ui.sign_pdf.industrial_verification')}</p>
                           <p className="text-[9px] font-bold text-muted-foreground uppercase leading-relaxed tracking-tight">
-                            Identity blocks are permanently merged into the document object stream using high-resolution rendering. 
-                            Zero training or storage protocols are active.
+                            {t('ui.sign_pdf.verification_desc')}
                           </p>
                        </div>
                     </div>
@@ -558,20 +557,19 @@ export default function SignPage() {
                   <CheckCircle2 className="h-10 w-10" />
                 </div>
                 <div className="space-y-2">
-                  <h2 className="text-2xl font-black uppercase italic tracking-tight text-accent">Anchor Complete!</h2>
-                  <p className="text-muted-foreground text-sm font-medium">Identity block permanently embedded at verified coordinates.</p>
+                  <h2 className="text-2xl font-black uppercase italic tracking-tight text-accent">{t('ui.sign_pdf.success_title')}</h2>
+                  <p className="text-muted-foreground text-sm font-medium">{t('ui.sign_pdf.success_desc')}</p>
                 </div>
                 <div className="p-4 bg-muted/30 rounded-2xl border border-accent/5 text-left">
                    <div className="flex items-center gap-2 mb-3">
                       <Zap className="h-3 w-3 text-primary" />
-                      <span className="text-[9px] font-black uppercase tracking-widest text-accent/60">Execution Audit</span>
+                      <span className="text-[9px] font-black uppercase tracking-widest text-accent/60">{t('ui.sign_pdf.execution_audit')}</span>
                    </div>
                    <ul className="space-y-2">
                       {[
-                        "Identity Mode: Composite Block",
-                        `Placement: ${position.replace('-', ' ').toUpperCase()}`,
-                        `Metadata: ${[includeName && 'NAME', includeDate && 'DATE'].filter(Boolean).join(' + ') || 'NONE'}`,
-                        "Reconstruction: Verified"
+                        t('ui.sign_pdf.mode_composite'),
+                        `${t('ui.sign_pdf.registry_pos')}: ${position.replace('-', ' ').toUpperCase()}`,
+                        `${t('common.status')}: ${t('ui.sign_pdf.reconstruction_verified')}`
                       ].map(item => (
                         <li key={item} className="flex items-center gap-2 text-[9px] font-bold text-accent italic">
                            <div className="h-1 w-1 rounded-full bg-green-500" /> {item}
@@ -594,11 +592,11 @@ export default function SignPage() {
                   className="w-full h-14 rounded-2xl bg-accent hover:bg-accent/90 shadow-xl shadow-accent/20 text-[11px] font-black uppercase tracking-widest"
                 >
                   <Download className="mr-2 h-4 w-4" />
-                  Download Executed Asset
+                  {t('common.download')}
                 </Button>
               </Card>
               <Button variant="ghost" onClick={reset} className="text-[10px] font-bold uppercase tracking-widest text-accent/40 hover:text-accent">
-                Execute New Sequence
+                {t('ui.sign_pdf.new_sequence')}
               </Button>
             </div>
           )}

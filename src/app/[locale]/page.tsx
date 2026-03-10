@@ -22,6 +22,7 @@ import {
   ArrowRight,
   Play,
   Lock,
+  Unlock,
   Cpu,
   RefreshCcw,
   Zap,
@@ -335,10 +336,10 @@ export default function Home() {
           </div>
           <div className="flex flex-col md:flex-row items-center justify-between gap-8 pt-10 border-t border-white/5 opacity-30">
             <p className="text-[8px] font-black uppercase tracking-[0.5em]">
-              &copy; {year} DOCFLOW. All Protocols Reserved.
+              &copy; {year} DOCFLOW. {t('common.copyright')}
             </p>
             <div className="flex items-center gap-10 text-[8px] font-black uppercase tracking-[0.5em]">
-              <span>SECURE TUNNEL 256-BIT AES</span>
+              <span>{t('common.secure_tunnel_aes')}</span>
             </div>
           </div>
         </div>
