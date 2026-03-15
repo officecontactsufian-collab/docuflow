@@ -11,7 +11,6 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { useAuth, useUser } from '@/firebase';
 import { signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
 import { Loader2, Lock, Mail, Chrome, ArrowRight, ShieldCheck } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
 import Link from 'next/link';
 import Script from 'next/script';
 import { useTranslation } from '@/lib/i18n-context';
@@ -22,7 +21,6 @@ export default function LoginPage() {
   const locale = params.locale as string;
   const auth = useAuth();
   const { user, isUserLoading } = useUser();
-  const { toast } = useToast();
   const { t } = useTranslation();
   
   const [email, setEmail] = React.useState('');
@@ -40,11 +38,11 @@ export default function LoginPage() {
     setIsLoading(true);
     try {
       await signInWithEmailAndPassword(auth!, email, password);
-      // Success is silent, proceeding to dashboard
+      // Silent transition: no success toast shown
       router.push(`/${locale}/dashboard`);
     } catch (error: any) {
       console.error('Auth Protocol Failure:', error.code);
-      // Anonymized errors: no toast shown
+      // Anonymized errors: no toast shown to user
     } finally {
       setIsLoading(false);
     }
@@ -61,7 +59,7 @@ export default function LoginPage() {
       router.push(`/${locale}/dashboard`);
     } catch (error: any) {
       console.error('Federated Auth Error:', error.code);
-      // Anonymized errors: no toast shown
+      // Anonymized errors: no toast shown to user
     } finally {
       setIsLoading(false);
     }

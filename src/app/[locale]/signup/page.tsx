@@ -19,7 +19,6 @@ import {
 } from 'firebase/auth';
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { Loader2, Mail, Lock, Chrome, ArrowRight, ShieldCheck } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
 import Link from 'next/link';
 import Script from 'next/script';
 import { verifyRecaptcha } from '../auth-actions';
@@ -32,7 +31,6 @@ export default function SignupPage() {
   const auth = useAuth();
   const firestore = useFirestore();
   const { user, isUserLoading } = useUser();
-  const { toast } = useToast();
   const { t } = useTranslation();
   
   const [name, setName] = React.useState('');
@@ -94,12 +92,12 @@ export default function SignupPage() {
       await syncUserProfile(cred.user.uid, email, name);
       
       // Silent verification link dispatch
-      await sendEmailVerification(cred.user);
+      await sendEmailVerification(cred.user).catch(() => {});
       
       router.push(`/${locale}/dashboard`);
     } catch (error: any) {
       console.error('Signup Protocol Failure:', error.code);
-      // Anonymized errors: no toast shown to user as per request
+      // Anonymized errors: no message shown to user
     } finally {
       setIsLoading(false);
     }
@@ -115,8 +113,8 @@ export default function SignupPage() {
       
       // Dispatch verification link and password setup link to Gmail silently
       if (cred.user) {
-        await sendEmailVerification(cred.user);
-        await sendPasswordResetEmail(auth!, cred.user.email!);
+        await sendEmailVerification(cred.user).catch(() => {});
+        await sendPasswordResetEmail(auth!, cred.user.email!).catch(() => {});
       }
 
       await syncUserProfile(cred.user.uid, cred.user.email!, cred.user.displayName!);
@@ -125,7 +123,7 @@ export default function SignupPage() {
       router.push(`/${locale}/dashboard`);
     } catch (error: any) {
       console.error('Federated Signup Error:', error.code);
-      // Anonymized errors: no toast shown
+      // Anonymized errors: no message shown to user
     } finally {
       setIsLoading(false);
     }
