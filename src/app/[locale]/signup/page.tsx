@@ -10,7 +10,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { useAuth, useUser, useFirestore } from '@/firebase';
 import { createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, updateProfile } from 'firebase/auth';
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
-import { Loader2, UserPlus, Mail, Lock, Chrome, ArrowRight, ShieldCheck } from 'lucide-react';
+import { Loader2, UserPlus, Mail, Lock, Chrome, ArrowRight } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import Link from 'next/link';
 import Script from 'next/script';
@@ -79,7 +79,7 @@ export default function SignupPage() {
 
   const verifyHumanity = async (action: string) => {
     const token = await executeRecaptcha(action);
-    if (!token) return true; // Fallback for missing keys in dev environment
+    if (!token) return true;
     return await verifyRecaptcha(token);
   };
 
@@ -120,8 +120,8 @@ export default function SignupPage() {
       toast({ title: "Identity Federated", description: "Account created via Google tunnel." });
       router.push(`/${locale}/dashboard`);
     } catch (error: any) {
+      // Graceful handling of popup cancellation
       if (error.code === 'auth/popup-closed-by-user') {
-        setIsLoading(false);
         return;
       }
       toast({ 

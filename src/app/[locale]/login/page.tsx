@@ -56,6 +56,10 @@ export default function LoginPage() {
       toast({ title: "Identity Verified", description: "Google authentication successful." });
       router.push(`/${locale}/dashboard`);
     } catch (error: any) {
+      // Graceful handling of popup cancellation
+      if (error.code === 'auth/popup-closed-by-user') {
+        return;
+      }
       toast({ variant: "destructive", title: "Protocol Error", description: error.message });
     } finally {
       setIsLoading(false);
