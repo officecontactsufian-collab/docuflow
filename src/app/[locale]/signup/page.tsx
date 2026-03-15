@@ -40,7 +40,8 @@ export default function SignupPage() {
   }, [user, isUserLoading, router, locale]);
 
   const syncUserProfile = async (uid: string, email: string, displayName: string) => {
-    const userRef = doc(firestore!, 'users', uid);
+    if (!firestore) return;
+    const userRef = doc(firestore, 'users', uid);
     await setDoc(userRef, {
       uid,
       email,
@@ -96,7 +97,7 @@ export default function SignupPage() {
       const cred = await createUserWithEmailAndPassword(auth!, email, password);
       await updateProfile(cred.user, { displayName: name });
       await syncUserProfile(cred.user.uid, email, name);
-      toast({ title: "SIGN UP SUCCESS", description: "Your professional registry has been established." });
+      toast({ title: t('common.success'), description: "Your professional registry has been established." });
       router.push(`/${locale}/dashboard`);
     } catch (error: any) {
       let message = t('auth.errors.default');
@@ -107,7 +108,7 @@ export default function SignupPage() {
       } else if (error.message) {
         message = error.message;
       }
-      toast({ variant: "destructive", title: "Synthesis Error", description: message });
+      toast({ variant: "destructive", title: t('common.failure'), description: message });
     } finally {
       setIsLoading(false);
     }
@@ -126,17 +127,16 @@ export default function SignupPage() {
 
       const cred = await signInWithPopup(auth!, provider);
       await syncUserProfile(cred.user.uid, cred.user.email!, cred.user.displayName!);
-      toast({ title: "Identity Federated", description: "Account created via Google tunnel." });
+      toast({ title: t('common.success'), description: "Identity Federated." });
       router.push(`/${locale}/dashboard`);
     } catch (error: any) {
-      // Graceful handling of popup cancellation
       if (error.code === 'auth/popup-closed-by-user') {
         setIsLoading(false);
         return;
       }
       toast({ 
         variant: "destructive", 
-        title: "Protocol Error", 
+        title: t('common.failure'), 
         description: t('auth.errors.default')
       });
     } finally {
@@ -220,7 +220,7 @@ export default function SignupPage() {
                 </Button>
 
                 <div className="pt-4 text-center">
-                  <p className="text-[10px] font-bold text-accent/40 uppercase">{t('auth.signup.existing_user')} <Link href={`/${locale}/login`} className="text-primary hover:underline italic">{t('common.signup')} - {t('common.login')} <ArrowRight className="inline h-2.5 w-2.5" /></Link></p>
+                  <p className="text-[10px] font-bold text-accent/40 uppercase">{t('auth.signup.existing_user')} <Link href={`/${locale}/login`} className="text-primary hover:underline italic">{t('common.login')} <ArrowRight className="inline h-2.5 w-2.5" /></Link></p>
                 </div>
               </CardFooter>
             </form>
@@ -228,7 +228,7 @@ export default function SignupPage() {
           
           <div className="text-center">
              <p className="text-[8px] font-bold text-accent/20 uppercase tracking-[0.2em] max-w-[240px] mx-auto leading-relaxed">
-               Protected by reCAPTCHA v3. Google <Link href="/privacy" className="underline">Privacy</Link> and <Link href="/terms" className="underline">Terms</Link> apply.
+               Protected by reCAPTCHA v3. Google Privacy and Terms apply.
              </p>
           </div>
         </div>

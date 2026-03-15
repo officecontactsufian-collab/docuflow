@@ -54,11 +54,6 @@
       "title": "DOCFLOW Professional - Industrial Document Intelligence",
       "desc": "High-performance, local-first document intelligence workspace. Securely merge, split, compress, and sign PDF documents with zero-retention architecture.",
       "keywords": "PDF tools, Document Intelligence, Merge PDF, Split PDF, Digital Signature, Secure PDF"
-    },
-    "home": {
-      "title": "DOCFLOW Professional - Secure Document Intelligence",
-      "desc": "The industrial benchmark for local-first document manipulation. AI-powered, private, and instant transformation protocols.",
-      "keywords": "Online PDF tools, secure pdf editor, AI document assistant, private file conversion"
     }
   },
   "home": {
@@ -142,7 +137,8 @@
       "submit": "Verify Identity",
       "google": "Google Integration",
       "new_user": "New to the protocol?",
-      "or": "OR FEDERATED GATEWAY"
+      "or": "OR FEDERATED GATEWAY",
+      "lost_key": "Lost Key?"
     },
     "signup": {
       "title": "Identity Registry",
@@ -155,11 +151,96 @@
       "existing_user": "Already registered?",
       "or": "OR GOOGLE TUNNEL"
     },
+    "reset_password": {
+      "title": "Initialize Reset",
+      "desc": "Identity Verification via Email",
+      "endpoint": "Registered Endpoint",
+      "submit": "Deploy Recovery Stream",
+      "success_title": "Stream Dispatched",
+      "success_desc": "Verification link has been transmitted. Please check your registry (inbox).",
+      "return": "Return to Gateway"
+    },
     "errors": {
       "invalid_credential": "The credentials provided are incorrect. Please verify and retry.",
       "email_already_in_use": "This identity is already registered in the lattice.",
       "weak_password": "The provided secure key does not meet industrial complexity standards.",
       "default": "Authentication protocol failure. Please verify the transmission stream."
+    }
+  },
+  "ui": {
+    "dropzone": {
+      "select_documents": "Initialize Asset Staging",
+      "drop_to_process": "Deploy Binary Stream",
+      "encrypted": "Locally Sandboxed • AES-256 Memory Hardening",
+      "accepts": "Accepts",
+      "choose_files": "Staging Source Assets",
+      "staged": "Staged Assets",
+      "discard_all": "Purge Buffer"
+    },
+    "ai_studio": {
+      "registry": "Protocol Registry",
+      "identity_access": "Identity Access",
+      "unlimited_access": "Unlimited Professional Access",
+      "purge_session": "Purge Session Stream",
+      "intelligence_active": "Industrial Intelligence Active",
+      "protocol_synthesis": "Protocol Synthesis.",
+      "zero_retention_note": "Initialize a mission-critical generative sequence. Our zero-retention architecture ensures that every binary bit remains private.",
+      "stream_analysis": "Structural Stream Analysis v2.5",
+      "executing": "Executing Protocol...",
+      "asset_staged": "ASSET STAGED",
+      "attach_asset": "Attach Protocol Asset",
+      "secure_tunnel": "Secure Tunnel",
+      "local_synthesis": "Local Synthesis"
+    },
+    "repair_pdf": {
+      "title": "Repair & Rebuild",
+      "subtitle": "Structural object tree re-indexing. Fix broken file catalogs and restore cross-reference tables via industrial re-serialization.",
+      "analysis_title": "Source Stream Analysis",
+      "recovery_title": "Structural Recovery",
+      "recovery_desc": "Object Stream Reconstruction",
+      "staged_rebuild": "Staged for Rebuild",
+      "audit_log": "Process Audit Log",
+      "industrial_note": "Re-serialization will attempt to reconstruct the internal object tree and re-index the cross-reference table locally.",
+      "initiate_repair": "Initiate Repair Sequence",
+      "success_title": "File Recovered!",
+      "success_desc": "Object stream successfully re-serialized and hardened.",
+      "new_workspace": "Repair another document"
+    },
+    "sign_pdf": {
+      "title": "Identity Engine",
+      "subtitle": "Professional Document Execution. Construct composite identity blocks with precision anchor controls.",
+      "placement_title": "Interactive Placement Preview",
+      "click_zone": "Click Zone to Anchor",
+      "identity_bar": "Identity Bar",
+      "anchor": "Anchor",
+      "control_suite": "Control Suite",
+      "identity_synthesis": "Identity Synthesis & Anchoring",
+      "ink": "Ink",
+      "script": "Script",
+      "asset": "Asset",
+      "wet_ink": "Wet Ink Surface",
+      "script_payload": "Script Synthesis Payload",
+      "style": "Script Style",
+      "style_elegant": "Elegant Script",
+      "style_casual": "Casual Flow",
+      "style_modern": "Modern Caveat",
+      "upload_asset": "Upload Signature Asset",
+      "supports": "Supports PNG, JPG, WEBP",
+      "include_name": "Include Legal Name",
+      "construct_name": "Construct Name Metadata",
+      "include_date": "Include Current Date",
+      "auto_synthesize": "Auto-synthesize temporal data",
+      "page_target": "Page Target",
+      "registry_pos": "Registry Position",
+      "deploy_anchor": "Deploy Identity Anchor",
+      "industrial_verification": "Industrial verification",
+      "verification_desc": "Identity blocks are permanently merged into the document object stream using high-resolution rendering. Zero training or storage protocols are active.",
+      "success_title": "Anchor Complete!",
+      "success_desc": "Identity block permanently embedded at verified coordinates.",
+      "execution_audit": "Execution Audit",
+      "mode_composite": "Identity Mode: Composite Block",
+      "reconstruction_verified": "Reconstruction: Verified",
+      "new_sequence": "Execute New Sequence"
     }
   }
 }

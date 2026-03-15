@@ -40,11 +40,10 @@ export default function LoginPage() {
     setIsLoading(true);
     try {
       await signInWithEmailAndPassword(auth!, email, password);
-      toast({ title: "Session Initialized", description: "Welcome back to DOCFLOW Professional." });
+      toast({ title: t('common.success'), description: "Session Initialized." });
       router.push(`/${locale}/dashboard`);
     } catch (error: any) {
       let message = t('auth.errors.default');
-      // Intercept specific Firebase error codes for localized feedback
       if (
         error.code === 'auth/invalid-credential' || 
         error.code === 'auth/user-not-found' || 
@@ -63,15 +62,14 @@ export default function LoginPage() {
     const provider = new GoogleAuthProvider();
     try {
       await signInWithPopup(auth!, provider);
-      toast({ title: "Identity Verified", description: "Google authentication successful." });
+      toast({ title: t('common.success'), description: "Identity Verified." });
       router.push(`/${locale}/dashboard`);
     } catch (error: any) {
-      // Graceful handling of popup cancellation
       if (error.code === 'auth/popup-closed-by-user') {
         setIsLoading(false);
         return;
       }
-      toast({ variant: "destructive", title: "Protocol Error", description: t('auth.errors.default') });
+      toast({ variant: "destructive", title: t('common.failure'), description: t('auth.errors.default') });
     } finally {
       setIsLoading(false);
     }
@@ -124,9 +122,12 @@ export default function LoginPage() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="password" className="text-[10px] font-black uppercase tracking-widest text-accent/60 flex items-center gap-2">
-                    <Lock className="h-3.5 w-3.5" /> {t('auth.login.key')}
-                  </Label>
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="password" className="text-[10px] font-black uppercase tracking-widest text-accent/60 flex items-center gap-2">
+                      <Lock className="h-3.5 w-3.5" /> {t('auth.login.key')}
+                    </Label>
+                    <Link href={`/${locale}/reset-password`} className="text-[9px] font-black uppercase text-primary hover:underline italic">{t('auth.login.lost_key')}</Link>
+                  </div>
                   <Input 
                     id="password" type="password" required 
                     value={password} onChange={(e) => setPassword(e.target.value)}
