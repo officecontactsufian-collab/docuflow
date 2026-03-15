@@ -1,3 +1,4 @@
+
 "use client"
 
 import * as React from 'react';
@@ -8,9 +9,9 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAuth, useUser, useFirestore } from '@/firebase';
-import { createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, updateProfile } from 'firebase/auth';
+import { createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, updateProfile, updatePassword } from 'firebase/auth';
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
-import { Loader2, UserPlus, Mail, Lock, Chrome, ArrowRight } from 'lucide-react';
+import { Loader2, UserPlus, Mail, Lock, Chrome, ArrowRight, Zap, ShieldCheck } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import Link from 'next/link';
 import Script from 'next/script';
@@ -30,13 +31,15 @@ export default function SignupPage() {
   const [name, setName] = React.useState('');
   const [email, setEmail] = React.useState('');
   const [password, setPassword] = React.useState('');
+  const [newPassword, setNewPassword] = React.useState('');
   const [isLoading, setIsLoading] = React.useState(false);
+  const [showPasswordPrompt, setShowPasswordPrompt] = React.useState(false);
 
   React.useEffect(() => {
-    if (!isUserLoading && user && !user.isAnonymous) {
+    if (!isUserLoading && user && !user.isAnonymous && !showPasswordPrompt) {
       router.push(`/${locale}/dashboard`);
     }
-  }, [user, isUserLoading, router, locale]);
+  }, [user, isUserLoading, router, locale, showPasswordPrompt]);
 
   const syncUserProfile = async (uid: string, email: string, displayName: string) => {
     if (!firestore) return;
@@ -53,18 +56,8 @@ export default function SignupPage() {
   const executeRecaptcha = async (action: string): Promise<string | null> => {
     return new Promise((resolve) => {
       const siteKey = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY;
-      
-      if (!siteKey) {
-        console.warn('reCAPTCHA site key is missing. Initializing in sandbox mode.');
-        resolve(null);
-        return;
-      }
-
-      if (typeof window === 'undefined' || !(window as any).grecaptcha) {
-        console.warn('reCAPTCHA registry not found in window buffer.');
-        resolve(null);
-        return;
-      }
+      if (!siteKey) { resolve(null); return; }
+      if (typeof window === 'undefined' || !(window as any).grecaptcha) { resolve(null); return; }
 
       (window as any).grecaptcha.ready(() => {
         (window as any).grecaptcha
@@ -89,9 +82,7 @@ export default function SignupPage() {
     setIsLoading(true);
     try {
       const isHuman = await verifyHumanity('signup_email');
-      if (!isHuman) {
-        throw new Error("Security verification failed.");
-      }
+      if (!isHuman) throw new Error("Security verification failed.");
 
       const cred = await createUserWithEmailAndPassword(auth!, email, password);
       await updateProfile(cred.user, { displayName: name });
@@ -99,7 +90,6 @@ export default function SignupPage() {
       toast({ title: t('common.success'), description: "Your professional registry has been established." });
       router.push(`/${locale}/dashboard`);
     } catch (error: any) {
-      // Error message removed as requested
       console.error('Signup Protocol Failure:', error.code);
     } finally {
       setIsLoading(false);
@@ -114,11 +104,26 @@ export default function SignupPage() {
     try {
       const cred = await signInWithPopup(auth!, provider);
       await syncUserProfile(cred.user.uid, cred.user.email!, cred.user.displayName!);
-      // Success toast removed for Gmail signup as requested
+      // Force password setup for Google signups
+      setShowPasswordPrompt(true);
+    } catch (error: any) {
+      console.error('Federated Signup Error:', error.code);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleSetPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    try {
+      if (auth?.currentUser) {
+        await updatePassword(auth.currentUser, newPassword);
+      }
       router.push(`/${locale}/dashboard`);
     } catch (error: any) {
-      // Error message removed as requested
-      console.error('Federated Signup Error:', error.code);
+      console.error('Credential Hardening Failure:', error.code);
+      router.push(`/${locale}/dashboard`);
     } finally {
       setIsLoading(false);
     }
@@ -153,58 +158,86 @@ export default function SignupPage() {
             <p className="text-muted-foreground font-bold text-xs uppercase tracking-widest">Establish your professional presence.</p>
           </div>
 
-          <Card className="border-none shadow-2xl rounded-[2.5rem] bg-white overflow-hidden">
-            <CardHeader className="space-y-1 pb-2">
-              <CardTitle className="text-xl font-black uppercase italic text-accent">{t('auth.signup.title')}</CardTitle>
-              <CardDescription className="text-[10px] font-bold uppercase tracking-widest italic">{t('auth.signup.desc')}</CardDescription>
-            </CardHeader>
-            <form onSubmit={handleSignup}>
-              <CardContent className="space-y-4 pt-4">
-                <div className="space-y-2">
-                  <Label htmlFor="name" className="text-[10px] font-black uppercase tracking-widest text-accent/60">{t('auth.signup.name')}</Label>
-                  <Input 
-                    id="name" placeholder="JOHN DOE" required 
-                    value={name} onChange={(e) => setName(e.target.value)}
-                    className="h-11 bg-muted/20 border-accent/10 rounded-xl font-bold text-accent"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="email" className="text-[10px] font-black uppercase tracking-widest text-accent/60">{t('auth.signup.email')}</Label>
-                  <Input 
-                    id="email" type="email" placeholder="YOUR@EMAIL.PRO" required 
-                    value={email} onChange={(e) => setEmail(e.target.value)}
-                    className="h-11 bg-muted/20 border-accent/10 rounded-xl font-bold text-accent"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="password" className="text-[10px] font-black uppercase tracking-widest text-accent/60">{t('auth.signup.key')}</Label>
-                  <Input 
-                    id="password" type="password" required 
-                    value={password} onChange={(e) => setPassword(e.target.value)}
-                    className="h-11 bg-muted/20 border-accent/10 rounded-xl font-bold text-accent"
-                  />
-                </div>
-              </CardContent>
-              <CardFooter className="flex flex-col gap-4 pb-8">
-                <Button type="submit" className="w-full h-12 rounded-xl bg-primary text-white font-black uppercase tracking-widest text-[10px] shadow-xl shadow-primary/20" disabled={isLoading}>
-                  {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : t('auth.signup.submit')}
-                </Button>
-                
-                <div className="relative w-full py-2">
-                  <div className="absolute inset-0 flex items-center"><span className="w-full border-t border-accent/5"></span></div>
-                  <div className="relative flex justify-center text-[8px] font-black uppercase"><span className="bg-white px-4 text-accent/20 tracking-[0.3em]">{t('auth.signup.or')}</span></div>
-                </div>
+          {!showPasswordPrompt ? (
+            <Card className="border-none shadow-2xl rounded-[2.5rem] bg-white overflow-hidden">
+              <CardHeader className="space-y-1 pb-2">
+                <CardTitle className="text-xl font-black uppercase italic text-accent">{t('auth.signup.title')}</CardTitle>
+                <CardDescription className="text-[10px] font-bold uppercase tracking-widest italic">{t('auth.signup.desc')}</CardDescription>
+              </CardHeader>
+              <form onSubmit={handleSignup}>
+                <CardContent className="space-y-4 pt-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="name" className="text-[10px] font-black uppercase tracking-widest text-accent/60">{t('auth.signup.name')}</Label>
+                    <Input 
+                      id="name" placeholder="JOHN DOE" required 
+                      value={name} onChange={(e) => setName(e.target.value)}
+                      className="h-11 bg-muted/20 border-accent/10 rounded-xl font-bold text-accent"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="email" className="text-[10px] font-black uppercase tracking-widest text-accent/60">{t('auth.signup.email')}</Label>
+                    <Input 
+                      id="email" type="email" placeholder="YOUR@EMAIL.PRO" required 
+                      value={email} onChange={(e) => setEmail(e.target.value)}
+                      className="h-11 bg-muted/20 border-accent/10 rounded-xl font-bold text-accent"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="password" className="text-[10px] font-black uppercase tracking-widest text-accent/60">{t('auth.signup.key')}</Label>
+                    <Input 
+                      id="password" type="password" required 
+                      value={password} onChange={(e) => setPassword(e.target.value)}
+                      className="h-11 bg-muted/20 border-accent/10 rounded-xl font-bold text-accent"
+                    />
+                  </div>
+                </CardContent>
+                <CardFooter className="flex flex-col gap-4 pb-8">
+                  <Button type="submit" className="w-full h-12 rounded-xl bg-primary text-white font-black uppercase tracking-widest text-[10px] shadow-xl shadow-primary/20" disabled={isLoading}>
+                    {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : t('auth.signup.submit')}
+                  </Button>
+                  
+                  <div className="relative w-full py-2">
+                    <div className="absolute inset-0 flex items-center"><span className="w-full border-t border-accent/5"></span></div>
+                    <div className="relative flex justify-center text-[8px] font-black uppercase"><span className="bg-white px-4 text-accent/20 tracking-[0.3em]">{t('auth.signup.or')}</span></div>
+                  </div>
 
-                <Button type="button" variant="outline" onClick={handleGoogleSignup} className="w-full h-12 rounded-xl border-accent/10 font-black uppercase tracking-widest text-[10px]" disabled={isLoading}>
-                  <Chrome className="mr-2 h-4 w-4 text-primary" /> {t('auth.signup.google')}
-                </Button>
+                  <Button type="button" variant="outline" onClick={handleGoogleSignup} className="w-full h-12 rounded-xl border-accent/10 font-black uppercase tracking-widest text-[10px]" disabled={isLoading}>
+                    <Chrome className="mr-2 h-4 w-4 text-primary" /> {t('auth.signup.google')}
+                  </Button>
 
-                <div className="pt-4 text-center">
-                  <p className="text-[10px] font-bold text-accent/40 uppercase">{t('auth.signup.existing_user')} <Link href={`/${locale}/login`} className="text-primary hover:underline italic">{t('common.login')} <ArrowRight className="inline h-2.5 w-2.5" /></Link></p>
-                </div>
-              </CardFooter>
-            </form>
-          </Card>
+                  <div className="pt-4 text-center">
+                    <p className="text-[10px] font-bold text-accent/40 uppercase">{t('auth.signup.existing_user')} <Link href={`/${locale}/login`} className="text-primary hover:underline italic">{t('common.login')} <ArrowRight className="inline h-2.5 w-2.5" /></Link></p>
+                  </div>
+                </CardFooter>
+              </form>
+            </Card>
+          ) : (
+            <Card className="border-none shadow-2xl rounded-[2.5rem] bg-white overflow-hidden animate-in zoom-in-95 duration-500">
+              <CardHeader className="space-y-1 pb-2">
+                <CardTitle className="text-xl font-black uppercase italic text-accent">{t('auth.password_setup.title')}</CardTitle>
+                <CardDescription className="text-[10px] font-bold uppercase tracking-widest italic">{t('auth.password_setup.desc')}</CardDescription>
+              </CardHeader>
+              <form onSubmit={handleSetPassword}>
+                <CardContent className="space-y-4 pt-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="new-password" className="text-[10px] font-black uppercase tracking-widest text-accent/60 flex items-center gap-2">
+                      <Zap className="h-3.5 w-3.5 text-primary" /> {t('auth.password_setup.label')}
+                    </Label>
+                    <Input 
+                      id="new-password" type="password" required 
+                      value={newPassword} onChange={(e) => setNewPassword(e.target.value)}
+                      className="h-11 bg-muted/20 border-accent/10 rounded-xl font-bold text-accent"
+                    />
+                  </div>
+                </CardContent>
+                <CardFooter className="pb-8">
+                  <Button type="submit" className="w-full h-12 rounded-xl bg-accent text-white font-black uppercase tracking-widest text-[10px] shadow-xl shadow-accent/20" disabled={isLoading}>
+                    {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : t('auth.password_setup.submit')}
+                  </Button>
+                </CardFooter>
+              </form>
+            </Card>
+          )}
           
           <div className="text-center">
              <p className="text-[8px] font-bold text-accent/20 uppercase tracking-[0.2em] max-w-[240px] mx-auto leading-relaxed">
