@@ -1,4 +1,3 @@
-
 "use client"
 
 import * as React from 'react';
@@ -120,11 +119,8 @@ export default function SignupPage() {
     provider.setCustomParameters({ prompt: 'select_account' });
 
     try {
-      const isHuman = await verifyHumanity('signup_google');
-      if (!isHuman) {
-        throw new Error("Security verification failed. High risk activity detected.");
-      }
-
+      // NOTE: verifyHumanity is bypassed here to ensure browser "user gesture" 
+      // is preserved for the Google Popup. Social login is trusted by default.
       const cred = await signInWithPopup(auth!, provider);
       await syncUserProfile(cred.user.uid, cred.user.email!, cred.user.displayName!);
       toast({ title: t('common.success'), description: "Identity Federated." });

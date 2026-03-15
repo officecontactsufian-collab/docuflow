@@ -1,4 +1,3 @@
-
 "use client"
 
 import * as React from 'react';
@@ -60,6 +59,8 @@ export default function LoginPage() {
   const handleGoogleLogin = async () => {
     setIsLoading(true);
     const provider = new GoogleAuthProvider();
+    provider.setCustomParameters({ prompt: 'select_account' });
+    
     try {
       await signInWithPopup(auth!, provider);
       toast({ title: t('common.success'), description: "Identity Verified." });
