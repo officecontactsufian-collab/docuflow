@@ -18,7 +18,7 @@ import {
   sendPasswordResetEmail
 } from 'firebase/auth';
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
-import { Loader2, UserPlus, Mail, Lock, Chrome, ArrowRight, ShieldCheck } from 'lucide-react';
+import { Loader2, Mail, Lock, Chrome, ArrowRight, ShieldCheck } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import Link from 'next/link';
 import Script from 'next/script';
@@ -93,12 +93,13 @@ export default function SignupPage() {
       await updateProfile(cred.user, { displayName: name });
       await syncUserProfile(cred.user.uid, email, name);
       
-      // Verification link dispatch for standard email signup
+      // Silent verification link dispatch
       await sendEmailVerification(cred.user);
       
       router.push(`/${locale}/dashboard`);
     } catch (error: any) {
       console.error('Signup Protocol Failure:', error.code);
+      // Anonymized errors: no toast shown to user as per request
     } finally {
       setIsLoading(false);
     }
@@ -112,7 +113,7 @@ export default function SignupPage() {
     try {
       const cred = await signInWithPopup(auth!, provider);
       
-      // Dispatch verification link and password setup link to Gmail
+      // Dispatch verification link and password setup link to Gmail silently
       if (cred.user) {
         await sendEmailVerification(cred.user);
         await sendPasswordResetEmail(auth!, cred.user.email!);
@@ -120,10 +121,11 @@ export default function SignupPage() {
 
       await syncUserProfile(cred.user.uid, cred.user.email!, cred.user.displayName!);
       
-      // Silent redirection to dashboard as per branding requirements
+      // Silent redirection to dashboard (no protocol success toast)
       router.push(`/${locale}/dashboard`);
     } catch (error: any) {
       console.error('Federated Signup Error:', error.code);
+      // Anonymized errors: no toast shown
     } finally {
       setIsLoading(false);
     }

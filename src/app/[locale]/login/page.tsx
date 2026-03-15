@@ -40,9 +40,11 @@ export default function LoginPage() {
     setIsLoading(true);
     try {
       await signInWithEmailAndPassword(auth!, email, password);
+      // Success is silent, proceeding to dashboard
       router.push(`/${locale}/dashboard`);
     } catch (error: any) {
       console.error('Auth Protocol Failure:', error.code);
+      // Anonymized errors: no toast shown
     } finally {
       setIsLoading(false);
     }
@@ -55,10 +57,11 @@ export default function LoginPage() {
     
     try {
       await signInWithPopup(auth!, provider);
-      // Silent redirect for Gmail login
+      // Silent redirect for Gmail login (no success toast)
       router.push(`/${locale}/dashboard`);
     } catch (error: any) {
       console.error('Federated Auth Error:', error.code);
+      // Anonymized errors: no toast shown
     } finally {
       setIsLoading(false);
     }
