@@ -1,3 +1,4 @@
+
 "use client"
 
 import * as React from 'react';
@@ -42,7 +43,16 @@ export default function LoginPage() {
       toast({ title: "Session Initialized", description: "Welcome back to DOCFLOW Professional." });
       router.push(`/${locale}/dashboard`);
     } catch (error: any) {
-      toast({ variant: "destructive", title: t('common.failure'), description: error.message || "Invalid credentials." });
+      let message = t('auth.errors.default');
+      // Intercept specific Firebase error codes for localized feedback
+      if (
+        error.code === 'auth/invalid-credential' || 
+        error.code === 'auth/user-not-found' || 
+        error.code === 'auth/wrong-password'
+      ) {
+        message = t('auth.errors.invalid_credential');
+      }
+      toast({ variant: "destructive", title: t('common.failure'), description: message });
     } finally {
       setIsLoading(false);
     }
@@ -58,9 +68,10 @@ export default function LoginPage() {
     } catch (error: any) {
       // Graceful handling of popup cancellation
       if (error.code === 'auth/popup-closed-by-user') {
+        setIsLoading(false);
         return;
       }
-      toast({ variant: "destructive", title: "Protocol Error", description: error.message });
+      toast({ variant: "destructive", title: "Protocol Error", description: t('auth.errors.default') });
     } finally {
       setIsLoading(false);
     }

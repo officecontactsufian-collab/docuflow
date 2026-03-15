@@ -1,3 +1,4 @@
+
 {
   "common": {
     "all_protocols": "All Protocols",
@@ -58,36 +59,6 @@
       "title": "DOCFLOW Professional - Secure Document Intelligence",
       "desc": "The industrial benchmark for local-first document manipulation. AI-powered, private, and instant transformation protocols.",
       "keywords": "Online PDF tools, secure pdf editor, AI document assistant, private file conversion"
-    },
-    "merge": {
-      "title": "Merge PDF Online - Secure & High Fidelity | DOCFLOW",
-      "desc": "Combine multiple PDF documents into a single professional asset. Secure, local-first merging with zero cloud retention.",
-      "keywords": "combine pdf, join pdf files, merge documents online, secure pdf merger"
-    },
-    "split": {
-      "title": "Split PDF Pages - Extract PDF Ranges | DOCFLOW",
-      "desc": "Extract specific pages or ranges from your PDF documents. High-fidelity page segmentation with visual mapping.",
-      "keywords": "split pdf, extract pdf pages, separate pdf, cut pdf pages"
-    },
-    "compress": {
-      "title": "Compress PDF Online - Optimize File Size | DOCFLOW",
-      "desc": "Optimize PDF file size for web delivery. Rebuilds internal object streams for maximum efficiency without loss of quality.",
-      "keywords": "compress pdf, reduce pdf size, optimize pdf, small pdf"
-    },
-    "organize": {
-      "title": "Organize PDF Pages - Reorder & Rotate | DOCFLOW",
-      "desc": "Manage your document structure with a high-fidelity visual map. Reorder and rotate page segments locally.",
-      "keywords": "organize pdf, reorder pdf pages, rotate pdf, visual pdf editor"
-    },
-    "sign": {
-      "title": "Sign PDF Online - Secure Digital Signatures | DOCFLOW",
-      "desc": "Apply professional digital signatures to your documents. Identity synthesis with wet ink and script engines.",
-      "keywords": "e-signature, sign pdf, digital signature, sign documents online"
-    },
-    "ai_studio": {
-      "title": "AI Studio - Industrial Generative Workspace | DOCFLOW",
-      "desc": "Initialize mission-critical generative sequences. Paraphrase, summarize, and translate documents with zero training protocols.",
-      "keywords": "AI writing assistant, document summarizer, AI paraphraser, Doc Intel"
     }
   },
   "home": {
@@ -162,119 +133,6 @@
     "unlock": { "title": "Unlock PDF", "desc": "Strip restrictions." },
     "sanitize": { "title": "Sanitize Asset", "desc": "Deep cleaning." }
   },
-  "ui": {
-    "dropzone": {
-      "drop_to_process": "Drop to Process",
-      "select_documents": "Select Documents",
-      "encrypted": "Encrypted • Private • High-Fidelity",
-      "accepts": "Accepts",
-      "choose_files": "Choose Files",
-      "staged": "Staged for Processing",
-      "discard_all": "Discard All"
-    },
-    "ai_studio": {
-      "registry": "Protocol Registry",
-      "identity_access": "Identity Access",
-      "unlimited_access": "Unlimited Professional Access",
-      "purge_session": "Purge Session Stream",
-      "intelligence_active": "Industrial Intelligence Active",
-      "protocol_synthesis": "Protocol Synthesis",
-      "zero_retention_note": "Initialize a mission-critical generative sequence. Our zero-retention architecture ensures that every binary bit remains private.",
-      "executing": "Executing Protocol...",
-      "stream_analysis": "Structural Stream Analysis v2.5",
-      "attach_asset": "Attach Protocol Asset",
-      "asset_staged": "Asset Staged",
-      "secure_tunnel": "Secure Tunnel",
-      "local_synthesis": "Local Synthesis"
-    },
-    "sign_pdf": {
-      "title": "Identity Engine",
-      "subtitle": "Professional Document Execution. Construct composite identity blocks with precision anchor controls.",
-      "placement_title": "Interactive Placement Preview",
-      "click_zone": "Click Zone to Anchor",
-      "identity_bar": "Identity Bar",
-      "anchor": "Anchor",
-      "control_suite": "Control Suite",
-      "identity_synthesis": "Identity Synthesis & Anchoring",
-      "ink": "Ink",
-      "script": "Script",
-      "asset": "Asset",
-      "wet_ink": "Wet Ink Surface",
-      "script_payload": "Script Synthesis Payload",
-      "style": "Script Style",
-      "style_elegant": "Elegant Script",
-      "style_casual": "Casual Flow",
-      "style_modern": "Modern Caveat",
-      "upload_asset": "Upload Signature Asset",
-      "supports": "Supports PNG, JPG, WEBP",
-      "include_name": "Include Legal Name",
-      "construct_name": "Construct Name Metadata",
-      "include_date": "Include Current Date",
-      "auto_synthesize": "Auto-synthesize temporal data",
-      "page_target": "Page Target",
-      "registry_pos": "Registry Position",
-      "deploy_anchor": "Deploy Identity Anchor",
-      "industrial_verification": "Industrial verification",
-      "verification_desc": "Identity blocks are permanently merged into the document object stream using high-resolution rendering. Zero training or storage protocols are active.",
-      "success_title": "Anchor Complete!",
-      "success_desc": "Identity block permanently embedded at verified coordinates.",
-      "execution_audit": "Execution Audit",
-      "mode_composite": "Identity Mode: Composite Block",
-      "reconstruction_verified": "Reconstruction: Verified",
-      "new_sequence": "Execute New Sequence"
-    },
-    "repair_pdf": {
-      "title": "Repair & Rebuild",
-      "subtitle": "Structural object tree re-indexing. Fix broken file catalogs and restore cross-reference tables via industrial re-serialization.",
-      "analysis_title": "Source Stream Analysis",
-      "recovery_title": "Structural Recovery",
-      "recovery_desc": "Object Stream Reconstruction",
-      "staged_rebuild": "Staged for Rebuild",
-      "audit_log": "Protocol Audit Log",
-      "industrial_note": "Industrial Protocol: Re-serialization will attempt to reconstruct the internal object tree and re-index the cross-reference table locally.",
-      "initiate_repair": "Initiate Repair Sequence",
-      "success_title": "File Recovered!",
-      "success_desc": "Object stream successfully re-serialized and hardened.",
-      "new_workspace": "Repair another document"
-    }
-  },
-  "about": {
-    "hero": {
-      "mission": "Our Core Mission",
-      "title_redefining": "Redefining",
-      "title_document": "Document",
-      "title_intelligence": "Intelligence.",
-      "subtitle": "DOCFLOW is an industrial-grade workspace engineered for the modern professional. We’ve replaced the traditional cloud-storage model with a stateless, local-first architecture designed for absolute privacy."
-    },
-    "pillars": {
-      "privacy": { "title": "Privacy by Nature", "desc": "We don't just protect your data; we eliminate it. Every document stream is processed in-memory and auto-shredded upon session termination." },
-      "precision": { "title": "Industrial Precision", "desc": "Built on high-fidelity reconstruction engines, DOCFLOW ensures bit-perfect structural integrity for even the most complex legal assets." },
-      "hardware": { "title": "Hardware Accelerated", "desc": "Leveraging the full power of your machine, our local-first protocols deliver instant processing without server-side latency." }
-    },
-    "bridge": {
-      "label": "Origin Protocol",
-      "title": "Stateless Innovation.",
-      "desc": "DOCFLOW was born from a simple observation: most document tools prioritize data retention over user privacy. We set out to build a platform that serves as a bridge, not a vault.",
-      "zero_retention": { "title": "Zero Retention", "desc": "Binary streams are purged immediately after execution." },
-      "identity_first": { "title": "Identity First", "desc": "You maintain 100% ownership of your digital signature and assets." },
-      "stats": { "uptime": "Core Uptime", "daily_ops": "Daily Ops" }
-    }
-  },
-  "contact": {
-    "title": "Contact Gateway",
-    "subtitle": "Direct Tunnel to Administration. Initialize a support sequence or request enterprise-grade integrations.",
-    "endpoint": { "title": "Master Endpoint", "label": "Authorized Protocol Scope" },
-    "form": {
-      "title": "Initialize Inquiry",
-      "desc": "Encrypted Transmission Channel",
-      "identity": "Account Identity",
-      "tunnel": "Communication Tunnel",
-      "payload": "Transmission Payload",
-      "submit": "Deploy Transmission Sequence",
-      "success": "Transmission Logged!",
-      "success_desc": "Protocol successfully archived for review."
-    }
-  },
   "auth": {
     "login": {
       "title": "Gateway Entrance",
@@ -296,6 +154,12 @@
       "google": "Google Synthesis",
       "existing_user": "Already registered?",
       "or": "OR GOOGLE TUNNEL"
+    },
+    "errors": {
+      "invalid_credential": "The credentials provided are incorrect. Please verify and retry.",
+      "email_already_in_use": "This identity is already registered in the lattice.",
+      "weak_password": "The provided secure key does not meet industrial complexity standards.",
+      "default": "Authentication protocol failure. Please verify the transmission stream."
     }
   }
 }

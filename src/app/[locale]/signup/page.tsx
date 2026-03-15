@@ -1,3 +1,4 @@
+
 "use client"
 
 import * as React from 'react';
@@ -39,7 +40,7 @@ export default function SignupPage() {
   }, [user, isUserLoading, router, locale]);
 
   const syncUserProfile = async (uid: string, email: string, displayName: string) => {
-    const userRef = doc(firestore, 'users', uid);
+    const userRef = doc(firestore!, 'users', uid);
     await setDoc(userRef, {
       uid,
       email,
@@ -98,7 +99,15 @@ export default function SignupPage() {
       toast({ title: "SIGN UP SUCCESS", description: "Your professional registry has been established." });
       router.push(`/${locale}/dashboard`);
     } catch (error: any) {
-      toast({ variant: "destructive", title: "Synthesis Error", description: error.message || "Failed to create account." });
+      let message = t('auth.errors.default');
+      if (error.code === 'auth/email-already-in-use') {
+        message = t('auth.errors.email_already_in_use');
+      } else if (error.code === 'auth/weak-password') {
+        message = t('auth.errors.weak_password');
+      } else if (error.message) {
+        message = error.message;
+      }
+      toast({ variant: "destructive", title: "Synthesis Error", description: message });
     } finally {
       setIsLoading(false);
     }
@@ -122,12 +131,13 @@ export default function SignupPage() {
     } catch (error: any) {
       // Graceful handling of popup cancellation
       if (error.code === 'auth/popup-closed-by-user') {
+        setIsLoading(false);
         return;
       }
       toast({ 
         variant: "destructive", 
         title: "Protocol Error", 
-        description: error.message || "Google onboarding sequence interrupted." 
+        description: t('auth.errors.default')
       });
     } finally {
       setIsLoading(false);
