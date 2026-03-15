@@ -39,18 +39,12 @@ export default function LoginPage() {
     setIsLoading(true);
     try {
       await signInWithEmailAndPassword(auth!, email, password);
+      // Success toast kept for email/password as requested, but we could remove it too if needed
       toast({ title: t('common.success'), description: "Session Initialized." });
       router.push(`/${locale}/dashboard`);
     } catch (error: any) {
-      let message = t('auth.errors.default');
-      if (
-        error.code === 'auth/invalid-credential' || 
-        error.code === 'auth/user-not-found' || 
-        error.code === 'auth/wrong-password'
-      ) {
-        message = t('auth.errors.invalid_credential');
-      }
-      toast({ variant: "destructive", title: t('common.failure'), description: message });
+      // Detailed error message removed as requested
+      console.error('Auth Protocol Failure:', error.code);
     } finally {
       setIsLoading(false);
     }
@@ -63,14 +57,11 @@ export default function LoginPage() {
     
     try {
       await signInWithPopup(auth!, provider);
-      toast({ title: t('common.success'), description: "Identity Verified." });
+      // Success toast removed for Gmail login as requested
       router.push(`/${locale}/dashboard`);
     } catch (error: any) {
-      if (error.code === 'auth/popup-closed-by-user') {
-        setIsLoading(false);
-        return;
-      }
-      toast({ variant: "destructive", title: t('common.failure'), description: t('auth.errors.default') });
+      // Error message removed as requested
+      console.error('Federated Auth Error:', error.code);
     } finally {
       setIsLoading(false);
     }

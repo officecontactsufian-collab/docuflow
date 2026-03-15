@@ -90,7 +90,7 @@ export default function SignupPage() {
     try {
       const isHuman = await verifyHumanity('signup_email');
       if (!isHuman) {
-        throw new Error("Security verification failed. High risk activity detected.");
+        throw new Error("Security verification failed.");
       }
 
       const cred = await createUserWithEmailAndPassword(auth!, email, password);
@@ -99,15 +99,8 @@ export default function SignupPage() {
       toast({ title: t('common.success'), description: "Your professional registry has been established." });
       router.push(`/${locale}/dashboard`);
     } catch (error: any) {
-      let message = t('auth.errors.default');
-      if (error.code === 'auth/email-already-in-use') {
-        message = t('auth.errors.email_already_in_use');
-      } else if (error.code === 'auth/weak-password') {
-        message = t('auth.errors.weak_password');
-      } else if (error.message) {
-        message = error.message;
-      }
-      toast({ variant: "destructive", title: t('common.failure'), description: message });
+      // Error message removed as requested
+      console.error('Signup Protocol Failure:', error.code);
     } finally {
       setIsLoading(false);
     }
@@ -119,22 +112,13 @@ export default function SignupPage() {
     provider.setCustomParameters({ prompt: 'select_account' });
 
     try {
-      // NOTE: verifyHumanity is bypassed here to ensure browser "user gesture" 
-      // is preserved for the Google Popup. Social login is trusted by default.
       const cred = await signInWithPopup(auth!, provider);
       await syncUserProfile(cred.user.uid, cred.user.email!, cred.user.displayName!);
-      toast({ title: t('common.success'), description: "Identity Federated." });
+      // Success toast removed for Gmail signup as requested
       router.push(`/${locale}/dashboard`);
     } catch (error: any) {
-      if (error.code === 'auth/popup-closed-by-user') {
-        setIsLoading(false);
-        return;
-      }
-      toast({ 
-        variant: "destructive", 
-        title: t('common.failure'), 
-        description: t('auth.errors.default')
-      });
+      // Error message removed as requested
+      console.error('Federated Signup Error:', error.code);
     } finally {
       setIsLoading(false);
     }
