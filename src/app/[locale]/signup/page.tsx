@@ -1,4 +1,3 @@
-
 "use client"
 
 import * as React from 'react';
@@ -66,7 +65,6 @@ export default function SignupPage() {
           .execute(siteKey, { action })
           .then((token: string) => resolve(token))
           .catch((err: any) => {
-            console.error('reCAPTCHA Synthesis Failure:', err);
             resolve(null);
           });
       });
@@ -95,7 +93,6 @@ export default function SignupPage() {
       
       router.push(`/${locale}/dashboard`);
     } catch (error: any) {
-      console.error('Signup Protocol Failure:', error.code);
       // Anonymized errors: no message shown to user
     } finally {
       setIsLoading(false);
@@ -121,7 +118,10 @@ export default function SignupPage() {
       // Anonymized success: silent redirect
       router.push(`/${locale}/dashboard`);
     } catch (error: any) {
-      console.error('Federated Signup Error:', error.code);
+      // Suppress the error if the user closed the popup (expected behavior)
+      if (error.code !== 'auth/popup-closed-by-user') {
+        console.error('Federated Auth Error:', error.code);
+      }
       // Anonymized errors: no feedback provided
     } finally {
       setIsLoading(false);

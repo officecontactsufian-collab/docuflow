@@ -1,4 +1,3 @@
-
 "use client"
 
 import * as React from 'react';
@@ -41,8 +40,7 @@ export default function LoginPage() {
       // Anonymized success: silent redirect to dashboard
       router.push(`/${locale}/dashboard`);
     } catch (error: any) {
-      console.error('Auth Protocol Failure:', error.code);
-      // Anonymized errors: no toast shown to user to prevent info leakage
+      // Anonymized errors: no feedback provided to end-user
     } finally {
       setIsLoading(false);
     }
@@ -58,7 +56,10 @@ export default function LoginPage() {
       // Anonymized success: silent redirect for Gmail login
       router.push(`/${locale}/dashboard`);
     } catch (error: any) {
-      console.error('Federated Auth Error:', error.code);
+      // Suppress the error if the user closed the popup (expected behavior)
+      if (error.code !== 'auth/popup-closed-by-user') {
+        console.error('Federated Auth Error:', error.code);
+      }
       // Anonymized errors: no feedback provided to end-user
     } finally {
       setIsLoading(false);
