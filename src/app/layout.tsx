@@ -1,6 +1,8 @@
 import type {Metadata} from 'next';
 import './globals.css';
 import { Toaster } from "@/components/toaster-registry";
+import { FirebaseClientProvider } from '@/firebase/client-provider';
+import { LanguageProvider } from '@/lib/i18n-context';
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://docflow.pro'),
@@ -66,8 +68,12 @@ export default function RootLayout({
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Dancing+Script:wght@400;700&family=Pacifico&family=Caveat:wght@400;700&display=swap" rel="stylesheet" />
       </head>
       <body className="font-body antialiased min-h-screen bg-background selection:bg-primary/20" suppressHydrationWarning>
-        {children}
-        <Toaster />
+        <FirebaseClientProvider>
+          <LanguageProvider initialLocale="en">
+            {children}
+            <Toaster />
+          </LanguageProvider>
+        </FirebaseClientProvider>
       </body>
     </html>
   );

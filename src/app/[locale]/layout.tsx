@@ -1,6 +1,5 @@
 import React from 'react';
 import { notFound } from 'next/navigation';
-import { FirebaseClientProvider } from '@/firebase/client-provider';
 import { LanguageProvider } from '@/lib/i18n-context';
 import { Suspense } from 'react';
 import { Loader2 } from 'lucide-react';
@@ -36,7 +35,6 @@ interface LocaleLayoutProps {
 /**
  * Industrial SEO Metadata Engine
  * Dynamically generates metadata based on locale and active route segment.
- * Hardened with optional chaining and fallbacks to prevent runtime crashes.
  */
 export async function generateMetadata(
   { params }: LocaleLayoutProps,
@@ -45,20 +43,17 @@ export async function generateMetadata(
   const { locale } = await params;
   const baseUrl = 'https://docflow.pro';
   
-  // Use a fallback for the base translations
   const t = translationRegistry[locale] || translationRegistry['en'];
   const seo = t?.seo || translationRegistry['en']?.seo || {};
 
-  // Hreflang alternates for global indexing
   const languages: Record<string, string> = {};
   locales.forEach((l) => {
     languages[l] = `${baseUrl}/${l}`;
   });
 
-  // Robust access with fallbacks to prevent "Cannot read properties of undefined"
   const defaultTitle = seo?.default?.title || "DOCFLOW Professional - Industrial Document Intelligence";
-  const defaultDesc = seo?.default?.desc || "High-performance, local-first document intelligence workspace. Securely merge, split, compress, and sign PDF documents.";
-  const defaultKeywords = seo?.default?.keywords || "PDF tools, Document Intelligence, Merge PDF, Split PDF, Digital Signature, Secure PDF";
+  const defaultDesc = seo?.default?.desc || "High-performance, local-first document intelligence workspace.";
+  const defaultKeywords = seo?.default?.keywords || "PDF tools, Document Intelligence, Merge PDF";
 
   return {
     title: {
@@ -78,31 +73,6 @@ export async function generateMetadata(
       siteName: 'DOCFLOW Professional',
       title: defaultTitle,
       description: defaultDesc,
-      images: [
-        {
-          url: `${baseUrl}/og-image.jpg`,
-          width: 1200,
-          height: 630,
-          alt: 'DOCFLOW Professional',
-        },
-      ],
-    },
-    twitter: {
-      card: 'summary_large_image',
-      title: defaultTitle,
-      description: defaultDesc,
-      images: [`${baseUrl}/og-image.jpg`],
-    },
-    robots: {
-      index: true,
-      follow: true,
-      googleBot: {
-        index: true,
-        follow: true,
-        'max-video-preview': -1,
-        'max-image-preview': 'large',
-        'max-snippet': -1,
-      },
     },
   };
 }
@@ -115,20 +85,18 @@ export default async function LocaleLayout({ children, params }: LocaleLayoutPro
   }
 
   return (
-    <FirebaseClientProvider>
-      <LanguageProvider initialLocale={locale as any}>
-        <StructuredData locale={locale} />
-        <Suspense fallback={
-          <div className="flex min-h-screen items-center justify-center bg-muted/30">
-            <div className="flex flex-col items-center gap-4">
-              <Loader2 className="h-8 w-8 animate-spin text-primary" />
-              <p className="text-[10px] font-black uppercase tracking-widest text-accent/40 italic">Initializing Protocol Stream...</p>
-            </div>
+    <LanguageProvider initialLocale={locale as any}>
+      <StructuredData locale={locale} />
+      <Suspense fallback={
+        <div className="flex min-h-screen items-center justify-center bg-muted/30">
+          <div className="flex flex-col items-center gap-4">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            <p className="text-[10px] font-black uppercase tracking-widest text-accent/40 italic">Initializing Protocol Stream...</p>
           </div>
-        }>
-          {children}
-        </Suspense>
-      </LanguageProvider>
-    </FirebaseClientProvider>
+        </div>
+      }>
+        {children}
+      </Suspense>
+    </LanguageProvider>
   );
 }
