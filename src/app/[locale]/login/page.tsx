@@ -9,8 +9,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAuth, useUser } from '@/firebase';
-import { signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, updatePassword } from 'firebase/auth';
-import { Loader2, Lock, Mail, Chrome, ArrowRight, ShieldCheck, Zap } from 'lucide-react';
+import { signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
+import { Loader2, Lock, Mail, Chrome, ArrowRight, ShieldCheck } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import Link from 'next/link';
 import Script from 'next/script';
@@ -27,22 +27,19 @@ export default function LoginPage() {
   
   const [email, setEmail] = React.useState('');
   const [password, setPassword] = React.useState('');
-  const [newPassword, setNewPassword] = React.useState('');
   const [isLoading, setIsLoading] = React.useState(false);
-  const [showPasswordPrompt, setShowPasswordPrompt] = React.useState(false);
 
   React.useEffect(() => {
-    if (!isUserLoading && user && !user.isAnonymous && !showPasswordPrompt) {
+    if (!isUserLoading && user && !user.isAnonymous) {
       router.push(`/${locale}/dashboard`);
     }
-  }, [user, isUserLoading, router, locale, showPasswordPrompt]);
+  }, [user, isUserLoading, router, locale]);
 
   const handleEmailLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     try {
       await signInWithEmailAndPassword(auth!, email, password);
-      toast({ title: t('common.success'), description: "Session Initialized." });
       router.push(`/${locale}/dashboard`);
     } catch (error: any) {
       console.error('Auth Protocol Failure:', error.code);
@@ -57,34 +54,11 @@ export default function LoginPage() {
     provider.setCustomParameters({ prompt: 'select_account' });
     
     try {
-      const cred = await signInWithPopup(auth!, provider);
-      // Check if user already has a password provider
-      const hasPassword = cred.user.providerData.some(p => p.providerId === 'password');
-      
-      if (!hasPassword) {
-        setShowPasswordPrompt(true);
-      } else {
-        router.push(`/${locale}/dashboard`);
-      }
+      await signInWithPopup(auth!, provider);
+      // Silent redirect for Gmail login
+      router.push(`/${locale}/dashboard`);
     } catch (error: any) {
       console.error('Federated Auth Error:', error.code);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleSetPassword = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-    try {
-      if (auth?.currentUser) {
-        await updatePassword(auth.currentUser, newPassword);
-      }
-      router.push(`/${locale}/dashboard`);
-    } catch (error: any) {
-      console.error('Password Hardening Failure:', error.code);
-      // Silent error as requested, but we still allow the user to proceed to dashboard to avoid blockages
-      router.push(`/${locale}/dashboard`);
     } finally {
       setIsLoading(false);
     }
@@ -119,85 +93,57 @@ export default function LoginPage() {
             <p className="text-muted-foreground font-bold text-xs uppercase tracking-widest">Secure identity verification required.</p>
           </div>
 
-          {!showPasswordPrompt ? (
-            <Card className="border-none shadow-2xl rounded-[2.5rem] bg-white overflow-hidden">
-              <CardHeader className="space-y-1 pb-2">
-                <CardTitle className="text-xl font-black uppercase italic text-accent">{t('auth.login.title')}</CardTitle>
-                <CardDescription className="text-[10px] font-bold uppercase tracking-widest italic">{t('auth.login.desc')}</CardDescription>
-              </CardHeader>
-              <form onSubmit={handleEmailLogin}>
-                <CardContent className="space-y-4 pt-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="email" className="text-[10px] font-black uppercase tracking-widest text-accent/60 flex items-center gap-2">
-                      <Mail className="h-3.5 w-3.5" /> {t('auth.login.identity')}
+          <Card className="border-none shadow-2xl rounded-[2.5rem] bg-white overflow-hidden">
+            <CardHeader className="space-y-1 pb-2">
+              <CardTitle className="text-xl font-black uppercase italic text-accent">{t('auth.login.title')}</CardTitle>
+              <CardDescription className="text-[10px] font-bold uppercase tracking-widest italic">{t('auth.login.desc')}</CardDescription>
+            </CardHeader>
+            <form onSubmit={handleEmailLogin}>
+              <CardContent className="space-y-4 pt-4">
+                <div className="space-y-2">
+                  <Label htmlFor="email" className="text-[10px] font-black uppercase tracking-widest text-accent/60 flex items-center gap-2">
+                    <Mail className="h-3.5 w-3.5" /> {t('auth.login.identity')}
+                  </Label>
+                  <Input 
+                    id="email" type="email" placeholder="USER@DOCFLOW.PRO" required 
+                    value={email} onChange={(e) => setEmail(e.target.value)}
+                    className="h-11 bg-muted/20 border-accent/10 rounded-xl font-bold text-accent"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="password" className="text-[10px] font-black uppercase tracking-widest text-accent/60 flex items-center gap-2">
+                      <Lock className="h-3.5 w-3.5" /> {t('auth.login.key')}
                     </Label>
-                    <Input 
-                      id="email" type="email" placeholder="USER@DOCFLOW.PRO" required 
-                      value={email} onChange={(e) => setEmail(e.target.value)}
-                      className="h-11 bg-muted/20 border-accent/10 rounded-xl font-bold text-accent"
-                    />
+                    <Link href={`/${locale}/reset-password`} className="text-[9px] font-black uppercase text-primary hover:underline italic">{t('auth.login.lost_key')}</Link>
                   </div>
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <Label htmlFor="password" className="text-[10px] font-black uppercase tracking-widest text-accent/60 flex items-center gap-2">
-                        <Lock className="h-3.5 w-3.5" /> {t('auth.login.key')}
-                      </Label>
-                      <Link href={`/${locale}/reset-password`} className="text-[9px] font-black uppercase text-primary hover:underline italic">{t('auth.login.lost_key')}</Link>
-                    </div>
-                    <Input 
-                      id="password" type="password" required 
-                      value={password} onChange={(e) => setPassword(e.target.value)}
-                      className="h-11 bg-muted/20 border-accent/10 rounded-xl font-bold text-accent"
-                    />
-                  </div>
-                </CardContent>
-                <CardFooter className="flex flex-col gap-4 pb-8">
-                  <Button type="submit" className="w-full h-12 rounded-xl bg-accent text-white font-black uppercase tracking-widest text-[10px] shadow-xl shadow-accent/20" disabled={isLoading}>
-                    {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : t('auth.login.submit')}
-                  </Button>
-                  
-                  <div className="relative w-full py-2">
-                    <div className="absolute inset-0 flex items-center"><span className="w-full border-t border-accent/5"></span></div>
-                    <div className="relative flex justify-center text-[8px] font-black uppercase"><span className="bg-white px-4 text-accent/20 tracking-[0.3em]">{t('auth.login.or')}</span></div>
-                  </div>
+                  <Input 
+                    id="password" type="password" required 
+                    value={password} onChange={(e) => setPassword(e.target.value)}
+                    className="h-11 bg-muted/20 border-accent/10 rounded-xl font-bold text-accent"
+                  />
+                </div>
+              </CardContent>
+              <CardFooter className="flex flex-col gap-4 pb-8">
+                <Button type="submit" className="w-full h-12 rounded-xl bg-accent text-white font-black uppercase tracking-widest text-[10px] shadow-xl shadow-accent/20" disabled={isLoading}>
+                  {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : t('auth.login.submit')}
+                </Button>
+                
+                <div className="relative w-full py-2">
+                  <div className="absolute inset-0 flex items-center"><span className="w-full border-t border-accent/5"></span></div>
+                  <div className="relative flex justify-center text-[8px] font-black uppercase"><span className="bg-white px-4 text-accent/20 tracking-[0.3em]">{t('auth.login.or')}</span></div>
+                </div>
 
-                  <Button type="button" variant="outline" onClick={handleGoogleLogin} className="w-full h-12 rounded-xl border-accent/10 font-black uppercase tracking-widest text-[10px]" disabled={isLoading}>
-                    <Chrome className="mr-2 h-4 w-4 text-primary" /> {t('auth.login.google')}
-                  </Button>
+                <Button type="button" variant="outline" onClick={handleGoogleLogin} className="w-full h-12 rounded-xl border-accent/10 font-black uppercase tracking-widest text-[10px]" disabled={isLoading}>
+                  <Chrome className="mr-2 h-4 w-4 text-primary" /> {t('auth.login.google')}
+                </Button>
 
-                  <div className="pt-4 text-center">
-                    <p className="text-[10px] font-bold text-accent/40 uppercase">{t('auth.login.new_user')} <Link href={`/${locale}/signup`} className="text-primary hover:underline italic">{t('common.signup')} <ArrowRight className="inline h-2.5 w-2.5" /></Link></p>
-                  </div>
-                </CardFooter>
-              </form>
-            </Card>
-          ) : (
-            <Card className="border-none shadow-2xl rounded-[2.5rem] bg-white overflow-hidden animate-in zoom-in-95 duration-500">
-              <CardHeader className="space-y-1 pb-2">
-                <CardTitle className="text-xl font-black uppercase italic text-accent">{t('auth.password_setup.title')}</CardTitle>
-                <CardDescription className="text-[10px] font-bold uppercase tracking-widest italic">{t('auth.password_setup.desc')}</CardDescription>
-              </CardHeader>
-              <form onSubmit={handleSetPassword}>
-                <CardContent className="space-y-4 pt-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="new-password" className="text-[10px] font-black uppercase tracking-widest text-accent/60 flex items-center gap-2">
-                      <Zap className="h-3.5 w-3.5 text-primary" /> {t('auth.password_setup.label')}
-                    </Label>
-                    <Input 
-                      id="new-password" type="password" required 
-                      value={newPassword} onChange={(e) => setNewPassword(e.target.value)}
-                      className="h-11 bg-muted/20 border-accent/10 rounded-xl font-bold text-accent"
-                    />
-                  </div>
-                </CardContent>
-                <CardFooter className="pb-8">
-                  <Button type="submit" className="w-full h-12 rounded-xl bg-accent text-white font-black uppercase tracking-widest text-[10px] shadow-xl shadow-accent/20" disabled={isLoading}>
-                    {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : t('auth.password_setup.submit')}
-                  </Button>
-                </CardFooter>
-              </form>
-            </Card>
-          )}
+                <div className="pt-4 text-center">
+                  <p className="text-[10px] font-bold text-accent/40 uppercase">{t('auth.login.new_user')} <Link href={`/${locale}/signup`} className="text-primary hover:underline italic">{t('common.signup')} <ArrowRight className="inline h-2.5 w-2.5" /></Link></p>
+                </div>
+              </CardFooter>
+            </form>
+          </Card>
         </div>
       </main>
     </div>
