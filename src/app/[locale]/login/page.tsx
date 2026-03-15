@@ -38,11 +38,11 @@ export default function LoginPage() {
     setIsLoading(true);
     try {
       await signInWithEmailAndPassword(auth!, email, password);
-      // Silent transition: no success toast shown
+      // Anonymized success: silent redirect to dashboard
       router.push(`/${locale}/dashboard`);
     } catch (error: any) {
       console.error('Auth Protocol Failure:', error.code);
-      // Anonymized errors: no toast shown to user
+      // Anonymized errors: no toast shown to user to prevent info leakage
     } finally {
       setIsLoading(false);
     }
@@ -55,11 +55,11 @@ export default function LoginPage() {
     
     try {
       await signInWithPopup(auth!, provider);
-      // Silent redirect for Gmail login (no success toast)
+      // Anonymized success: silent redirect for Gmail login
       router.push(`/${locale}/dashboard`);
     } catch (error: any) {
       console.error('Federated Auth Error:', error.code);
-      // Anonymized errors: no toast shown to user
+      // Anonymized errors: no feedback provided to end-user
     } finally {
       setIsLoading(false);
     }
@@ -105,10 +105,10 @@ export default function LoginPage() {
                   <Label htmlFor="email" className="text-[10px] font-black uppercase tracking-widest text-accent/60 flex items-center gap-2">
                     <Mail className="h-3.5 w-3.5" /> {t('auth.login.identity')}
                   </Label>
-                  <Input 
+                  <input 
                     id="email" type="email" placeholder="USER@DOCFLOW.PRO" required 
                     value={email} onChange={(e) => setEmail(e.target.value)}
-                    className="h-11 bg-muted/20 border-accent/10 rounded-xl font-bold text-accent"
+                    className="flex h-11 w-full rounded-xl border border-accent/10 bg-muted/20 px-3 py-2 text-sm font-bold text-accent ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                   />
                 </div>
                 <div className="space-y-2">
@@ -118,10 +118,10 @@ export default function LoginPage() {
                     </Label>
                     <Link href={`/${locale}/reset-password`} className="text-[9px] font-black uppercase text-primary hover:underline italic">{t('auth.login.lost_key')}</Link>
                   </div>
-                  <Input 
+                  <input 
                     id="password" type="password" required 
                     value={password} onChange={(e) => setPassword(e.target.value)}
-                    className="h-11 bg-muted/20 border-accent/10 rounded-xl font-bold text-accent"
+                    className="flex h-11 w-full rounded-xl border border-accent/10 bg-muted/20 px-3 py-2 text-sm font-bold text-accent ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                   />
                 </div>
               </CardContent>

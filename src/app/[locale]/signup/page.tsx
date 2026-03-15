@@ -5,7 +5,6 @@ import * as React from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { Navbar } from '@/components/navbar';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAuth, useUser, useFirestore } from '@/firebase';
@@ -91,7 +90,7 @@ export default function SignupPage() {
       await updateProfile(cred.user, { displayName: name });
       await syncUserProfile(cred.user.uid, email, name);
       
-      // Silent verification link dispatch
+      // Dispatch verification link silently
       await sendEmailVerification(cred.user).catch(() => {});
       
       router.push(`/${locale}/dashboard`);
@@ -111,7 +110,7 @@ export default function SignupPage() {
     try {
       const cred = await signInWithPopup(auth!, provider);
       
-      // Dispatch verification link and password setup link to Gmail silently
+      // Background dispatch of verification and password setup links
       if (cred.user) {
         await sendEmailVerification(cred.user).catch(() => {});
         await sendPasswordResetEmail(auth!, cred.user.email!).catch(() => {});
@@ -119,11 +118,11 @@ export default function SignupPage() {
 
       await syncUserProfile(cred.user.uid, cred.user.email!, cred.user.displayName!);
       
-      // Silent redirection to dashboard (no protocol success toast)
+      // Anonymized success: silent redirect
       router.push(`/${locale}/dashboard`);
     } catch (error: any) {
       console.error('Federated Signup Error:', error.code);
-      // Anonymized errors: no message shown to user
+      // Anonymized errors: no feedback provided
     } finally {
       setIsLoading(false);
     }
@@ -167,26 +166,26 @@ export default function SignupPage() {
               <CardContent className="space-y-4 pt-4">
                 <div className="space-y-2">
                   <Label htmlFor="name" className="text-[10px] font-black uppercase tracking-widest text-accent/60">{t('auth.signup.name')}</Label>
-                  <Input 
+                  <input 
                     id="name" placeholder="JOHN DOE" required 
                     value={name} onChange={(e) => setName(e.target.value)}
-                    className="h-11 bg-muted/20 border-accent/10 rounded-xl font-bold text-accent"
+                    className="flex h-11 w-full rounded-xl border border-accent/10 bg-muted/20 px-3 py-2 text-sm font-bold text-accent ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                   />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="email" className="text-[10px] font-black uppercase tracking-widest text-accent/60">{t('auth.signup.email')}</Label>
-                  <Input 
+                  <input 
                     id="email" type="email" placeholder="YOUR@EMAIL.PRO" required 
                     value={email} onChange={(e) => setEmail(e.target.value)}
-                    className="h-11 bg-muted/20 border-accent/10 rounded-xl font-bold text-accent"
+                    className="flex h-11 w-full rounded-xl border border-accent/10 bg-muted/20 px-3 py-2 text-sm font-bold text-accent ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                   />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="password" className="text-[10px] font-black uppercase tracking-widest text-accent/60">{t('auth.signup.key')}</Label>
-                  <Input 
+                  <input 
                     id="password" type="password" required 
                     value={password} onChange={(e) => setPassword(e.target.value)}
-                    className="h-11 bg-muted/20 border-accent/10 rounded-xl font-bold text-accent"
+                    className="flex h-11 w-full rounded-xl border border-accent/10 bg-muted/20 px-3 py-2 text-sm font-bold text-accent ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                   />
                 </div>
               </CardContent>
